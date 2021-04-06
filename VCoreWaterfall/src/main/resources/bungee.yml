@@ -1,0 +1,3 @@
+name: VCoreWaterfall
+version: ${project.version}
+main: de.verdox.vcorewaterfall.VCoreWaterfall
