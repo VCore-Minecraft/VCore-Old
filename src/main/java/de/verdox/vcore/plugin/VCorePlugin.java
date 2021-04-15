@@ -9,6 +9,7 @@ import de.verdox.vcore.data.manager.PlayerSessionManager;
 import de.verdox.vcore.plugin.bukkit.BukkitPlugin;
 import de.verdox.vcore.plugin.bungeecord.BungeeCordPlugin;
 import de.verdox.vcore.subsystem.VCoreSubsystem;
+import de.verdox.vcore.threads.VCoreScheduler;
 import net.md_5.bungee.api.ProxyServer;
 
 import java.io.File;
@@ -26,6 +27,7 @@ public interface VCorePlugin <T, R extends VCoreSubsystem<?>> {
     File getPluginDataFolder();
     String getPluginName();
     void consoleMessage(String message);
+    VCoreScheduler getScheduler();
 
     void async(Runnable runnable);
     void sync(Runnable runnable);
@@ -69,7 +71,8 @@ public interface VCorePlugin <T, R extends VCoreSubsystem<?>> {
 
     abstract class Minecraft extends BukkitPlugin{
 
-        private EventBus eventBus;
+        private final VCoreScheduler vCoreScheduler = new VCoreScheduler(this);
+        private final EventBus eventBus = new EventBus();
         private PlayerSessionManager.BukkitPlayerSessionManager sessionManager;
         private ServerDataManager<BukkitPlugin> serverDataManager;
         private final VCoreSubsystemManager<Minecraft,VCoreSubsystem.Bukkit> subsystemManager = new VCoreSubsystemManager<>(this);
@@ -86,6 +89,11 @@ public interface VCorePlugin <T, R extends VCoreSubsystem<?>> {
             consoleMessage("&eStopping VCorePlugin&7: &a"+getPluginName());
             onPluginDisable();
             subsystemManager.disable();
+        }
+
+        @Override
+        public VCoreScheduler getScheduler() {
+            return vCoreScheduler;
         }
 
         @Override
@@ -114,8 +122,6 @@ public interface VCorePlugin <T, R extends VCoreSubsystem<?>> {
 
         @Override
         public EventBus getEventBus() {
-            if(eventBus == null)
-                eventBus = new EventBus();
             return eventBus;
         }
 
@@ -126,7 +132,8 @@ public interface VCorePlugin <T, R extends VCoreSubsystem<?>> {
     }
     abstract class BungeeCord extends BungeeCordPlugin {
 
-        private EventBus eventBus;
+        private final VCoreScheduler vCoreScheduler = new VCoreScheduler(this);
+        private final EventBus eventBus = new EventBus();
         private PlayerSessionManager.BungeePlayerSessionManager sessionManager;
         private ServerDataManager<BungeeCordPlugin> serverDataManager;
         private final VCoreSubsystemManager<BungeeCord,VCoreSubsystem.BungeeCord> subsystemManager = new VCoreSubsystemManager<>(this);
@@ -141,6 +148,11 @@ public interface VCorePlugin <T, R extends VCoreSubsystem<?>> {
         public final void onDisable() {
             onPluginDisable();
             subsystemManager.disable();
+        }
+
+        @Override
+        public VCoreScheduler getScheduler() {
+            return vCoreScheduler;
         }
 
         @Override
@@ -169,8 +181,6 @@ public interface VCorePlugin <T, R extends VCoreSubsystem<?>> {
 
         @Override
         public EventBus getEventBus() {
-            if(eventBus == null)
-                eventBus = new EventBus();
             return eventBus;
         }
 

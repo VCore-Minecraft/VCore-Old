@@ -1,21 +1,16 @@
 package de.verdox.vcorepaper;
 
-import de.verdox.vcore.data.session.PlayerSession;
 import de.verdox.vcore.dataconnection.DataConnection;
 import de.verdox.vcore.plugin.VCorePlugin;
 import de.verdox.vcore.subsystem.VCoreSubsystem;
-import de.verdox.vcore.subsystem.exceptions.SubsystemDeactivatedException;
 import de.verdox.vcorepaper.subsystems.VCoreTestSubsystem;
 import org.bukkit.Bukkit;
-import org.bukkit.block.Block;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
-import org.bukkit.metadata.MetadataValue;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.UUID;
 
 public class VCorePaper extends VCorePlugin.Minecraft implements Listener {
 

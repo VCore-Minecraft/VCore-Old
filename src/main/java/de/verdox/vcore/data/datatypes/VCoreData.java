@@ -14,7 +14,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-public abstract class VCoreData <S extends VCoreData<S>> implements VCoreRedisData, VCorePersistentDatabaseData {
+public abstract class VCoreData implements VCoreRedisData, VCorePersistentDatabaseData {
 
     //TODO: Methode um alle ServerData UUIDs für eine Klasse aus Datenbank oder Cache zu laden
 
@@ -22,7 +22,8 @@ public abstract class VCoreData <S extends VCoreData<S>> implements VCoreRedisDa
     protected final RedisManager<?> redisManager;
     private final UUID objectUUID;
     private boolean cleaned = false;
-
+    @VCorePersistentData
+    protected long lastUse = 0;
 
     public VCoreData(RedisManager<?> redisManager, UUID objectUUID){
         this.redisManager = redisManager;
@@ -33,11 +34,14 @@ public abstract class VCoreData <S extends VCoreData<S>> implements VCoreRedisDa
 
        this.messageListener = (channel, map) -> {
             restoreFromRedis(map);
+            lastUse = (long) map.get("lastUse");
         };
         topic.addListener(Map.class,messageListener);
+        updateLastUse();
     }
 
-    public UUID getUUID() {
+    public final UUID getUUID() {
+        updateLastUse();
         return objectUUID;
     }
 
@@ -47,16 +51,20 @@ public abstract class VCoreData <S extends VCoreData<S>> implements VCoreRedisDa
         onCleanUp();
         getDataTopic().removeListener(messageListener);
         cleaned = true;
+        updateLastUse();
     }
 
-    public abstract RTopic getDataTopic();
+    public final RTopic getDataTopic(){
+        return redisManager.getTopic(getClass(),getUUID());
+    }
+
     public abstract void pushUpdate();
 
     public final Map<String, Object> dataForRedis() {
         if(cleaned)
-            System.out.println("Potential data leak at: "+getClass().getCanonicalName()+" as it has already been cleaned.");
+            System.out.println("Potential data leak at: " + getClass().getCanonicalName() + " as it has already been cleaned.");
         Map<String, Object> dataForRedis = new HashMap<>();
-
+        updateLastUse();
         Arrays.stream(getClass().getDeclaredFields())
                 .filter(field -> field.getAnnotation(VCorePersistentData.class) != null)
                 .forEach(field -> {
@@ -70,10 +78,18 @@ public abstract class VCoreData <S extends VCoreData<S>> implements VCoreRedisDa
         return dataForRedis;
     }
 
-    public VCoreSubsystem<?> getRequiredSubsystem(){
+    public final VCoreSubsystem<?> getRequiredSubsystem(){
+        updateLastUse();
         return redisManager.getPlugin().getSubsystemManager().findSubsystemByClass(VCorePlugin.findDependSubsystemClass(getClass()));
     }
 
+    protected void updateLastUse(){
+        lastUse = System.currentTimeMillis();
+    }
     public abstract void onLoad();
     public abstract void onCleanUp();
+
+    public long getLastUse() {
+        return lastUse;
+    }
 }

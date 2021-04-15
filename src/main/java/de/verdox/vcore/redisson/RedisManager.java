@@ -5,15 +5,16 @@ import de.verdox.vcore.dataconnection.DataConnection;
 import de.verdox.vcore.plugin.VCorePlugin;
 import de.verdox.vcore.subsystem.VCoreSubsystem;
 import org.redisson.Redisson;
+import org.redisson.api.RMap;
 import org.redisson.api.RTopic;
 import org.redisson.api.RedissonClient;
 import org.redisson.config.Config;
 
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 public class RedisManager<R extends VCorePlugin<?,?>> {
-
-    //TODO PERSISTENT PLUGIN DATA MIT REDIS VERBINDUNG UND DATENBANK (GLOBAL, SERVER SPECIFIC)
 
     private final R plugin;
     private DataConnection.MongoDB mongoDB;
@@ -46,6 +47,27 @@ public class RedisManager<R extends VCorePlugin<?,?>> {
         return mongoDB;
     }
 
+    public Set<String> getRedisKeys(Class<? extends VCoreData> dataClass){
+        return getRedissonClient()
+                .getKeys()
+                .getKeysStream()
+                .filter(s -> s.contains(VCorePlugin.getMongoDBIdentifier(dataClass)))
+                .collect(Collectors.toSet());
+    }
+
+    public RMap<String, Object> getRedisCache(Class<? extends VCoreData> dataClass, UUID objectUUID){
+        return getRedissonClient().getMap("VCoreData:"+objectUUID+":"+VCorePlugin.getMongoDBIdentifier(dataClass));
+    }
+
+    public RTopic getTopic(Class<? extends VCoreData> dataClass, UUID objectUUID){
+        if(dataClass == null)
+            throw new NullPointerException("DataClass is null");
+        if(objectUUID == null)
+            throw new NullPointerException("objectUUID is null");
+        String key = "VCoreDataManager:"+VCorePlugin.getMongoDBIdentifier(dataClass)+":"+objectUUID.toString();
+        return getRedissonClient().getTopic(key);
+    }
+
     public String generateSubsystemKey(VCoreSubsystem<?> subsystem, UUID playerUUID){
         if(subsystem == null)
             throw new NullPointerException("subsystem is null");
@@ -60,15 +82,6 @@ public class RedisManager<R extends VCorePlugin<?,?>> {
         if(playerUUID == null)
             throw new NullPointerException("playerUUID is null");
         return "VCoreSessionManager:"+playerUUID.toString()+":"+VCorePlugin.getMongoDBIdentifier(subsystem);
-    }
-
-    public RTopic getTopic(Class<? extends VCoreData<?>> dataClass, UUID objectUUID){
-        if(dataClass == null)
-            throw new NullPointerException("DataClass is null");
-        if(objectUUID == null)
-            throw new NullPointerException("objectUUID is null");
-        String key = "VCoreDataManager:"+VCorePlugin.getMongoDBIdentifier(dataClass)+":"+objectUUID.toString();
-        return getRedissonClient().getTopic(key);
     }
 
     public RTopic getObjectHandlerTopic(VCoreSubsystem<?> subsystem){

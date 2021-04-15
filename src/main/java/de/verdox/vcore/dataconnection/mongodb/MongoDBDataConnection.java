@@ -1,10 +1,10 @@
 package de.verdox.vcore.dataconnection.mongodb;
 
-import com.mongodb.DB;
 import com.mongodb.DBCollection;
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import de.verdox.vcore.data.datatypes.VCoreData;
 import de.verdox.vcore.dataconnection.DataConnection;
 import de.verdox.vcore.dataconnection.DataProvider;
 import de.verdox.vcore.plugin.VCorePlugin;
@@ -62,6 +62,15 @@ public abstract class MongoDBDataConnection extends DataConnection<DBCollection,
             getMongoDatabase().createCollection(name);
             return getCollection(name);
         }
+    }
 
+    public MongoCollection<Document> getCollection(Class<? extends VCoreData> dataClass, String suffix){
+        Class<? extends VCoreSubsystem<?>> subsystemClass = VCorePlugin.findDependSubsystemClass(dataClass);
+        if(subsystemClass == null)
+            throw new NullPointerException("Dependent Subsystem Annotation not set. ["+dataClass.getCanonicalName()+"]");
+        String mongoIdentifier = VCorePlugin.getMongoDBIdentifier(subsystemClass);
+        if(mongoIdentifier == null)
+            throw new NullPointerException("MongoDBIdentifier Annotation not set. ["+subsystemClass.getCanonicalName()+"]");
+        return getCollection(VCorePlugin.getMongoDBIdentifier(subsystemClass)+suffix);
     }
 }

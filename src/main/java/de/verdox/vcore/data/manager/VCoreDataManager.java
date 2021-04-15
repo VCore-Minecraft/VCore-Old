@@ -9,12 +9,14 @@ import de.verdox.vcore.data.session.DataSession;
 import de.verdox.vcore.dataconnection.DataConnection;
 import de.verdox.vcore.plugin.VCorePlugin;
 import de.verdox.vcore.redisson.RedisManager;
+import org.redisson.api.RMap;
 import org.redisson.api.RTopic;
 import org.redisson.api.listener.MessageListener;
 
+import java.util.Set;
 import java.util.UUID;
 
-public abstract class VCoreDataManager <S extends VCoreData<S>, R extends VCorePlugin<?,?>> {
+public abstract class VCoreDataManager <S extends VCoreData, R extends VCorePlugin<?,?>> {
 
     protected final RedisManager<VCorePlugin<?,?>> redisManager;
     protected final R plugin;
@@ -35,25 +37,29 @@ public abstract class VCoreDataManager <S extends VCoreData<S>, R extends VCoreP
                 plugin.getEventBus().post(new RedisDataRemoveEvent(msg.getDataType(),msg.getUuid()));
         };
         objectHandlerTopic.addListener(RedisObjectHandlerMessage.class,channelListener);
+        plugin.consoleMessage("&eCleanup Task started");
+        redisManager.getPlugin().getScheduler().runTaskInterval(this::onCleanupInterval,20L*120,20L*1800);
     }
 
     public void pushCreation(Class<? extends S> type, S dataObject){
-        new RedisObjectHandlerMessage<S>(type)
+        objectHandlerTopic.publishAsync(new RedisObjectHandlerMessage<S>(type)
                 .setDelete()
                 .setUUID(dataObject.getUUID())
-                .create();
+                .create());
     }
 
     public void pushRemoval(Class<? extends S> type, UUID uuid){
-        new RedisObjectHandlerMessage<S>(type)
+        objectHandlerTopic.publishAsync(new RedisObjectHandlerMessage<S>(type)
                 .setDelete()
                 .setUUID(uuid)
-                .create();
+                .create());
     }
 
     public RedisManager<VCorePlugin<?, ?>> getRedisManager() {
         return redisManager;
     }
+
+    protected abstract void onCleanupInterval();
 
     protected abstract DataSession<S> createSession(UUID objectUUID);
     protected abstract boolean exist (UUID objectUUID);
@@ -64,4 +70,6 @@ public abstract class VCoreDataManager <S extends VCoreData<S>, R extends VCoreP
     public R getPlugin() {
         return plugin;
     }
+
+    public abstract Set<S> getAllData(Class<? extends S> dataClass);
 }

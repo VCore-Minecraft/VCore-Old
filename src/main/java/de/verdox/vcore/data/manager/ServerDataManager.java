@@ -1,7 +1,6 @@
 package de.verdox.vcore.data.manager;
 
 import de.verdox.vcore.data.datatypes.ServerData;
-import de.verdox.vcore.data.ServerDataSession;
 import de.verdox.vcore.data.session.DataSession;
 import de.verdox.vcore.data.session.SSession;
 import de.verdox.vcore.dataconnection.DataConnection;
@@ -14,12 +13,23 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class ServerDataManager <R extends VCorePlugin<?,?>> extends VCoreDataManager<ServerData, R> {
 
-    //TODO: Eine Redis Cache Map für jedes Subsystem -> Bei Serverstart werden alle Daten geladen
     private final Map<VCoreSubsystem<?>, SSession> dataCache = new ConcurrentHashMap<>();
 
     public ServerDataManager(R plugin, boolean useRedisCluster, String[] addressArray, DataConnection.MongoDB mongoDB) {
         super(plugin, useRedisCluster, addressArray, mongoDB);
         plugin.getSubsystemManager().getActivatedSubSystems().forEach(vCoreSubsystem -> dataCache.put(vCoreSubsystem,new SSession(this,vCoreSubsystem)));
+    }
+
+    @Override
+    protected void onCleanupInterval() {
+        plugin.getSubsystemManager().getActiveServerDataClasses().forEach(aClass -> {
+            getAllData(aClass).forEach(serverData -> {
+                if(System.currentTimeMillis() - serverData.getLastUse() <= 1000L*1800)
+                    return;
+                // Wurde das Datum in den letzten 1800 Sekunden nicht genutzt wird es in Redis geladen
+                serverData.getResponsibleDataManager().save(serverData.getClass(),serverData.getUUID());
+            });
+        });
     }
 
     @Override
@@ -66,6 +76,16 @@ public class ServerDataManager <R extends VCorePlugin<?,?>> extends VCoreDataMan
             e.printStackTrace();
         }
         return null;
+    }
+
+    @Override
+    public Set<ServerData> getAllData(Class<? extends ServerData> dataClass) {
+        Set<ServerData> dataSet = new HashSet<>();
+        getPlugin()
+                .getSubsystemManager()
+                .getSubSystems()
+                .forEach(vCoreSubsystem -> dataSet.addAll(getDataHolder(vCoreSubsystem).getAllData(dataClass)));
+        return dataSet;
     }
 
 }

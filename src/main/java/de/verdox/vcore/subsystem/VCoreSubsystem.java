@@ -1,6 +1,5 @@
 package de.verdox.vcore.subsystem;
 
-import de.verdox.vcore.dataconnection.mongodb.annotation.MongoDBIdentifier;
 import de.verdox.vcore.plugin.VCorePlugin;
 import de.verdox.vcore.subsystem.exceptions.SubsystemDeactivatedException;
 
@@ -15,7 +14,7 @@ public abstract class VCoreSubsystem<S extends VCorePlugin<?,?>> {
         this.vCorePlugin = vCorePlugin;
         if(VCorePlugin.getMongoDBIdentifier(this.getClass()) == null)
             throw new RuntimeException(getClass().getName()+" has no MongoDBAnnotation");
-        uuid = UUID.randomUUID();
+        uuid = UUID.nameUUIDFromBytes(VCorePlugin.getMongoDBIdentifier(this.getClass()).getBytes());
     }
 
     public abstract boolean isActivated();

@@ -5,6 +5,7 @@ import de.verdox.vcore.data.session.PlayerSession;
 import de.verdox.vcore.dataconnection.DataConnection;
 import de.verdox.vcore.data.annotations.RequiredSubsystemInfo;
 import de.verdox.vcore.plugin.VCorePlugin;
+import de.verdox.vcore.redisson.RedisManager;
 import de.verdox.vcore.subsystem.VCoreSubsystem;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.event.PlayerDisconnectEvent;
@@ -37,6 +38,17 @@ public abstract class PlayerSessionManager<R extends VCorePlugin<?,?>> extends V
         return this.playerSessionCache.put(uuid, new PlayerSession(this,uuid));
     }
 
+    @Override
+    public Set<PlayerData> getAllData(Class<? extends PlayerData> dataClass) {
+        Set<PlayerData> dataSet = new HashSet<>();
+        playerSessionCache
+                .values()
+                .stream()
+                .map(playerSession -> playerSession.getAllData(dataClass))
+                .forEach(dataSet::addAll);
+        return dataSet;
+    }
+
     protected PlayerSession deleteSession(UUID uuid){
         getPlugin().consoleMessage("&eDeleting Local Player Session&7: &b"+uuid);
         PlayerSession playerSession = this.playerSessionCache.remove(uuid);
@@ -61,6 +73,18 @@ public abstract class PlayerSessionManager<R extends VCorePlugin<?,?>> extends V
         return keys;
     }
 
+    @Override
+    protected void onCleanupInterval() {
+        plugin.getSubsystemManager().getActivePlayerDataClasses().forEach(aClass -> {
+            playerSessionCache.values().forEach(playerSession -> playerSession.getAllData(aClass).forEach(playerData -> {
+                if(System.currentTimeMillis() - playerData.getLastUse() <= 1000L*1800)
+                    return;
+                // Wurde das Datum in den letzten 1800 Sekunden nicht genutzt wird es in Redis geladen
+                playerData.getResponsiblePlayerSession().save(playerData.getClass(),playerData.getUUID());
+            }));
+        });
+    }
+
     protected void loginPipeline(UUID playerUUID){
         long start = System.currentTimeMillis();
             createSession(playerUUID);
@@ -73,6 +97,11 @@ public abstract class PlayerSessionManager<R extends VCorePlugin<?,?>> extends V
                 RequiredSubsystemInfo requiredSubsystemInfo = playerDataClass.getAnnotation(RequiredSubsystemInfo.class);
                 if(requiredSubsystemInfo == null)
                     throw new RuntimeException(getClass().getName()+" does not have PlayerDataClassInfo Annotation set");
+                VCoreSubsystem<?> subsystem = plugin.getSubsystemManager().findSubsystemByClass(requiredSubsystemInfo.parentSubSystem());
+                if(subsystem == null)
+                    return;
+                if(!subsystem.isActivated())
+                    return;
 
                 getSession(playerUUID).load(playerDataClass,playerUUID);
 
