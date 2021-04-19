@@ -13,11 +13,22 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class ServerDataManager <R extends VCorePlugin<?,?>> extends VCoreDataManager<ServerData, R> {
 
-    private final Map<VCoreSubsystem<?>, SSession> dataCache = new ConcurrentHashMap<>();
+    private final Map<UUID, SSession> dataCache = new ConcurrentHashMap<>();
 
     public ServerDataManager(R plugin, boolean useRedisCluster, String[] addressArray, DataConnection.MongoDB mongoDB) {
         super(plugin, useRedisCluster, addressArray, mongoDB);
-        plugin.getSubsystemManager().getActivatedSubSystems().forEach(vCoreSubsystem -> dataCache.put(vCoreSubsystem,new SSession(this,vCoreSubsystem)));
+        plugin
+                .getSubsystemManager()
+                .getActivatedSubSystems()
+                .forEach(vCoreSubsystem -> dataCache.put(vCoreSubsystem.getUuid(), new SSession(this,vCoreSubsystem)));
+    }
+
+    @Override
+    public ServerData load(Class<? extends ServerData> type, UUID uuid) {
+        VCoreSubsystem<?> subsystem = plugin.findDependSubsystem(type);
+        if(subsystem == null)
+            return null;
+        return getSession(subsystem.getUuid()).load(type,uuid);
     }
 
     @Override
@@ -26,8 +37,8 @@ public class ServerDataManager <R extends VCorePlugin<?,?>> extends VCoreDataMan
             getAllData(aClass).forEach(serverData -> {
                 if(System.currentTimeMillis() - serverData.getLastUse() <= 1000L*1800)
                     return;
-                // Wurde das Datum in den letzten 1800 Sekunden nicht genutzt wird es in Redis geladen
-                serverData.getResponsibleDataManager().save(serverData.getClass(),serverData.getUUID());
+                // Wurde das Datum in den letzten 1800 Sekunden nicht genutzt wird es von Redis in die Datenbank geschrieben und aus Redis entfernt.
+                serverData.getResponsibleDataSession().saveAndRemove(serverData.getClass(),serverData.getUUID());
             });
         });
     }
@@ -47,10 +58,11 @@ public class ServerDataManager <R extends VCorePlugin<?,?>> extends VCoreDataMan
         return null;
     }
 
-    public SSession getDataHolder(VCoreSubsystem<?> subsystem){
-        if(!dataCache.containsKey(subsystem))
+    @Override
+    public DataSession<ServerData> getSession(UUID objectUUID) {
+        if(!dataCache.containsKey(objectUUID))
             return null;
-        return dataCache.get(subsystem);
+        return dataCache.get(objectUUID);
     }
 
     @Override
@@ -64,18 +76,21 @@ public class ServerDataManager <R extends VCorePlugin<?,?>> extends VCoreDataMan
             return null;
         if(!subsystem.isActivated())
             return null;
-        SSession serverDataSession = dataCache.get(subsystem);
+        SSession serverDataSession = dataCache.get(subsystem.getUuid());
         if(serverDataSession.dataExistLocally(dataClass,objectUUID))
             return serverDataSession.getData(dataClass,objectUUID);
 
         try {
             ServerData dataObject =  dataClass.getDeclaredConstructor(ServerDataManager.class,UUID.class).newInstance(this,objectUUID);
-            serverDataSession.addData(dataObject,dataClass,true);
             return dataClass.cast(dataObject);
         } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
             e.printStackTrace();
         }
         return null;
+    }
+
+    public SSession getDataSession(VCoreSubsystem<?> subsystem){
+        return (SSession) getSession(subsystem.getUuid());
     }
 
     @Override
@@ -84,7 +99,7 @@ public class ServerDataManager <R extends VCorePlugin<?,?>> extends VCoreDataMan
         getPlugin()
                 .getSubsystemManager()
                 .getSubSystems()
-                .forEach(vCoreSubsystem -> dataSet.addAll(getDataHolder(vCoreSubsystem).getAllData(dataClass)));
+                .forEach(vCoreSubsystem -> dataSet.addAll(getSession(vCoreSubsystem.getUuid()).getAllData(dataClass)));
         return dataSet;
     }
 

@@ -3,7 +3,6 @@ package de.verdox.vcore.data.datatypes;
 import de.verdox.vcore.data.manager.PlayerSessionManager;
 import de.verdox.vcore.data.session.PlayerSession;
 import de.verdox.vcore.plugin.VCorePlugin;
-import org.redisson.api.RTopic;
 
 import java.util.*;
 
@@ -18,11 +17,8 @@ public abstract class PlayerData extends VCoreData {
         this.playerSessionManager = playerSessionManager;
     }
 
-    public final void pushUpdate(){
-        playerSessionManager.getSession(getUUID()).pushToRedis(this,this.getClass(),getUUID());
-    }
-
-    public final PlayerSession getResponsiblePlayerSession(){
+    @Override
+    public PlayerSession getResponsibleDataSession() {
         return playerSessionManager.getSession(getUUID());
     }
 }

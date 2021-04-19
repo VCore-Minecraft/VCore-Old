@@ -1,13 +1,11 @@
-package de.verdox.vcorepaper;
+package de.verdox.vcorepaper.subsystems;
 
 import de.verdox.vcore.data.annotations.RequiredSubsystemInfo;
 import de.verdox.vcore.data.annotations.VCorePersistentData;
 import de.verdox.vcore.data.datatypes.PlayerData;
 import de.verdox.vcore.data.manager.PlayerSessionManager;
 import de.verdox.vcore.dataconnection.mongodb.annotation.MongoDBIdentifier;
-import de.verdox.vcorepaper.subsystems.VCoreTestSubsystem;
 
-import java.util.Map;
 import java.util.UUID;
 
 @RequiredSubsystemInfo(parentSubSystem = VCoreTestSubsystem.class)
@@ -15,7 +13,7 @@ import java.util.UUID;
 public class VCorePlayerDataTest extends PlayerData {
 
     @VCorePersistentData
-    public String name;
+    public String name = "Jürgen";
     @VCorePersistentData
     public UUID companyUUID;
 
@@ -25,21 +23,16 @@ public class VCorePlayerDataTest extends PlayerData {
 
     @Override
     public void onLoad() {
-        getRequiredSubsystem().getVCorePlugin().getServerDataManager().getDataHolder(getRequiredSubsystem()).load(Company.class,companyUUID);
+        Company company = (Company) getPlugin().getServerDataManager().load(Company.class,companyUUID);
+        System.out.println("Loaded Name was: "+name);
+        System.out.println("Changing Name");
+        name = UUID.randomUUID().toString();
+        System.out.println("Changed to: "+name);
+        pushUpdate();
     }
 
     @Override
     public void onCleanUp() {
 
-    }
-
-    @Override
-    public void restoreFromDataBase(Map<String, Object> dataFromDatabase) {
-        dataFromDatabase.forEach((s, o) -> System.out.println(s+"   :   "+o));
-    }
-
-    @Override
-    public void restoreFromRedis(Map<String, Object> dataFromRedis) {
-        dataFromRedis.forEach((s, o) -> System.out.println(s+"   :   "+o));
     }
 }

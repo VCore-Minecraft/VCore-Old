@@ -2,12 +2,11 @@ package de.verdox.vcore.data.datatypes;
 
 import de.verdox.vcore.data.manager.ServerDataManager;
 import de.verdox.vcore.data.session.SSession;
-import org.redisson.api.RTopic;
 
 import java.util.UUID;
 
 public abstract class ServerData extends VCoreData{
-    private final ServerDataManager< ?> serverDataManager;
+    private final ServerDataManager<?> serverDataManager;
     private SSession responsibleDataSession;
 
     public ServerData(ServerDataManager<?> serverDataManager, UUID uuid){
@@ -20,13 +19,9 @@ public abstract class ServerData extends VCoreData{
     }
 
     @Override
-    public void pushUpdate() {
-        getResponsibleDataManager().pushToRedis(this,this.getClass(),getUUID());
-    }
-
-    public final SSession getResponsibleDataManager(){
+    public SSession getResponsibleDataSession() {
         if(responsibleDataSession == null)
-            responsibleDataSession = redisManager.getPlugin().getServerDataManager().getDataHolder(getRequiredSubsystem());
+            responsibleDataSession = (SSession) redisManager.getPlugin().getServerDataManager().getSession(getRequiredSubsystem().getUuid());
         return responsibleDataSession;
     }
 }

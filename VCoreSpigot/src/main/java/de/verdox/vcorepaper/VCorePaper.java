@@ -3,21 +3,33 @@ package de.verdox.vcorepaper;
 import de.verdox.vcore.dataconnection.DataConnection;
 import de.verdox.vcore.plugin.VCorePlugin;
 import de.verdox.vcore.subsystem.VCoreSubsystem;
+import de.verdox.vcorepaper.custom.entities.CustomEntityManager;
+import de.verdox.vcorepaper.custom.items.CustomItemManager;
 import de.verdox.vcorepaper.subsystems.VCoreTestSubsystem;
-import org.bukkit.Bukkit;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
-import org.bukkit.event.block.BlockBreakEvent;
 
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
-public class VCorePaper extends VCorePlugin.Minecraft implements Listener {
+public class VCorePaper extends VCorePlugin.Minecraft {
+    public static VCorePaper instance;
+
+    private final CustomEntityManager customEntityManager;
+    private final CustomItemManager customItemManager;
+
+    public static VCorePaper getInstance() {
+        return instance;
+    }
+
+    public VCorePaper() {
+        this.customEntityManager = new CustomEntityManager(this);
+        this.customItemManager = new CustomItemManager(this);
+    }
 
     @Override
     public void onPluginEnable() {
+        instance = this;
         getSessionManager();
-        Bukkit.getPluginManager().registerEvents(this,this);
+        getServerDataManager();
     }
 
     @Override
@@ -27,7 +39,7 @@ public class VCorePaper extends VCorePlugin.Minecraft implements Listener {
 
     @Override
     public List<VCoreSubsystem.Bukkit> provideSubsystems() {
-        return Arrays.asList(new VCoreTestSubsystem(this));
+        return Collections.singletonList(new VCoreTestSubsystem(this));
     }
 
     @Override
@@ -36,9 +48,7 @@ public class VCorePaper extends VCorePlugin.Minecraft implements Listener {
     }
 
     @Override
-    public String[] redisAddresses() {
-        return new String[]{"redis://localhost:6379"};
-    }
+    public String[] redisAddresses() { return new String[]{"redis://localhost:6379"}; }
 
     @Override
     public DataConnection.MongoDB mongoDB() {
@@ -53,8 +63,7 @@ public class VCorePaper extends VCorePlugin.Minecraft implements Listener {
         };
     }
 
-    @EventHandler
-    public void onBlockBreak(BlockBreakEvent e){
-
+    public CustomEntityManager getCustomEntityManager() {
+        return customEntityManager;
     }
 }

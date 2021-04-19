@@ -9,7 +9,6 @@ import de.verdox.vcore.data.session.DataSession;
 import de.verdox.vcore.dataconnection.DataConnection;
 import de.verdox.vcore.plugin.VCorePlugin;
 import de.verdox.vcore.redisson.RedisManager;
-import org.redisson.api.RMap;
 import org.redisson.api.RTopic;
 import org.redisson.api.listener.MessageListener;
 
@@ -42,14 +41,16 @@ public abstract class VCoreDataManager <S extends VCoreData, R extends VCorePlug
     }
 
     public void pushCreation(Class<? extends S> type, S dataObject){
-        objectHandlerTopic.publishAsync(new RedisObjectHandlerMessage<S>(type)
+        objectHandlerTopic.publish(new RedisObjectHandlerMessage<S>(type)
                 .setDelete()
                 .setUUID(dataObject.getUUID())
                 .create());
     }
 
+    public abstract S load(Class<? extends S> type, UUID uuid);
+
     public void pushRemoval(Class<? extends S> type, UUID uuid){
-        objectHandlerTopic.publishAsync(new RedisObjectHandlerMessage<S>(type)
+        objectHandlerTopic.publish(new RedisObjectHandlerMessage<S>(type)
                 .setDelete()
                 .setUUID(uuid)
                 .create());
@@ -64,6 +65,7 @@ public abstract class VCoreDataManager <S extends VCoreData, R extends VCorePlug
     protected abstract DataSession<S> createSession(UUID objectUUID);
     protected abstract boolean exist (UUID objectUUID);
     protected abstract DataSession<S> deleteSession (UUID objectUUID);
+    public abstract DataSession<S> getSession(UUID objectUUID);
 
     public abstract S instantiateVCoreData(Class<? extends S> dataClass, UUID objectUUID);
 

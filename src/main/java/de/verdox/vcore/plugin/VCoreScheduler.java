@@ -1,16 +1,14 @@
-package de.verdox.vcore.threads;
-
-import de.verdox.vcore.plugin.VCorePlugin;
+package de.verdox.vcore.plugin;
 
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 public class VCoreScheduler {
-    private VCorePlugin<?, ?> vCorePlugin;
-    private ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(4);
+    private final VCorePlugin<?, ?> vCorePlugin;
+    private final ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(4);
 
-    public VCoreScheduler(VCorePlugin<?,?> vCorePlugin){
+    VCoreScheduler(VCorePlugin<?,?> vCorePlugin){
         this.vCorePlugin = vCorePlugin;
     }
 

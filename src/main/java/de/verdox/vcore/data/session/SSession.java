@@ -1,7 +1,10 @@
 package de.verdox.vcore.data.session;
 
+import de.verdox.vcore.data.annotations.DataContext;
+import de.verdox.vcore.data.annotations.PreloadStrategy;
 import de.verdox.vcore.data.datatypes.ServerData;
 import de.verdox.vcore.data.manager.VCoreDataManager;
+import de.verdox.vcore.plugin.VCorePlugin;
 import de.verdox.vcore.subsystem.VCoreSubsystem;
 
 import java.util.*;
@@ -14,9 +17,22 @@ public class SSession extends DataSession<ServerData>{
     private final VCoreSubsystem<?> vCoreSubsystem;
 
     public SSession(VCoreDataManager<ServerData, ?> dataManager, VCoreSubsystem<?> vCoreSubsystem) {
-        super(dataManager);
+        super(dataManager,vCoreSubsystem.getUuid());
         this.serverDataObjects = new ConcurrentHashMap<>();
         this.vCoreSubsystem = vCoreSubsystem;
+
+
+        dataManager
+                .getPlugin()
+                .getSubsystemManager()
+                .getActiveServerDataClasses()
+                .stream()
+                // Find all Player Data Classes that belong to this session
+                .filter(aClass -> VCorePlugin.findDependSubsystemClass(aClass).equals(this.vCoreSubsystem.getClass()))
+                // Load Data on Server Start
+                .filter(aClass -> dataManager.getRedisManager().getPreloadStrategy(aClass).equals(PreloadStrategy.LOAD_BEFORE))
+                // PreLoad every Server Data
+                .forEach(this::loadAllDataFromDatabase);
     }
 
     @Override
@@ -27,11 +43,6 @@ public class SSession extends DataSession<ServerData>{
     @Override
     public void onCleanUp() {
 
-    }
-
-    @Override
-    public UUID getUUID() {
-        return vCoreSubsystem.getUuid();
     }
 
     @Override

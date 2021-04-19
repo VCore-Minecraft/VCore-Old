@@ -5,9 +5,9 @@ import de.verdox.vcore.data.session.PlayerSession;
 import de.verdox.vcore.dataconnection.DataConnection;
 import de.verdox.vcore.data.annotations.RequiredSubsystemInfo;
 import de.verdox.vcore.plugin.VCorePlugin;
-import de.verdox.vcore.redisson.RedisManager;
 import de.verdox.vcore.subsystem.VCoreSubsystem;
 import net.md_5.bungee.api.ProxyServer;
+import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.event.PlayerDisconnectEvent;
 import net.md_5.bungee.api.event.PostLoginEvent;
 import org.bukkit.entity.Player;
@@ -16,7 +16,6 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerKickEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
-import org.redisson.api.RMap;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
@@ -49,10 +48,18 @@ public abstract class PlayerSessionManager<R extends VCorePlugin<?,?>> extends V
         return dataSet;
     }
 
+    @Override
+    public PlayerData load(Class<? extends PlayerData> type, UUID uuid) {
+        return getSession(uuid).load(type,uuid);
+    }
+
     protected PlayerSession deleteSession(UUID uuid){
         getPlugin().consoleMessage("&eDeleting Local Player Session&7: &b"+uuid);
         PlayerSession playerSession = this.playerSessionCache.remove(uuid);
         playerSession.cleanUp();
+
+        getAllPlayerKeys(uuid).forEach((aClass, strings) -> playerSession.saveAndRemove(aClass,uuid));
+
         return playerSession;
     }
 
@@ -80,7 +87,7 @@ public abstract class PlayerSessionManager<R extends VCorePlugin<?,?>> extends V
                 if(System.currentTimeMillis() - playerData.getLastUse() <= 1000L*1800)
                     return;
                 // Wurde das Datum in den letzten 1800 Sekunden nicht genutzt wird es in Redis geladen
-                playerData.getResponsiblePlayerSession().save(playerData.getClass(),playerData.getUUID());
+                playerData.getResponsibleDataSession().saveAndRemove(playerData.getClass(),playerData.getUUID());
             }));
         });
     }
@@ -93,7 +100,6 @@ public abstract class PlayerSessionManager<R extends VCorePlugin<?,?>> extends V
             getPlugin().consoleMessage("&eHandling Player Join&7: &a"+playerUUID.toString());
 
             keys.forEach((playerDataClass, dataKeys) -> {
-
                 RequiredSubsystemInfo requiredSubsystemInfo = playerDataClass.getAnnotation(RequiredSubsystemInfo.class);
                 if(requiredSubsystemInfo == null)
                     throw new RuntimeException(getClass().getName()+" does not have PlayerDataClassInfo Annotation set");
@@ -102,25 +108,8 @@ public abstract class PlayerSessionManager<R extends VCorePlugin<?,?>> extends V
                     return;
                 if(!subsystem.isActivated())
                     return;
-
+                System.out.println("Loading Data:"+playerDataClass);
                 getSession(playerUUID).load(playerDataClass,playerUUID);
-
-
-              // VCoreSubsystem<?> subsystem = plugin.getSubsystemManager().findSubsystemByClass(requiredSubsystemInfo.parentSubSystem());
-              // RMap<String,Object> playerSessionDataCache = playerSessionCache.get(playerUUID).getRedisCache(playerDataClass);
-
-              // if(subsystem.isActivated()){
-              //     dataKeys.parallelStream()
-              //             .filter(dataKey -> !playerSessionDataCache.containsKey(dataKey))
-              //             .forEach(dataKey -> playerSession.dataBaseToRedis(playerDataClass,playerUUID));
-
-              //     getPlugin().consoleMessage("&eLoading Data &b"+VCorePlugin.getMongoDBIdentifier(playerDataClass));
-              //     playerSession.loadFromRedis(playerDataClass, playerSession.getPlayerUUID());
-              // }
-              // else {
-              //     getPlugin().consoleMessage("&eSaving to database &b"+VCorePlugin.getMongoDBIdentifier(playerDataClass));
-              //     playerSession.redisToDatabase(playerDataClass,playerUUID,dataKeys);
-              // }
             });
             long end = System.currentTimeMillis() - start;
             getPlugin().consoleMessage("&eSuccessfully loaded data&7: &a"+playerUUID.toString() + " &7[&e"+end+" ms&7]");
@@ -130,49 +119,6 @@ public abstract class PlayerSessionManager<R extends VCorePlugin<?,?>> extends V
         getPlugin().consoleMessage("&eUnloading PlayerSession&7: &a"+playerUUID);
         deleteSession(playerUUID);
     }
-
-    //protected void databaseToRedisPipeline(VCoreSubsystem<?> subsystem, Class<? extends PlayerData> playerDataClass, UUID playerUUID, Map<String, Object> playerSessionDataCache){
-    //    MongoCollection<Document> mongoCollection = redisManager.getMongoDB().getCollection(VCorePlugin.getMongoDBIdentifier(subsystem.getClass()));
-//
-    //    PlayerData playerData = instantiatePlayerData(playerDataClass,playerUUID);
-//
-    //    Document mongoDBData = mongoCollection.find(new Document("playerUUID",playerUUID.toString())).first();
-    //    if(mongoDBData == null)
-    //        mongoDBData = new Document("playerUUID", playerUUID.toString());
-//
-    //    Map<String, Object> dataFromDatabase = new HashMap<>();
-//
-    //    mongoDBData.forEach((key, data) -> {
-    //        if(!key.contains(":"))
-    //            return;
-    //        String[]split = key.split(":");
-    //        if(!split[0].equals(VCorePlugin.getMongoDBIdentifier(playerDataClass)))
-    //            return;
-    //        dataFromDatabase.put(key.split(":")[1],data);
-    //    });
-//
-    //    playerData.restoreFromDataBase(dataFromDatabase);
-//
-    //    playerData.dataForRedis().forEach(playerSessionDataCache::put);
-    //}
-
-   //protected void redisToDatabasePipeline(Map<String, Object> playerSessionDataCache, VCoreSubsystem<?> subsystem, UUID playerUUID, Set<String> keys){
-   //    if(playerSessionDataCache == null)
-   //        throw new NullPointerException("playerSessionDataCache can't be null!");
-
-   //    MongoCollection<Document> mongoCollection = redisManager.getMongoDB().getCollection(VCorePlugin.getMongoDBIdentifier(subsystem.getClass()));
-
-   //    keys.parallelStream().filter(playerSessionDataCache::containsKey).forEach(dataKey -> {
-
-   //        Document playerData = new Document("playerUUID",playerUUID.toString());
-   //        playerData.putAll(playerSessionDataCache);
-
-   //        mongoCollection.insertOne(playerData);
-
-   //        // Removing from Redis
-   //        playerSessionDataCache.remove(dataKey);
-   //    });
-   //}
 
     @Override
     public PlayerData instantiateVCoreData(Class<? extends PlayerData> dataClass, UUID objectUUID){
@@ -193,6 +139,10 @@ public abstract class PlayerSessionManager<R extends VCorePlugin<?,?>> extends V
         public BukkitPlayerSessionManager(VCorePlugin.Minecraft plugin, boolean useRedisCluster, String[] addressArray, DataConnection.MongoDB mongoDB) {
             super(plugin, useRedisCluster, addressArray,mongoDB);
             plugin.getPlugin().getServer().getPluginManager().registerEvents(this,plugin);
+        }
+
+        public PlayerSession getPlayerSession(Player player){
+            return getSession(player.getUniqueId());
         }
 
         @EventHandler
@@ -216,6 +166,10 @@ public abstract class PlayerSessionManager<R extends VCorePlugin<?,?>> extends V
         public BungeePlayerSessionManager(VCorePlugin.BungeeCord plugin, boolean useRedisCluster, String[] addressArray, DataConnection.MongoDB mongoDB) {
             super(plugin, useRedisCluster, addressArray, mongoDB);
             ProxyServer.getInstance().getPluginManager().registerListener(plugin,this);
+        }
+
+        public PlayerSession getPlayerSession(ProxiedPlayer player){
+            return getSession(player.getUniqueId());
         }
 
         @net.md_5.bungee.event.EventHandler

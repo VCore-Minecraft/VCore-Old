@@ -9,7 +9,6 @@ import de.verdox.vcore.data.manager.PlayerSessionManager;
 import de.verdox.vcore.plugin.bukkit.BukkitPlugin;
 import de.verdox.vcore.plugin.bungeecord.BungeeCordPlugin;
 import de.verdox.vcore.subsystem.VCoreSubsystem;
-import de.verdox.vcore.threads.VCoreScheduler;
 import net.md_5.bungee.api.ProxyServer;
 
 import java.io.File;

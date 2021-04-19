@@ -1,18 +1,18 @@
 package de.verdox.vcore.redisson;
 
+import de.verdox.vcore.data.annotations.DataContext;
+import de.verdox.vcore.data.annotations.PreloadStrategy;
+import de.verdox.vcore.data.annotations.VCoreDataContext;
 import de.verdox.vcore.data.datatypes.VCoreData;
 import de.verdox.vcore.dataconnection.DataConnection;
 import de.verdox.vcore.plugin.VCorePlugin;
-import de.verdox.vcore.subsystem.VCoreSubsystem;
 import org.redisson.Redisson;
 import org.redisson.api.RMap;
 import org.redisson.api.RTopic;
 import org.redisson.api.RedissonClient;
 import org.redisson.config.Config;
 
-import java.util.Set;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 public class RedisManager<R extends VCorePlugin<?,?>> {
 
@@ -47,16 +47,8 @@ public class RedisManager<R extends VCorePlugin<?,?>> {
         return mongoDB;
     }
 
-    public Set<String> getRedisKeys(Class<? extends VCoreData> dataClass){
-        return getRedissonClient()
-                .getKeys()
-                .getKeysStream()
-                .filter(s -> s.contains(VCorePlugin.getMongoDBIdentifier(dataClass)))
-                .collect(Collectors.toSet());
-    }
-
     public RMap<String, Object> getRedisCache(Class<? extends VCoreData> dataClass, UUID objectUUID){
-        return getRedissonClient().getMap("VCoreData:"+objectUUID+":"+VCorePlugin.getMongoDBIdentifier(dataClass));
+        return getRedissonClient().getMap(plugin.getPluginName()+"Cache:"+objectUUID+":"+VCorePlugin.getMongoDBIdentifier(dataClass));
     }
 
     public RTopic getTopic(Class<? extends VCoreData> dataClass, UUID objectUUID){
@@ -64,35 +56,26 @@ public class RedisManager<R extends VCorePlugin<?,?>> {
             throw new NullPointerException("DataClass is null");
         if(objectUUID == null)
             throw new NullPointerException("objectUUID is null");
-        String key = "VCoreDataManager:"+VCorePlugin.getMongoDBIdentifier(dataClass)+":"+objectUUID.toString();
-        return getRedissonClient().getTopic(key);
-    }
-
-    public String generateSubsystemKey(VCoreSubsystem<?> subsystem, UUID playerUUID){
-        if(subsystem == null)
-            throw new NullPointerException("subsystem is null");
-        if(playerUUID == null)
-            throw new NullPointerException("playerUUID is null");
-        return "VCoreSessionManager:"+playerUUID.toString()+":"+VCorePlugin.getMongoDBIdentifier(subsystem.getClass());
-    }
-
-    public String generateSubsystemKey(Class<? extends VCoreSubsystem<?>> subsystem, UUID playerUUID){
-        if(subsystem == null)
-            throw new NullPointerException("subsystem is null");
-        if(playerUUID == null)
-            throw new NullPointerException("playerUUID is null");
-        return "VCoreSessionManager:"+playerUUID.toString()+":"+VCorePlugin.getMongoDBIdentifier(subsystem);
-    }
-
-    public RTopic getObjectHandlerTopic(VCoreSubsystem<?> subsystem){
-        if(subsystem == null)
-            throw new NullPointerException("subsystem is null");
-        String key = "VCoreDataManager:ObjectHandler"+VCorePlugin.getMongoDBIdentifier(subsystem.getClass());
+        String key = plugin.getPluginName()+"DataTopic:"+VCorePlugin.getMongoDBIdentifier(dataClass)+":"+objectUUID.toString();
         return getRedissonClient().getTopic(key);
     }
 
     public R getPlugin() {
         return plugin;
+    }
+
+    public DataContext getContext(Class<? extends VCoreData> dataClass){
+        VCoreDataContext vCoreDataContext = dataClass.getAnnotation(VCoreDataContext.class);
+        if(vCoreDataContext == null)
+            return DataContext.GLOBAL;
+        return vCoreDataContext.dataContext();
+    }
+
+    public PreloadStrategy getPreloadStrategy(Class<? extends VCoreData> dataClass){
+        VCoreDataContext vCoreDataContext = dataClass.getAnnotation(VCoreDataContext.class);
+        if(vCoreDataContext == null)
+            return PreloadStrategy.LOAD_ON_NEED;
+        return vCoreDataContext.preloadStrategy();
     }
 
     public RedissonClient getRedissonClient() {

@@ -4,7 +4,7 @@ import de.verdox.vcore.data.datatypes.VCoreData;
 
 import java.util.UUID;
 
-public class RedisObjectHandlerMessage <S extends VCoreData<?>> implements RedisMessage{
+public class RedisObjectHandlerMessage <S extends VCoreData> implements RedisMessage{
 
     public final int INSERT = 1;
     public final int DELETE = -1;

@@ -10,17 +10,15 @@ public class PlayerSession extends DataSession<PlayerData>{
 
     private final Map<Class<? extends PlayerData>, PlayerData> playerDataObjects = new HashMap<>();
     private final VCoreDataManager<PlayerData, ?> dataManager;
-    private final UUID playerUUID;
 
     public PlayerSession(VCoreDataManager<PlayerData, ?> dataManager, UUID playerUUID) {
-        super(dataManager);
+        super(dataManager, playerUUID);
         this.dataManager = dataManager;
-        this.playerUUID = playerUUID;
     }
 
     @Override
     public void onLoad() {
-        System.out.println("PlayerSession loaded for player with uuid: "+getUUID());
+        System.out.println("PlayerSession loaded for player with uuid: "+getUuid());
     }
 
     @Override
@@ -50,18 +48,14 @@ public class PlayerSession extends DataSession<PlayerData>{
 
     @Override
     public void removeData(Class<? extends PlayerData> dataClass, UUID uuid, boolean push) {
+        playerDataObjects.remove(dataClass);
         if(push)
-            dataManager.pushRemoval(dataClass,playerUUID);
+            dataManager.pushRemoval(dataClass,getUuid());
     }
 
     @Override
     public void onCleanUp() {
         playerDataObjects.forEach((aClass, playerData) -> playerData.cleanUp());
-    }
-
-    @Override
-    public UUID getUUID() {
-        return playerUUID;
     }
 
     @Override

@@ -1,6 +1,8 @@
 package de.verdox.vcore.data.datatypes;
 
+import de.verdox.vcore.data.annotations.DataContext;
 import de.verdox.vcore.data.annotations.VCorePersistentData;
+import de.verdox.vcore.data.session.DataSession;
 import de.verdox.vcore.plugin.VCorePlugin;
 import de.verdox.vcore.redisson.RedisManager;
 import de.verdox.vcore.redisson.VCorePersistentDatabaseData;
@@ -9,14 +11,20 @@ import de.verdox.vcore.subsystem.VCoreSubsystem;
 import org.redisson.api.RTopic;
 import org.redisson.api.listener.MessageListener;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.lang.reflect.Field;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public abstract class VCoreData implements VCoreRedisData, VCorePersistentDatabaseData {
 
     //TODO: Methode um alle ServerData UUIDs für eine Klasse aus Datenbank oder Cache zu laden
+
+    public static Set<String> getRedisDataKeys(Class<? extends VCoreData> vCoreDataClass){
+        return Arrays.stream(vCoreDataClass.getDeclaredFields())
+                .filter(field -> field.getAnnotation(VCorePersistentData.class) != null)
+                .map(Field::getName)
+                .collect(Collectors.toSet());
+    }
 
     private MessageListener<Map<String,Object>> messageListener;
     protected final RedisManager<?> redisManager;
@@ -32,12 +40,14 @@ public abstract class VCoreData implements VCoreRedisData, VCorePersistentDataba
         if(topic == null)
             return;
 
-       this.messageListener = (channel, map) -> {
-            restoreFromRedis(map);
-            lastUse = (long) map.get("lastUse");
-        };
-        topic.addListener(Map.class,messageListener);
-        updateLastUse();
+        if(redisManager.getContext(getClass()).equals(DataContext.GLOBAL)) {
+            this.messageListener = (channel, map) -> {
+                restoreFromRedis(map);
+                updateLastUse();
+            };
+            topic.addListener(Map.class,messageListener);
+            updateLastUse();
+        }
     }
 
     public final UUID getUUID() {
@@ -58,25 +68,46 @@ public abstract class VCoreData implements VCoreRedisData, VCorePersistentDataba
         return redisManager.getTopic(getClass(),getUUID());
     }
 
-    public abstract void pushUpdate();
+    //TODO: PushUpdate auslagern in die DataSession und Objekt als Eingabeparameter
+    public final void pushUpdate(){
+        getResponsibleDataSession().localToRedis(this,this.getClass(),getUUID());
+    }
 
     public final Map<String, Object> dataForRedis() {
         if(cleaned)
             System.out.println("Potential data leak at: " + getClass().getCanonicalName() + " as it has already been cleaned.");
         Map<String, Object> dataForRedis = new HashMap<>();
         updateLastUse();
-        Arrays.stream(getClass().getDeclaredFields())
-                .filter(field -> field.getAnnotation(VCorePersistentData.class) != null)
-                .forEach(field -> {
-                    try {
-                        field.setAccessible(true);
-                        if(field.get(this) == null)
-                            return;
-                        dataForRedis.put(VCorePlugin.getMongoDBIdentifier(this.getClass())+":"+field.getName(), field.get(this));
-                    } catch (IllegalAccessException e) { e.printStackTrace(); }
-                });
+
+        getRedisDataKeys(getClass()).forEach(dataKey -> {
+            try {
+                Field field = getClass().getField(dataKey);
+                if(field.get(this) == null)
+                    return;
+                dataForRedis.put(field.getName(), field.get(this));
+            } catch (NoSuchFieldException | IllegalAccessException e) { e.printStackTrace(); }
+        });
         return dataForRedis;
     }
+
+    //TODO Interessant für Lokale Server Daten die nicht über Redis synchronisiert werden müssen
+    // Müssen in die Load Pipeline extra eingegliedert werden vermutlich?
+
+    @Override
+    public final void restoreFromDataBase(Map<String, Object> dataFromDatabase) {
+        dataFromDatabase.forEach((key, value) -> {
+            try { getClass().getField(key).set(this,value); } catch (IllegalAccessException | NoSuchFieldException e) { e.printStackTrace(); }
+        });
+    }
+
+    @Override
+    public final void restoreFromRedis(Map<String, Object> dataFromRedis) {
+        dataFromRedis.forEach((key, value) -> {
+            try { getClass().getField(key).set(this,value); } catch (IllegalAccessException | NoSuchFieldException e) { e.printStackTrace(); }
+        });
+    }
+
+    public VCorePlugin<?,?> getPlugin(){return redisManager.getPlugin();}
 
     public final VCoreSubsystem<?> getRequiredSubsystem(){
         updateLastUse();
@@ -86,10 +117,14 @@ public abstract class VCoreData implements VCoreRedisData, VCorePersistentDataba
     protected void updateLastUse(){
         lastUse = System.currentTimeMillis();
     }
-    public abstract void onLoad();
-    public abstract void onCleanUp();
-
     public long getLastUse() {
         return lastUse;
     }
+
+    public abstract void onLoad();
+    public abstract void onCleanUp();
+
+    public abstract DataSession getResponsibleDataSession();
+
+
 }

@@ -1,25 +1,29 @@
 package de.verdox.vcore.data.session;
 
 import com.mongodb.client.MongoCollection;
+import de.verdox.vcore.data.annotations.DataContext;
 import de.verdox.vcore.data.annotations.RequiredSubsystemInfo;
-import de.verdox.vcore.data.annotations.VCorePersistentData;
 import de.verdox.vcore.data.datatypes.VCoreData;
 import de.verdox.vcore.data.manager.VCoreDataManager;
-import de.verdox.vcore.plugin.VCorePlugin;
 import org.bson.Document;
 import org.redisson.api.RMap;
 import org.redisson.api.RTopic;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 public abstract class DataSession <S extends VCoreData> {
 
     protected final VCoreDataManager<S,?> dataManager;
+    private UUID uuid;
 
-    public DataSession(VCoreDataManager<S,?> dataManager){
+    public DataSession(VCoreDataManager<S,?> dataManager, UUID uuid){
         this.dataManager = dataManager;
+        this.uuid = uuid;
         onLoad();
+    }
+
+    public final UUID getUuid() {
+        return uuid;
     }
 
     public final void cleanUp(){
@@ -27,21 +31,71 @@ public abstract class DataSession <S extends VCoreData> {
     }
 
     public S load(Class<? extends S> dataClass, UUID objectUUID){
-        if(!dataExistRemote(dataClass,objectUUID))
-            dataBaseToRedis(dataClass,objectUUID);
-        if(!dataExistLocally(dataClass,objectUUID))
-            loadFromRedis(dataClass,objectUUID);
+        if(dataClass == null || objectUUID == null)
+            return null;
+
+        if(dataExistLocally(dataClass,objectUUID)) {
+            dataManager.getPlugin().consoleMessage("&eFound Data in Local Cache");
+        }
+        else if(dataExistRedis(dataClass,objectUUID)) {
+            dataManager.getPlugin().consoleMessage("&eFound Data in Redis Cache");
+            redisToLocal(dataClass, objectUUID);
+        }
+        else if(dataExistInDatabase(dataClass,objectUUID)) {
+            dataManager.getPlugin().consoleMessage("&eFound Data in Database");
+            if(dataManager.getRedisManager().getContext(dataClass).equals(DataContext.GLOBAL)){
+                dataBaseToRedis(dataClass, objectUUID);
+                redisToLocal(dataClass,objectUUID);
+            }
+            else {
+                databaseToLocal(dataClass,objectUUID);
+            }
+        }
+        else {
+            dataManager.getPlugin().consoleMessage("&eNo Data was found. Creating new data");
+            S vCoreData = dataManager.instantiateVCoreData(dataClass,objectUUID);
+            addData(vCoreData,dataClass,true);
+            localToRedis(vCoreData,dataClass,vCoreData.getUUID());
+        }
+        dataManager.getPlugin().consoleMessage("&eLoaded &a"+dataClass.getCanonicalName()+" &ewith uuid&7: "+objectUUID);
         return getData(dataClass,objectUUID);
     }
 
-    public void save(Class<? extends S> dataClass, UUID objectUUID){
-        if(!dataExistRemote(dataClass,objectUUID))
-            return;
-        redisToDatabase(dataClass,objectUUID);
-        dataManager.pushRemoval(dataClass,objectUUID);
+    private boolean dataExistInDatabase(Class<? extends S> dataClass, UUID objectUUID){
+        Document document = getMongoCollection(dataClass).find(new Document("objectUUID",objectUUID.toString())).first();
+        return document != null;
     }
 
-    public final boolean dataExistRemote(Class<? extends S> dataClass, UUID uuid){
+    public void save(Class<? extends S> dataClass, UUID objectUUID){
+        if(dataManager.getRedisManager().getContext(dataClass).equals(DataContext.GLOBAL)){
+            if(!dataExistRedis(dataClass,objectUUID))
+                //TODO: Es wird hier nur in die Datenbank gespeichert, wenn remote die Daten noch existieren,
+                // um zu verhindern, dass lokal noch Reste bestehen die nicht existieren sollten
+                return;
+            redisToDatabase(dataClass,objectUUID);
+        }
+        else {
+            localToDatabase(dataClass,objectUUID);
+        }
+    }
+
+    public void saveAndRemove(Class<? extends S> dataClass, UUID objectUUID){
+        save(dataClass,objectUUID);
+        removeData(dataClass,objectUUID,true);
+    }
+
+    protected void loadAllDataFromDatabase(Class<? extends S> dataClass){
+        dataManager.getPlugin().consoleMessage("&ePreloading Data for &a"+dataClass.getCanonicalName()+" &efrom database&7!");
+        getMongoCollection(dataClass)
+                .find()
+                .iterator()
+                .forEachRemaining(document -> {
+                    UUID uuid = UUID.fromString(document.getString("objectUUID"));
+                    load(dataClass,uuid);
+                });
+    }
+
+    public final boolean dataExistRedis(Class<? extends S> dataClass, UUID uuid){
         RMap<String, Object> redisCache = getRedisCache(dataClass);
 
         Set<String> redisKeys = getRedisKeys(dataClass,uuid);
@@ -49,11 +103,16 @@ public abstract class DataSession <S extends VCoreData> {
         return redisKeys.parallelStream().anyMatch(redisCache::containsKey);
     }
 
-    public final void pushToRedis (S dataObject, Class<? extends S> dataClass, UUID objectUUID){
+    public final void localToRedis(S dataObject, Class<? extends S> dataClass, UUID objectUUID){
         if(dataClass == null)
             return;
         if(objectUUID == null)
             return;
+        // If it is a Local Datum it wont be published to redis again.
+        // Method should not be invoked if local anyway
+        if(dataManager.getRedisManager().getContext(dataClass).equals(DataContext.LOCAL))
+            return;
+
         RMap<String, Object> redisCache = getRedisCache(dataClass);
 
         dataObject.dataForRedis().forEach(redisCache::put);
@@ -65,68 +124,38 @@ public abstract class DataSession <S extends VCoreData> {
         dataManager.getPlugin().consoleMessage("&ePushing Update&7: &b"+objectUUID+" &7[&e"+end+" ms&7]");
     }
 
-    public final void dataBaseToRedis(Class<? extends S> dataClass, UUID objectUUID){
+    public final void localToDatabase(Class<? extends S> dataClass,UUID objectUUID){
+        saveToDatabase(dataClass,objectUUID,getData(dataClass,objectUUID).dataForRedis());
+    }
 
+    public final void dataBaseToRedis(Class<? extends S> dataClass, UUID objectUUID){
         S vCoreData = dataManager.instantiateVCoreData(dataClass,objectUUID);
         RMap<String, Object> redisCache = getRedisCache(dataClass);
 
-        Document mongoDBData = getMongoCollection(dataClass).find(new Document("objectUUID",objectUUID.toString())).first();
-
-        if(mongoDBData == null)
-            mongoDBData = new Document("objectUUID", objectUUID.toString());
-
-        Map<String, Object> dataFromDatabase = new HashMap<>();
-
-        //TODO: Für SPIELERDATEN
-        //        mongoDBData.forEach((key, data) -> {
-        //            if(!key.contains(":"))
-        //                return;
-        //            String[]split = key.split(":");
-        //            if(!split[0].equals(VCorePlugin.getMongoDBIdentifier(dataClass)))
-        //                return;
-        //            dataFromDatabase.put(key.split(":")[1],data);
-        //        });
-
-        //TODO: Für Spielerdaten und Serverdaten einheitlich machen!
-
-        //TODO: Für SERVERDATEN
-
-        mongoDBData.forEach((key, data) -> {
-            if(!key.contains(":"))
-                return;
-            String[]split = key.split(":");
-            if(!split[0].equals(VCorePlugin.getMongoDBIdentifier(dataClass)))
-                return;
-            // TODO: Evtl nicht auf [2] setzen
-            dataFromDatabase.put(key.split(":")[2],data);
-        });
+        Map<String, Object> dataFromDatabase = loadDataFromDatabase(dataClass,objectUUID);
 
         vCoreData.dataForRedis().forEach(redisCache::put);
+        vCoreData.restoreFromRedis(dataFromDatabase);
+    }
+
+    /**
+     * Method to save from Database to Local
+     * @param dataClass
+     * @param objectUUID
+     */
+    public final void databaseToLocal(Class<? extends S> dataClass, UUID objectUUID){
+        S vCoreData = dataManager.instantiateVCoreData(dataClass,objectUUID);
+
+        Map<String, Object> dataFromDatabase = loadDataFromDatabase(dataClass,objectUUID);
         vCoreData.restoreFromDataBase(dataFromDatabase);
     }
 
-    public final void redisToDatabase(Class<? extends S> dataClass,UUID objectUUID){
-        if(dataClass == null)
-            return;
-        if(objectUUID == null)
-            return;
-        Set<String> dataKeysToSave = getRedisKeys(dataClass,objectUUID);
-        if(dataKeysToSave == null)
-            return;
-        getData(dataClass,objectUUID).cleanUp();
-        RMap<String, Object> redisCache = getRedisCache(dataClass);
-        dataKeysToSave
-                .parallelStream()
-                .filter(redisCache::containsKey)
-                .forEach(dataKey -> {
-                    Document serverData = new Document("objectUUID",objectUUID.toString());
-                    serverData.putAll(redisCache);
-                    getMongoCollection(dataClass).insertOne(serverData);
-                    redisCache.remove(dataKey);
-                });
-    }
-
-    public final void loadFromRedis (Class<? extends S> dataClass, UUID objectUUID){
+    /**
+     * Method to save Data from Redis to Local Cache
+     * @param dataClass
+     * @param objectUUID
+     */
+    public final void redisToLocal(Class<? extends S> dataClass, UUID objectUUID){
 
         if(dataClass == null)
             return;
@@ -138,11 +167,63 @@ public abstract class DataSession <S extends VCoreData> {
         Set<String> redisKeys = getRedisKeys(dataClass,objectUUID);
         Map<String, Object> dataFromRedis = new HashMap<>();
 
-        redisKeys.forEach(key -> dataFromRedis.put(key.split(":")[2],redisCache.get(key)));
+        redisKeys.forEach(key -> dataFromRedis.put(key,redisCache.get(key)));
 
         vCoreData.restoreFromRedis(dataFromRedis);
 
         addData(vCoreData,dataClass,true);
+    }
+
+    /**
+     * Method to save Data from Redis to Database
+     * @param dataClass
+     * @param objectUUID
+     */
+
+    public final void redisToDatabase(Class<? extends S> dataClass,UUID objectUUID){
+        if(dataClass == null)
+            return;
+        RMap<String, Object> redisCache = getRedisCache(dataClass);
+        saveToDatabase(dataClass,objectUUID,redisCache);
+    }
+
+    /**
+     * Method to directly save some Data to MongoDB Database
+     * @param dataClass
+     * @param objectUUID
+     * @param dataToSave
+     */
+
+    private final void saveToDatabase(Class<? extends S> dataClass,UUID objectUUID, Map<String, Object> dataToSave){
+        if(dataClass == null)
+            return;
+        if(objectUUID == null)
+            return;
+        if(dataToSave == null)
+            return;
+        Set<String> dataKeysToSave = getRedisKeys(dataClass,objectUUID);
+        if(dataKeysToSave == null)
+            return;
+        getData(dataClass,objectUUID).cleanUp();
+        dataKeysToSave
+                .parallelStream()
+                .filter(dataToSave::containsKey)
+                .forEach(dataKey -> {
+                    Document serverData = new Document("objectUUID",objectUUID.toString());
+                    serverData.putAll(dataToSave);
+                    getMongoCollection(dataClass).insertOne(serverData);
+                    dataToSave.remove(dataKey);
+                });
+    }
+
+    private Map<String, Object> loadDataFromDatabase(Class<? extends S> dataClass, UUID objectUUID){
+        Document mongoDBData = getMongoCollection(dataClass).find(new Document("objectUUID",objectUUID.toString())).first();
+
+        if(mongoDBData == null)
+            mongoDBData = new Document("objectUUID", objectUUID.toString());
+        Map<String, Object> dataFromDatabase = new HashMap<>();
+        mongoDBData.forEach(dataFromDatabase::put);
+        return dataFromDatabase;
     }
 
     public final Set<String> getRedisKeys(Class<? extends S> vCoreDataClass, UUID uuid){
@@ -151,22 +232,16 @@ public abstract class DataSession <S extends VCoreData> {
             throw new RuntimeException(getClass().getSimpleName()+" does not have RequiredSubsystemInfo Annotation set");
         if(uuid == null)
             return new HashSet<>();
-
-        return Arrays.stream(vCoreDataClass.getDeclaredFields())
-                .filter(field -> field.getAnnotation(VCorePersistentData.class) != null)
-                .map(field -> VCorePlugin.getMongoDBIdentifier(vCoreDataClass)+":"+uuid.toString()+":"+field.getName())
-                .collect(Collectors.toSet());
+        return VCoreData.getRedisDataKeys(vCoreDataClass);
     }
 
     public final RMap<String, Object> getRedisCache(Class<? extends S> dataClass){
-        return dataManager.getRedisManager().getRedisCache(dataClass,getUUID());
+        return dataManager.getRedisManager().getRedisCache(dataClass,getUuid());
     }
 
     public final MongoCollection<Document> getMongoCollection(Class<? extends S> dataClass){
         return dataManager.getRedisManager().getMongoDB().getCollection(dataClass,getMongoDBSuffix());
     }
-
-    public abstract UUID getUUID();
     public abstract String getMongoDBSuffix();
 
     public abstract void onLoad();
