@@ -1,5 +1,7 @@
 package de.verdox.vcorepaper.custom;
 
+import de.verdox.vcorepaper.custom.annotation.NBTIdentifier;
+
 import java.util.Objects;
 
 public abstract class CustomData <S,C extends CustomDataHolder<S,?>,R extends CustomDataManager<S,?,?>,T> {
@@ -11,6 +13,9 @@ public abstract class CustomData <S,C extends CustomDataHolder<S,?>,R extends Cu
     public CustomData(R dataManager, C customDataHolder){
         this.dataManager = dataManager;
         this.customDataHolder = customDataHolder;
+
+        if(!dataManager.getCustomDataStorage().contains(getClass()))
+            dataManager.getvCorePaper().consoleMessage("&eWarning&7: &a"+getClass().getCanonicalName()+" &ehas not been registered to &b"+dataManager.getClass().getCanonicalName()+" &eyet.",false);
     }
 
     public R getDataManager() {
@@ -46,5 +51,12 @@ public abstract class CustomData <S,C extends CustomDataHolder<S,?>,R extends Cu
     @Override
     public final int hashCode() {
         return Objects.hash(getStoredData());
+    }
+
+    public String getNBTKey(){
+        NBTIdentifier nbtIdentifier = getClass().getAnnotation(NBTIdentifier.class);
+        if(nbtIdentifier == null)
+            throw new IllegalStateException("Your CustomData Class "+getClass().getCanonicalName()+" needs to have the NBTIdentifier Annotation set!");
+        return nbtIdentifier.nbtKey();
     }
 }

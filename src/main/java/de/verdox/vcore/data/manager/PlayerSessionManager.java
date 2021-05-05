@@ -25,16 +25,18 @@ public abstract class PlayerSessionManager<R extends VCorePlugin<?,?>> extends V
 
     protected final Map<UUID, PlayerSession> playerSessionCache = new ConcurrentHashMap<>();
 
-    public PlayerSessionManager(R plugin, boolean useRedisCluster, String[] addressArray, DataConnection.MongoDB mongoDB){
-        super(plugin,useRedisCluster,addressArray,mongoDB);
-        getPlugin().consoleMessage("&eStarting Session Manager");
+    public PlayerSessionManager(R plugin, boolean useRedisCluster, String[] addressArray, String redisPassword, DataConnection.MongoDB mongoDB){
+        super(plugin,useRedisCluster,addressArray,redisPassword,mongoDB);
+        getPlugin().consoleMessage("&eStarting Session Manager",true);
     }
 
     protected PlayerSession createSession(UUID uuid){
-        getPlugin().consoleMessage("&eCreating Local Player Session&7: &b"+uuid);
+        //getPlugin().consoleMessage("&eCreating Local Player Session&7: &b"+uuid);
         if(exist(uuid))
             return getSession(uuid);
-        return this.playerSessionCache.put(uuid, new PlayerSession(this,uuid));
+        PlayerSession playerSession = new PlayerSession(this,uuid);
+        this.playerSessionCache.put(uuid, playerSession);
+        return playerSession;
     }
 
     @Override
@@ -54,12 +56,10 @@ public abstract class PlayerSessionManager<R extends VCorePlugin<?,?>> extends V
     }
 
     protected PlayerSession deleteSession(UUID uuid){
-        getPlugin().consoleMessage("&eDeleting Local Player Session&7: &b"+uuid);
+        //getPlugin().consoleMessage("&eDeleting Local Player Session&7: &b"+uuid);
         PlayerSession playerSession = this.playerSessionCache.remove(uuid);
+        playerSession.getPlayerDataObjects().forEach((aClass, playerData) -> playerSession.localToRedis(playerData,aClass,uuid));
         playerSession.cleanUp();
-
-        getAllPlayerKeys(uuid).forEach((aClass, strings) -> playerSession.saveAndRemove(aClass,uuid));
-
         return playerSession;
     }
 
@@ -71,12 +71,12 @@ public abstract class PlayerSessionManager<R extends VCorePlugin<?,?>> extends V
         return playerSessionCache.get(playerUUID);
     }
 
-    protected Map<Class<? extends PlayerData>, Set<String>> getAllPlayerKeys(UUID playerUUID){
+    protected Map<Class<? extends PlayerData>, Set<String>> getAllPlayerKeys(PlayerSession playerSession){
         Map<Class<? extends PlayerData>, Set<String>> keys = new HashMap<>();
-        PlayerSession playerSession = getSession(playerUUID);
-
+        if(playerSession == null)
+            throw new NullPointerException("PlayerSession can't be null!");
         plugin.getSubsystemManager().getRegisteredPlayerDataClasses()
-                .forEach(aClass -> keys.put(aClass, playerSession.getRedisKeys(aClass,playerUUID)));
+                .forEach(aClass -> keys.put(aClass, playerSession.getRedisKeys(aClass,playerSession.getUuid())));
         return keys;
     }
 
@@ -94,10 +94,8 @@ public abstract class PlayerSessionManager<R extends VCorePlugin<?,?>> extends V
 
     protected void loginPipeline(UUID playerUUID){
         long start = System.currentTimeMillis();
-            createSession(playerUUID);
-
-            Map<Class<? extends PlayerData>,Set<String>> keys = getAllPlayerKeys(playerUUID);
-            getPlugin().consoleMessage("&eHandling Player Join&7: &a"+playerUUID.toString());
+            Map<Class<? extends PlayerData>,Set<String>> keys = getAllPlayerKeys(createSession(playerUUID));
+            getPlugin().consoleMessage("&eHandling Player Join&7: &a"+playerUUID.toString(),true);
 
             keys.forEach((playerDataClass, dataKeys) -> {
                 RequiredSubsystemInfo requiredSubsystemInfo = playerDataClass.getAnnotation(RequiredSubsystemInfo.class);
@@ -108,15 +106,14 @@ public abstract class PlayerSessionManager<R extends VCorePlugin<?,?>> extends V
                     return;
                 if(!subsystem.isActivated())
                     return;
-                System.out.println("Loading Data:"+playerDataClass);
                 getSession(playerUUID).load(playerDataClass,playerUUID);
             });
             long end = System.currentTimeMillis() - start;
-            getPlugin().consoleMessage("&eSuccessfully loaded data&7: &a"+playerUUID.toString() + " &7[&e"+end+" ms&7]");
+            getPlugin().consoleMessage("&eSuccessfully loaded data&7: &a"+playerUUID.toString() + " &7[&e"+end+" ms&7]",true);
     }
 
     protected void logoutPipeline(UUID playerUUID){
-        getPlugin().consoleMessage("&eUnloading PlayerSession&7: &a"+playerUUID);
+        getPlugin().consoleMessage("&eUnloading PlayerSession&7: &a"+playerUUID,true);
         deleteSession(playerUUID);
     }
 
@@ -136,8 +133,8 @@ public abstract class PlayerSessionManager<R extends VCorePlugin<?,?>> extends V
 
     public static class BukkitPlayerSessionManager extends PlayerSessionManager<VCorePlugin.Minecraft> implements Listener {
 
-        public BukkitPlayerSessionManager(VCorePlugin.Minecraft plugin, boolean useRedisCluster, String[] addressArray, DataConnection.MongoDB mongoDB) {
-            super(plugin, useRedisCluster, addressArray,mongoDB);
+        public BukkitPlayerSessionManager(VCorePlugin.Minecraft plugin, boolean useRedisCluster, String[] addressArray, String redisPassword, DataConnection.MongoDB mongoDB) {
+            super(plugin, useRedisCluster, addressArray, redisPassword, mongoDB);
             plugin.getPlugin().getServer().getPluginManager().registerEvents(this,plugin);
         }
 
@@ -163,8 +160,8 @@ public abstract class PlayerSessionManager<R extends VCorePlugin<?,?>> extends V
     }
 
     public static class BungeePlayerSessionManager extends PlayerSessionManager<VCorePlugin.BungeeCord> implements net.md_5.bungee.api.plugin.Listener {
-        public BungeePlayerSessionManager(VCorePlugin.BungeeCord plugin, boolean useRedisCluster, String[] addressArray, DataConnection.MongoDB mongoDB) {
-            super(plugin, useRedisCluster, addressArray, mongoDB);
+        public BungeePlayerSessionManager(VCorePlugin.BungeeCord plugin, boolean useRedisCluster, String[] addressArray, String redisPassword, DataConnection.MongoDB mongoDB) {
+            super(plugin, useRedisCluster, addressArray, redisPassword, mongoDB);
             ProxyServer.getInstance().getPluginManager().registerListener(plugin,this);
         }
 

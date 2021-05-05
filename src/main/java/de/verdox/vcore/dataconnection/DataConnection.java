@@ -1,18 +1,20 @@
 package de.verdox.vcore.dataconnection;
 
+import com.mongodb.client.MongoCollection;
+import de.verdox.vcore.data.datatypes.VCoreData;
 import de.verdox.vcore.dataconnection.mongodb.MongoDBDataConnection;
 import de.verdox.vcore.plugin.VCorePlugin;
 import de.verdox.vcore.subsystem.DummySubSystem;
 import de.verdox.vcore.subsystem.VCoreSubsystem;
 import de.verdox.vcore.dataconnection.mysql.MySQLDataConnection;
 import de.verdox.vcore.subsystem.exceptions.SubsystemDeactivatedException;
+import org.bson.Document;
 
 import java.util.HashMap;
 import java.util.Map;
 
-public abstract class DataConnection <D,R extends DataProvider<D>> {
+public abstract class DataConnection <T> {
 
-    private final Map<Class<?>,R> providers = new HashMap<>();
     private final VCoreSubsystem<?> subsystem;
     private final VCorePlugin<?, ?> vCorePlugin;
 
@@ -32,15 +34,6 @@ public abstract class DataConnection <D,R extends DataProvider<D>> {
     public abstract void onDisconnect() throws SubsystemDeactivatedException;
     public abstract void saveAllPlayers();
 
-    public void registerDataProvider(R dataProvider){
-        this.providers.put(dataProvider.getClass(),dataProvider);
-        loadData(dataProvider);
-    }
-
-    private void loadData(R dataProvider){
-        subsystem.getVCorePlugin().consoleMessage("Initializing table&7: &b"+dataProvider);
-    }
-
     public VCoreSubsystem<?> getSubsystem() {
         return subsystem;
     }
@@ -49,11 +42,7 @@ public abstract class DataConnection <D,R extends DataProvider<D>> {
         return vCorePlugin;
     }
 
-    public R getDataProvider(Class<? extends R> providerType){
-        if(!this.providers.containsKey(providerType))
-            return null;
-        return this.providers.get(providerType);
-    }
+    public abstract T getDataProvider(Class<? extends VCoreData> dataClass, String suffix);
 
      public abstract static class MySQL extends MySQLDataConnection {
          public MySQL(VCoreSubsystem<?> subsystem, String host, String databaseName, String userName, String password, int port, int maxPoolSize) {
@@ -67,7 +56,7 @@ public abstract class DataConnection <D,R extends DataProvider<D>> {
 
 
     public abstract static class MongoDB extends MongoDBDataConnection {
-        public MongoDB(VCoreSubsystem<?> subsystem, String host, String database, int port, String user, String password) {
+        public MongoDB(VCoreSubsystem<?> subsystem, String host, String database, int port, String user, String password) throws SubsystemDeactivatedException {
             super(subsystem, host, database, port, user, password);
         }
 

@@ -6,7 +6,11 @@
 
     <groupId>de.verdox</groupId>
     <artifactId>VCore</artifactId>
+    <packaging>pom</packaging>
     <version>1.0</version>
+    <modules>
+        <module>VCorePaperShadedDependencies</module>
+    </modules>
 
     <repositories>
         <repository>
@@ -73,7 +77,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
-                <version>2.4.3</version>
+                <version>3.2.1</version>
                 <executions>
                     <execution>
                         <phase>package</phase>
@@ -81,6 +85,16 @@
                             <goal>shade</goal>
                         </goals>
                         <configuration>
+                            <relocations>
+                                <relocation>
+                                    <pattern>de.tr7zw.changeme.nbtapi</pattern>
+                                    <shadedPattern>de.verdox.vcore.nbtapi</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>dev.jorel.commandapi-shade</pattern>
+                                    <shadedPattern>de.verdox.vcore.commandapi</shadedPattern>
+                                </relocation>
+                            </relocations>
                             <filters>
                                 <filter>
                                     <artifact>*:*</artifact>

@@ -15,8 +15,8 @@ public class ServerDataManager <R extends VCorePlugin<?,?>> extends VCoreDataMan
 
     private final Map<UUID, SSession> dataCache = new ConcurrentHashMap<>();
 
-    public ServerDataManager(R plugin, boolean useRedisCluster, String[] addressArray, DataConnection.MongoDB mongoDB) {
-        super(plugin, useRedisCluster, addressArray, mongoDB);
+    public ServerDataManager(R plugin, boolean useRedisCluster, String[] addressArray, String redisPassword, DataConnection.MongoDB mongoDB) {
+        super(plugin, useRedisCluster, addressArray, redisPassword, mongoDB);
         plugin
                 .getSubsystemManager()
                 .getActivatedSubSystems()

@@ -35,14 +35,14 @@ public abstract class DataSession <S extends VCoreData> {
             return null;
 
         if(dataExistLocally(dataClass,objectUUID)) {
-            dataManager.getPlugin().consoleMessage("&eFound Data in Local Cache");
+            dataManager.getPlugin().consoleMessage("&eFound Data in Local Cache", 1,true);
         }
         else if(dataExistRedis(dataClass,objectUUID)) {
-            dataManager.getPlugin().consoleMessage("&eFound Data in Redis Cache");
+            dataManager.getPlugin().consoleMessage("&eFound Data in Redis Cache", 1,true);
             redisToLocal(dataClass, objectUUID);
         }
         else if(dataExistInDatabase(dataClass,objectUUID)) {
-            dataManager.getPlugin().consoleMessage("&eFound Data in Database");
+            dataManager.getPlugin().consoleMessage("&eFound Data in Database", 1,true);
             if(dataManager.getRedisManager().getContext(dataClass).equals(DataContext.GLOBAL)){
                 dataBaseToRedis(dataClass, objectUUID);
                 redisToLocal(dataClass,objectUUID);
@@ -52,12 +52,12 @@ public abstract class DataSession <S extends VCoreData> {
             }
         }
         else {
-            dataManager.getPlugin().consoleMessage("&eNo Data was found. Creating new data");
+            dataManager.getPlugin().consoleMessage("&eNo Data was found. Creating new data", 1,true);
             S vCoreData = dataManager.instantiateVCoreData(dataClass,objectUUID);
             addData(vCoreData,dataClass,true);
             localToRedis(vCoreData,dataClass,vCoreData.getUUID());
         }
-        dataManager.getPlugin().consoleMessage("&eLoaded &a"+dataClass.getCanonicalName()+" &ewith uuid&7: "+objectUUID);
+        dataManager.getPlugin().consoleMessage("&eLoaded &a"+dataClass.getSimpleName()+" &ewith uuid&7: "+objectUUID, 1,true);
         return getData(dataClass,objectUUID);
     }
 
@@ -85,7 +85,7 @@ public abstract class DataSession <S extends VCoreData> {
     }
 
     protected void loadAllDataFromDatabase(Class<? extends S> dataClass){
-        dataManager.getPlugin().consoleMessage("&ePreloading Data for &a"+dataClass.getCanonicalName()+" &efrom database&7!");
+        dataManager.getPlugin().consoleMessage("&ePreloading Data for &a"+dataClass.getSimpleName()+" &efrom database&7!",true);
         getMongoCollection(dataClass)
                 .find()
                 .iterator()
@@ -121,7 +121,7 @@ public abstract class DataSession <S extends VCoreData> {
         long start = System.currentTimeMillis();
         topic.publishAsync(dataObject.dataForRedis());
         long end = System.currentTimeMillis() - start;
-        dataManager.getPlugin().consoleMessage("&ePushing Update&7: &b"+objectUUID+" &7[&e"+end+" ms&7]");
+        dataManager.getPlugin().consoleMessage("&ePushing Update&7: &b"+objectUUID+" &7[&e"+end+" ms&7]",true);
     }
 
     public final void localToDatabase(Class<? extends S> dataClass,UUID objectUUID){
@@ -232,6 +232,8 @@ public abstract class DataSession <S extends VCoreData> {
             throw new RuntimeException(getClass().getSimpleName()+" does not have RequiredSubsystemInfo Annotation set");
         if(uuid == null)
             return new HashSet<>();
+        if(VCoreData.getRedisDataKeys(vCoreDataClass) == null)
+            throw new NullPointerException(VCoreData.class.getSimpleName()+" does not provide RedisDataKeys");
         return VCoreData.getRedisDataKeys(vCoreDataClass);
     }
 
@@ -240,7 +242,7 @@ public abstract class DataSession <S extends VCoreData> {
     }
 
     public final MongoCollection<Document> getMongoCollection(Class<? extends S> dataClass){
-        return dataManager.getRedisManager().getMongoDB().getCollection(dataClass,getMongoDBSuffix());
+        return dataManager.getRedisManager().getMongoDB().getDataProvider(dataClass,getMongoDBSuffix());
     }
     public abstract String getMongoDBSuffix();
 
@@ -252,4 +254,5 @@ public abstract class DataSession <S extends VCoreData> {
     public abstract void addData(S data, Class<? extends S> dataClass, boolean push);
     public abstract void removeData(Class<? extends S> dataClass, UUID uuid, boolean push);
     public abstract Set<S> getAllData(Class<? extends S> dataClass);
+    public abstract void debugToConsole();
 }

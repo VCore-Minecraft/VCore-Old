@@ -24,4 +24,8 @@ public abstract class CustomDataManager<S, R extends CustomDataHolder<S,?>,T ext
     public Set<Class<? extends T>> getCustomDataStorage() {
         return customDataCache;
     }
+
+    public VCorePaper getvCorePaper() {
+        return vCorePaper;
+    }
 }

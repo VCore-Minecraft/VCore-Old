@@ -17,13 +17,26 @@ public class PlayerSession extends DataSession<PlayerData>{
     }
 
     @Override
-    public void onLoad() {
-        System.out.println("PlayerSession loaded for player with uuid: "+getUuid());
-    }
+    public void onLoad() {}
 
     @Override
     public Set<PlayerData> getAllData(Class<? extends PlayerData> dataClass) {
         return playerDataObjects.values().parallelStream().filter(playerData -> playerData.getClass().equals(dataClass)).collect(Collectors.toSet());
+    }
+
+    public Map<Class<? extends PlayerData>, PlayerData> getPlayerDataObjects() {
+        return playerDataObjects;
+    }
+
+    @Override
+    public void debugToConsole() {
+        dataManager.getPlugin().consoleMessage("&8--- &6Debugging PlayerSession&7: &b"+getUuid()+" &8---",false);
+        playerDataObjects.forEach((aClass, playerData) -> {
+            dataManager.getPlugin().consoleMessage("",false);
+            dataManager.getPlugin().consoleMessage("&b"+aClass.getCanonicalName()+"&7: ",1,false);
+            playerData.debugToConsole();
+        });
+        dataManager.getPlugin().consoleMessage("&8---\t\t\t\t\t\t\t\t&8---",false);
     }
 
     @Override

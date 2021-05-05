@@ -2,30 +2,26 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>VCore</artifactId>
+        <groupId>de.verdox</groupId>
+        <version>1.0</version>
+    </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>de.verdox</groupId>
-    <artifactId>VCorePaper</artifactId>
-    <version>1.0</version>
-    <packaging>jar</packaging>
-
-    <name>VCorePaper</name>
-
-    <properties>
-        <java.version>1.8</java.version>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    </properties>
+    <artifactId>VCorePaperShadedDependencies</artifactId>
 
     <repositories>
-        <!---  Paper Repository -->
+        <!---  NBT API Repository -->
         <repository>
-            <id>papermc-repo</id>
-            <url>https://papermc.io/repo/repository/maven-public/</url>
+            <id>codemc-repo</id>
+            <url>https://repo.codemc.org/repository/maven-public/</url>
+            <layout>default</layout>
         </repository>
-        <!---  Maven Plugins -->
+        <!---  Command API Repository -->
         <repository>
-            <id>sonatype</id>
-            <url>https://oss.sonatype.org/content/groups/public/</url>
+            <id>commandapi</id>
+            <url>https://raw.githubusercontent.com/JorelAli/CommandAPI/mvn-repo/</url>
         </repository>
         <!---  JitPack Repository -->
         <repository>
@@ -35,25 +31,23 @@
     </repositories>
 
     <dependencies>
-        <!---  PaperSpigot Dependency -->
+        <!---  NBT API Dependency -->
         <dependency>
-            <groupId>com.destroystokyo.paper</groupId>
-            <artifactId>paper-api</artifactId>
-            <version>1.16.5-R0.1-SNAPSHOT</version>
-            <scope>provided</scope>
+            <groupId>de.tr7zw</groupId>
+            <artifactId>item-nbt-api</artifactId>
+            <version>2.6.0</version>
         </dependency>
-        <!---  VCoreParent Dependency -->
+        <!---  PlayerInput Dependency -->
         <dependency>
-            <groupId>de.verdox</groupId>
-            <artifactId>VCore</artifactId>
-            <version>1.0</version>
+            <groupId>com.github.MrNemo64</groupId>
+            <artifactId>player-inputs</artifactId>
+            <version>1.2.1</version>
         </dependency>
-        <!---  Vault Dependency -->
+        <!---  AnvilGUI Dependency -->
         <dependency>
-            <groupId>com.github.MilkBowl</groupId>
-            <artifactId>VaultAPI</artifactId>
-            <version>1.7</version>
-            <scope>provided</scope>
+            <groupId>net.wesjd</groupId>
+            <artifactId>anvilgui</artifactId>
+            <version>1.4.0-SNAPSHOT</version>
         </dependency>
     </dependencies>
 
@@ -64,8 +58,8 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.8.1</version>
                 <configuration>
-                    <source>9</source>
-                    <target>9</target>
+                    <source>11</source>
+                    <target>11</target>
                 </configuration>
             </plugin>
             <plugin>
@@ -79,6 +73,10 @@
                             <goal>shade</goal>
                         </goals>
                         <configuration>
+                            <relocations>
+                                <pattern>de.tr7zw.changeme.nbtapi</pattern>
+                                <shadedPattern>Yde.verdox.vcore.dependencies.nbtapi</shadedPattern>
+                            </relocations>
                             <createDependencyReducedPom>false</createDependencyReducedPom>
                             <shadedClassifierName>shaded</shadedClassifierName>
                             <shadedArtifactAttached>true</shadedArtifactAttached>
@@ -94,4 +92,6 @@
             </resource>
         </resources>
     </build>
+
+
 </project>

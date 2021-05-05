@@ -1,8 +1,12 @@
 package de.verdox.vcore.subsystem;
 
+import de.verdox.vcore.data.datatypes.PlayerData;
+import de.verdox.vcore.data.datatypes.ServerData;
+import de.verdox.vcore.data.datatypes.VCoreData;
 import de.verdox.vcore.plugin.VCorePlugin;
 import de.verdox.vcore.subsystem.exceptions.SubsystemDeactivatedException;
 
+import java.util.Set;
 import java.util.UUID;
 
 public abstract class VCoreSubsystem<S extends VCorePlugin<?,?>> {
@@ -35,13 +39,18 @@ public abstract class VCoreSubsystem<S extends VCorePlugin<?,?>> {
         }
     }
 
-    public abstract void onSubsystemEnable() throws SubsystemDeactivatedException;
-    public abstract void onSubsystemDisable() throws SubsystemDeactivatedException;
+    public abstract void onSubsystemEnable();
+    public abstract void onSubsystemDisable();
 
     public static void checkSubsystem(VCoreSubsystem<?> subsystem) throws SubsystemDeactivatedException {
+        if(subsystem == null)
+            return;
         if(!subsystem.isActivated())
             throw new SubsystemDeactivatedException("Subsystem "+subsystem.getClass().getName()+" is not activated!");
     }
+
+    public abstract Set<Class<? extends PlayerData>> playerDataClasses();
+    public abstract Set<Class<? extends ServerData>> serverDataClasses();
 
     public UUID getUuid() {
         return uuid;

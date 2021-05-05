@@ -3,3 +3,8 @@ version: ${project.version}
 main: de.verdox.vcorepaper.VCorePaper
 api-version: 1.16
 authors: [ Verdox ]
+
+commands:
+  debug:
+    description: "Main Debug Command for VCorePaper"
+    permission: "VCore.debug"

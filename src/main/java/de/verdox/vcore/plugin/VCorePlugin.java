@@ -21,12 +21,15 @@ public interface VCorePlugin <T, R extends VCoreSubsystem<?>> {
     List<R> provideSubsystems();
     boolean useRedisCluster();
     String[] redisAddresses();
+    String redisPassword();
 
     T getPlugin();
     File getPluginDataFolder();
     String getPluginName();
-    void consoleMessage(String message);
+    void consoleMessage(String message, boolean debug);
+    void consoleMessage(String message, int tabSize, boolean debug);
     VCoreScheduler getScheduler();
+    boolean debug();
 
     void async(Runnable runnable);
     void sync(Runnable runnable);
@@ -78,16 +81,22 @@ public interface VCorePlugin <T, R extends VCoreSubsystem<?>> {
 
         @Override
         public final void onEnable() {
-            consoleMessage("&eStarting VCorePlugin&7: &a"+getPluginName());
+            consoleMessage("&ePlugin starting&7!",false);
             onPluginEnable();
+
+            getSessionManager();
+            getServerDataManager();
+
             subsystemManager.enable();
+            consoleMessage("&aPlugin started&7!",false);
         }
 
         @Override
         public final void onDisable() {
-            consoleMessage("&eStopping VCorePlugin&7: &a"+getPluginName());
+            consoleMessage("&ePlugin stopping&7!",false);
             onPluginDisable();
             subsystemManager.disable();
+            consoleMessage("&aPlugin stopped&7!",false);
         }
 
         @Override
@@ -108,14 +117,14 @@ public interface VCorePlugin <T, R extends VCoreSubsystem<?>> {
         @Override
         public PlayerSessionManager<Minecraft> getSessionManager() {
             if(sessionManager == null)
-                sessionManager = new PlayerSessionManager.BukkitPlayerSessionManager(this,useRedisCluster(),redisAddresses(),mongoDB());
+                sessionManager = new PlayerSessionManager.BukkitPlayerSessionManager(this,useRedisCluster(),redisAddresses(), redisPassword(), mongoDB());
             return sessionManager;
         }
 
         @Override
         public ServerDataManager<BukkitPlugin> getServerDataManager() {
             if(serverDataManager == null)
-                serverDataManager = new ServerDataManager<>(this,useRedisCluster(),redisAddresses(),mongoDB());
+                serverDataManager = new ServerDataManager<>(this,useRedisCluster(),redisAddresses(), redisPassword(), mongoDB());
             return serverDataManager;
         }
 
@@ -140,13 +149,19 @@ public interface VCorePlugin <T, R extends VCoreSubsystem<?>> {
         @Override
         public final void onEnable() {
             onPluginEnable();
+
+            getSessionManager();
+            getServerDataManager();
+
             subsystemManager.enable();
+            consoleMessage("&aPlugin started&7!",false);
         }
 
         @Override
         public final void onDisable() {
             onPluginDisable();
             subsystemManager.disable();
+            consoleMessage("&aPlugin started&7!",false);
         }
 
         @Override
@@ -167,14 +182,14 @@ public interface VCorePlugin <T, R extends VCoreSubsystem<?>> {
         @Override
         public PlayerSessionManager<BungeeCord> getSessionManager() {
             if(sessionManager == null)
-                sessionManager = new PlayerSessionManager.BungeePlayerSessionManager(this,useRedisCluster(),redisAddresses(),mongoDB());
+                sessionManager = new PlayerSessionManager.BungeePlayerSessionManager(this,useRedisCluster(),redisAddresses(), redisPassword(),mongoDB());
             return sessionManager;
         }
 
         @Override
         public ServerDataManager<BungeeCordPlugin> getServerDataManager() {
             if(serverDataManager == null)
-                serverDataManager = new ServerDataManager<>(this,useRedisCluster(),redisAddresses(),mongoDB());
+                serverDataManager = new ServerDataManager<>(this,useRedisCluster(),redisAddresses(), redisPassword(), mongoDB());
             return serverDataManager;
         }
 

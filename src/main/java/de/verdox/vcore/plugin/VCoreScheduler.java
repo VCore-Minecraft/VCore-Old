@@ -12,11 +12,11 @@ public class VCoreScheduler {
         this.vCorePlugin = vCorePlugin;
     }
 
-    public void runTaskInterval(Runnable task, long delay, long interval){
+    public void asyncInterval(Runnable task, long delay, long interval){
         scheduledExecutorService.scheduleAtFixedRate(task,delay*50,interval*50, TimeUnit.MILLISECONDS);
     }
 
-    public void runTask(Runnable task){
+    public void async(Runnable task){
         scheduledExecutorService.execute(task);
     }
 

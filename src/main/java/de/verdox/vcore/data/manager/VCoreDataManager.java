@@ -22,9 +22,10 @@ public abstract class VCoreDataManager <S extends VCoreData, R extends VCorePlug
     private final RTopic objectHandlerTopic;
     private final MessageListener<RedisObjectHandlerMessage<S>> channelListener;
 
-    public VCoreDataManager(R plugin, boolean useRedisCluster, String[] addressArray, DataConnection.MongoDB mongoDB){
+    public VCoreDataManager(R plugin, boolean useRedisCluster, String[] addressArray, String redisPassword, DataConnection.MongoDB mongoDB){
+        plugin.consoleMessage("&6Starting &b"+this,true);
         this.plugin = plugin;
-        this.redisManager = new RedisManager<>(plugin,useRedisCluster,addressArray,mongoDB);
+        this.redisManager = new RedisManager<>(plugin,useRedisCluster,addressArray,redisPassword,mongoDB);
 
         objectHandlerTopic = getRedisManager().getRedissonClient().getTopic("VCoreDataManager:ObjectHandler:"+getClass().getName());
 
@@ -36,8 +37,8 @@ public abstract class VCoreDataManager <S extends VCoreData, R extends VCorePlug
                 plugin.getEventBus().post(new RedisDataRemoveEvent(msg.getDataType(),msg.getUuid()));
         };
         objectHandlerTopic.addListener(RedisObjectHandlerMessage.class,channelListener);
-        plugin.consoleMessage("&eCleanup Task started");
-        redisManager.getPlugin().getScheduler().runTaskInterval(this::onCleanupInterval,20L*120,20L*1800);
+        plugin.consoleMessage("&eCleanup Task started",true);
+        redisManager.getPlugin().getScheduler().asyncInterval(this::onCleanupInterval,20L*120,20L*1800);
     }
 
     public void pushCreation(Class<? extends S> type, S dataObject){

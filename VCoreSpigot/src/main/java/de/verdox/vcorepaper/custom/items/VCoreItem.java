@@ -1,10 +1,9 @@
 package de.verdox.vcorepaper.custom.items;
 
+
 import de.tr7zw.changeme.nbtapi.NBTItem;
 import de.verdox.vcorepaper.custom.CustomDataHolder;
-import de.verdox.vcorepaper.custom.entities.CustomEntityManager;
 import de.verdox.vcorepaper.custom.entities.EntityCustomData;
-import de.verdox.vcorepaper.custom.entities.VCoreEntity;
 import org.bukkit.inventory.ItemStack;
 
 import java.lang.reflect.InvocationTargetException;

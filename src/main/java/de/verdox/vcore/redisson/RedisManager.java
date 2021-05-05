@@ -20,9 +20,9 @@ public class RedisManager<R extends VCorePlugin<?,?>> {
     private DataConnection.MongoDB mongoDB;
     private final RedissonClient redissonClient;
 
-    public RedisManager (R plugin, boolean clusterMode, String[] addressArray, DataConnection.MongoDB mongoDB){
+    public RedisManager (R plugin, boolean clusterMode, String[] addressArray, String redisPassword, DataConnection.MongoDB mongoDB){
         this.plugin = plugin;
-        getPlugin().consoleMessage("&eStarting Redis Manager");
+        getPlugin().consoleMessage("&eStarting Redis Manager",true);
         this.mongoDB = mongoDB;
         if(this.mongoDB == null)
             throw new IllegalArgumentException("MongoDB can't be null!");
@@ -33,12 +33,21 @@ public class RedisManager<R extends VCorePlugin<?,?>> {
         Config config = new Config();
         if(clusterMode){
             config.useClusterServers().addNodeAddress(addressArray);
+
+            if(redisPassword != null && !redisPassword.isEmpty())
+                config.useClusterServers().addNodeAddress(addressArray).setPassword(redisPassword);
+            else
+                config.useClusterServers().addNodeAddress(addressArray);
         }
         else {
             String address = addressArray[0];
             if(address == null)
                 throw new IllegalArgumentException("Single Server Adress can't be null!");
-            config.useSingleServer().setAddress(addressArray[0]);
+
+            if(redisPassword != null && !redisPassword.isEmpty())
+                config.useSingleServer().setAddress(addressArray[0]).setPassword(redisPassword);
+            else
+                config.useSingleServer().setAddress(addressArray[0]);
         }
         this.redissonClient = Redisson.create(config);
     }

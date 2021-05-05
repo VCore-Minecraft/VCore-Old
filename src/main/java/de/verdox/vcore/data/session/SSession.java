@@ -56,6 +56,18 @@ public class SSession extends DataSession<ServerData>{
     }
 
     @Override
+    public void debugToConsole() {
+        dataManager.getPlugin().consoleMessage("&8--- &6Debugging ServerDataSession&7: &b"+getUuid()+" &8---",false);
+        serverDataObjects.forEach((aClass, serverDataMap) -> {
+            dataManager.getPlugin().consoleMessage("&b"+aClass.getCanonicalName()+"&7: ",1,false);
+            serverDataMap.forEach((uuid, serverData) -> {
+                dataManager.getPlugin().consoleMessage("&b"+aClass.getCanonicalName()+"&7: ",2,false);
+            });
+        });
+        dataManager.getPlugin().consoleMessage("&8---\t\t\t\t\t\t\t\t\t&8---",false);
+    }
+
+    @Override
     public <T extends ServerData> T getData(Class<? extends T> type, UUID uuid) {
         if(!dataExistLocally(type,uuid))
             return null;

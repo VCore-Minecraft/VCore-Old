@@ -75,7 +75,7 @@ public abstract class VCoreData implements VCoreRedisData, VCorePersistentDataba
 
     public final Map<String, Object> dataForRedis() {
         if(cleaned)
-            System.out.println("Potential data leak at: " + getClass().getCanonicalName() + " as it has already been cleaned.");
+            getPlugin().consoleMessage("Potential data leak at: " + getClass().getCanonicalName() + " as it has already been cleaned.",true);
         Map<String, Object> dataForRedis = new HashMap<>();
         updateLastUse();
 
@@ -103,7 +103,7 @@ public abstract class VCoreData implements VCoreRedisData, VCorePersistentDataba
     @Override
     public final void restoreFromRedis(Map<String, Object> dataFromRedis) {
         dataFromRedis.forEach((key, value) -> {
-            try { getClass().getField(key).set(this,value); } catch (IllegalAccessException | NoSuchFieldException e) { e.printStackTrace(); }
+            try { getClass().getField(key).set(this,value); } catch (IllegalAccessException | NoSuchFieldException ignored) { }
         });
     }
 
@@ -123,6 +123,11 @@ public abstract class VCoreData implements VCoreRedisData, VCorePersistentDataba
 
     public abstract void onLoad();
     public abstract void onCleanUp();
+    public void debugToConsole(){
+        dataForRedis().forEach((s, o) -> {
+            getPlugin().consoleMessage("&e"+s+"&7: &b"+o.toString(),2,true);
+        });
+    }
 
     public abstract DataSession getResponsibleDataSession();
 

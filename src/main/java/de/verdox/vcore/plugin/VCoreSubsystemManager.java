@@ -5,12 +5,8 @@ import de.verdox.vcore.data.datatypes.PlayerData;
 import de.verdox.vcore.data.annotations.RequiredSubsystemInfo;
 import de.verdox.vcore.data.datatypes.ServerData;
 import de.verdox.vcore.subsystem.VCoreSubsystem;
-import de.verdox.vcore.subsystem.exceptions.SubsystemDeactivatedException;
-import org.reflections.Reflections;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class VCoreSubsystemManager<T extends VCorePlugin<?,R>, R extends VCoreSubsystem<T>>{
@@ -19,37 +15,35 @@ public class VCoreSubsystemManager<T extends VCorePlugin<?,R>, R extends VCoreSu
     private final List<R> subSystems = new ArrayList<>();
     private final List<R> activatedSubSystems = new ArrayList<>();
 
-    private Set<Class<? extends VCoreData>> registeredDataClasses;
-    private Set<Class<? extends VCoreData>> activeDataClasses;
+    private Set<Class<? extends VCoreData>> registeredDataClasses = new HashSet<>();
+    private Set<Class<? extends VCoreData>> activeDataClasses = new HashSet<>();
 
-    private Set<Class<? extends PlayerData>> registeredPlayerDataClasses;
-    private Set<Class<? extends PlayerData>> activePlayerDataClasses;
+    private Set<Class<? extends PlayerData>> registeredPlayerDataClasses = new HashSet<>();
+    private Set<Class<? extends PlayerData>> activePlayerDataClasses = new HashSet<>();
 
-    private Set<Class<? extends ServerData>> registeredServerDataClasses;
-    private Set<Class<? extends ServerData>> activeServerDataClasses;
+    private Set<Class<? extends ServerData>> registeredServerDataClasses = new HashSet<>();
+    private Set<Class<? extends ServerData>> activeServerDataClasses = new HashSet<>();
 
     VCoreSubsystemManager(T plugin){
         this.plugin = plugin;
     }
 
     void enable(){
-        plugin.consoleMessage("&eStarting Subsystem Manager&7...");
+        plugin.consoleMessage("&eStarting Subsystem Manager&7...",false);
         List<R> providedSubsystems = plugin.provideSubsystems();
         if(providedSubsystems != null) {
             subSystems.addAll(providedSubsystems);
             subSystems.stream()
                     .filter(VCoreSubsystem::isActivated)
                     .forEach(r -> {
-                        try {
-                            r.onSubsystemEnable();
-                            activatedSubSystems.add(r);
-                            plugin.consoleMessage("&eActivated Subsystem&7: &b" + r);
-                        } catch (SubsystemDeactivatedException e) {
-                            e.printStackTrace();
-                        }
+                        plugin.consoleMessage("&eActivating Subsystem&7: &b" + r.getClass().getSimpleName(),false);
+                        r.onSubsystemEnable();
+                        activatedSubSystems.add(r);
+                        findRegisteredDataClasses(r);
+                        plugin.consoleMessage("&eActivated Subsystem&7: &b" + r.getClass().getSimpleName(),false);
+                        plugin.consoleMessage("",false);
                     });
         }
-        findRegisteredDataClasses();
         findActiveDataClasses();
     }
 
@@ -66,27 +60,36 @@ public class VCoreSubsystemManager<T extends VCorePlugin<?,R>, R extends VCoreSu
     }
 
     void disable(){
-        plugin.consoleMessage("&eStopping Subsystem Manager&7...");
+        plugin.consoleMessage("&eStopping Subsystem Manager&7...",false);
         activatedSubSystems.forEach(r -> {
-            try {
-                r.onSubsystemDisable();
-                plugin.consoleMessage("&eDeactivated Subsystem&7: &b"+r);
-            } catch (SubsystemDeactivatedException e) { e.printStackTrace(); }
+            r.onSubsystemDisable();
+            plugin.consoleMessage("&eDeactivated Subsystem&7: &b"+r,false);
         });
     }
 
-    void findRegisteredDataClasses(){
-        plugin.consoleMessage("&eSearching for DataClass Implementations&7...");
-        Reflections reflections = new Reflections(plugin.getClass().getPackage().getName());
-        registeredDataClasses = reflections.getSubTypesOf(VCoreData.class);
-        registeredServerDataClasses = reflections.getSubTypesOf(ServerData.class);
-        registeredPlayerDataClasses = reflections.getSubTypesOf(PlayerData.class);
+    void findRegisteredDataClasses(VCoreSubsystem<?> subsystem){
+        plugin.consoleMessage("&eSearching for DataClass Implementations&7... &8[&b"+subsystem.getClass().getSimpleName()+"&8]",1,true);
+
+        //Reflections reflections = new Reflections(plugin.getClass().getPackage().getName(), new SubTypesScanner(false));
+        if(subsystem.playerDataClasses() != null)
+            this.registeredPlayerDataClasses = subsystem.playerDataClasses();
+        if(subsystem.serverDataClasses() != null)
+            this.registeredServerDataClasses = subsystem.serverDataClasses();
+        this.registeredDataClasses.addAll(registeredPlayerDataClasses);
+        this.registeredDataClasses.addAll(registeredServerDataClasses);
+//
+        //registeredDataClasses = reflections.getSubTypesOf(VCoreData.class);
+        //registeredServerDataClasses = reflections.getSubTypesOf(ServerData.class);
+        //registeredPlayerDataClasses = reflections.getSubTypesOf(PlayerData.class);
+        plugin.consoleMessage("&aDone searching&7!",1,true);
     }
 
     void findActiveDataClasses() {
         activeDataClasses = registeredDataClasses.stream()
                 .filter(aClass -> {
                     RequiredSubsystemInfo requiredSubsystemInfo = aClass.getAnnotation(RequiredSubsystemInfo.class);
+                    if(requiredSubsystemInfo == null)
+                        plugin.consoleMessage("&eWarning &a"+aClass+" &edoes not have RequiredSubsystemInfo Annotation set&7!",1,false);
                     return requiredSubsystemInfo != null && isActivated(requiredSubsystemInfo);
                 })
                 .collect(Collectors.toSet());

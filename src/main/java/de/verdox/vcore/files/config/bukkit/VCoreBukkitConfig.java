@@ -1,5 +1,6 @@
 package de.verdox.vcore.files.config.bukkit;
 
+import de.verdox.vcore.plugin.VCorePlugin;
 import de.verdox.vcore.subsystem.VCoreSubsystem;
 import de.verdox.vcore.subsystem.exceptions.SubsystemDeactivatedException;
 import de.verdox.vcore.files.config.VCoreConfig;
@@ -15,23 +16,21 @@ import java.util.HashMap;
 import java.util.Map;
 
 public abstract class VCoreBukkitConfig extends VCoreConfig<VCoreSubsystem.Bukkit,FileConfiguration> {
-
-    public VCoreBukkitConfig(VCoreSubsystem.Bukkit subsystem, File file) throws SubsystemDeactivatedException {
-        super(subsystem,file);
+    public VCoreBukkitConfig(VCorePlugin.Minecraft plugin, File file) {
+        super(plugin,file);
     }
-    public VCoreBukkitConfig(VCoreSubsystem.Bukkit subsystem, String fileName, String pluginDirectory) throws SubsystemDeactivatedException {
-        super(subsystem,fileName,pluginDirectory);
+
+    public VCoreBukkitConfig(VCorePlugin.Minecraft plugin, String fileName, String pluginDirectory) {
+        super(plugin,fileName,pluginDirectory);
     }
 
     @Override
-    public FileConfiguration getConfig() throws SubsystemDeactivatedException {
-        VCoreSubsystem.checkSubsystem(getSubSystem());
+    public FileConfiguration getConfig() {
         return YamlConfiguration.loadConfiguration(file);
     }
 
     @Override
-    public void saveSerializable(String path, VCoreSerializable vCoreSerializable) throws SubsystemDeactivatedException {
-        VCoreSubsystem.checkSubsystem(getSubSystem());
+    public void saveSerializable(String path, VCoreSerializable vCoreSerializable) {
         config.set(path,null);
         Map<String, Object> data = vCoreSerializable.serialize();
 
@@ -42,8 +41,7 @@ public abstract class VCoreBukkitConfig extends VCoreConfig<VCoreSubsystem.Bukki
     }
 
     @Override
-    public <S extends VCoreSerializable> S getSerializable(Class<S> serializableClass, String path, VCoreDeserializer<? extends S> vCoreDeserializer) throws SubsystemDeactivatedException {
-        VCoreSubsystem.checkSubsystem(getSubSystem());
+    public <S extends VCoreSerializable> S getSerializable(Class<S> serializableClass, String path, VCoreDeserializer<? extends S> vCoreDeserializer) {
         Map<String, Object> data = new HashMap<>();
         if(!config.isConfigurationSection(path))
             return null;
@@ -55,8 +53,7 @@ public abstract class VCoreBukkitConfig extends VCoreConfig<VCoreSubsystem.Bukki
     }
 
     @Override
-    public void save() throws SubsystemDeactivatedException {
-        VCoreSubsystem.checkSubsystem(getSubSystem());
+    public void save() {
         try {
             config.save(file);
         } catch (IOException e) {
@@ -64,14 +61,9 @@ public abstract class VCoreBukkitConfig extends VCoreConfig<VCoreSubsystem.Bukki
         }
     }
 
-    @Override
-    public void delete() throws SubsystemDeactivatedException {
-        VCoreSubsystem.checkSubsystem(getSubSystem());
-        try { FileUtils.forceDelete(file); } catch (IOException e) { e.printStackTrace(); }
-    }
 
     @Override
-    public VCoreSubsystem.Bukkit getSubSystem() {
-        return super.getSubSystem();
+    public void delete() {
+        try { FileUtils.forceDelete(file); } catch (IOException e) { e.printStackTrace(); }
     }
 }

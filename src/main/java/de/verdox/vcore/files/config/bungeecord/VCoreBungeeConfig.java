@@ -1,5 +1,6 @@
 package de.verdox.vcore.files.config.bungeecord;
 
+import de.verdox.vcore.plugin.VCorePlugin;
 import de.verdox.vcore.subsystem.VCoreSubsystem;
 import de.verdox.vcore.files.config.VCoreConfig;
 import de.verdox.vcore.files.config.serialization.VCoreDeserializer;
@@ -15,18 +16,16 @@ import java.util.HashMap;
 import java.util.Map;
 
 public abstract class VCoreBungeeConfig extends VCoreConfig<VCoreSubsystem.BungeeCord,Configuration> {
-
-    public VCoreBungeeConfig(VCoreSubsystem.BungeeCord subsystem, File file) throws SubsystemDeactivatedException {
-        super(subsystem,file);
+    public VCoreBungeeConfig(VCorePlugin.BungeeCord plugin, File file) {
+        super(plugin,file);
     }
-    public VCoreBungeeConfig(VCoreSubsystem.BungeeCord subsystem, String fileName, String pluginDirectory) throws SubsystemDeactivatedException {
-        super(subsystem,fileName,pluginDirectory);
+
+    public VCoreBungeeConfig(VCorePlugin.BungeeCord plugin, String fileName, String pluginDirectory) {
+        super(plugin,fileName,pluginDirectory);
     }
 
     @Override
     public Configuration getConfig() {
-        if(!getSubSystem().isActivated())
-            return null;
         try{
             if(!file.exists())
                 if(!file.createNewFile())
