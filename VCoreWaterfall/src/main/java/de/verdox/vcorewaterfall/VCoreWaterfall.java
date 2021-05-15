@@ -33,6 +33,16 @@ public class VCoreWaterfall extends VCorePlugin.BungeeCord {
     }
 
     @Override
+    public String redisPassword() {
+        return null;
+    }
+
+    @Override
+    public boolean debug() {
+        return false;
+    }
+
+    @Override
     public DataConnection.MongoDB mongoDB() {
         return null;
     }

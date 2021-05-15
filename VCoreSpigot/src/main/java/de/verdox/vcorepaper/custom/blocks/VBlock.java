@@ -1,16 +1,18 @@
-package de.verdox.vcorepaper.custom.entities;
+package de.verdox.vcorepaper.custom.blocks;
 
-import de.tr7zw.changeme.nbtapi.NBTEntity;
 import de.verdox.vcorepaper.custom.CustomData;
 import de.verdox.vcorepaper.custom.CustomDataHolder;
-import org.bukkit.entity.Entity;
+import org.bukkit.block.BlockState;
 
 import java.lang.reflect.InvocationTargetException;
 
-public class VCoreEntity extends CustomDataHolder<Entity, NBTEntity, CustomEntityManager> {
+public class VBlock extends CustomDataHolder<BlockState, NBTBlock, VBlockManager> {
 
-    public VCoreEntity(Entity entity, CustomEntityManager customEntityManager){
-        super(entity, customEntityManager);
+    private final BlockPersistentData blockPersistentData;
+
+    VBlock(BlockState dataHolder, VBlockManager customDataManager, BlockPersistentData blockPersistentData) {
+        super(dataHolder, customDataManager);
+        this.blockPersistentData = blockPersistentData;
     }
 
     @Override
@@ -29,7 +31,7 @@ public class VCoreEntity extends CustomDataHolder<Entity, NBTEntity, CustomEntit
     }
 
     @Override
-    public NBTEntity getNBTCompound() {
-        return new NBTEntity(getDataHolder());
+    public NBTBlock getNBTCompound() {
+        return new NBTBlock(getDataHolder(), blockPersistentData);
     }
 }

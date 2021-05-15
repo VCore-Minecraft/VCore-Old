@@ -11,6 +11,7 @@ public abstract class VCoreListener <T extends VCorePlugin<?,?>>{
 
     public VCoreListener(VCoreSubsystem<T> subsystem){
         plugin = subsystem.getVCorePlugin();
+
         registerListener();
     }
 
@@ -28,12 +29,13 @@ public abstract class VCoreListener <T extends VCorePlugin<?,?>>{
             super(subsystem);
         }
 
-        public VCoreBukkitListener(VCorePlugin.Minecraft subsystem) {
-            super(subsystem);
+        public VCoreBukkitListener(VCorePlugin.Minecraft plugin) {
+            super(plugin);
         }
 
         @Override
         protected void registerListener() {
+            getPlugin().consoleMessage("&eRegistering Listener&7: &b"+getClass().getSimpleName(),false);
             Bukkit.getPluginManager().registerEvents(this,getPlugin().getPlugin());
         }
     }

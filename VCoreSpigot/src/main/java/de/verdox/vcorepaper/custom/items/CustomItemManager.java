@@ -17,7 +17,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
-public class CustomItemManager extends CustomDataManager<ItemStack,VCoreItem,ItemCustomData<?>> implements Listener {
+public class CustomItemManager extends CustomDataManager<ItemStack,ItemCustomData<?>,VCoreItem> implements Listener {
 
     private static CustomItemManager instance = null;
 
@@ -36,6 +36,16 @@ public class CustomItemManager extends CustomDataManager<ItemStack,VCoreItem,Ite
     public VCoreItem wrap(Class<? extends VCoreItem> type, ItemStack inputObject) {
         try {
             return type.getDeclaredConstructor(ItemStack.class, CustomItemManager.class).newInstance(inputObject,this);
+        } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    @Override
+    protected ItemCustomData<?> instantiateCustomData(Class<? extends ItemCustomData<?>> dataClass) {
+        try {
+            return dataClass.getDeclaredConstructor().newInstance();
         } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
             e.printStackTrace();
             return null;

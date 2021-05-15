@@ -1,41 +1,63 @@
 package de.verdox.vcorepaper.custom;
 
 import de.tr7zw.changeme.nbtapi.NBTCompound;
-import de.verdox.vcorepaper.custom.entities.EntityCustomData;
 
-import java.util.Objects;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
-public abstract class CustomDataHolder <S, N extends NBTCompound> extends NBTCompound {
+/**
+ *
+ * @param <S> DataHolder Class (e.g. ItemStack, Entity)
+ * @param <N> NBTCompound (e.g. NBTItem, NBTEntity)
+ */
+public abstract class CustomDataHolder <S, N extends NBTCompound, C extends CustomDataManager<S,?,?>> {
 
     private final S dataHolder;
+    private final C customDataManager;
 
-    public CustomDataHolder(S dataHolder){
-        super(null,null);
+    public CustomDataHolder(S dataHolder, C customDataManager){
         this.dataHolder = dataHolder;
+        this.customDataManager = customDataManager;
     }
 
-    public final <T, R extends EntityCustomData<T>> CustomDataHolder<S,N> storeCustomData(Class<? extends R> customDataType, T value, Consumer<R> callback){
+    protected abstract <T,R extends CustomData<T>> void onStoreData(Class<? extends R> customDataType, T value);
+
+    public final <T, R extends CustomData<T>> CustomDataHolder<S,N,C> storeCustomData(Class<? extends R> customDataType, T value, Consumer<R> callback){
         R customData = instantiateData(customDataType);
         if(customData == null)
             throw new NullPointerException("CustomData could not be instantiated");
-        customData.setStoredData(value);
+        customData.storeCustomData(this,value);
+        onStoreData(customDataType,value);
         if(callback == null)
             return this;
         callback.accept(customData);
         return this;
     }
-    public final <T, R extends EntityCustomData<T>> T getCustomData(Class<? extends R> customDataClass){
-        R customEntity = instantiateData(customDataClass);
-        if(customEntity == null)
+
+    public final <T,R extends CustomData<T>> T getCustomData(Class<? extends R> customDataClass){
+        R customData = instantiateData(customDataClass);
+        if(customData == null)
             return null;
-        return Objects.requireNonNull(instantiateData(customDataClass)).getStoredData();
+        return customData.findInDataHolder(this);
     }
-    protected abstract  <T, R extends EntityCustomData<T>> R instantiateData(Class <? extends R> customDataType);
+
+    public Set<String> getCustomDataKeys(){
+        return getNBTCompound().getKeys().parallelStream().filter(customDataManager::exists).collect(Collectors.toSet());
+    }
+
+    protected abstract <T,R extends CustomData<T>> R instantiateData(Class <? extends R> customDataType);
 
     public S getDataHolder() {
         return dataHolder;
     }
 
     public abstract N getNBTCompound();
+
+    public C getCustomDataManager() {
+        return customDataManager;
+    }
 }

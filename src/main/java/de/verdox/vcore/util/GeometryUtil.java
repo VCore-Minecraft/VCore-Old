@@ -9,8 +9,53 @@ public class GeometryUtil {
 
     GeometryUtil(){}
 
-    public Location rotateAround (Location point, Location rotateAround, double rotation){
+    public static double dCos(double degrees) {
+        int dInt = (int)degrees;
+        if (degrees == (double)dInt && dInt % 90 == 0) {
+            dInt %= 360;
+            if (dInt < 0) {
+                dInt += 360;
+            }
 
+            switch(dInt) {
+                case 0:
+                    return 1.0D;
+                case 90:
+                    return 0.0D;
+                case 180:
+                    return -1.0D;
+                case 270:
+                    return 0.0D;
+            }
+        }
+
+        return Math.cos(Math.toRadians(degrees));
+    }
+
+    public static double dSin(double degrees) {
+        int dInt = (int)degrees;
+        if (degrees == (double)dInt && dInt % 90 == 0) {
+            dInt %= 360;
+            if (dInt < 0) {
+                dInt += 360;
+            }
+
+            switch(dInt) {
+                case 0:
+                    return 0.0D;
+                case 90:
+                    return 1.0D;
+                case 180:
+                    return 0.0D;
+                case 270:
+                    return -1.0D;
+            }
+        }
+
+        return Math.sin(Math.toRadians(degrees));
+    }
+
+    public Location rotateAround (Location point, Location rotateAround, double rotation){
         if(rotation == 0)
             return point;
         rotation %= 360;
@@ -20,6 +65,41 @@ public class GeometryUtil {
 
         double centerX = rotateAround.getX();
         double centerZ = rotateAround.getZ();
+
+        double rotatedX = -Math.sin(angle) * (point.getZ() - centerZ) + Math.cos(angle) * (point.getX() - centerX) + centerX;
+        double rotatedZ = Math.sin(angle) * (point.getX() - centerX) + Math.cos(angle) * (point.getZ() - centerZ) + centerZ;
+
+        double newRotatedX = Math.round(rotatedX);
+        double newRotatedZ = Math.round(rotatedZ);
+
+        return new Location(point.getWorld(),newRotatedX,point.getY(),newRotatedZ);
+    }
+
+    public Location rotatePointAround(Location point, Location rotateAround, double rotation) {
+
+        // Point will be rotated around rotateAround
+
+        float part = 0;
+        if(rotation == 0){
+            return point;
+        }
+        if(rotation<0)
+            throw new IllegalArgumentException("Rotation can't be negative");
+        if(rotation>=360)
+            rotation-=360;
+        switch ((int)rotation){
+            case 0: return point;
+            case 90:part = 0.5f; break;
+            case 180:part = 1f; break;
+            case 270:part = 1.5f; break;
+        }
+
+        double angle = part * Math.PI;
+
+        double centerX = rotateAround.getX();
+        double centerZ = rotateAround.getZ();
+
+        //- Math.sin(angle) * (point.getZ() - centerZ) + Math.cos(angle) * (point.getX() - centerX) + centerX
 
         double rotatedX = -Math.sin(angle) * (point.getZ() - centerZ) + Math.cos(angle) * (point.getX() - centerX) + centerX;
         double rotatedZ = Math.sin(angle) * (point.getX() - centerX) + Math.cos(angle) * (point.getZ() - centerZ) + centerZ;
@@ -41,19 +121,19 @@ public class GeometryUtil {
             }
 
             if (blockData instanceof Rotatable) {
-                Rotatable rotatable = (Rotatable)blockData;
+                Rotatable rotatable = (Rotatable) blockData.clone();
                 rotatable.setRotation(rotateBlockface(rotatable.getRotation(), rotation));
                 return rotatable;
             } else if (blockData instanceof Orientable) {
-                Orientable orientable = (Orientable)blockData;
+                Orientable orientable = (Orientable) blockData.clone();
                 orientable.setAxis(rotateAxis(orientable.getAxis(), rotation));
                 return orientable;
             } else if (blockData instanceof Directional) {
-                Directional directional = (Directional)blockData;
+                Directional directional = (Directional) blockData.clone();
                 directional.setFacing(rotateBlockface(directional.getFacing(), rotation));
                 return directional;
             } else if (blockData instanceof MultipleFacing) {
-                MultipleFacing multipleFacing = (MultipleFacing)blockData;
+                MultipleFacing multipleFacing = (MultipleFacing) blockData.clone();
                 multipleFacing = rotateMultipleFacing(multipleFacing, rotation);
                 return multipleFacing;
             } else {

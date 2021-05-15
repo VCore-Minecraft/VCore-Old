@@ -16,6 +16,10 @@ public class VCoreScheduler {
         scheduledExecutorService.scheduleAtFixedRate(task,delay*50,interval*50, TimeUnit.MILLISECONDS);
     }
 
+    public void asyncSchedule(Runnable task, long delay, long interval){
+        scheduledExecutorService.scheduleAtFixedRate(task,delay*50,interval*50, TimeUnit.MILLISECONDS);
+    }
+
     public void async(Runnable task){
         scheduledExecutorService.execute(task);
     }

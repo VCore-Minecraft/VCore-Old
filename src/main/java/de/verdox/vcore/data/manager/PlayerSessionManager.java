@@ -6,6 +6,7 @@ import de.verdox.vcore.dataconnection.DataConnection;
 import de.verdox.vcore.data.annotations.RequiredSubsystemInfo;
 import de.verdox.vcore.plugin.VCorePlugin;
 import de.verdox.vcore.subsystem.VCoreSubsystem;
+import de.verdox.vcore.subsystem.exceptions.SubsystemDeactivatedException;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.event.PlayerDisconnectEvent;
@@ -98,14 +99,18 @@ public abstract class PlayerSessionManager<R extends VCorePlugin<?,?>> extends V
             getPlugin().consoleMessage("&eHandling Player Join&7: &a"+playerUUID.toString(),true);
 
             keys.forEach((playerDataClass, dataKeys) -> {
+                getPlugin().consoleMessage("&a"+playerDataClass.getSimpleName(),true);
                 RequiredSubsystemInfo requiredSubsystemInfo = playerDataClass.getAnnotation(RequiredSubsystemInfo.class);
                 if(requiredSubsystemInfo == null)
                     throw new RuntimeException(getClass().getName()+" does not have PlayerDataClassInfo Annotation set");
                 VCoreSubsystem<?> subsystem = plugin.getSubsystemManager().findSubsystemByClass(requiredSubsystemInfo.parentSubSystem());
-                if(subsystem == null)
+                if(subsystem == null) {
+                    throw new IllegalStateException("Subsystem could not be found!");
+                }
+                if(!subsystem.isActivated()) {
+                    System.out.println(subsystem +" is deactivated!");
                     return;
-                if(!subsystem.isActivated())
-                    return;
+                }
                 getSession(playerUUID).load(playerDataClass,playerUUID);
             });
             long end = System.currentTimeMillis() - start;

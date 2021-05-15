@@ -71,17 +71,20 @@ public class VCoreSubsystemManager<T extends VCorePlugin<?,R>, R extends VCoreSu
         plugin.consoleMessage("&eSearching for DataClass Implementations&7... &8[&b"+subsystem.getClass().getSimpleName()+"&8]",1,true);
 
         //Reflections reflections = new Reflections(plugin.getClass().getPackage().getName(), new SubTypesScanner(false));
-        if(subsystem.playerDataClasses() != null)
-            this.registeredPlayerDataClasses = subsystem.playerDataClasses();
-        if(subsystem.serverDataClasses() != null)
-            this.registeredServerDataClasses = subsystem.serverDataClasses();
-        this.registeredDataClasses.addAll(registeredPlayerDataClasses);
-        this.registeredDataClasses.addAll(registeredServerDataClasses);
-//
+        if(subsystem.playerDataClasses() != null) {
+            this.registeredPlayerDataClasses.addAll(subsystem.playerDataClasses());
+            this.registeredDataClasses.addAll(subsystem.playerDataClasses());
+        }
+        if(subsystem.serverDataClasses() != null) {
+            this.registeredServerDataClasses.addAll(subsystem.serverDataClasses());
+            this.registeredDataClasses.addAll(subsystem.serverDataClasses());
+        }
         //registeredDataClasses = reflections.getSubTypesOf(VCoreData.class);
         //registeredServerDataClasses = reflections.getSubTypesOf(ServerData.class);
         //registeredPlayerDataClasses = reflections.getSubTypesOf(PlayerData.class);
         plugin.consoleMessage("&aDone searching&7!",1,true);
+        plugin.consoleMessage("&aFound PlayerDataClasses&7: &b"+registeredPlayerDataClasses.size(),2,true);
+        plugin.consoleMessage("&aFound ServerDataClasses&7: &b"+registeredServerDataClasses.size(),2,true);
     }
 
     void findActiveDataClasses() {

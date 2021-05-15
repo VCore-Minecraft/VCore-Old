@@ -6,11 +6,8 @@
 
     <groupId>de.verdox</groupId>
     <artifactId>VCore</artifactId>
-    <packaging>pom</packaging>
+    <packaging>jar</packaging>
     <version>1.0</version>
-    <modules>
-        <module>VCorePaperShadedDependencies</module>
-    </modules>
 
     <repositories>
         <repository>
@@ -85,16 +82,6 @@
                             <goal>shade</goal>
                         </goals>
                         <configuration>
-                            <relocations>
-                                <relocation>
-                                    <pattern>de.tr7zw.changeme.nbtapi</pattern>
-                                    <shadedPattern>de.verdox.vcore.nbtapi</shadedPattern>
-                                </relocation>
-                                <relocation>
-                                    <pattern>dev.jorel.commandapi-shade</pattern>
-                                    <shadedPattern>de.verdox.vcore.commandapi</shadedPattern>
-                                </relocation>
-                            </relocations>
                             <filters>
                                 <filter>
                                     <artifact>*:*</artifact>

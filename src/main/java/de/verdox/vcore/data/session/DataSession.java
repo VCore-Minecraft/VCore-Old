@@ -35,14 +35,14 @@ public abstract class DataSession <S extends VCoreData> {
             return null;
 
         if(dataExistLocally(dataClass,objectUUID)) {
-            dataManager.getPlugin().consoleMessage("&eFound Data in Local Cache", 1,true);
+            dataManager.getPlugin().consoleMessage("&eFound Data in Local Cache &8[&b"+dataClass.getSimpleName()+"&8]", 1,true);
         }
         else if(dataExistRedis(dataClass,objectUUID)) {
-            dataManager.getPlugin().consoleMessage("&eFound Data in Redis Cache", 1,true);
+            dataManager.getPlugin().consoleMessage("&eFound Data in Redis Cache &8[&b"+dataClass.getSimpleName()+"&8]", 1,true);
             redisToLocal(dataClass, objectUUID);
         }
         else if(dataExistInDatabase(dataClass,objectUUID)) {
-            dataManager.getPlugin().consoleMessage("&eFound Data in Database", 1,true);
+            dataManager.getPlugin().consoleMessage("&eFound Data in Database &8[&b"+dataClass.getSimpleName()+"&8]", 1,true);
             if(dataManager.getRedisManager().getContext(dataClass).equals(DataContext.GLOBAL)){
                 dataBaseToRedis(dataClass, objectUUID);
                 redisToLocal(dataClass,objectUUID);
@@ -52,7 +52,7 @@ public abstract class DataSession <S extends VCoreData> {
             }
         }
         else {
-            dataManager.getPlugin().consoleMessage("&eNo Data was found. Creating new data", 1,true);
+            dataManager.getPlugin().consoleMessage("&eNo Data was found. Creating new data! &8[&b"+dataClass.getSimpleName()+"&8]", 1,true);
             S vCoreData = dataManager.instantiateVCoreData(dataClass,objectUUID);
             addData(vCoreData,dataClass,true);
             localToRedis(vCoreData,dataClass,vCoreData.getUUID());

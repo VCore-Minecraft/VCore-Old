@@ -3,16 +3,14 @@ package de.verdox.vcorepaper;
 import de.verdox.vcore.dataconnection.DataConnection;
 import de.verdox.vcore.plugin.VCorePlugin;
 import de.verdox.vcore.subsystem.VCoreSubsystem;
-import de.verdox.vcore.subsystem.exceptions.SubsystemDeactivatedException;
+import de.verdox.vcore.util.VCoreUtil;
 import de.verdox.vcorepaper.commands.ConsoleCommands;
+import de.verdox.vcorepaper.custom.blocks.VBlockManager;
+import de.verdox.vcorepaper.custom.entities.CustomEntityListener;
 import de.verdox.vcorepaper.custom.entities.CustomEntityManager;
+import de.verdox.vcorepaper.custom.items.CustomItemListener;
 import de.verdox.vcorepaper.custom.items.CustomItemManager;
 import de.verdox.vcorepaper.files.VCorePaperSettings;
-import dev.jorel.commandapi.CommandAPI;
-import dev.jorel.commandapi.CommandAPICommand;
-import dev.jorel.commandapi.IStringTooltip;
-import dev.jorel.commandapi.StringTooltip;
-import dev.jorel.commandapi.arguments.*;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -24,6 +22,7 @@ public class VCorePaper extends VCorePlugin.Minecraft {
 
     private CustomEntityManager customEntityManager;
     private CustomItemManager customItemManager;
+    private VBlockManager vBlockManager;
 
     private VCorePaperSettings vCorePaperSettings;
 
@@ -38,12 +37,15 @@ public class VCorePaper extends VCorePlugin.Minecraft {
         this.vCorePaperSettings = new VCorePaperSettings(this,"settings.yml","");
         this.vCorePaperSettings.init();
 
+        new CustomItemListener(this);
+        new CustomEntityListener(this);
+
         getSessionManager();
         getServerDataManager();
 
         this.customEntityManager = new CustomEntityManager(this);
         this.customItemManager = new CustomItemManager(this);
-
+        this.vBlockManager = new VBlockManager(this);
         getCommand("debug").setExecutor(new ConsoleCommands());
     }
 
@@ -101,5 +103,9 @@ public class VCorePaper extends VCorePlugin.Minecraft {
 
     public CustomItemManager getCustomItemManager() {
         return customItemManager;
+    }
+
+    public VBlockManager getVBlockManager() {
+        return vBlockManager;
     }
 }

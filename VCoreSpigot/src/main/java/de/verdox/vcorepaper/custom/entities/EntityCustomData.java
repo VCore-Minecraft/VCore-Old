@@ -4,10 +4,10 @@ import de.verdox.vcorepaper.custom.CustomData;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 
-public abstract class EntityCustomData<T> extends CustomData<Entity,VCoreEntity,CustomEntityManager,T> {
+public abstract class EntityCustomData<T> extends CustomData<T> {
 
-    public EntityCustomData(CustomEntityManager dataManager, VCoreEntity customDataHolder) {
-        super(dataManager, customDataHolder);
+    public EntityCustomData() {
+        super();
     }
 
     public abstract boolean onDeath(Entity entity);

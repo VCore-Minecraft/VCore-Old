@@ -88,6 +88,7 @@ public abstract class VCoreCommand <T extends VCorePlugin<?,?>, R> {
 
         @Override
         protected void registerCommand() {
+            getVCorePlugin().consoleMessage("&eRegistering Command&7: &b"+getClass().getSimpleName(),false);
             vCorePlugin.getPlugin().getCommand(commandName).setExecutor(this);
             vCorePlugin.getPlugin().getCommand(commandName).setTabCompleter(this);
         }
