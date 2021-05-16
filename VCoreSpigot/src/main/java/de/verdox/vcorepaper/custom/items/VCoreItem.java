@@ -5,6 +5,7 @@ package de.verdox.vcorepaper.custom.items;
 import de.tr7zw.changeme.nbtapi.NBTItem;
 import de.verdox.vcorepaper.custom.CustomData;
 import de.verdox.vcorepaper.custom.CustomDataHolder;
+import de.verdox.vcorepaper.custom.nbtholders.NBTItemHolder;
 import org.bukkit.ChatColor;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -15,7 +16,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-public class VCoreItem extends CustomDataHolder<ItemStack, NBTItem, CustomItemManager> {
+public class VCoreItem extends CustomDataHolder<ItemStack, NBTItemHolder, CustomItemManager> {
     private static final String separatorLine = ChatColor.translateAlternateColorCodes('&',"                ");
 
     public VCoreItem(ItemStack dataHolder, CustomItemManager customItemManager) {
@@ -75,7 +76,7 @@ public class VCoreItem extends CustomDataHolder<ItemStack, NBTItem, CustomItemMa
     }
 
     @Override
-    public NBTItem getNBTCompound() {
-        return new NBTItem(getDataHolder(),true);
+    public NBTItemHolder getNBTCompound() {
+        return new NBTItemHolder(getDataHolder(),true);
     }
 }

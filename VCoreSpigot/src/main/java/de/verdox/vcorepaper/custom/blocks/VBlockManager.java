@@ -74,7 +74,7 @@ public class VBlockManager extends CustomDataManager<BlockState, VBlockCustomDat
         if(jsonObject == null)
             jsonObject = new JSONObject();
 
-        Set<BlockPersistentData> dataSet = cache.put(splitChunkKey,new HashSet<>());
+        cache.put(splitChunkKey,new HashSet<>());
         blockPersistentData = new BlockPersistentData(new LocationKey(blockState.getLocation()),jsonObject,blockState.getLocation());
 
         cache.get(splitChunkKey).add(blockPersistentData);
@@ -98,16 +98,16 @@ public class VBlockManager extends CustomDataManager<BlockState, VBlockCustomDat
     }
 
     public synchronized BlockPersistentData saveBlockPersistentData(BlockState blockState){
-        try {
+
             BlockPersistentData blockPersistentData = getBlockPersistentData(blockState);
             if (blockPersistentData == null)
                 return null;
             File jsonFile = vBlockFileStorage.getBlockStateJsonFile(blockState);
             if (jsonFile == null)
-                return null;
-            if(!jsonFile.exists())
-                jsonFile.createNewFile();
-            blockPersistentData.getJsonObject().writeJSONString(new FileWriter(jsonFile));
+                throw new NullPointerException("JsonFile is null!");
+        try (FileWriter fileWriter = new FileWriter(jsonFile)){
+            blockPersistentData.getJsonObject().writeJSONString(fileWriter);
+            fileWriter.flush();
             return blockPersistentData;
         } catch (IOException e) {
             e.printStackTrace();

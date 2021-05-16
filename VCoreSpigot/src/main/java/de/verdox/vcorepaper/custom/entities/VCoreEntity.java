@@ -3,11 +3,12 @@ package de.verdox.vcorepaper.custom.entities;
 import de.tr7zw.changeme.nbtapi.NBTEntity;
 import de.verdox.vcorepaper.custom.CustomData;
 import de.verdox.vcorepaper.custom.CustomDataHolder;
+import de.verdox.vcorepaper.custom.nbtholders.NBTEntityHolder;
 import org.bukkit.entity.Entity;
 
 import java.lang.reflect.InvocationTargetException;
 
-public class VCoreEntity extends CustomDataHolder<Entity, NBTEntity, CustomEntityManager> {
+public class VCoreEntity extends CustomDataHolder<Entity, NBTEntityHolder, CustomEntityManager> {
 
     public VCoreEntity(Entity entity, CustomEntityManager customEntityManager){
         super(entity, customEntityManager);
@@ -29,7 +30,7 @@ public class VCoreEntity extends CustomDataHolder<Entity, NBTEntity, CustomEntit
     }
 
     @Override
-    public NBTEntity getNBTCompound() {
-        return new NBTEntity(getDataHolder());
+    public NBTEntityHolder getNBTCompound() {
+        return new NBTEntityHolder(getDataHolder());
     }
 }

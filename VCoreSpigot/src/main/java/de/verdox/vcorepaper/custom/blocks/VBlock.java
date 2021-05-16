@@ -2,11 +2,12 @@ package de.verdox.vcorepaper.custom.blocks;
 
 import de.verdox.vcorepaper.custom.CustomData;
 import de.verdox.vcorepaper.custom.CustomDataHolder;
+import de.verdox.vcorepaper.custom.nbtholders.NBTBlockHolder;
 import org.bukkit.block.BlockState;
 
 import java.lang.reflect.InvocationTargetException;
 
-public class VBlock extends CustomDataHolder<BlockState, NBTBlock, VBlockManager> {
+public class VBlock extends CustomDataHolder<BlockState, NBTBlockHolder, VBlockManager> {
 
     private final BlockPersistentData blockPersistentData;
 
@@ -31,7 +32,7 @@ public class VBlock extends CustomDataHolder<BlockState, NBTBlock, VBlockManager
     }
 
     @Override
-    public NBTBlock getNBTCompound() {
-        return new NBTBlock(getDataHolder(), blockPersistentData);
+    public NBTBlockHolder getNBTCompound() {
+        return new NBTBlockHolder(getDataHolder(), blockPersistentData);
     }
 }

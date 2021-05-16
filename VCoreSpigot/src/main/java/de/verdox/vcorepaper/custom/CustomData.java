@@ -16,12 +16,16 @@ public abstract class CustomData <T> {
         String nbtKey = getNBTKey();
         if(!customDataHolder.getNBTCompound().hasKey(nbtKey))
             return null;
-        return (T) customDataHolder.getNBTCompound().getObject(nbtKey,Object.class);
+        if(getTypeClass() == null)
+            throw new NullPointerException("Can't return null!");
+        return (T) customDataHolder.getNBTCompound().getObject(nbtKey,getTypeClass());
     }
 
     public void storeCustomData(CustomDataHolder<?,?,?> customDataHolder, T data){
         customDataHolder.getNBTCompound().setObject(getNBTKey(),data);
     }
+
+    public abstract Class<T> getTypeClass();
 
     public String getNBTKey(){
         NBTIdentifier nbtIdentifier = getClass().getAnnotation(NBTIdentifier.class);

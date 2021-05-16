@@ -2,21 +2,19 @@ package de.verdox.vcorepaper.custom.blocks;
 
 import de.verdox.vcore.event.listener.VCoreListener;
 import de.verdox.vcore.plugin.VCorePlugin;
+import de.verdox.vcorepaper.VCorePaper;
 import org.bukkit.Chunk;
-import org.bukkit.Location;
-import org.bukkit.block.BlockState;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.world.ChunkLoadEvent;
 import org.bukkit.event.world.ChunkUnloadEvent;
 import org.bukkit.event.world.WorldSaveEvent;
 
-import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class VBlockListener extends VCoreListener.VCoreBukkitListener {
     private final VBlockManager vBlockManager;
-    private ExecutorService threadPool = Executors.newCachedThreadPool();
+    private ExecutorService threadPool = Executors.newSingleThreadExecutor();
 
     public VBlockListener(VCorePlugin.Minecraft plugin, VBlockManager vBlockManager) {
         super(plugin);
@@ -25,31 +23,39 @@ public class VBlockListener extends VCoreListener.VCoreBukkitListener {
 
     @EventHandler
     public void chunkLoad(ChunkLoadEvent e){
-        Chunk chunk = e.getChunk();
-        if(this.vBlockManager.isCached(chunk))
+        if(e.isNewChunk())
             return;
+        Chunk chunk = e.getChunk();
+        if(vBlockManager.isCached(chunk))
+            return;
+        System.out.println("LOADING CHUNK");
         threadPool.submit(() -> {
-            Set<Location> customBlockLocations = vBlockManager.getVBlockFileStorage().findCustomBlockLocations(chunk);
-            customBlockLocations.parallelStream().forEach(location -> {
-                BlockState blockState = location.getBlock().getState();
-                vBlockManager.getOrCreateBlockPersistentData(blockState);
-            });
+            long time = System.currentTimeMillis();
+            vBlockManager
+                    .getVBlockFileStorage()
+                    .findCustomBlockLocations(chunk)
+                    .forEach(location -> {
+                    });
+            VCorePaper.getInstance().consoleMessage("&eChunkData loaded in&7: "+(System.currentTimeMillis() - time)+"ms",true);
         });
     }
 
     @EventHandler
-    public void chunkUnload(ChunkUnloadEvent e){
-        Chunk chunk = e.getChunk();
-        if(!this.vBlockManager.isCached(chunk))
+    public void chunkUnloadEvent(ChunkUnloadEvent e){
+        if(!e.isSaveChunk())
             return;
-
+        Chunk chunk = e.getChunk();
+        if(!vBlockManager.isCached(chunk))
+            return;
         threadPool.submit(() -> {
+            long time = System.currentTimeMillis();
             vBlockManager.getDataOfChunk(chunk)
-                    .parallelStream()
+                    .stream()
                     .filter(BlockPersistentData::readyToBeCleaned)
                     .forEach(blockPersistentData -> {
-                        vBlockManager.removeAndSaveBlockPersistentData(blockPersistentData.getLocation().getBlock().getState());
-                    });
+                       vBlockManager.removeAndSaveBlockPersistentData(blockPersistentData.getLocation().getBlock().getState());
+                     });
+            VCorePaper.getInstance().consoleMessage("&eChunkData unloaded in&7: "+(System.currentTimeMillis() - time)+"ms",true);
         });
     }
 

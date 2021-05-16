@@ -3,8 +3,8 @@ package de.verdox.vcorepaper;
 import de.verdox.vcore.dataconnection.DataConnection;
 import de.verdox.vcore.plugin.VCorePlugin;
 import de.verdox.vcore.subsystem.VCoreSubsystem;
-import de.verdox.vcore.util.VCoreUtil;
 import de.verdox.vcorepaper.commands.ConsoleCommands;
+import de.verdox.vcorepaper.custom.blocks.VBlockListener;
 import de.verdox.vcorepaper.custom.blocks.VBlockManager;
 import de.verdox.vcorepaper.custom.entities.CustomEntityListener;
 import de.verdox.vcorepaper.custom.entities.CustomEntityManager;
@@ -37,15 +37,18 @@ public class VCorePaper extends VCorePlugin.Minecraft {
         this.vCorePaperSettings = new VCorePaperSettings(this,"settings.yml","");
         this.vCorePaperSettings.init();
 
+        this.customEntityManager = new CustomEntityManager(this);
+        this.customItemManager = new CustomItemManager(this);
+        this.vBlockManager = new VBlockManager(this);
+
         new CustomItemListener(this);
         new CustomEntityListener(this);
+        new VBlockListener(this,vBlockManager);
 
         getSessionManager();
         getServerDataManager();
 
-        this.customEntityManager = new CustomEntityManager(this);
-        this.customItemManager = new CustomItemManager(this);
-        this.vBlockManager = new VBlockManager(this);
+
         getCommand("debug").setExecutor(new ConsoleCommands());
     }
 

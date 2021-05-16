@@ -4,6 +4,7 @@ import de.verdox.vcore.util.VCoreUtil;
 import de.verdox.vcore.util.keys.ChunkKey;
 import de.verdox.vcore.util.keys.LocationKey;
 import de.verdox.vcore.util.keys.SplitChunkKey;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
@@ -36,7 +37,9 @@ public class VBlockFileStorage {
                     Location location = key.toLocation(chunk.getWorld());
                     if(location == null)
                         return;
-                    File folder = getOrCreateFolder(location);
+                    File folder = getFolder(location);
+                    if(folder == null || !folder.exists())
+                        return;
                     try{
                         Files.walk(folder.toPath(),1).forEach(path -> {
                             String locationString = FilenameUtils.removeExtension(path.toFile().getName());
@@ -52,16 +55,20 @@ public class VBlockFileStorage {
     }
 
     public File getOrCreateFolder(Location location){
-        File worldFolder = location.getWorld().getWorldFolder();
-
-        String chunkKey = new ChunkKey(location.getChunk()).toString();
-        String splitChunkKey = new SplitChunkKey(location.getChunk(),location.getBlockY()).toString();
-
-
-        File saveFolder = new File(worldFolder
-                .getAbsolutePath()+"//VChunks//"+chunkKey+"//"+splitChunkKey);
+        File saveFolder = getFolder(location);
         if(!saveFolder.exists() || !saveFolder.isDirectory())
             saveFolder.mkdirs();
+        return saveFolder;
+    }
+
+    public File getFolder(Location location){
+        File worldFolder = location.getWorld().getWorldFolder();
+        int yCoordinate = location.getBlockY() / 16;
+
+        String chunkKey = new ChunkKey(location.getChunk()).toString();
+        String splitChunkKey = new SplitChunkKey(location.getChunk(),yCoordinate).toString();
+        File saveFolder = new File(worldFolder
+                .getAbsolutePath()+"//VChunks//"+chunkKey+"//"+splitChunkKey);
         return saveFolder;
     }
 
@@ -70,12 +77,7 @@ public class VBlockFileStorage {
         if(jsonFile == null)
             return null;
         if(!jsonFile.exists()) {
-            try {
-                jsonFile.createNewFile();
-            } catch (IOException e) {
-                e.printStackTrace();
-                return null;
-            }
+            try { jsonFile.createNewFile(); } catch (IOException e) { e.printStackTrace(); return null; }
         }
         return readFromFile(jsonFile);
     }
@@ -84,7 +86,11 @@ public class VBlockFileStorage {
         try {
             JSONParser jsonParser = new JSONParser();
             return (JSONObject) jsonParser.parse(new FileReader(file));
-        } catch (IOException | ParseException e) { e.printStackTrace(); }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (ParseException ignored) {
+            return new JSONObject();
+        }
         return null;
     }
 
@@ -94,10 +100,10 @@ public class VBlockFileStorage {
             Path foundFile = Files.walk(folder.toPath(),1).parallel().filter(path -> {
                 File file = path.toFile();
                 return file.getName().contains(new LocationKey(blockState.getLocation()).toString());
-            }).findAny().orElse(new File(folder.toPath()+"//"+new LocationKey(blockState.getLocation())+".json").toPath());
+            }).findAny().orElse(new File(folder.getAbsolutePath()+"//"+new LocationKey(blockState.getLocation())+".json").toPath());
             return foundFile.toFile();
         } catch (IOException e) { e.printStackTrace(); }
-        return null;
+        return new File(folder.toPath()+"//"+new LocationKey(blockState.getLocation())+".json");
     }
 
 }

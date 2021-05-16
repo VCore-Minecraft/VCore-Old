@@ -1,6 +1,7 @@
 package de.verdox.vcorepaper.custom;
 
 import de.tr7zw.changeme.nbtapi.NBTCompound;
+import de.verdox.vcorepaper.custom.nbtholders.NBTHolder;
 
 import java.util.List;
 import java.util.Map;
@@ -14,7 +15,7 @@ import java.util.stream.Collectors;
  * @param <S> DataHolder Class (e.g. ItemStack, Entity)
  * @param <N> NBTCompound (e.g. NBTItem, NBTEntity)
  */
-public abstract class CustomDataHolder <S, N extends NBTCompound, C extends CustomDataManager<S,?,?>> {
+public abstract class CustomDataHolder <S, N extends NBTHolder, C extends CustomDataManager<S,?,?>> {
 
     private final S dataHolder;
     private final C customDataManager;
@@ -40,8 +41,9 @@ public abstract class CustomDataHolder <S, N extends NBTCompound, C extends Cust
 
     public final <T,R extends CustomData<T>> T getCustomData(Class<? extends R> customDataClass){
         R customData = instantiateData(customDataClass);
-        if(customData == null)
-            return null;
+        if(customData == null) {
+            throw new NullPointerException("Could not instantiate: "+customDataClass);
+        }
         return customData.findInDataHolder(this);
     }
 
