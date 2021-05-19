@@ -3,12 +3,13 @@ package de.verdox.vcorepaper;
 import de.verdox.vcore.dataconnection.DataConnection;
 import de.verdox.vcore.plugin.VCorePlugin;
 import de.verdox.vcore.subsystem.VCoreSubsystem;
+import de.verdox.vcorepaper.commands.AdminCommands;
 import de.verdox.vcorepaper.commands.ConsoleCommands;
 import de.verdox.vcorepaper.custom.blocks.VBlockListener;
 import de.verdox.vcorepaper.custom.blocks.VBlockManager;
 import de.verdox.vcorepaper.custom.entities.CustomEntityListener;
 import de.verdox.vcorepaper.custom.entities.CustomEntityManager;
-import de.verdox.vcorepaper.custom.items.CustomItemListener;
+import de.verdox.vcorepaper.custom.CustomDataListener;
 import de.verdox.vcorepaper.custom.items.CustomItemManager;
 import de.verdox.vcorepaper.files.VCorePaperSettings;
 
@@ -41,7 +42,7 @@ public class VCorePaper extends VCorePlugin.Minecraft {
         this.customItemManager = new CustomItemManager(this);
         this.vBlockManager = new VBlockManager(this);
 
-        new CustomItemListener(this);
+        new CustomDataListener(this);
         new CustomEntityListener(this);
         new VBlockListener(this,vBlockManager);
 
@@ -50,6 +51,7 @@ public class VCorePaper extends VCorePlugin.Minecraft {
 
 
         getCommand("debug").setExecutor(new ConsoleCommands());
+        new AdminCommands(this,"debug");
     }
 
     @Override
@@ -77,7 +79,7 @@ public class VCorePaper extends VCorePlugin.Minecraft {
 
     @Override
     public boolean debug() {
-        return false;
+        return true;
     }
 
     @Override

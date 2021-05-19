@@ -46,6 +46,8 @@ public class NBTBlockHolder implements NBTHolder {
         lastUse = System.currentTimeMillis();
 
         Object dataFromJson = blockPersistentData.getJsonObject().get(key);
+
+
         if(!blockState.hasMetadata(key)) {
             return VCoreUtil.getTypeUtil().castData(dataFromJson,type);
         }

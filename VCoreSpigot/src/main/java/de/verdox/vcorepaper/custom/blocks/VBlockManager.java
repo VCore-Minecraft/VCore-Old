@@ -13,6 +13,7 @@ import org.json.simple.JSONObject;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -138,11 +139,19 @@ public class VBlockManager extends CustomDataManager<BlockState, VBlockCustomDat
 
     @Override
     public VBlock wrap(Class<? extends VBlock> type, BlockState inputObject) {
-        return null;
+        BlockPersistentData blockPersistentData = getOrCreateBlockPersistentData(inputObject);
+        if(blockPersistentData == null)
+            throw new NullPointerException("BlockPersistentData could not be created!");
+        return new VBlock(inputObject,this,blockPersistentData);
     }
 
     @Override
     protected VBlockCustomData<?> instantiateCustomData(Class<? extends VBlockCustomData<?>> dataClass) {
-        return null;
+        try {
+            return dataClass.getDeclaredConstructor().newInstance();
+        } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 }

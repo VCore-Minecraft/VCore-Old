@@ -28,15 +28,14 @@ public class VBlockListener extends VCoreListener.VCoreBukkitListener {
         Chunk chunk = e.getChunk();
         if(vBlockManager.isCached(chunk))
             return;
-        System.out.println("LOADING CHUNK");
         threadPool.submit(() -> {
-            long time = System.currentTimeMillis();
+            //long time = System.currentTimeMillis();
             vBlockManager
                     .getVBlockFileStorage()
                     .findCustomBlockLocations(chunk)
                     .forEach(location -> {
                     });
-            VCorePaper.getInstance().consoleMessage("&eChunkData loaded in&7: "+(System.currentTimeMillis() - time)+"ms",true);
+            //VCorePaper.getInstance().consoleMessage("&eChunkData loaded in&7: "+(System.currentTimeMillis() - time)+"ms",true);
         });
     }
 
@@ -48,14 +47,14 @@ public class VBlockListener extends VCoreListener.VCoreBukkitListener {
         if(!vBlockManager.isCached(chunk))
             return;
         threadPool.submit(() -> {
-            long time = System.currentTimeMillis();
+            //long time = System.currentTimeMillis();
             vBlockManager.getDataOfChunk(chunk)
                     .stream()
                     .filter(BlockPersistentData::readyToBeCleaned)
                     .forEach(blockPersistentData -> {
                        vBlockManager.removeAndSaveBlockPersistentData(blockPersistentData.getLocation().getBlock().getState());
                      });
-            VCorePaper.getInstance().consoleMessage("&eChunkData unloaded in&7: "+(System.currentTimeMillis() - time)+"ms",true);
+            //VCorePaper.getInstance().consoleMessage("&eChunkData unloaded in&7: "+(System.currentTimeMillis() - time)+"ms",true);
         });
     }
 

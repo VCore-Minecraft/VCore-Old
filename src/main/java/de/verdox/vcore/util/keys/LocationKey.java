@@ -5,7 +5,7 @@ import org.bukkit.Location;
 
 import java.util.Objects;
 
-public class LocationKey {
+public class LocationKey extends VCoreKey{
 
     private final String worldName;
     private final int x;

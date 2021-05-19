@@ -45,12 +45,10 @@ public class VCoreItem extends CustomDataHolder<ItemStack, NBTItemHolder, Custom
         List<String> lore = new ArrayList<>(getItemLore());
         lore.add(separatorLine);
 
-        getCustomDataManager().getNBTKeys().forEach(nbtKey -> {
-
+        getCustomDataKeys().forEach(nbtKey -> {
             ItemCustomData<?> customData = getCustomDataManager().getDataType(nbtKey);
             if(customData == null)
                 return;
-
             List<String> customDataLore = customData.asLabel(Objects.requireNonNull(getCustomData(customData.getClass())).toString());
 
             if(customDataLore != null && !customDataLore.isEmpty())

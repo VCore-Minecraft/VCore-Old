@@ -14,11 +14,14 @@ public abstract class CustomData <T> {
 
     public T findInDataHolder(CustomDataHolder<?,?,?> customDataHolder){
         String nbtKey = getNBTKey();
-        if(!customDataHolder.getNBTCompound().hasKey(nbtKey))
+        if(!customDataHolder.getNBTCompound().hasKey(nbtKey)) {
+            System.out.println("DOES NOT HAVE KEY");
             return null;
+        }
         if(getTypeClass() == null)
             throw new NullPointerException("Can't return null!");
-        return (T) customDataHolder.getNBTCompound().getObject(nbtKey,getTypeClass());
+        System.out.println("SUCHE AB HIER");
+        return customDataHolder.getNBTCompound().getObject(nbtKey,getTypeClass());
     }
 
     public void storeCustomData(CustomDataHolder<?,?,?> customDataHolder, T data){
@@ -31,6 +34,6 @@ public abstract class CustomData <T> {
         NBTIdentifier nbtIdentifier = getClass().getAnnotation(NBTIdentifier.class);
         if(nbtIdentifier == null)
             throw new IllegalStateException("Your CustomData Class "+getClass().getCanonicalName()+" needs to have the NBTIdentifier Annotation set!");
-        return nbtIdentifier.nbtKey();
+        return nbtIdentifier.nbtKey().toLowerCase();
     }
 }

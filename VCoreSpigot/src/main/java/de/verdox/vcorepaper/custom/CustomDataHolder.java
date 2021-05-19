@@ -1,12 +1,8 @@
 package de.verdox.vcorepaper.custom;
 
-import de.tr7zw.changeme.nbtapi.NBTCompound;
 import de.verdox.vcorepaper.custom.nbtholders.NBTHolder;
 
-import java.util.List;
-import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -31,6 +27,8 @@ public abstract class CustomDataHolder <S, N extends NBTHolder, C extends Custom
         R customData = instantiateData(customDataType);
         if(customData == null)
             throw new NullPointerException("CustomData could not be instantiated");
+        if(!customDataManager.exists(customData.getNBTKey()))
+            throw new IllegalStateException("CustomDataClass "+customDataType+" has not yet been registered in your plugin!");
         customData.storeCustomData(this,value);
         onStoreData(customDataType,value);
         if(callback == null)
@@ -41,9 +39,10 @@ public abstract class CustomDataHolder <S, N extends NBTHolder, C extends Custom
 
     public final <T,R extends CustomData<T>> T getCustomData(Class<? extends R> customDataClass){
         R customData = instantiateData(customDataClass);
-        if(customData == null) {
+        if(customData == null)
             throw new NullPointerException("Could not instantiate: "+customDataClass);
-        }
+        if(!customDataManager.exists(customData.getNBTKey()))
+            throw new IllegalStateException("CustomDataClass "+customDataClass+" has not yet been registered in your plugin!");
         return customData.findInDataHolder(this);
     }
 
