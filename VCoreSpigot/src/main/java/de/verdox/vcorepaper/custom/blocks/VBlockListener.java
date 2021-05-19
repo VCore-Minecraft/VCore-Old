@@ -2,7 +2,6 @@ package de.verdox.vcorepaper.custom.blocks;
 
 import de.verdox.vcore.event.listener.VCoreListener;
 import de.verdox.vcore.plugin.VCorePlugin;
-import de.verdox.vcorepaper.VCorePaper;
 import org.bukkit.Chunk;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.world.ChunkLoadEvent;

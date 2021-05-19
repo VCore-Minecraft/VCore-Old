@@ -27,11 +27,11 @@ public class SSession extends DataSession<ServerData>{
                 .getSubsystemManager()
                 .getActiveServerDataClasses()
                 .stream()
-                // Find all Player Data Classes that belong to this session
+                // Find all Server Data Classes that belong to this session
                 .filter(aClass -> VCorePlugin.findDependSubsystemClass(aClass).equals(this.vCoreSubsystem.getClass()))
                 // Load Data on Server Start
                 .filter(aClass -> dataManager.getRedisManager().getPreloadStrategy(aClass).equals(PreloadStrategy.LOAD_BEFORE))
-                // PreLoad every Server Data
+                // PreLoad every Server Data (First from Redis, if it does not exist in redis, load from database)
                 .forEach(this::loadAllDataFromDatabase);
     }
 

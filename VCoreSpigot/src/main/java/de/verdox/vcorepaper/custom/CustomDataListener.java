@@ -11,6 +11,7 @@ import de.verdox.vcorepaper.custom.events.callbacks.BlockPlaceCallback;
 import de.verdox.vcorepaper.custom.items.VCoreItem;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
@@ -27,14 +28,14 @@ public class CustomDataListener extends VCoreListener.VCoreBukkitListener {
         super(plugin);
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void onItemInteract(PlayerInteractEvent e){
         ItemStack stack = e.getItem();
         Action action = e.getAction();
 
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void onPlaceBlock(BlockPlaceEvent e){
         Player player = e.getPlayer();
         ItemStack stack = e.getItemInHand();

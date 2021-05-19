@@ -84,6 +84,8 @@ public abstract class DataSession <S extends VCoreData> {
         removeData(dataClass,objectUUID,true);
     }
 
+
+    //TODO: First search in Redis then search in MongoDB
     protected void loadAllDataFromDatabase(Class<? extends S> dataClass){
         dataManager.getPlugin().consoleMessage("&ePreloading Data for &a"+dataClass.getSimpleName()+" &efrom database&7!",true);
         getMongoCollection(dataClass)
