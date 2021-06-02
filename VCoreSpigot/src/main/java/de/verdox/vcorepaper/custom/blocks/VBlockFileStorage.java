@@ -13,6 +13,7 @@ import org.json.simple.parser.ParseException;
 
 import java.io.File;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -30,16 +31,15 @@ public class VBlockFileStorage {
     public Set<Location> findCustomBlockLocations(Chunk chunk){
         Set<Location> locations = new HashSet<>();
         new ChunkKey(chunk).splitChunkKey(chunk.getWorld())
-                .parallelStream()
                 .forEach(key -> {
                     Location location = key.toLocation(chunk.getWorld());
                     if(location == null)
                         return;
                     File folder = getFolder(location);
-                    if(folder == null || !folder.exists())
+                    if(!folder.isDirectory())
                         return;
                     try{
-                        Files.walk(folder.toPath(),1).forEach(path -> {
+                        Files.walk(folder.toPath(),1).skip(1).forEach(path -> {
                             String locationString = FilenameUtils.removeExtension(path.toFile().getName());
                             Location locationOfCustomBlock = new LocationKey(locationString).getLocation();
                             if(locationOfCustomBlock == null)
@@ -59,40 +59,84 @@ public class VBlockFileStorage {
         return saveFolder;
     }
 
-    public File getFolder(Location location){
+    public synchronized File getFolder(Location location){
+        //TODO: getWorldFolder causes ConcurrentModificationException
         File worldFolder = location.getWorld().getWorldFolder();
         int yCoordinate = location.getBlockY() / 16;
 
         String chunkKey = new ChunkKey(location.getChunk()).toString();
         String splitChunkKey = new SplitChunkKey(location.getChunk(),yCoordinate).toString();
-        File saveFolder = new File(worldFolder
+        return new File(worldFolder
                 .getAbsolutePath()+"//VChunks//"+chunkKey+"//"+splitChunkKey);
-        return saveFolder;
     }
 
     public JSONObject getBlockStateJsonObject(BlockState blockState){
         File jsonFile = getBlockStateJsonFile(blockState);
         if(jsonFile == null)
             return null;
-        if(!jsonFile.exists()) {
-            try { jsonFile.createNewFile(); } catch (IOException e) { e.printStackTrace(); return null; }
-        }
         return readFromFile(jsonFile);
+    }
+
+    public JSONObject getOrCreateBlockStateJsonObject(BlockState blockState){
+        File jsonFile = getOrCreateBlockStateJsonFile(blockState);
+        if(jsonFile == null)
+            return null;
+        if(!jsonFile.exists()) {
+            try {
+                jsonFile.createNewFile();
+                JSONObject jsonObject = new JSONObject();
+                saveJsonObjectToFile(jsonFile,jsonObject);
+                return jsonObject;
+            } catch (IOException e) { e.printStackTrace(); return null; }
+        }
+
+        return readFromFile(jsonFile);
+    }
+
+    public void saveJsonObjectToFile(File jsonFile, JSONObject jsonObject){
+        if(jsonObject.isEmpty())
+            return;
+        try (FileWriter fileWriter = new FileWriter(jsonFile)){
+            jsonObject.writeJSONString(fileWriter);
+            fileWriter.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void deleteSaveFile(BlockState blockState){
+        deleteJsonFile(getBlockStateJsonFile(blockState));
+    }
+
+    private void deleteJsonFile(File jsonFile){
+        jsonFile.delete();
     }
 
     private JSONObject readFromFile(File file){
         try {
             JSONParser jsonParser = new JSONParser();
             return (JSONObject) jsonParser.parse(new FileReader(file));
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (ParseException ignored) {
+        } catch (IOException | ParseException e) {
+            //System.err.println("Error occured while reading vblock jsonFile: "+file.getAbsolutePath());
+            //e.printStackTrace();
             return new JSONObject();
         }
-        return null;
     }
 
     public File getBlockStateJsonFile(BlockState blockState){
+        File folder = getOrCreateFolder(blockState.getLocation());
+        try {
+            Path foundFile = Files.walk(folder.toPath(),1).parallel().filter(path -> {
+                File file = path.toFile();
+                return file.getName().contains(new LocationKey(blockState.getLocation()).toString());
+            }).findAny().orElse(null);
+            if(foundFile != null)
+            return foundFile.toFile();
+        } catch (IOException e) { e.printStackTrace(); }
+        return null;
+    }
+
+    public File getOrCreateBlockStateJsonFile(BlockState blockState){
         File folder = getOrCreateFolder(blockState.getLocation());
         try {
             Path foundFile = Files.walk(folder.toPath(),1).parallel().filter(path -> {
@@ -104,4 +148,7 @@ public class VBlockFileStorage {
         return new File(folder.toPath()+"//"+new LocationKey(blockState.getLocation())+".json");
     }
 
+    public VBlockManager getVBlockManager() {
+        return vBlockManager;
+    }
 }

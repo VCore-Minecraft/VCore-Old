@@ -58,9 +58,10 @@ public abstract class PlayerSessionManager<R extends VCorePlugin<?,?>> extends V
 
     protected PlayerSession deleteSession(UUID uuid){
         //getPlugin().consoleMessage("&eDeleting Local Player Session&7: &b"+uuid);
-        PlayerSession playerSession = this.playerSessionCache.remove(uuid);
-        playerSession.getPlayerDataObjects().forEach((aClass, playerData) -> playerSession.localToRedis(playerData,aClass,uuid));
+        PlayerSession playerSession = getSession(uuid);
+        playerSession.getPlayerDataObjects().forEach((aClass, playerData) -> playerData.pushUpdate());
         playerSession.cleanUp();
+        this.playerSessionCache.remove(uuid);
         return playerSession;
     }
 

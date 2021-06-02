@@ -6,6 +6,8 @@ import de.verdox.vcorepaper.custom.nbtholders.NBTBlockHolder;
 import org.bukkit.block.BlockState;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.Set;
+import java.util.function.Consumer;
 
 public class VBlock extends CustomDataHolder<BlockState, NBTBlockHolder, VBlockManager> {
 
@@ -14,6 +16,10 @@ public class VBlock extends CustomDataHolder<BlockState, NBTBlockHolder, VBlockM
     VBlock(BlockState dataHolder, VBlockManager customDataManager, BlockPersistentData blockPersistentData) {
         super(dataHolder, customDataManager);
         this.blockPersistentData = blockPersistentData;
+    }
+
+    public void addVBlockTickCallback(Consumer<VBlock> callback){
+        blockPersistentData.addTickCallback(callback);
     }
 
     @Override
@@ -30,6 +36,20 @@ public class VBlock extends CustomDataHolder<BlockState, NBTBlockHolder, VBlockM
             return null;
         }
     }
+
+    public boolean isBlockPermissionAllowed(VBlockEventPermission vBlockEventPermission){
+        return vBlockEventPermission.isAllowed(this);
+    }
+
+    public void allowBlockPermission(VBlockEventPermission vBlockEventPermission, boolean allowed){
+        vBlockEventPermission.setAllowed(this,allowed);
+    }
+
+    public void deleteAllData(){
+        blockPersistentData.getJsonObject().clear();
+        getNBTCompound().save();
+    }
+
 
     @Override
     public NBTBlockHolder getNBTCompound() {

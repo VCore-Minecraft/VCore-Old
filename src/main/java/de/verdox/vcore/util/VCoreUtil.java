@@ -6,6 +6,8 @@ public class VCoreUtil {
     private static final BukkitPlayerUtil bukkitPlayerUtil = new BukkitPlayerUtil();
     private static final BukkitWorldUtil bukkitWorldUtil = new BukkitWorldUtil();
     private static final TypeUtil typeUtil = new TypeUtil();
+    private static final RandomUtil randomUtil = new RandomUtil();
+    private static final MathUtil mathUtil = new MathUtil();
 
     public static GeometryUtil getGeometryUtil() {
         return geometryUtil;
@@ -21,5 +23,13 @@ public class VCoreUtil {
 
     public static TypeUtil getTypeUtil() {
         return typeUtil;
+    }
+
+    public static RandomUtil getRandomUtil() {
+        return randomUtil;
+    }
+
+    public static MathUtil getMathUtil() {
+        return mathUtil;
     }
 }

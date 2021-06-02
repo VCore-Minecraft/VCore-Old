@@ -62,7 +62,7 @@ public abstract class DataSession <S extends VCoreData> {
     }
 
     private boolean dataExistInDatabase(Class<? extends S> dataClass, UUID objectUUID){
-        Document document = getMongoCollection(dataClass).find(new Document("objectUUID",objectUUID.toString())).first();
+        Document document = getMongoCollection(dataClass).find(new Document("_id",objectUUID.toString())).first();
         return document != null;
     }
 
@@ -92,7 +92,7 @@ public abstract class DataSession <S extends VCoreData> {
                 .find()
                 .iterator()
                 .forEachRemaining(document -> {
-                    UUID uuid = UUID.fromString(document.getString("objectUUID"));
+                    UUID uuid = UUID.fromString(document.getString("_id"));
                     load(dataClass,uuid);
                 });
     }
@@ -196,33 +196,49 @@ public abstract class DataSession <S extends VCoreData> {
      * @param dataToSave
      */
 
-    private final void saveToDatabase(Class<? extends S> dataClass,UUID objectUUID, Map<String, Object> dataToSave){
+    private final void saveToDatabase(Class<? extends S> dataClass, UUID objectUUID, Map<String, Object> dataToSave){
         if(dataClass == null)
             return;
         if(objectUUID == null)
             return;
         if(dataToSave == null)
             return;
+        if(dataToSave.isEmpty())
+            return;
         Set<String> dataKeysToSave = getRedisKeys(dataClass,objectUUID);
         if(dataKeysToSave == null)
             return;
         getData(dataClass,objectUUID).cleanUp();
+
         dataKeysToSave
-                .parallelStream()
-                .filter(dataToSave::containsKey)
-                .forEach(dataKey -> {
-                    Document serverData = new Document("objectUUID",objectUUID.toString());
-                    serverData.putAll(dataToSave);
-                    getMongoCollection(dataClass).insertOne(serverData);
-                    dataToSave.remove(dataKey);
-                });
+                .stream()
+                .filter(s -> !dataToSave.containsKey(s))
+                .forEach(dataToSave::remove);
+
+        MongoCollection<Document> mongoCollection = getMongoCollection(dataClass);
+
+        Document filter = new Document("_id",objectUUID.toString());
+
+        if(mongoCollection.find(filter).first() == null){
+            Document newData = new Document("_id",objectUUID.toString());
+            newData.putAll(dataToSave);
+            mongoCollection.insertOne(newData);
+        }
+        else {
+            Document newData = new Document(dataToSave);
+            Document updateFunc = new Document("$set",newData);
+            mongoCollection.updateOne(filter,updateFunc);
+        }
     }
 
     private Map<String, Object> loadDataFromDatabase(Class<? extends S> dataClass, UUID objectUUID){
-        Document mongoDBData = getMongoCollection(dataClass).find(new Document("objectUUID",objectUUID.toString())).first();
+
+        Document filter = new Document("objectUUID",objectUUID.toString());
+
+        Document mongoDBData = getMongoCollection(dataClass).find(filter).first();
 
         if(mongoDBData == null)
-            mongoDBData = new Document("objectUUID", objectUUID.toString());
+            mongoDBData = filter;
         Map<String, Object> dataFromDatabase = new HashMap<>();
         mongoDBData.forEach(dataFromDatabase::put);
         return dataFromDatabase;

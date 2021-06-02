@@ -4,9 +4,12 @@ import de.verdox.vcore.util.VCoreUtil;
 import de.verdox.vcorepaper.VCorePaper;
 import de.verdox.vcorepaper.custom.blocks.BlockPersistentData;
 import de.verdox.vcorepaper.custom.blocks.VBlockManager;
+import de.verdox.vcorepaper.custom.util.Serializer;
 import org.bukkit.block.BlockState;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.metadata.FixedMetadataValue;
 
+import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
@@ -37,7 +40,6 @@ public class NBTBlockHolder implements NBTHolder {
 
     private <T> void saveMetaDataKey(String key, Class<T> type, T value){
         blockState.setMetadata(key, new FixedMetadataValue(VCorePaper.getInstance(), value));
-
         blockPersistentData.getJsonObject().put(key,value);
         lastUse = System.currentTimeMillis();
     }
@@ -46,7 +48,6 @@ public class NBTBlockHolder implements NBTHolder {
         lastUse = System.currentTimeMillis();
 
         Object dataFromJson = blockPersistentData.getJsonObject().get(key);
-
 
         if(!blockState.hasMetadata(key)) {
             return VCoreUtil.getTypeUtil().castData(dataFromJson,type);
@@ -125,9 +126,37 @@ public class NBTBlockHolder implements NBTHolder {
     }
 
     @Override
+    public ItemStack getItemStack(String key) {
+        try{
+            getReadLock().lock();
+            String serialized = getMetaDataKey(key, String.class);
+            if(serialized == null)
+                return null;
+            return Serializer.Base64ToItemStack(serialized);
+        } finally {
+            getReadLock().unlock();
+        }
+    }
+
+    @Override
     public <T> T getObject(String key, Class<T> type) {
         try{
             getReadLock().lock();
+            if(type.equals(ItemStack.class))
+                return (T) getItemStack(key);
+            if(type.equals(Boolean.class))
+                return (T) getBoolean(key);
+            if(type.equals(Integer.class))
+                return (T) getInteger(key);
+            if(type.equals(Double.class))
+                return (T) getDouble(key);
+            if(type.equals(String.class))
+                return (T) getString(key);
+            if(type.equals(UUID.class))
+                return (T) getUUID(key);
+            if(type.equals(Long.class))
+                return (T) getLong(key);
+
             return getMetaDataKey(key, type);
         } finally {
             getReadLock().unlock();
@@ -150,6 +179,11 @@ public class NBTBlockHolder implements NBTHolder {
                 saveMetaDataKey(key,UUID.class,(UUID) value);
             if(value instanceof Long)
                 saveMetaDataKey(key,Long.class,(Long) value);
+            if(value instanceof ItemStack) {
+                String serialized = Serializer.itemStackToBase64((ItemStack) value);
+                if(serialized != null)
+                    saveMetaDataKey(key, String.class, serialized);
+            }
             else
                 saveMetaDataKey(key, Object.class,value);
             save();

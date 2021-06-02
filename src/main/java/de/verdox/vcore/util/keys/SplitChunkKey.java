@@ -23,7 +23,7 @@ public class SplitChunkKey extends ChunkKey{
     }
 
     public Location toLocation(World world){
-        return new Location(world,x,yCoordinate,z);
+        return new Location(world,globalX,yCoordinate,globalZ);
     }
 
     @Override

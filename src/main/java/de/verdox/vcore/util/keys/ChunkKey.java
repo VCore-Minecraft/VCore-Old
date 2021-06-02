@@ -11,10 +11,14 @@ public class ChunkKey extends VCoreKey{
 
     protected int x;
     protected int z;
+    protected int globalX;
+    protected int globalZ;
 
     public ChunkKey(Chunk chunk){
         x = chunk.getX();
         z = chunk.getZ();
+        globalX = chunk.getBlock(0,0,0).getLocation().getBlockX();
+        globalZ = chunk.getBlock(0,0,0).getLocation().getBlockZ();
     }
 
     public ChunkKey(String key){

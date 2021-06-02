@@ -1,23 +1,21 @@
 package de.verdox.vcorepaper.custom.gui;
 
-import de.tr7zw.changeme.nbtapi.NBTItem;
-import de.verdox.vcore.plugin.VCorePlugin;
-import de.verdox.vcore.plugin.VCoreScheduler;
 import de.verdox.vcore.plugin.bukkit.BukkitPlugin;
+import de.verdox.vcorepaper.VCorePaper;
+import de.verdox.vcorepaper.custom.items.VCoreItem;
+import io.reactivex.rxjava3.functions.Function3;
+import io.reactivex.rxjava3.functions.Function4;
+import net.wesjd.anvilgui.AnvilGUI;
 import org.apache.commons.lang.Validate;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
-import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.event.inventory.InventoryCloseEvent;
-import org.bukkit.event.inventory.InventoryDragEvent;
-import org.bukkit.event.inventory.InventoryType;
+import org.bukkit.event.inventory.*;
 import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitTask;
 
 import java.util.Arrays;
@@ -27,6 +25,8 @@ import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public class VCoreGUI<T> {
 
@@ -36,10 +36,11 @@ public class VCoreGUI<T> {
     private final BukkitPlugin plugin;
     private final Player player;
 
-    private Map<ItemStack ,InventoryContent> itemCache;
+    private final Map<Integer ,InventoryContent<T>> itemCache;
     private final Consumer<Player> closeListener;
-    private final BiFunction<ItemStack, T, Response> onItemClick;
-    private final BiFunction<Player, List<ItemStack>, Response> completeFunction;
+    private final Function<VCoreGUIClick<T>, Response<?,?>> onItemClick;
+    private final Function<GUIClick, Response<?,?>> onPlayerInventoryClick;
+    private final BiFunction<Player, List<VCoreItem>, Response<?,?>> completeFunction;
     private final boolean updater;
     private final Consumer<ContentBuilder<T>> consumer;
     private boolean open;
@@ -54,7 +55,19 @@ public class VCoreGUI<T> {
 
     private BukkitTask guiUpdater;
 
-    public VCoreGUI(BukkitPlugin plugin, Player player, String inventoryTitle, int size, InventoryType inventoryType, boolean preventClose, Map<ItemStack, InventoryContent> itemCache, Consumer<Player> closeListener, BiFunction<ItemStack, T, Response> onItemClick, BiFunction<Player, List<ItemStack>, Response> completeFunction, boolean updater, Consumer<ContentBuilder<T>> consumer){
+    public VCoreGUI(BukkitPlugin plugin
+            , Player player
+            , String inventoryTitle
+            , int size
+            , InventoryType inventoryType
+            , boolean preventClose
+            , Map<Integer, InventoryContent<T>> itemCache
+            , Consumer<Player> closeListener
+            , Function<VCoreGUIClick<T>, Response<?,?>> onItemClick
+            , Function<GUIClick, Response<?,?>> onPlayerInventoryClick, BiFunction<Player, List<VCoreItem>, Response<?,?>> completeFunction
+            , boolean updater
+            , Consumer<ContentBuilder<T>> consumer){
+        this.onPlayerInventoryClick = onPlayerInventoryClick;
         this.completeFunction = completeFunction;
         this.updater = updater;
         this.consumer = consumer;
@@ -72,10 +85,6 @@ public class VCoreGUI<T> {
         openInventory();
     }
 
-    public Player getPlayer() {
-        return player;
-    }
-
     public void openInventory(){
         Bukkit.getPluginManager().registerEvents(this.listener,this.plugin);
         if(this.size == 0) {
@@ -88,13 +97,12 @@ public class VCoreGUI<T> {
         }
 
         //TODO: Inventory Items setzen
-
-        itemCache.forEach((stack, inventoryContent) -> {
+        itemCache.forEach((slot, inventoryContent) -> {
             if(inventory.getSize() <= inventoryContent.slot)
                 return;
             if(inventoryContent.slot < 0)
                 return;
-            inventory.setItem(inventoryContent.slot,stack);
+            inventory.setItem(inventoryContent.slot,inventoryContent.stack.getDataHolder());
         });
 
         this.open = true;
@@ -109,59 +117,77 @@ public class VCoreGUI<T> {
                 ContentBuilder<T> contentBuilder = new ContentBuilder<T>();
                 consumer.accept(contentBuilder);
 
-                // Removing every item that was changed
-                this.itemCache.forEach((stack, inventoryContent) -> {
-                    if(contentBuilder.getItemCache().containsKey(stack))
+                // Removing every item that was changed in contentBuilder since last update
+                this.itemCache.forEach((integer, inventoryContent) -> {
+                    if(contentBuilder.getItemCache().containsValue(inventoryContent))
                         return;
-                    itemCache.remove(stack);
-                    inventory.remove(stack);
+                    removeItem(integer);
                 });
 
-                contentBuilder.getItemCache().forEach((stack, inventoryContent) -> {
-
-                    // Items that are the same won't be replaced
-                    if(itemCache.containsKey(stack)){
-                        if(itemCache.get(stack).equals(inventoryContent))
-                            return;
-                    }
-                    if(inventory.getSize() <= inventoryContent.slot)
-                        return;
+                contentBuilder.getItemCache().forEach((itemSlot, inventoryContent) -> {
                     if(inventoryContent.slot < 0)
                         return;
-                    itemCache.put(stack,inventoryContent);
-                    inventory.setItem(inventoryContent.slot,stack);
+
+                    if(inventory.getSize() <= inventoryContent.slot)
+                        return;
+
+                    if(itemCache.containsKey(itemSlot))
+                        if(itemCache.get(itemSlot).equals(inventoryContent))
+                            return;
+
+                    itemCache.put(itemSlot,inventoryContent);
+                    inventory.setItem(inventoryContent.slot,inventoryContent.stack.getDataHolder());
                 });
             },20L,20L);
         }
     }
-
-    public BukkitPlugin getPlugin() {
-        return plugin;
+    private VCoreGUI<T> copy(){
+        return new VCoreGUI<>(plugin
+                , player
+                , inventoryTitle
+                , size
+                , inventoryType
+                , preventClose
+                , itemCache
+                , closeListener
+                , onItemClick
+                , onPlayerInventoryClick, completeFunction
+                , updater
+                , consumer);
     }
-
-    public void closeInventory(){
-
+    private void closeInventory(){
         if(open){
             open = false;
             player.closeInventory();
             HandlerList.unregisterAll(this.listener);
             if(this.completeFunction != null)
-                this.completeFunction.apply(player, Arrays.asList(inventory.getContents()));
+                this.completeFunction.apply(player, Arrays.stream(inventory.getContents()).map(stack -> VCorePaper.getInstance().getCustomItemManager().wrap(VCoreItem.class,stack)).collect(Collectors.toList()));
             if(this.closeListener != null)
                 closeListener.accept(player);
         }
+    }
+    public void removeItem(int slot){
+        InventoryContent<T> content = itemCache.remove(slot);
+        inventory.remove(content.stack.getDataHolder());
     }
 
     public Inventory getInventory() {
         return inventory;
     }
+    public BukkitPlugin getPlugin() {
+        return plugin;
+    }
+    public Player getPlayer() {
+        return player;
+    }
 
     public static class Builder<T>{
         private Consumer<Player> closeListener;
         private boolean preventClose;
-        private Map<ItemStack, InventoryContent> itemCache;
-        private BiFunction<ItemStack, T, Response> onItemClick;
-        private BiFunction<Player, List<ItemStack>, Response> completeFunction;
+        private Map<Integer, InventoryContent<T>> itemCache;
+        private Function<VCoreGUIClick<T>, Response<?,?>> onItemClick;
+        private Function<GUIClick, Response<?,?>> onPlayerInventoryClick;
+        private BiFunction<Player, List<VCoreItem>, Response<?,?>> completeFunction;
         private BukkitPlugin plugin;
         private String title = "VCore GUI";
         private Consumer<ContentBuilder<T>> consumer;
@@ -199,9 +225,15 @@ public class VCoreGUI<T> {
             return this;
         }
 
-        public Builder<T> onItemClick(BiFunction<ItemStack, T, Response> onItemClick){
+        public Builder<T> onItemClick(Function<VCoreGUIClick<T>, Response<?,?>> onItemClick){
             Validate.notNull(onItemClick,"biFunction cannot be null");
             this.onItemClick = onItemClick;
+            return this;
+        }
+
+        public Builder<T> onPlayerInventoryClick(Function<GUIClick, Response<?,?>> onPlayerInventoryClick){
+            Validate.notNull(onPlayerInventoryClick,"onPlayerInventoryClick cannot be null");
+            this.onPlayerInventoryClick = onPlayerInventoryClick;
             return this;
         }
 
@@ -223,7 +255,7 @@ public class VCoreGUI<T> {
             return this;
         }
 
-        public Builder<T> completeFunction(BiFunction<Player, List<ItemStack>, Response> completeFunction){
+        public Builder<T> completeFunction(BiFunction<Player, List<VCoreItem>, Response<?,?>> completeFunction){
             Validate.notNull(completeFunction, "completeFunction cannot be null");
             this.completeFunction = completeFunction;
             return this;
@@ -236,92 +268,199 @@ public class VCoreGUI<T> {
                 Validate.notNull(consumer, "Content must be set!");
             if(inventoryType == null && size <= 0)
                 size = 9;
-            return new VCoreGUI<T>(plugin,player,title,size,inventoryType,preventClose,itemCache,closeListener,onItemClick, completeFunction,update, consumer);
+            return new VCoreGUI<T>(plugin,player,title,size,inventoryType,preventClose,itemCache,closeListener,onItemClick, onPlayerInventoryClick, completeFunction,update, consumer);
         }
 
     }
 
     public static class ContentBuilder<T>{
-        private Map<ItemStack, InventoryContent> itemCache = new ConcurrentHashMap<>();
+        private final Map<Integer, InventoryContent<T>> itemCache = new ConcurrentHashMap<>();
 
-        public ContentBuilder addContent(int slot, ItemStack stack, T object){
+        public ContentBuilder<T> addContent(int slot, VCoreItem stack, T object){
             Validate.notNull(stack, "Stack cannot be null");
-            Validate.notNull(object, "Object cannot be null");
-            NBTItem nbtItem = new NBTItem(stack,true);
-            nbtItem.setInteger("vcore_gui_slot",slot);
-            itemCache.put(stack, new InventoryContent(stack,slot,object));
+            stack.getNBTCompound().setObject("vcore_gui_slot", slot);
+            itemCache.put(slot, new InventoryContent<>(stack,slot,object));
             return this;
         }
 
-        Map<ItemStack, InventoryContent> getItemCache() {
+        public ContentBuilder<T> removeItem(int slot){
+            itemCache.remove(slot);
+            return this;
+        }
+
+        Map<Integer, InventoryContent<T>> getItemCache() {
             return itemCache;
         }
     }
 
-    public static class Response {
+    public static class Response<T, R> {
         private final static String CLOSE = "close";
         private final static String NOTHING = "nothing";
-        private String code;
+        private final static String CONFIRMATION = "confirmation";
+        private final static String INPUT = "input";
+        private final String code;
+        private final Function<T, R> callback;
 
-        private Response(String code){
+        private Response(String code, Function<T, R> callback){
             this.code = code;
+            this.callback = callback;
         }
 
-        public static Response close() {return new Response(CLOSE);}
+        public static Response<?,?> close() {return new Response<>(CLOSE, null);}
 
-        public static Response nothing() {return new Response(NOTHING);}
+        public static Response<?,?> nothing() {return new Response<>(NOTHING, null);}
+
+        public static Response<Boolean, AnvilGUI.Response> confirmation(Function<Boolean, AnvilGUI.Response> callback) {return new Response<>(CONFIRMATION, callback);}
+
+        public static Response<String, AnvilGUI.Response> input(Function<String, AnvilGUI.Response> callback) {return new Response<>(INPUT,callback);}
+
+        public Function<T, R> getCallback() {
+            return callback;
+        }
     }
 
-    public static class InventoryContent{
-        private ItemStack stack;
+    public static class InventoryContent<T>{
+        private VCoreItem stack;
         private int slot;
-        private Object object;
+        private T object;
 
-        private InventoryContent(ItemStack stack, int slot, Object object){
+        private InventoryContent(VCoreItem stack, int slot, T object){
             this.stack = stack;
             this.slot = slot;
             this.object = object;
-        }
-
-        public static InventoryContent createItem(Object object, ItemStack stack, int slot){
-            return new InventoryContent(stack,slot,object);
         }
 
         @Override
         public boolean equals(Object o) {
             if (this == o) return true;
             if (!(o instanceof InventoryContent)) return false;
-            InventoryContent content = (InventoryContent) o;
-            return slot == content.slot &&
-                    stack.equals(content.stack) &&
-                    object.equals(content.object);
+            InventoryContent<?> that = (InventoryContent<?>) o;
+            return Objects.equals(stack, that.stack);
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(stack, slot, object);
+            return Objects.hash(stack);
+        }
+    }
+
+    public static class GUIClick{
+        private final int slot;
+        private final ClickType clickType;
+        private final VCoreItem clickedItem;
+        private final Inventory clickedInventory;
+
+        public GUIClick(int slot, ClickType clickType, VCoreItem clickedItem, Inventory clickedInventory){
+            this.slot = slot;
+            this.clickType = clickType;
+            this.clickedItem = clickedItem;
+            this.clickedInventory = clickedInventory;
+        }
+
+        public int getSlot() {
+            return slot;
+        }
+
+        public Inventory getClickedInventory() {
+            return clickedInventory;
+        }
+
+        public VCoreItem getClickedItem() {
+            return clickedItem;
+        }
+
+        public ClickType getClickType() {
+            return clickType;
+        }
+    }
+
+    public static class VCoreGUIClick<T> extends GUIClick{
+        private final T dataInItemStack;
+        private final VCoreGUI<T> clickedGUI;
+
+        public VCoreGUIClick(int slot, ClickType clickType, VCoreItem clickedItem, T dataInItemStack, VCoreGUI<T> clickedGUI){
+            super(slot, clickType, clickedItem,clickedGUI.getInventory());
+            this.dataInItemStack = dataInItemStack;
+            this.clickedGUI = clickedGUI;
+        }
+
+        public VCoreGUI<T> getClickedGUI() {
+            return clickedGUI;
+        }
+
+        public T getDataInItemStack() {
+            return dataInItemStack;
         }
     }
 
     private class VCoreGUIListener implements Listener{
-
         @EventHandler
         public void onInventoryClick(InventoryClickEvent e){
             if(!e.getInventory().equals(VCoreGUI.this.inventory))
                 return;
             e.setCancelled(true);
-            Player clicker = (Player) e.getWhoClicked();
-            ItemStack clickedItem = e.getCurrentItem();
-            if(clickedItem == null || clickedItem.getType().equals(Material.AIR))
+            player.updateInventory();
+            if(e.getCurrentItem() == null || e.getCurrentItem().equals(Material.AIR))
                 return;
-            InventoryContent content = VCoreGUI.this.itemCache.get(clickedItem);
-            if(content == null)
+            VCoreItem clickedItem = VCorePaper.getInstance().getCustomItemManager().wrap(VCoreItem.class,e.getCurrentItem());
+            if(clickedItem == null || clickedItem.getDataHolder().getType().equals(Material.AIR))
                 return;
-            if(VCoreGUI.this.onItemClick == null)
-                return;
-            Response response = VCoreGUI.this.onItemClick.apply(clickedItem, (T) content.object);
+
+            Response<?,?> response;
+
+            if(e.getClickedInventory().equals(e.getView().getTopInventory())){
+                InventoryContent<T> content = VCoreGUI.this.itemCache.get(e.getSlot());
+                if(VCoreGUI.this.onItemClick == null)
+                    return;
+                try {
+                    VCoreGUIClick<T> vCoreGUIClick = new VCoreGUIClick<>(e.getSlot(), e.getClick(), clickedItem, content.object, VCoreGUI.this);
+                    response = VCoreGUI.this.onItemClick.apply(vCoreGUIClick); }
+                catch (Throwable throwable) {
+                    throwable.printStackTrace();
+                    return;
+                }
+            }
+            else {
+                if(VCoreGUI.this.onPlayerInventoryClick == null)
+                    return;
+                //VCoreItem, ClickType, Inventory, Response
+                try{
+                    GUIClick guiClick = new GUIClick(e.getSlot(), e.getClick(), clickedItem, e.getClickedInventory());
+                    response = VCoreGUI.this.onPlayerInventoryClick.apply(guiClick);
+                }
+                catch (Throwable throwable){throwable.printStackTrace(); return; }
+            }
+
             if(response.code.equals(Response.CLOSE))
                 VCoreGUI.this.closeInventory();
+            else if(response.code.equals(Response.CONFIRMATION)){
+                new AnvilGUI.Builder()
+                        .plugin(getPlugin())
+                        .title(ChatColor.translateAlternateColorCodes('&',"&cBestätige mit Ja"))
+                        .itemLeft(VCorePaper.getInstance().getCustomItemManager().getItemPreset().blackGUIBorder().getDataHolder())
+                        .onLeftInputClick(player -> copy())
+                        .onComplete((player, text) -> {
+                            Function<Boolean,AnvilGUI.Response> func = (Function<Boolean, AnvilGUI.Response>) response.getCallback();
+                            boolean input = text.equalsIgnoreCase("Ja")
+                                    || text.equalsIgnoreCase("yes");
+                            return func.apply(input);
+                        })
+                        .onClose(player -> copy())
+                        .open(getPlayer());
+            }
+            else if(response.code.equals(Response.INPUT)){
+                new AnvilGUI.Builder()
+                        .plugin(getPlugin())
+                        .title(ChatColor.translateAlternateColorCodes('&',inventoryTitle))
+                        .itemLeft(VCorePaper.getInstance().getCustomItemManager().getItemPreset().redBackButton().getDataHolder())
+                        .onLeftInputClick(player -> copy())
+                        .onComplete((player1, s) -> {
+                            Function<String,AnvilGUI.Response> func = (Function<String, AnvilGUI.Response>) response.getCallback();
+                            return func.apply(s);
+                        })
+                        .onClose(player -> copy())
+                        .open(getPlayer());
+            }
         }
 
         @EventHandler
@@ -334,7 +473,7 @@ public class VCoreGUI<T> {
         public void onInventoryClose(InventoryCloseEvent e){
             if(VCoreGUI.this.open && e.getInventory().equals(VCoreGUI.this.inventory)){
                 if(VCoreGUI.this.preventClose)
-                    Bukkit.getScheduler().runTask(VCoreGUI.this.getPlugin().getPlugin(), VCoreGUI.this::openInventory);
+                    Bukkit.getScheduler().runTask(VCoreGUI.this.getPlugin().getPlugin(), VCoreGUI.this::copy);
                 else
                     if(VCoreGUI.this.closeListener != null)
                         VCoreGUI.this.closeListener.accept((Player) e.getPlayer());

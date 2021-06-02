@@ -9,10 +9,8 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public abstract class StorageSystem<S extends VCoreConfig<?,?>> {
     protected String storageName;
@@ -80,6 +78,10 @@ public abstract class StorageSystem<S extends VCoreConfig<?,?>> {
         saveFile.delete();
         saveFiles.remove(identifier);
         return true;
+    }
+
+    public List<S> getAllConfigs(){
+        return getStorageKeys().stream().map(this::getConfiguration).collect(Collectors.toList());
     }
 
     public Set<String> getStorageKeys(){

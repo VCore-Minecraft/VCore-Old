@@ -10,6 +10,8 @@ import de.verdox.vcore.plugin.bukkit.BukkitPlugin;
 import de.verdox.vcore.plugin.bungeecord.BungeeCordPlugin;
 import de.verdox.vcore.subsystem.VCoreSubsystem;
 import net.md_5.bungee.api.ProxyServer;
+import org.bukkit.Bukkit;
+import org.bukkit.World;
 
 import java.io.File;
 import java.util.List;
@@ -95,6 +97,7 @@ public interface VCorePlugin <T, R extends VCoreSubsystem<?>> {
         public final void onDisable() {
             consoleMessage("&ePlugin stopping&7!",false);
             onPluginDisable();
+            Bukkit.getWorlds().forEach(World::save);
             subsystemManager.disable();
             consoleMessage("&aPlugin stopped&7!",false);
         }

@@ -1,7 +1,9 @@
 package de.verdox.vcorepaper.custom;
 
+import de.verdox.vcorepaper.custom.items.VCoreItem;
 import de.verdox.vcorepaper.custom.nbtholders.NBTHolder;
 
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -29,6 +31,8 @@ public abstract class CustomDataHolder <S, N extends NBTHolder, C extends Custom
             throw new NullPointerException("CustomData could not be instantiated");
         if(!customDataManager.exists(customData.getNBTKey()))
             throw new IllegalStateException("CustomDataClass "+customDataType+" has not yet been registered in your plugin!");
+        if(value == null)
+            throw new NullPointerException("Can't store value null to dataHolder");
         customData.storeCustomData(this,value);
         onStoreData(customDataType,value);
         if(callback == null)
@@ -38,6 +42,8 @@ public abstract class CustomDataHolder <S, N extends NBTHolder, C extends Custom
     }
 
     public final <T,R extends CustomData<T>> T getCustomData(Class<? extends R> customDataClass){
+        if(!containsCustomData(customDataClass))
+            return null;
         R customData = instantiateData(customDataClass);
         if(customData == null)
             throw new NullPointerException("Could not instantiate: "+customDataClass);
@@ -46,8 +52,13 @@ public abstract class CustomDataHolder <S, N extends NBTHolder, C extends Custom
         return customData.findInDataHolder(this);
     }
 
+    public <T,R extends CustomData<T>> boolean containsCustomData(Class<? extends R> customDataClass){
+        String nbtKey = customDataManager.getNBTKey(customDataClass);
+        return getNBTCompound().hasKey(nbtKey);
+    }
+
     public Set<String> getCustomDataKeys(){
-        return getNBTCompound().getKeys().parallelStream().filter(customDataManager::exists).collect(Collectors.toSet());
+        return getNBTCompound().getKeys().parallelStream().collect(Collectors.toSet());
     }
 
     protected abstract <T,R extends CustomData<T>> R instantiateData(Class <? extends R> customDataType);
@@ -60,5 +71,26 @@ public abstract class CustomDataHolder <S, N extends NBTHolder, C extends Custom
 
     public C getCustomDataManager() {
         return customDataManager;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof CustomDataHolder)) return false;
+        CustomDataHolder<?, ?, ?> that = (CustomDataHolder<?, ?, ?>) o;
+        return Objects.equals(getDataHolder(), that.getDataHolder());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getDataHolder());
+    }
+
+    @Override
+    public String toString() {
+        return "CustomDataHolder{" +
+                "dataHolder=" + dataHolder +
+                ", customDataManager=" + customDataManager +
+                '}';
     }
 }

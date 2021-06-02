@@ -1,8 +1,5 @@
 package de.verdox.vcorepaper.custom.items;
 
-
-
-import de.tr7zw.changeme.nbtapi.NBTItem;
 import de.verdox.vcorepaper.custom.CustomData;
 import de.verdox.vcorepaper.custom.CustomDataHolder;
 import de.verdox.vcorepaper.custom.nbtholders.NBTItemHolder;
@@ -13,7 +10,6 @@ import org.bukkit.inventory.meta.ItemMeta;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class VCoreItem extends CustomDataHolder<ItemStack, NBTItemHolder, CustomItemManager> {
@@ -21,9 +17,11 @@ public class VCoreItem extends CustomDataHolder<ItemStack, NBTItemHolder, Custom
 
     public VCoreItem(ItemStack dataHolder, CustomItemManager customItemManager) {
         super(dataHolder,customItemManager);
+        if(dataHolder == null || dataHolder.getType().isAir())
+            throw new NullPointerException("Stack can't be null or air!");
     }
 
-    public List<String> getItemLore(){
+    protected List<String> getItemLore(){
         ItemStack stack = getDataHolder();
         List<String> lore = new ArrayList<>();
 
@@ -38,6 +36,14 @@ public class VCoreItem extends CustomDataHolder<ItemStack, NBTItemHolder, Custom
         return lore;
     }
 
+    public List<String> getLore(){
+        return getDataHolder().getItemMeta().getLore();
+    }
+
+    public String getDisplayName(){
+        return getDataHolder().getI18NDisplayName();
+    }
+
     private void updateLore(){
         ItemStack stack = getDataHolder();
         ItemMeta meta = getDataHolder().getItemMeta();
@@ -49,7 +55,10 @@ public class VCoreItem extends CustomDataHolder<ItemStack, NBTItemHolder, Custom
             ItemCustomData<?> customData = getCustomDataManager().getDataType(nbtKey);
             if(customData == null)
                 return;
-            List<String> customDataLore = customData.asLabel(Objects.requireNonNull(getCustomData(customData.getClass())).toString());
+            Object object = getCustomData(customData.getClass());
+            if(object == null)
+                return;
+            List<String> customDataLore = customData.asLabel(object.toString());
 
             if(customDataLore != null && !customDataLore.isEmpty())
                 lore.addAll(customDataLore.stream().map(line -> ChatColor.translateAlternateColorCodes('&',line)).collect(Collectors.toList()));
@@ -77,4 +86,6 @@ public class VCoreItem extends CustomDataHolder<ItemStack, NBTItemHolder, Custom
     public NBTItemHolder getNBTCompound() {
         return new NBTItemHolder(getDataHolder(),true);
     }
+
+
 }

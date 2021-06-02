@@ -1,6 +1,7 @@
 package de.verdox.vcorepaper.custom.nbtholders;
 
 import de.tr7zw.changeme.nbtapi.NBTItem;
+import de.verdox.vcore.util.VCoreUtil;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 
@@ -52,13 +53,47 @@ public class NBTItemHolder implements NBTHolder {
     }
 
     @Override
+    public ItemStack getItemStack(String key) {
+        return nbtItem.getItemStack(key);
+    }
+
+    @Override
     public <T> T getObject(String key, Class<T> type) {
+        if(type.equals(Boolean.class))
+            return (T) getBoolean(key);
+        if(type.equals(Integer.class))
+            return (T) getInteger(key);
+        if(type.equals(Double.class))
+            return (T) getDouble(key);
+        if(type.equals(String.class))
+            return (T) getString(key);
+        if(type.equals(UUID.class))
+            return (T) getUUID(key);
+        if(type.equals(Long.class))
+            return (T) getLong(key);
+        if(type.equals(ItemStack.class))
+            return (T) nbtItem.getItemStack(key);
         return nbtItem.getObject(key,type);
     }
 
     @Override
     public void setObject(String key, Object value) {
-        nbtItem.setObject(key,value);
+        if(value instanceof Boolean)
+            nbtItem.setBoolean(key, (Boolean) value);
+        else if(value instanceof Integer)
+            nbtItem.setInteger(key, (Integer) value);
+        else if(value instanceof Double)
+            nbtItem.setDouble(key, (Double) value);
+        else if(value instanceof String)
+            nbtItem.setString(key, (String) value);
+        else if(value instanceof UUID)
+            nbtItem.setUUID(key, (UUID) value);
+        else if(value instanceof Long)
+            nbtItem.setLong(key, (Long) value);
+        else if(value instanceof ItemStack)
+            nbtItem.setItemStack(key, (ItemStack) value);
+        else
+            nbtItem.setObject(key, value);
     }
 
     @Override

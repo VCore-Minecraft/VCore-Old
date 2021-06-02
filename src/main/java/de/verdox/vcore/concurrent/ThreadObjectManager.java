@@ -28,7 +28,7 @@ public class ThreadObjectManager<T extends VCoreKey> {
         },0L,300, TimeUnit.SECONDS);
     }
 
-    public void submitTask(T object, Runnable runnable){
+    public void submitTask(T object, CatchingRunnable runnable){
         if(!cache.containsKey(object))
             cache.put(object, new ThreadObject<>(Executors.newSingleThreadScheduledExecutor()));
         cache.get(object).submit(runnable);

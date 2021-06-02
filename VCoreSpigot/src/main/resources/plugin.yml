@@ -3,6 +3,11 @@ version: ${project.version}
 main: de.verdox.vcorepaper.VCorePaper
 api-version: 1.16
 authors: [ Verdox ]
+softdepend:
+  - HolographicDisplays
+depend:
+  - ProtocolLib
+  - FastAsyncWorldEdit
 
 commands:
   debug:

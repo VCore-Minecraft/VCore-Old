@@ -12,6 +12,7 @@ public interface NBTHolder {
     String getString(String key);
     UUID getUUID(String key);
     Long getLong(String key);
+    ItemStack getItemStack(String key);
     <T> T getObject(String key, Class<T> type);
     void setObject(String key, Object value);
     Set<String> getKeys();

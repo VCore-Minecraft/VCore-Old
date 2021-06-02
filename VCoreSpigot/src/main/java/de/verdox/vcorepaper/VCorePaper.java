@@ -1,5 +1,12 @@
 package de.verdox.vcorepaper;
 
+import com.comphenix.protocol.PacketType;
+import com.comphenix.protocol.ProtocolLibrary;
+import com.comphenix.protocol.ProtocolManager;
+import com.comphenix.protocol.events.ListenerPriority;
+import com.comphenix.protocol.events.PacketAdapter;
+import com.comphenix.protocol.events.PacketEvent;
+import com.comphenix.protocol.wrappers.BlockPosition;
 import de.verdox.vcore.dataconnection.DataConnection;
 import de.verdox.vcore.plugin.VCorePlugin;
 import de.verdox.vcore.subsystem.VCoreSubsystem;
@@ -10,6 +17,7 @@ import de.verdox.vcorepaper.custom.blocks.VBlockManager;
 import de.verdox.vcorepaper.custom.entities.CustomEntityListener;
 import de.verdox.vcorepaper.custom.entities.CustomEntityManager;
 import de.verdox.vcorepaper.custom.CustomDataListener;
+import de.verdox.vcorepaper.custom.events.AsyncEventWrapper;
 import de.verdox.vcorepaper.custom.items.CustomItemManager;
 import de.verdox.vcorepaper.files.VCorePaperSettings;
 
@@ -24,6 +32,7 @@ public class VCorePaper extends VCorePlugin.Minecraft {
     private CustomEntityManager customEntityManager;
     private CustomItemManager customItemManager;
     private VBlockManager vBlockManager;
+    private ProtocolManager protocolManager;
 
     private VCorePaperSettings vCorePaperSettings;
 
@@ -35,6 +44,7 @@ public class VCorePaper extends VCorePlugin.Minecraft {
     public void onPluginEnable() {
         instance = this;
 
+
         this.vCorePaperSettings = new VCorePaperSettings(this,"settings.yml","");
         this.vCorePaperSettings.init();
 
@@ -45,6 +55,7 @@ public class VCorePaper extends VCorePlugin.Minecraft {
         new CustomDataListener(this);
         new CustomEntityListener(this);
         new VBlockListener(this,vBlockManager);
+        new AsyncEventWrapper(this);
 
         getSessionManager();
         getServerDataManager();
