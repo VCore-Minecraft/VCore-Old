@@ -3,13 +3,12 @@ package de.verdox.vcorepaper.custom.nbtholders;
 import de.verdox.vcore.util.VCoreUtil;
 import de.verdox.vcorepaper.VCorePaper;
 import de.verdox.vcorepaper.custom.blocks.BlockPersistentData;
-import de.verdox.vcorepaper.custom.blocks.VBlockManager;
+import de.verdox.vcorepaper.custom.blocks.CustomBlockManager;
 import de.verdox.vcorepaper.custom.util.Serializer;
 import org.bukkit.block.BlockState;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.metadata.FixedMetadataValue;
 
-import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
@@ -24,7 +23,7 @@ public class NBTBlockHolder implements NBTHolder {
     private final Lock writeLock = readWriteLock.writeLock();
 
     private final BlockState blockState;
-    private final VBlockManager vBlockManager;
+    private final CustomBlockManager customBlockManager;
     private final BlockPersistentData blockPersistentData;
     private long lastUse = System.currentTimeMillis();
 
@@ -35,7 +34,7 @@ public class NBTBlockHolder implements NBTHolder {
         if(blockPersistentData == null)
             throw new NullPointerException("blockPersistentData can't be null!");
         this.blockPersistentData = blockPersistentData;
-        vBlockManager = VCorePaper.getInstance().getVBlockManager();
+        customBlockManager = VCorePaper.getInstance().getCustomBlockManager();
     }
 
     private <T> void saveMetaDataKey(String key, Class<T> type, T value){
@@ -213,7 +212,7 @@ public class NBTBlockHolder implements NBTHolder {
     @Override
     public void save() {
         lastUse = System.currentTimeMillis();
-        vBlockManager.saveBlockPersistentData(blockState);
+        blockPersistentData.getVBlockSaveFile().save();
     }
 
     public Lock getWriteLock() {

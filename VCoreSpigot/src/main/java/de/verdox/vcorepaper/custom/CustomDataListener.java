@@ -10,9 +10,11 @@ import de.verdox.vcorepaper.custom.blocks.VBlock;
 import de.verdox.vcorepaper.custom.events.callbacks.BlockDestroyCallback;
 import de.verdox.vcorepaper.custom.events.callbacks.BlockInteractCallback;
 import de.verdox.vcorepaper.custom.events.callbacks.BlockPlaceCallback;
+import de.verdox.vcorepaper.custom.events.callbacks.EventBlockCallback;
 import de.verdox.vcorepaper.custom.items.VCoreItem;
 import org.bukkit.Bukkit;
 import org.bukkit.block.Block;
+import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -24,7 +26,6 @@ import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.Objects;
-import java.util.concurrent.ExecutorService;
 
 public class CustomDataListener extends VCoreListener.VCoreBukkitListener {
 
@@ -48,11 +49,13 @@ public class CustomDataListener extends VCoreListener.VCoreBukkitListener {
         Block block = e.getClickedBlock();
         if(block == null)
             return;
+        BlockData blockData = e.getClickedBlock().getBlockData();
 
         Bukkit.getScheduler().runTaskAsynchronously(getPlugin(),() -> { });
 
         threadObjectManager.submitTask(new ChunkKey(block.getChunk()),new CatchingRunnable(() -> {
-            VBlock vBlock = VCorePaper.getInstance().getVBlockManager().wrap(VBlock.class, block.getState());
+            VBlock vBlock = VCorePaper.getInstance().getCustomBlockManager().wrap(VBlock.class, block.getState());
+            vBlock.updateBlockData(blockData);
 
             VCoreItem vCoreItem = null;
             if(stack != null && !stack.getType().isAir())
@@ -65,14 +68,14 @@ public class CustomDataListener extends VCoreListener.VCoreBukkitListener {
                         .map(key -> VCorePaper.getInstance().getCustomItemManager().getDataType(key))
                         .filter(Objects::nonNull)
                         .filter(itemCustomData -> itemCustomData instanceof BlockInteractCallback)
-                        .forEach(itemCustomData -> ((BlockInteractCallback) itemCustomData).blockCallback(player,action,finalVCoreItem,vBlock,false));
+                        .forEach(itemCustomData -> ((BlockInteractCallback) itemCustomData).blockCallback(player,action,finalVCoreItem,vBlock, EventBlockCallback.CallbackType.INTERACT_BLOCK));
 
             vBlock.getCustomDataKeys()
                     .parallelStream()
-                    .map(key -> VCorePaper.getInstance().getVBlockManager().getDataType(key))
+                    .map(key -> VCorePaper.getInstance().getCustomBlockManager().getDataType(key))
                     .filter(Objects::nonNull)
                     .filter(itemCustomData -> itemCustomData instanceof BlockInteractCallback)
-                    .forEach(itemCustomData -> ((BlockInteractCallback) itemCustomData).blockCallback(player, action, finalVCoreItem, vBlock,false));
+                    .forEach(itemCustomData -> ((BlockInteractCallback) itemCustomData).blockCallback(player, action, finalVCoreItem, vBlock, EventBlockCallback.CallbackType.INTERACT_BLOCK));
         }));
     }
 
@@ -81,12 +84,14 @@ public class CustomDataListener extends VCoreListener.VCoreBukkitListener {
         Player player = e.getPlayer();
         ItemStack stack = e.getItemInHand();
         Block block = e.getBlock();
+        BlockData blockData = e.getBlock().getBlockData();
 
         if(e.isCancelled())
             return;
 
         threadObjectManager.submitTask(new ChunkKey(block.getChunk()),new CatchingRunnable(() -> {
-            VBlock vBlock = VCorePaper.getInstance().getVBlockManager().wrap(VBlock.class, block.getState());
+            VBlock vBlock = VCorePaper.getInstance().getCustomBlockManager().wrap(VBlock.class, block.getState());
+            vBlock.updateBlockData(blockData);
 
             VCoreItem vCoreItem = null;
             if(!stack.getType().isAir())
@@ -99,14 +104,14 @@ public class CustomDataListener extends VCoreListener.VCoreBukkitListener {
                         .map(key -> VCorePaper.getInstance().getCustomItemManager().getDataType(key))
                         .filter(Objects::nonNull)
                         .filter(itemCustomData -> itemCustomData instanceof BlockPlaceCallback)
-                        .forEach(itemCustomData -> ((BlockPlaceCallback) itemCustomData).blockCallback(player, Action.RIGHT_CLICK_BLOCK,finalVCoreItem,vBlock,e.isCancelled()));
+                        .forEach(itemCustomData -> ((BlockPlaceCallback) itemCustomData).blockCallback(player, Action.RIGHT_CLICK_BLOCK,finalVCoreItem,vBlock,EventBlockCallback.CallbackType.PLACE_BLOCK));
 
             vBlock.getCustomDataKeys()
                     .parallelStream()
-                    .map(key -> VCorePaper.getInstance().getVBlockManager().getDataType(key))
+                    .map(key -> VCorePaper.getInstance().getCustomBlockManager().getDataType(key))
                     .filter(Objects::nonNull)
                     .filter(vBlockCustomData -> vBlockCustomData instanceof BlockPlaceCallback)
-                    .forEach(vBlockCustomData -> ((BlockPlaceCallback) vBlockCustomData).blockCallback(player, Action.RIGHT_CLICK_BLOCK,finalVCoreItem,vBlock,e.isCancelled()));
+                    .forEach(vBlockCustomData -> ((BlockPlaceCallback) vBlockCustomData).blockCallback(player, Action.RIGHT_CLICK_BLOCK,finalVCoreItem,vBlock,EventBlockCallback.CallbackType.PLACE_BLOCK));
         }));
 
         Bukkit.getScheduler().runTaskAsynchronously(getPlugin(),() -> { });
@@ -117,12 +122,14 @@ public class CustomDataListener extends VCoreListener.VCoreBukkitListener {
         Player player = e.getPlayer();
         ItemStack stack = player.getInventory().getItemInMainHand();
         Block block = e.getBlock();
+        BlockData blockData = e.getBlock().getBlockData();
 
         if(e.isCancelled())
             return;
 
-        threadObjectManager.submitTask(new ChunkKey(block.getChunk()),new CatchingRunnable(() -> {
-            VBlock vBlock = VCorePaper.getInstance().getVBlockManager().wrap(VBlock.class, block.getState());
+        Bukkit.getScheduler().runTaskAsynchronously(getPlugin(),() -> {
+            VBlock vBlock = VCorePaper.getInstance().getCustomBlockManager().wrap(VBlock.class, block.getState());
+            vBlock.updateBlockData(blockData);
 
             VCoreItem vCoreItem = null;
             if(!stack.getType().isAir())
@@ -135,17 +142,20 @@ public class CustomDataListener extends VCoreListener.VCoreBukkitListener {
                         .map(key -> VCorePaper.getInstance().getCustomItemManager().getDataType(key))
                         .filter(Objects::nonNull)
                         .filter(itemCustomData -> itemCustomData instanceof BlockDestroyCallback)
-                        .forEach(itemCustomData -> ((BlockDestroyCallback) itemCustomData).blockCallback(player, Action.LEFT_CLICK_BLOCK, finalVCoreItem,vBlock,e.isCancelled()));
-
-            vBlock.getCustomDataKeys()
-                    .parallelStream()
-                    .map(key -> VCorePaper.getInstance().getVBlockManager().getDataType(key))
-                    .filter(Objects::nonNull)
-                    .filter(vBlockCustomData -> vBlockCustomData instanceof BlockDestroyCallback)
-                    .forEach(vBlockCustomData -> ((BlockDestroyCallback) vBlockCustomData).blockCallback(player, Action.LEFT_CLICK_BLOCK,finalVCoreItem,vBlock,e.isCancelled()));
-            vBlock.deleteAllData();
-        }));
-
-        Bukkit.getScheduler().runTaskAsynchronously(getPlugin(),() -> { });
+                        .forEach(itemCustomData -> {
+                            ((BlockDestroyCallback) itemCustomData).blockCallback(player, Action.LEFT_CLICK_BLOCK, finalVCoreItem, vBlock, EventBlockCallback.CallbackType.BREAK_BLOCK);
+                        });
+            try{
+                vBlock.getCustomDataKeys()
+                        .parallelStream()
+                        .map(key -> VCorePaper.getInstance().getCustomBlockManager().getDataType(key))
+                        .filter(Objects::nonNull)
+                        .filter(vBlockCustomData -> vBlockCustomData instanceof BlockDestroyCallback)
+                        .forEach(vBlockCustomData -> ((BlockDestroyCallback) vBlockCustomData).blockCallback(player, Action.LEFT_CLICK_BLOCK,finalVCoreItem,vBlock,EventBlockCallback.CallbackType.BREAK_BLOCK));
+            }
+            finally {
+                vBlock.deleteData();
+            }
+        });
     }
 }

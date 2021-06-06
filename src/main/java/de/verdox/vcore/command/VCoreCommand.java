@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2021. Lukas Jonsson
+ */
+
 package de.verdox.vcore.command;
 
 import de.verdox.vcore.command.callback.CommandCallback;
@@ -13,6 +17,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * VCoreCommand which is used to build a Command inside VCore
+ * @param <T> Type of VCorePlugin
+ * @param <R> Type of CommandSender
+ */
 public abstract class VCoreCommand <T extends VCorePlugin<?,?>, R> {
 
     protected final T vCorePlugin;

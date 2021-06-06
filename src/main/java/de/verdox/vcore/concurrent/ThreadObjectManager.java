@@ -1,9 +1,14 @@
+/*
+ * Copyright (c) 2021. Lukas Jonsson
+ */
+
 package de.verdox.vcore.concurrent;
 
 import de.verdox.vcore.util.keys.VCoreKey;
 
 import java.util.Map;
 import java.util.concurrent.*;
+
 
 public class ThreadObjectManager<T extends VCoreKey> {
 

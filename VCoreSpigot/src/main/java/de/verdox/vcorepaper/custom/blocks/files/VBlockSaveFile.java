@@ -1,11 +1,8 @@
 package de.verdox.vcorepaper.custom.blocks.files;
 
-import com.google.gson.JsonObject;
-import de.verdox.vcore.util.keys.ChunkKey;
 import de.verdox.vcore.util.keys.LocationKey;
 import de.verdox.vcore.util.keys.SplitChunkKey;
 import de.verdox.vcorepaper.custom.blocks.BlockPersistentData;
-import de.verdox.vcorepaper.custom.blocks.VBlockFileStorage;
 import org.bukkit.Location;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -20,15 +17,15 @@ import java.nio.file.Path;
 
 public class VBlockSaveFile {
 
-    private final VBlockFileStorage vBlockFileStorage;
+    private VBlockStorage vBlockStorage;
     private final Location blockLocation;
     private final File folder;
     private final File saveFile;
     private final JSONObject jsonObject;
     private final BlockPersistentData blockPersistentData;
 
-    public VBlockSaveFile(VBlockFileStorage vBlockFileStorage, Location blockLocation){
-        this.vBlockFileStorage = vBlockFileStorage;
+    public VBlockSaveFile(VBlockStorage vBlockStorage, Location blockLocation){
+        this.vBlockStorage = vBlockStorage;
         this.blockLocation = blockLocation;
         this.folder = getFolder();
         this.saveFile = getSaveFile();
@@ -39,10 +36,17 @@ public class VBlockSaveFile {
     public void save(){
         if(blockPersistentData.isEmpty())
             return;
-        try (FileWriter fileWriter = new FileWriter(getSaveFile())){
-            jsonObject.writeJSONString(fileWriter);
-            fileWriter.flush();
-        } catch (IOException e) {
+        try{
+            if(!getSaveFile().exists()) {
+                folder.mkdirs();
+                getSaveFile().createNewFile();
+            }
+            try (FileWriter fileWriter = new FileWriter(getSaveFile())){
+                jsonObject.writeJSONString(fileWriter);
+                fileWriter.flush();
+            }
+        }
+        catch (IOException e){
             e.printStackTrace();
         }
     }
@@ -54,35 +58,31 @@ public class VBlockSaveFile {
     public BlockPersistentData getBlockPersistentData(){
         if(blockPersistentData != null)
             return blockPersistentData;
-        BlockPersistentData blockPersistentData = new BlockPersistentData(new LocationKey(blockLocation),getJsonObject(),blockLocation);
+        BlockPersistentData blockPersistentData = new BlockPersistentData(new LocationKey(blockLocation),this,blockLocation);
         return blockPersistentData;
     }
 
-    public File getFolder(){
+    File getFolder(){
         if(folder != null)
             return folder;
-        File worldFolder = blockLocation.getWorld().getWorldFolder();
-        int yCoordinate = blockLocation.getBlockY() / 16;
-
-        String chunkKey = new ChunkKey(blockLocation.getChunk()).toString();
-        String splitChunkKey = new SplitChunkKey(blockLocation.getChunk(),yCoordinate).toString();
-        return new File(worldFolder
-                .getAbsolutePath()+"//VChunks//"+chunkKey+"//"+splitChunkKey);
+        return vBlockStorage.getFolder(blockLocation);
     }
 
     public JSONObject getJsonObject(){
         if(jsonObject != null)
             return jsonObject;
-        JSONParser jsonParser = new JSONParser();
-        try {
-            return (JSONObject) jsonParser.parse(new FileReader(getSaveFile()));
-        } catch (IOException | ParseException e) {
-            e.printStackTrace();
+        if(saveFile.exists()){
+            JSONParser jsonParser = new JSONParser();
+            try {
+                return (JSONObject) jsonParser.parse(new FileReader(getSaveFile()));
+            } catch (IOException | ParseException e) {
+                e.printStackTrace();
+            }
         }
         return new JSONObject();
     }
 
-    public File getSaveFile(){
+    File getSaveFile(){
         if(this.saveFile != null)
             return saveFile;
         if(folder.isDirectory()){
@@ -98,4 +98,15 @@ public class VBlockSaveFile {
         return new File(folder.getAbsolutePath()+"//"+new LocationKey(blockLocation)+".json");
     }
 
+    public Location getBlockLocation() {
+        return blockLocation;
+    }
+
+    public SplitChunkKey getSplitChunkKey(){
+        return new SplitChunkKey(blockLocation.getChunk(),blockLocation.getBlockY());
+    }
+
+    public LocationKey getLocationKey(){
+        return new LocationKey(blockLocation);
+    }
 }

@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2021. Lukas Jonsson
+ */
+
 package de.verdox.vcore.data.datatypes;
 
 import de.verdox.vcore.data.manager.ServerDataManager;

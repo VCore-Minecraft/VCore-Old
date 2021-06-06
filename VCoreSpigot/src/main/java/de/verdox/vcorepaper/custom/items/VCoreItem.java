@@ -25,12 +25,15 @@ public class VCoreItem extends CustomDataHolder<ItemStack, NBTItemHolder, Custom
         ItemStack stack = getDataHolder();
         List<String> lore = new ArrayList<>();
 
+        boolean adding = true;
+
         if(stack.getItemMeta().getLore() != null){
             for (int i = 0; i < stack.getItemMeta().getLore().size(); i++) {
                 String line = stack.getItemMeta().getLore().get(i);
                 if(line.equals(separatorLine))
-                    break;
-                lore.add(ChatColor.translateAlternateColorCodes('&',line));
+                    adding = !adding;
+                if(adding)
+                    lore.add(ChatColor.translateAlternateColorCodes('&',line));
             }
         }
         return lore;

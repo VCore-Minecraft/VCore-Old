@@ -13,12 +13,14 @@ public class ChunkKey extends VCoreKey{
     protected int z;
     protected int globalX;
     protected int globalZ;
+    private Chunk chunk;
 
     public ChunkKey(Chunk chunk){
         x = chunk.getX();
         z = chunk.getZ();
         globalX = chunk.getBlock(0,0,0).getLocation().getBlockX();
         globalZ = chunk.getBlock(0,0,0).getLocation().getBlockZ();
+        this.chunk = chunk;
     }
 
     public ChunkKey(String key){
@@ -30,13 +32,17 @@ public class ChunkKey extends VCoreKey{
     public Set<SplitChunkKey> splitChunkKey(World world){
         Set<SplitChunkKey> split = new HashSet<>();
         for(int y = 0; y <= 256; y+=16){
-            split.add(new SplitChunkKey(getChunk(world),y));
+            split.add(new SplitChunkKey(getChunkIn(world),y));
         }
         return split;
     }
 
-    public final Chunk getChunk(World world){
+    public final Chunk getChunkIn(World world){
         return world.getChunkAt(x,z);
+    }
+
+    public Chunk getChunk() {
+        return chunk;
     }
 
     @Override

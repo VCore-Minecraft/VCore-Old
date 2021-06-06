@@ -42,9 +42,9 @@ public abstract class CustomDataHolder <S, N extends NBTHolder, C extends Custom
     }
 
     public final <T,R extends CustomData<T>> T getCustomData(Class<? extends R> customDataClass){
-        if(!containsCustomData(customDataClass))
-            return null;
         R customData = instantiateData(customDataClass);
+        if(!containsCustomData(customDataClass))
+            return customData.defaultValue();
         if(customData == null)
             throw new NullPointerException("Could not instantiate: "+customDataClass);
         if(!customDataManager.exists(customData.getNBTKey()))

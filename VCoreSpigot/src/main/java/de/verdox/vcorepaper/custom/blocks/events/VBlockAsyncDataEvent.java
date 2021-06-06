@@ -11,7 +11,7 @@ public class VBlockAsyncDataEvent extends VCoreAsyncEvent {
         this.vBlock = vBlock;
     }
 
-    public VBlock getvBlock() {
+    public VBlock getVBlock() {
         return vBlock;
     }
 }

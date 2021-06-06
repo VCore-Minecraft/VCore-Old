@@ -3,10 +3,12 @@ package de.verdox.vcorepaper.custom.items;
 import de.tr7zw.changeme.nbtapi.NBTItem;
 import de.verdox.vcorepaper.VCorePaper;
 import de.verdox.vcorepaper.custom.CustomDataManager;
+import de.verdox.vcorepaper.custom.entities.CustomEntityManager;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.Entity;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -33,7 +35,7 @@ public class CustomItemManager extends CustomDataManager<ItemStack,ItemCustomDat
     }
 
     @Override
-    public VCoreItem wrap(Class<? extends VCoreItem> type, ItemStack inputObject) {
+    public <U extends VCoreItem> U wrap(Class<? extends U> type, ItemStack inputObject) {
         try {
             return type.getDeclaredConstructor(ItemStack.class, CustomItemManager.class).newInstance(inputObject,this);
         } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
@@ -41,6 +43,17 @@ public class CustomItemManager extends CustomDataManager<ItemStack,ItemCustomDat
             return null;
         }
     }
+
+    @Override
+    public <U extends VCoreItem> U convertTo(Class<? extends U> type, VCoreItem customData) {
+        try {
+            return type.getDeclaredConstructor(ItemStack.class, CustomItemManager.class).newInstance(customData.getDataHolder(),this);
+        } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
 
     @Override
     protected ItemCustomData<?> instantiateCustomData(Class<? extends ItemCustomData<?>> dataClass) {

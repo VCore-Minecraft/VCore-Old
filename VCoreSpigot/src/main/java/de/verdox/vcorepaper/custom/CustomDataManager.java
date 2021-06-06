@@ -27,7 +27,8 @@ public abstract class CustomDataManager<S,T extends CustomData<?>, R extends Cus
         customDataCacheByClass = new ConcurrentHashMap<>();
     }
 
-    public abstract R wrap(Class<? extends R> type, S inputObject);
+    public abstract <U extends R> U wrap(Class<? extends U> type, S inputObject);
+    public abstract <U extends R> U convertTo(Class<? extends U> type, R customData);
 
     public final void registerData(Class<? extends T> customDataClass){
         String nbtKey = findNBTKey(customDataClass);

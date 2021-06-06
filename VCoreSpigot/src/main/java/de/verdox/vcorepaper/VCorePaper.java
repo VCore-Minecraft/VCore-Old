@@ -1,19 +1,13 @@
 package de.verdox.vcorepaper;
 
-import com.comphenix.protocol.PacketType;
-import com.comphenix.protocol.ProtocolLibrary;
 import com.comphenix.protocol.ProtocolManager;
-import com.comphenix.protocol.events.ListenerPriority;
-import com.comphenix.protocol.events.PacketAdapter;
-import com.comphenix.protocol.events.PacketEvent;
-import com.comphenix.protocol.wrappers.BlockPosition;
 import de.verdox.vcore.dataconnection.DataConnection;
 import de.verdox.vcore.plugin.VCorePlugin;
 import de.verdox.vcore.subsystem.VCoreSubsystem;
 import de.verdox.vcorepaper.commands.AdminCommands;
 import de.verdox.vcorepaper.commands.ConsoleCommands;
+import de.verdox.vcorepaper.custom.blocks.CustomBlockManager;
 import de.verdox.vcorepaper.custom.blocks.VBlockListener;
-import de.verdox.vcorepaper.custom.blocks.VBlockManager;
 import de.verdox.vcorepaper.custom.entities.CustomEntityListener;
 import de.verdox.vcorepaper.custom.entities.CustomEntityManager;
 import de.verdox.vcorepaper.custom.CustomDataListener;
@@ -31,7 +25,7 @@ public class VCorePaper extends VCorePlugin.Minecraft {
 
     private CustomEntityManager customEntityManager;
     private CustomItemManager customItemManager;
-    private VBlockManager vBlockManager;
+    private CustomBlockManager customBlockManager;
     private ProtocolManager protocolManager;
 
     private VCorePaperSettings vCorePaperSettings;
@@ -50,11 +44,11 @@ public class VCorePaper extends VCorePlugin.Minecraft {
 
         this.customEntityManager = new CustomEntityManager(this);
         this.customItemManager = new CustomItemManager(this);
-        this.vBlockManager = new VBlockManager(this);
+        this.customBlockManager = new CustomBlockManager(this);
 
         new CustomDataListener(this);
         new CustomEntityListener(this);
-        new VBlockListener(this,vBlockManager);
+        new VBlockListener(this,customBlockManager);
         new AsyncEventWrapper(this);
 
         getSessionManager();
@@ -121,7 +115,7 @@ public class VCorePaper extends VCorePlugin.Minecraft {
         return customItemManager;
     }
 
-    public VBlockManager getVBlockManager() {
-        return vBlockManager;
+    public CustomBlockManager getCustomBlockManager() {
+        return customBlockManager;
     }
 }

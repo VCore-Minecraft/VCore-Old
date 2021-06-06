@@ -1,4 +1,4 @@
-package de.verdox.vcorepaper.custom.blocks;
+package de.verdox.vcorepaper.custom.blocks.data;
 
 import de.verdox.vcorepaper.custom.CustomData;
 

@@ -4,6 +4,7 @@ import de.verdox.vcore.util.keys.LocationKey;
 import de.verdox.vcorepaper.VCorePaper;
 import de.verdox.vcorepaper.custom.blocks.events.LoadVBlockDataEvent;
 import de.verdox.vcorepaper.custom.blocks.events.UnloadVBlockDataEvent;
+import de.verdox.vcorepaper.custom.blocks.files.VBlockSaveFile;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.block.data.BlockData;
@@ -20,16 +21,15 @@ public class BlockPersistentData {
 
     private long lastUse = System.currentTimeMillis();
     private final LocationKey locationKey;
-    private final JSONObject jsonObject;
+    private final VBlockSaveFile vBlockSaveFile;
     private final Location location;
     private boolean save = true;
     private Set<Consumer<VBlock>> tickCallbacks = new HashSet<>();
 
-    public BlockPersistentData(LocationKey locationKey, JSONObject jsonObject, Location location){
+    public BlockPersistentData(LocationKey locationKey, VBlockSaveFile vBlockSaveFile, Location location){
         this.locationKey = locationKey;
-        this.jsonObject = jsonObject;
+        this.vBlockSaveFile = vBlockSaveFile;
         this.location = location;
-
         //if(!jsonObject.containsKey("vBlock_blockData"))
         //    jsonObject.put("vBlock_blockData",location.getBlock().getBlockData().getAsString());
     }
@@ -38,54 +38,60 @@ public class BlockPersistentData {
         return tickCallbacks;
     }
 
-    void addTickCallback(Consumer<VBlock> callback){
+    public void addTickCallback(Consumer<VBlock> callback){
         tickCallbacks.add(callback);
     }
 
+    public void clearTickCallbacks(){
+        tickCallbacks.clear();
+    }
+
     public boolean isEmpty(){
-        if(jsonObject.size() == 1 && jsonObject.containsKey("vBlockBlockData"))
+        if(getJsonObject().size() == 1 && getJsonObject().containsKey("vBlockBlockData"))
             return true;
-        return jsonObject.size() == 0;
+        return getJsonObject().size() == 0;
     }
 
     void onDataLoad(){
-        BlockData blockData = getBlockData();
-        if(blockData == null) {
+        String blockDataAsString = getBlockDataAsString();
+        if(blockDataAsString == null) {
             saveBlockData();
         }
         else {
-            if(!location.getBlock().getType().equals(blockData.getMaterial()))
-                Bukkit.getScheduler().runTask(VCorePaper.getInstance(),() -> location.getBlock().setBlockData(blockData));
+            if(!validate())
+                Bukkit.getScheduler().runTask(VCorePaper.getInstance(),() -> {
+                    BlockData blockData = Bukkit.createBlockData(blockDataAsString);
+                    location.getBlock().setBlockData(blockData);
+                });
         }
         Bukkit.getPluginManager().callEvent(new LoadVBlockDataEvent(toVBlock()));
     }
 
     public VBlock toVBlock(){
-        return new VBlock(location.getBlock().getState(), VCorePaper.getInstance().getVBlockManager(),this);
+        return new VBlock(location.getBlock().getState(), VCorePaper.getInstance().getCustomBlockManager(),this);
     }
 
-    private BlockData getBlockData(){
-        String blockDataString = (String) jsonObject.get("vBlockBlockData");
+    private String getBlockDataAsString(){
+        String blockDataString = (String) getJsonObject().get("vBlockBlockData");
         if(blockDataString == null)
             return null;
-        BlockData blockData = Bukkit.createBlockData(blockDataString);
-        if(!location.getBlock().getBlockData().equals(blockData))
+        if(!location.getBlock().getBlockData().getAsString().equals(blockDataString))
             return null;
-        return blockData;
+        return blockDataString;
     }
 
     boolean validate(){
-        if(!jsonObject.containsKey("vBlockBlockData"))
+        if(!getJsonObject().containsKey("vBlockBlockData"))
             return true;
-        BlockData blockData = getBlockData();
-        if(blockData == null)
+        String blockDataAsString = getBlockDataAsString();
+        if(blockDataAsString == null)
             return true;
-        return location.getBlock().getType().equals(blockData.getMaterial());
+        return location.getBlock().getBlockData().getAsString().equals(blockDataAsString);
     }
 
     private void saveBlockData(){
         BlockData blockData = location.getBlock().getBlockData();
-        jsonObject.put("vBlockBlockData",blockData.getAsString());
+        getJsonObject().put("vBlockBlockData",blockData.getAsString());
     }
 
     void onDataUnload(){
@@ -107,7 +113,7 @@ public class BlockPersistentData {
 
     public JSONObject getJsonObject() {
         lastUse = System.currentTimeMillis();
-        return jsonObject;
+        return vBlockSaveFile.getJsonObject();
     }
 
     public Location getLocation() {
@@ -129,5 +135,9 @@ public class BlockPersistentData {
     @Override
     public int hashCode() {
         return Objects.hash(getLocationKey(), getJsonObject());
+    }
+
+    public VBlockSaveFile getVBlockSaveFile() {
+        return vBlockSaveFile;
     }
 }

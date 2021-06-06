@@ -19,9 +19,19 @@ public class CustomEntityManager extends CustomDataManager<Entity, EntityCustomD
     }
 
     @Override
-    public VCoreEntity wrap(Class<? extends VCoreEntity> type, Entity inputObject){
+    public <U extends VCoreEntity> U wrap(Class<? extends U> type, Entity inputObject) {
         try {
             return type.getDeclaredConstructor(CustomEntityManager.class, Entity.class).newInstance(this,inputObject);
+        } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    @Override
+    public <U extends VCoreEntity> U convertTo(Class<? extends U> type, VCoreEntity customData) {
+        try {
+            return type.getDeclaredConstructor(CustomEntityManager.class, Entity.class).newInstance(this,customData.getDataHolder());
         } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
             e.printStackTrace();
             return null;

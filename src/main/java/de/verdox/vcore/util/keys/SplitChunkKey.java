@@ -22,6 +22,10 @@ public class SplitChunkKey extends ChunkKey{
         z = Integer.parseInt(split[2]);
     }
 
+    public ChunkKey getChunkKey(){
+        return new ChunkKey(getChunk());
+    }
+
     public Location toLocation(World world){
         return new Location(world,globalX,yCoordinate,globalZ);
     }

@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2021. Lukas Jonsson
+ */
+
 package de.verdox.vcore.concurrent;
 
 public class CatchingRunnable implements Runnable{

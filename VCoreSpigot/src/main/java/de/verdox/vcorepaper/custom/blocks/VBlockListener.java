@@ -3,6 +3,8 @@ package de.verdox.vcorepaper.custom.blocks;
 import de.verdox.vcore.event.listener.VCoreListener;
 import de.verdox.vcore.plugin.VCorePlugin;
 import de.verdox.vcorepaper.VCorePaper;
+import de.verdox.vcorepaper.custom.blocks.enums.VBlockEventPermission;
+import de.verdox.vcorepaper.custom.blocks.files.VBlockSaveFile;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.block.Block;
@@ -16,10 +18,10 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class VBlockListener extends VCoreListener.VCoreBukkitListener {
-    private final VBlockManager vBlockManager;
+    private final CustomBlockManager vBlockManager;
     private final ExecutorService threadPool = Executors.newSingleThreadExecutor();
 
-    public VBlockListener(VCorePlugin.Minecraft plugin, VBlockManager vBlockManager) {
+    public VBlockListener(VCorePlugin.Minecraft plugin, CustomBlockManager vBlockManager) {
         super(plugin);
         this.vBlockManager = vBlockManager;
     }
@@ -33,9 +35,11 @@ public class VBlockListener extends VCoreListener.VCoreBukkitListener {
             return;
         Bukkit.getScheduler().runTaskAsynchronously(plugin,() -> {
             vBlockManager
-                    .getVBlockFileStorage()
+                    .getVBlockStorage()
                     .findCustomBlockLocations(chunk)
-                    .forEach(location -> vBlockManager.getOrLoadBlockPersistentData(location.getBlock().getState()));
+                    .forEach(location -> {
+                        vBlockManager.loadSaveFile(location.getBlock().getState());
+                    });
         });
         //threadPool.submit(() -> {
             //long time = System.currentTimeMillis();
@@ -53,70 +57,75 @@ public class VBlockListener extends VCoreListener.VCoreBukkitListener {
             //long time = System.currentTimeMillis();
             vBlockManager.getDataOfChunk(chunk)
                     //.filter(BlockPersistentData::readyToBeCleaned)
-                    .forEach(blockPersistentData -> {
+                    .forEach(vBlockSaveFile -> {
                         if(e.isSaveChunk())
-                            vBlockManager.removeAndSaveBlockPersistentData(blockPersistentData.getLocation().getBlock().getState());
-                        else
-                            vBlockManager.removeBlockPersistentData(blockPersistentData.getLocation().getBlock().getState());
+                            vBlockSaveFile.save();
+                        vBlockManager.unloadSaveFile(vBlockSaveFile);
                     });
             //VCorePaper.getInstance().consoleMessage("&eChunkData unloaded in&7: "+(System.currentTimeMillis() - time)+"ms",true);
         });
-        threadPool.submit(() -> {
-
-        });
+        //threadPool.submit(() -> {
+//
+        //});
     }
 
     @EventHandler
     public void blockFromTo(BlockFromToEvent e){
         Block block = e.getToBlock();
-        VBlock vBlock = VCorePaper.getInstance().getVBlockManager().getCachedVBlock(block.getState());
+        VBlock vBlock = VCorePaper.getInstance().getCustomBlockManager().getVBlock(block.getState());
         if(vBlock == null)
             return;
+        vBlock.updateBlockData(block.getBlockData());
         e.setCancelled(!vBlock.isBlockPermissionAllowed(VBlockEventPermission.BLOCK_LIQUID_EVENT));
     }
 
     @EventHandler
     public void blockGrowEvent(BlockGrowEvent e){
         Block block = e.getBlock();
-        VBlock vBlock = VCorePaper.getInstance().getVBlockManager().getCachedVBlock(block.getState());
+        VBlock vBlock = VCorePaper.getInstance().getCustomBlockManager().getVBlock(block.getState());
         if(vBlock == null)
             return;
+        vBlock.updateBlockData(block.getBlockData());
         e.setCancelled(!vBlock.isBlockPermissionAllowed(VBlockEventPermission.BLOCK_GROW_EVENT));
     }
 
     @EventHandler
     public void blockPhysicsEvent(BlockPhysicsEvent e){
         Block block = e.getBlock();
-        VBlock vBlock = VCorePaper.getInstance().getVBlockManager().getCachedVBlock(block.getState());
+        VBlock vBlock = VCorePaper.getInstance().getCustomBlockManager().getVBlock(block.getState());
         if(vBlock == null)
             return;
+        vBlock.updateBlockData(block.getBlockData());
         e.setCancelled(!vBlock.isBlockPermissionAllowed(VBlockEventPermission.BLOCK_GRAVITY_EVENT));
     }
 
     @EventHandler
     public void explodeEvent(BlockExplodeEvent e){
         Block block = e.getBlock();
-        VBlock vBlock = VCorePaper.getInstance().getVBlockManager().getCachedVBlock(block.getState());
+        VBlock vBlock = VCorePaper.getInstance().getCustomBlockManager().getVBlock(block.getState());
         if(vBlock == null)
             return;
+        vBlock.updateBlockData(block.getBlockData());
         e.setCancelled(!vBlock.isBlockPermissionAllowed(VBlockEventPermission.BLOCK_EXPLODE_EVENT));
     }
 
     @EventHandler
     public void dropItems(BlockDropItemEvent e){
         Block block = e.getBlock();
-        VBlock vBlock = VCorePaper.getInstance().getVBlockManager().getCachedVBlock(block.getState());
+        VBlock vBlock = VCorePaper.getInstance().getCustomBlockManager().getVBlock(block.getState());
         if(vBlock == null)
             return;
+        vBlock.updateBlockData(block.getBlockData());
         e.setCancelled(!vBlock.isBlockPermissionAllowed(VBlockEventPermission.BLOCK_DROP_ITEMS_EVENT));
     }
 
     @EventHandler
     public void blockPistonExtendEvent(BlockPistonExtendEvent e){
         for (Block block : e.getBlocks()) {
-            VBlock vBlock = VCorePaper.getInstance().getVBlockManager().getCachedVBlock(block.getState());
+            VBlock vBlock = VCorePaper.getInstance().getCustomBlockManager().getVBlock(block.getState());
             if(vBlock == null)
                 return;
+            vBlock.updateBlockData(block.getBlockData());
             e.setCancelled(!vBlock.isBlockPermissionAllowed(VBlockEventPermission.BLOCK_PISTON_EVENT));
             return;
         }
@@ -125,9 +134,10 @@ public class VBlockListener extends VCoreListener.VCoreBukkitListener {
     @EventHandler
     public void blockPistonRetractEvent(BlockPistonRetractEvent e){
         for (Block block : e.getBlocks()) {
-            VBlock vBlock = VCorePaper.getInstance().getVBlockManager().getCachedVBlock(block.getState());
+            VBlock vBlock = VCorePaper.getInstance().getCustomBlockManager().getVBlock(block.getState());
             if(vBlock == null)
                 return;
+            vBlock.updateBlockData(block.getBlockData());
             e.setCancelled(!vBlock.isBlockPermissionAllowed(VBlockEventPermission.BLOCK_PISTON_EVENT));
             return;
         }
@@ -136,9 +146,10 @@ public class VBlockListener extends VCoreListener.VCoreBukkitListener {
     @EventHandler
     public void blockBurnEvent(BlockBurnEvent e){
         Block block = e.getBlock();
-        VBlock vBlock = VCorePaper.getInstance().getVBlockManager().getCachedVBlock(block.getState());
+        VBlock vBlock = VCorePaper.getInstance().getCustomBlockManager().getVBlock(block.getState());
         if(vBlock == null)
             return;
+        vBlock.updateBlockData(block.getBlockData());
         e.setCancelled(!vBlock.isBlockPermissionAllowed(VBlockEventPermission.BLOCK_DROP_ITEMS_EVENT));
     }
 
@@ -149,9 +160,7 @@ public class VBlockListener extends VCoreListener.VCoreBukkitListener {
             for (Chunk chunk : e.getWorld().getLoadedChunks()) {
                 vBlockManager.getDataOfChunk(chunk)
                         //.filter(BlockPersistentData::readyToBeCleaned)
-                        .forEach(blockPersistentData -> {
-                            vBlockManager.saveBlockPersistentData(blockPersistentData.getLocation().getBlock().getState());
-                        });
+                        .forEach(VBlockSaveFile::save);
                 //VCorePaper.getInstance().consoleMessage("&eChunkData unloaded in&7: "+(System.currentTimeMillis() - time)+"ms",true);
             }
         });

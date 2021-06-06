@@ -1,21 +1,54 @@
 package de.verdox.vcorepaper.custom.blocks;
 
+import com.google.gson.JsonObject;
+import de.verdox.vcorepaper.VCorePaper;
 import de.verdox.vcorepaper.custom.CustomData;
 import de.verdox.vcorepaper.custom.CustomDataHolder;
+import de.verdox.vcorepaper.custom.blocks.enums.VBlockEventPermission;
+import de.verdox.vcorepaper.custom.blocks.files.VBlockSaveFile;
 import de.verdox.vcorepaper.custom.nbtholders.NBTBlockHolder;
+import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.block.BlockState;
+import org.bukkit.block.data.BlockData;
+import org.bukkit.entity.Item;
+import org.bukkit.inventory.ItemStack;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.Set;
 import java.util.function.Consumer;
 
-public class VBlock extends CustomDataHolder<BlockState, NBTBlockHolder, VBlockManager> {
+public class VBlock extends CustomDataHolder<BlockState, NBTBlockHolder, CustomBlockManager> {
 
     private final BlockPersistentData blockPersistentData;
+    private BlockData blockData;
 
-    VBlock(BlockState dataHolder, VBlockManager customDataManager, BlockPersistentData blockPersistentData) {
-        super(dataHolder, customDataManager);
+    //TODO: BLOCKSTATE IN BLOCKDATA UMWANDELN
+
+    public VBlock(BlockState dataHolder, CustomBlockManager customBlockManager, BlockPersistentData blockPersistentData) {
+        super(dataHolder, customBlockManager);
         this.blockPersistentData = blockPersistentData;
+        if(getBlockPersistentData().getJsonObject().containsKey("vBlockBlockData"))
+            blockData = Bukkit.createBlockData((String) getBlockPersistentData().getJsonObject().get("vBlockBlockData"));
+    }
+
+    /**
+     * Updates the internal cached blockData.
+     * @param blockData
+     */
+    public void updateBlockData(BlockData blockData){
+        this.blockData = blockData;
+        getBlockPersistentData().getJsonObject().put("vBlockBlockData",blockData.getAsString());
+    }
+
+    public void dropItemInWorld(ItemStack itemStack, org.bukkit.util.Consumer<Item> beforeDrop){
+        Location blockLocation = getBlockPersistentData().getLocation();
+        Bukkit.getScheduler().runTask(VCorePaper.getInstance(),() -> {
+           blockLocation.getWorld().dropItemNaturally(blockLocation.clone().add(0,1,0),itemStack,beforeDrop);
+        });
+    }
+
+    public BlockData getBlockData() {
+        return blockData;
     }
 
     public void addVBlockTickCallback(Consumer<VBlock> callback){
@@ -45,11 +78,29 @@ public class VBlock extends CustomDataHolder<BlockState, NBTBlockHolder, VBlockM
         vBlockEventPermission.setAllowed(this,allowed);
     }
 
-    public void deleteAllData(){
-        blockPersistentData.getJsonObject().clear();
-        getNBTCompound().save();
+    /**
+     * Only deletes the internal data of the VBlock
+     */
+    public void deleteData(){
+        synchronized (getBlockPersistentData().getJsonObject()){
+            getBlockPersistentData().clearTickCallbacks();
+            getBlockPersistentData().getJsonObject().clear();
+            getBlockPersistentData().getVBlockSaveFile().save();
+        }
     }
 
+    /**
+     * Deletes the VBlock and all save Files
+     */
+    public void delete(){
+        VBlockSaveFile vBlockSaveFile = getBlockPersistentData().getVBlockSaveFile();
+        getCustomDataManager().unloadSaveFile(vBlockSaveFile);
+        vBlockSaveFile.delete();
+    }
+
+    public BlockPersistentData getBlockPersistentData() {
+        return blockPersistentData;
+    }
 
     @Override
     public NBTBlockHolder getNBTCompound() {
