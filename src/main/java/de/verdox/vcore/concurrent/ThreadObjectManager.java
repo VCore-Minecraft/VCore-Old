@@ -10,6 +10,10 @@ import java.util.Map;
 import java.util.concurrent.*;
 
 
+/**
+ * Class to have few sequential thread executors for some objects
+ * @param <T> VCoreKey -> e.g. ChunkKey, LocationKey ..
+ */
 public class ThreadObjectManager<T extends VCoreKey> {
 
     private final Map<T, ThreadObject<T>> cache;
@@ -33,6 +37,11 @@ public class ThreadObjectManager<T extends VCoreKey> {
         },0L,300, TimeUnit.SECONDS);
     }
 
+    /**
+     * Submits a task
+     * @param object
+     * @param runnable
+     */
     public void submitTask(T object, CatchingRunnable runnable){
         if(!cache.containsKey(object))
             cache.put(object, new ThreadObject<>(Executors.newSingleThreadScheduledExecutor()));

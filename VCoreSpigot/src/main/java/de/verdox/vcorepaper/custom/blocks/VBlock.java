@@ -9,7 +9,6 @@ import de.verdox.vcorepaper.custom.blocks.files.VBlockSaveFile;
 import de.verdox.vcorepaper.custom.nbtholders.NBTBlockHolder;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
-import org.bukkit.block.BlockState;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.Item;
 import org.bukkit.inventory.ItemStack;
@@ -17,15 +16,15 @@ import org.bukkit.inventory.ItemStack;
 import java.lang.reflect.InvocationTargetException;
 import java.util.function.Consumer;
 
-public class VBlock extends CustomDataHolder<BlockState, NBTBlockHolder, CustomBlockManager> {
+public class VBlock extends CustomDataHolder<Location, NBTBlockHolder, CustomBlockManager> {
 
     private final BlockPersistentData blockPersistentData;
     private BlockData blockData;
 
     //TODO: BLOCKSTATE IN BLOCKDATA UMWANDELN
 
-    public VBlock(BlockState dataHolder, CustomBlockManager customBlockManager, BlockPersistentData blockPersistentData) {
-        super(dataHolder, customBlockManager);
+    public VBlock(Location blockLocation, CustomBlockManager customBlockManager, BlockPersistentData blockPersistentData) {
+        super(blockLocation, customBlockManager);
         this.blockPersistentData = blockPersistentData;
         if(getBlockPersistentData().getJsonObject().containsKey("vBlockBlockData"))
             blockData = Bukkit.createBlockData((String) getBlockPersistentData().getJsonObject().get("vBlockBlockData"));
@@ -87,6 +86,18 @@ public class VBlock extends CustomDataHolder<BlockState, NBTBlockHolder, CustomB
             getBlockPersistentData().getJsonObject().clear();
             getBlockPersistentData().getVBlockSaveFile().save();
         }
+    }
+
+    public int getChunkX(){
+        return getDataHolder().clone().getBlockX() & 0xF; // keep the 4 least significant bits, range 0-15
+    }
+
+    public int getChunkY(){
+        return getDataHolder().clone().getBlockX() & 0xFF; // and 8 least significant, range 0-255
+    }
+
+    public int getChunkZ(){
+        return getDataHolder().clone().getBlockZ() & 0xF; // keep the 4 least significant bits, range 0-15
     }
 
     /**

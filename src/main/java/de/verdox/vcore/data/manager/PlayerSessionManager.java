@@ -6,7 +6,6 @@ import de.verdox.vcore.dataconnection.DataConnection;
 import de.verdox.vcore.data.annotations.RequiredSubsystemInfo;
 import de.verdox.vcore.plugin.VCorePlugin;
 import de.verdox.vcore.subsystem.VCoreSubsystem;
-import de.verdox.vcore.subsystem.exceptions.SubsystemDeactivatedException;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.event.PlayerDisconnectEvent;
@@ -53,7 +52,7 @@ public abstract class PlayerSessionManager<R extends VCorePlugin<?,?>> extends V
 
     @Override
     public PlayerData load(Class<? extends PlayerData> type, UUID uuid) {
-        return getSession(uuid).load(type,uuid);
+        return getSession(uuid).loadFromPipeline(type,uuid);
     }
 
     protected PlayerSession deleteSession(UUID uuid){
@@ -89,7 +88,7 @@ public abstract class PlayerSessionManager<R extends VCorePlugin<?,?>> extends V
                 if(System.currentTimeMillis() - playerData.getLastUse() <= 1000L*1800)
                     return;
                 // Wurde das Datum in den letzten 1800 Sekunden nicht genutzt wird es in Redis geladen
-                playerData.getResponsibleDataSession().saveAndRemove(playerData.getClass(),playerData.getUUID());
+                playerData.getResponsibleDataSession().saveAndRemoveLocally(playerData.getClass(),playerData.getUUID());
             }));
         });
     }
@@ -112,7 +111,7 @@ public abstract class PlayerSessionManager<R extends VCorePlugin<?,?>> extends V
                     System.out.println(subsystem +" is deactivated!");
                     return;
                 }
-                getSession(playerUUID).load(playerDataClass,playerUUID);
+                getSession(playerUUID).loadFromPipeline(playerDataClass,playerUUID);
             });
             long end = System.currentTimeMillis() - start;
             getPlugin().consoleMessage("&eSuccessfully loaded data&7: &a"+playerUUID.toString() + " &7[&e"+end+" ms&7]",true);

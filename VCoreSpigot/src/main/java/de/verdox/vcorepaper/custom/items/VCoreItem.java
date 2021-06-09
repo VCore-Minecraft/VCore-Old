@@ -1,5 +1,6 @@
 package de.verdox.vcorepaper.custom.items;
 
+import de.verdox.vcorepaper.VCorePaper;
 import de.verdox.vcorepaper.custom.CustomData;
 import de.verdox.vcorepaper.custom.CustomDataHolder;
 import de.verdox.vcorepaper.custom.nbtholders.NBTItemHolder;
@@ -19,6 +20,10 @@ public class VCoreItem extends CustomDataHolder<ItemStack, NBTItemHolder, Custom
         super(dataHolder,customItemManager);
         if(dataHolder == null || dataHolder.getType().isAir())
             throw new NullPointerException("Stack can't be null or air!");
+    }
+
+    public VCoreItem copy(){
+        return VCorePaper.getInstance().getCustomItemManager().wrap(getClass(), getDataHolder().clone());
     }
 
     protected List<String> getItemLore(){

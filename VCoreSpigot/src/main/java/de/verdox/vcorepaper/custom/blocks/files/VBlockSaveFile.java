@@ -34,8 +34,10 @@ public class VBlockSaveFile {
     }
 
     public void save(){
-        if(blockPersistentData.isEmpty())
+        if(blockPersistentData.isEmpty()) {
+            delete();
             return;
+        }
         try{
             if(!getSaveFile().exists()) {
                 folder.mkdirs();
@@ -58,7 +60,7 @@ public class VBlockSaveFile {
     public BlockPersistentData getBlockPersistentData(){
         if(blockPersistentData != null)
             return blockPersistentData;
-        BlockPersistentData blockPersistentData = new BlockPersistentData(new LocationKey(blockLocation),this,blockLocation);
+        BlockPersistentData blockPersistentData = new BlockPersistentData(blockLocation,this);
         return blockPersistentData;
     }
 

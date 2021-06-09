@@ -4,6 +4,7 @@ import de.verdox.vcore.data.annotations.DataContext;
 import de.verdox.vcore.data.annotations.PreloadStrategy;
 import de.verdox.vcore.data.datatypes.ServerData;
 import de.verdox.vcore.data.manager.VCoreDataManager;
+import de.verdox.vcore.data.session.datahandler.LocalDataHandler;
 import de.verdox.vcore.plugin.VCorePlugin;
 import de.verdox.vcore.subsystem.VCoreSubsystem;
 
@@ -68,7 +69,12 @@ public class SSession extends DataSession<ServerData>{
     }
 
     @Override
-    public <T extends ServerData> T getData(Class<? extends T> type, UUID uuid) {
+    protected LocalDataHandler<ServerData> setupLocalDatabaseHandler() {
+        return null;
+    }
+
+    @Override
+    public <T extends ServerData> T getDataLocal(Class<? extends T> type, UUID uuid) {
         if(!dataExistLocally(type,uuid))
             return null;
         return type.cast(serverDataObjects.get(type).get(uuid));
@@ -82,7 +88,7 @@ public class SSession extends DataSession<ServerData>{
     }
 
     @Override
-    public void addData(ServerData data, Class<? extends ServerData> dataClass, boolean push) {
+    public void addDataLocally(ServerData data, Class<? extends ServerData> dataClass, boolean push) {
         if(dataExistLocally(dataClass,data.getUUID()))
             return;
         if(!serverDataObjects.containsKey(dataClass))
@@ -95,7 +101,7 @@ public class SSession extends DataSession<ServerData>{
     }
 
     @Override
-    public void removeData(Class<? extends ServerData> dataClass, UUID uuid, boolean push) {
+    public void removeDataLocally(Class<? extends ServerData> dataClass, UUID uuid, boolean push) {
         if(!dataExistLocally(dataClass,uuid))
             return;
         serverDataObjects.get(dataClass).remove(uuid);

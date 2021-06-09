@@ -38,7 +38,6 @@ public class VCorePaper extends VCorePlugin.Minecraft {
     public void onPluginEnable() {
         instance = this;
 
-
         this.vCorePaperSettings = new VCorePaperSettings(this,"settings.yml","");
         this.vCorePaperSettings.init();
 
@@ -53,7 +52,6 @@ public class VCorePaper extends VCorePlugin.Minecraft {
 
         getSessionManager();
         getServerDataManager();
-
 
         getCommand("debug").setExecutor(new ConsoleCommands());
         new AdminCommands(this,"debug");

@@ -4,6 +4,9 @@
 
 package de.verdox.vcore.concurrent;
 
+/**
+ * Runnable that prints exceptions thrown
+ */
 public class CatchingRunnable implements Runnable{
     private final Runnable delegate;
 

@@ -26,10 +26,10 @@ public class BlockPersistentData {
     private boolean save = true;
     private Set<Consumer<VBlock>> tickCallbacks = new HashSet<>();
 
-    public BlockPersistentData(LocationKey locationKey, VBlockSaveFile vBlockSaveFile, Location location){
-        this.locationKey = locationKey;
+    public BlockPersistentData(Location blockLocation, VBlockSaveFile vBlockSaveFile){
+        this.locationKey = new LocationKey(blockLocation);
         this.vBlockSaveFile = vBlockSaveFile;
-        this.location = location;
+        this.location = blockLocation;
         //if(!jsonObject.containsKey("vBlock_blockData"))
         //    jsonObject.put("vBlock_blockData",location.getBlock().getBlockData().getAsString());
     }
@@ -68,7 +68,7 @@ public class BlockPersistentData {
     }
 
     public VBlock toVBlock(){
-        return new VBlock(location.getBlock().getState(), VCorePaper.getInstance().getCustomBlockManager(),this);
+        return new VBlock(location, VCorePaper.getInstance().getCustomBlockManager(),this);
     }
 
     private String getBlockDataAsString(){

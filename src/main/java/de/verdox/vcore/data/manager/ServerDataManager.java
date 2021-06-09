@@ -28,7 +28,7 @@ public class ServerDataManager <R extends VCorePlugin<?,?>> extends VCoreDataMan
         VCoreSubsystem<?> subsystem = plugin.findDependSubsystem(type);
         if(subsystem == null)
             return null;
-        return getSession(subsystem.getUuid()).load(type,uuid);
+        return getSession(subsystem.getUuid()).loadFromPipeline(type,uuid);
     }
 
     @Override
@@ -38,7 +38,7 @@ public class ServerDataManager <R extends VCorePlugin<?,?>> extends VCoreDataMan
                 if(System.currentTimeMillis() - serverData.getLastUse() <= 1000L*1800)
                     return;
                 // Wurde das Datum in den letzten 1800 Sekunden nicht genutzt wird es von Redis in die Datenbank geschrieben und aus Redis entfernt.
-                serverData.getResponsibleDataSession().saveAndRemove(serverData.getClass(),serverData.getUUID());
+                serverData.getResponsibleDataSession().saveAndRemoveLocally(serverData.getClass(),serverData.getUUID());
             });
         });
     }
@@ -78,7 +78,7 @@ public class ServerDataManager <R extends VCorePlugin<?,?>> extends VCoreDataMan
             return null;
         SSession serverDataSession = dataCache.get(subsystem.getUuid());
         if(serverDataSession.dataExistLocally(dataClass,objectUUID))
-            return serverDataSession.getData(dataClass,objectUUID);
+            return serverDataSession.getDataLocal(dataClass,objectUUID);
 
         try {
             ServerData dataObject =  dataClass.getDeclaredConstructor(ServerDataManager.class,UUID.class).newInstance(this,objectUUID);

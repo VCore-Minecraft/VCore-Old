@@ -14,15 +14,8 @@ import org.jetbrains.annotations.NotNull;
 public class ConsoleCommands implements CommandExecutor {
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
-        if(sender instanceof Player)
-            return false;
-
-        else if(args.length == 1) {
-            if (args[0].equalsIgnoreCase("help")) {
-                sendHelpMessage(sender);
-                return true;
-            }
-            else if(args[0].equalsIgnoreCase("listPlugins")){
+        if(args.length == 1) {
+            if(args[0].equalsIgnoreCase("listPlugins")){
                 VCorePaper.getInstance().consoleMessage("&eDebuggable Plugins&7:",false);
                 for (Plugin plugin : Bukkit.getPluginManager().getPlugins()) {
                     if(!(plugin instanceof VCorePlugin.Minecraft))

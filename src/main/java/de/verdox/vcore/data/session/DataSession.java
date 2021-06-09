@@ -5,6 +5,7 @@ import de.verdox.vcore.data.annotations.DataContext;
 import de.verdox.vcore.data.annotations.RequiredSubsystemInfo;
 import de.verdox.vcore.data.datatypes.VCoreData;
 import de.verdox.vcore.data.manager.VCoreDataManager;
+import de.verdox.vcore.data.session.datahandler.LocalDataHandler;
 import org.bson.Document;
 import org.redisson.api.RMap;
 import org.redisson.api.RTopic;
@@ -15,10 +16,12 @@ public abstract class DataSession <S extends VCoreData> {
 
     protected final VCoreDataManager<S,?> dataManager;
     private UUID uuid;
+    private final LocalDataHandler<S> localDataHandler;
 
     public DataSession(VCoreDataManager<S,?> dataManager, UUID uuid){
         this.dataManager = dataManager;
         this.uuid = uuid;
+        this.localDataHandler = setupLocalDatabaseHandler();
         onLoad();
     }
 
@@ -30,7 +33,7 @@ public abstract class DataSession <S extends VCoreData> {
         onCleanUp();
     }
 
-    public S load(Class<? extends S> dataClass, UUID objectUUID){
+    public S loadFromPipeline(Class<? extends S> dataClass, UUID objectUUID){
         if(dataClass == null || objectUUID == null)
             return null;
 
@@ -54,11 +57,11 @@ public abstract class DataSession <S extends VCoreData> {
         else {
             dataManager.getPlugin().consoleMessage("&eNo Data was found. Creating new data! &8[&b"+dataClass.getSimpleName()+"&8]", 1,true);
             S vCoreData = dataManager.instantiateVCoreData(dataClass,objectUUID);
-            addData(vCoreData,dataClass,true);
+            addDataLocally(vCoreData,dataClass,true);
             localToRedis(vCoreData,dataClass,vCoreData.getUUID());
         }
         dataManager.getPlugin().consoleMessage("&eLoaded &a"+dataClass.getSimpleName()+" &ewith uuid&7: "+objectUUID, 1,true);
-        return getData(dataClass,objectUUID);
+        return getDataLocal(dataClass,objectUUID);
     }
 
     private boolean dataExistInDatabase(Class<? extends S> dataClass, UUID objectUUID){
@@ -66,7 +69,7 @@ public abstract class DataSession <S extends VCoreData> {
         return document != null;
     }
 
-    public void save(Class<? extends S> dataClass, UUID objectUUID){
+    public void saveToPipeline(Class<? extends S> dataClass, UUID objectUUID){
         if(dataManager.getRedisManager().getContext(dataClass).equals(DataContext.GLOBAL)){
             if(!dataExistRedis(dataClass,objectUUID))
                 //TODO: Es wird hier nur in die Datenbank gespeichert, wenn remote die Daten noch existieren,
@@ -79,9 +82,9 @@ public abstract class DataSession <S extends VCoreData> {
         }
     }
 
-    public void saveAndRemove(Class<? extends S> dataClass, UUID objectUUID){
-        save(dataClass,objectUUID);
-        removeData(dataClass,objectUUID,true);
+    public void saveAndRemoveLocally(Class<? extends S> dataClass, UUID objectUUID){
+        saveToPipeline(dataClass,objectUUID);
+        removeDataLocally(dataClass,objectUUID,true);
     }
 
 
@@ -93,7 +96,7 @@ public abstract class DataSession <S extends VCoreData> {
                 .iterator()
                 .forEachRemaining(document -> {
                     UUID uuid = UUID.fromString(document.getString("_id"));
-                    load(dataClass,uuid);
+                    loadFromPipeline(dataClass,uuid);
                 });
     }
 
@@ -127,7 +130,7 @@ public abstract class DataSession <S extends VCoreData> {
     }
 
     public final void localToDatabase(Class<? extends S> dataClass,UUID objectUUID){
-        saveToDatabase(dataClass,objectUUID,getData(dataClass,objectUUID).dataForRedis());
+        saveToDatabase(dataClass,objectUUID, getDataLocal(dataClass,objectUUID).dataForRedis());
     }
 
     public final void dataBaseToRedis(Class<? extends S> dataClass, UUID objectUUID){
@@ -173,7 +176,7 @@ public abstract class DataSession <S extends VCoreData> {
 
         vCoreData.restoreFromRedis(dataFromRedis);
 
-        addData(vCoreData,dataClass,true);
+        addDataLocally(vCoreData,dataClass,true);
     }
 
     /**
@@ -196,7 +199,7 @@ public abstract class DataSession <S extends VCoreData> {
      * @param dataToSave
      */
 
-    private final void saveToDatabase(Class<? extends S> dataClass, UUID objectUUID, Map<String, Object> dataToSave){
+    protected final void saveToDatabase(Class<? extends S> dataClass, UUID objectUUID, Map<String, Object> dataToSave){
         if(dataClass == null)
             return;
         if(objectUUID == null)
@@ -208,7 +211,7 @@ public abstract class DataSession <S extends VCoreData> {
         Set<String> dataKeysToSave = getRedisKeys(dataClass,objectUUID);
         if(dataKeysToSave == null)
             return;
-        getData(dataClass,objectUUID).cleanUp();
+        getDataLocal(dataClass,objectUUID).cleanUp();
 
         dataKeysToSave
                 .stream()
@@ -268,9 +271,15 @@ public abstract class DataSession <S extends VCoreData> {
     public abstract void onCleanUp();
 
     public abstract boolean dataExistLocally(Class<? extends S> dataClass, UUID uuid);
-    public abstract <T extends S> T getData (Class<? extends T> type, UUID uuid);
-    public abstract void addData(S data, Class<? extends S> dataClass, boolean push);
-    public abstract void removeData(Class<? extends S> dataClass, UUID uuid, boolean push);
+    public abstract <T extends S> T getDataLocal(Class<? extends T> type, UUID uuid);
+    public abstract void addDataLocally(S data, Class<? extends S> dataClass, boolean push);
+    public abstract void removeDataLocally(Class<? extends S> dataClass, UUID uuid, boolean push);
     public abstract Set<S> getAllData(Class<? extends S> dataClass);
     public abstract void debugToConsole();
+
+    public final LocalDataHandler<S> getLocalDataHandler() {
+        return localDataHandler;
+    }
+
+    protected abstract LocalDataHandler<S> setupLocalDatabaseHandler();
 }

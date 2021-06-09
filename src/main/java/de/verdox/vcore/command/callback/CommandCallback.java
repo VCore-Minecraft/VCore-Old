@@ -6,7 +6,7 @@ package de.verdox.vcore.command.callback;
 
 /**
  * Command callback used for VCoreCommands
- * @param <R>
+ * @param <R> Type of sender
  */
 
 public interface CommandCallback<R> {

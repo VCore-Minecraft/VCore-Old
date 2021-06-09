@@ -68,7 +68,7 @@ public class AdminCommands extends VCoreCommand.VCoreBukkitCommand {
                     if(args.length == 1){
                         VCoreUtil.getBukkitPlayerUtil().sendPlayerMessage(player,ChatMessageType.CHAT,"");
                         VCoreUtil.getBukkitPlayerUtil().sendPlayerMessage(player,ChatMessageType.CHAT,"&6Block Debug&7");
-                        VCorePaper.getInstance().getCustomBlockManager().VBlockCallback(block.getState(),vBlock -> {
+                        VCorePaper.getInstance().getCustomBlockManager().VBlockCallback(block.getLocation(),vBlock -> {
                             vBlock.getCustomDataKeys().forEach(key -> {
                                 VCoreUtil.getBukkitPlayerUtil().sendPlayerMessage(player,ChatMessageType.CHAT,"  &7>> &6"+key+"&7: &b"+vBlock.getNBTCompound().getObject(key,Object.class));
                             });
@@ -83,7 +83,7 @@ public class AdminCommands extends VCoreCommand.VCoreBukkitCommand {
                     }
                     else if(args.length == 2){
                         if(args[1].equalsIgnoreCase("isCached")){
-                            VBlock vBlock = VCorePaper.getInstance().getCustomBlockManager().getVBlock(block.getState());
+                            VBlock vBlock = VCorePaper.getInstance().getCustomBlockManager().getVBlock(block.getLocation());
                             boolean cached = vBlock != null;
                             VCoreUtil.getBukkitPlayerUtil().sendPlayerMessage(player,ChatMessageType.CHAT,"&eCached&7: &b"+cached+"&7!");
                             return true;
@@ -94,7 +94,7 @@ public class AdminCommands extends VCoreCommand.VCoreBukkitCommand {
                             String name = args[2];
                             try{
                                 VBlockEventPermission vBlockEventPermission = VBlockEventPermission.valueOf(name);
-                                VCorePaper.getInstance().getCustomBlockManager().VBlockCallback(block.getState(),vBlock -> {
+                                VCorePaper.getInstance().getCustomBlockManager().VBlockCallback(block.getLocation(),vBlock -> {
                                     boolean allow = args[1].equalsIgnoreCase("allow");
                                     vBlock.allowBlockPermission(vBlockEventPermission,allow);
                                 });

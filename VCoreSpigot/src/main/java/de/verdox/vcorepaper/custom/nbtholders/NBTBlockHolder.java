@@ -5,6 +5,7 @@ import de.verdox.vcorepaper.VCorePaper;
 import de.verdox.vcorepaper.custom.blocks.BlockPersistentData;
 import de.verdox.vcorepaper.custom.blocks.CustomBlockManager;
 import de.verdox.vcorepaper.custom.util.Serializer;
+import org.bukkit.Location;
 import org.bukkit.block.BlockState;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.metadata.FixedMetadataValue;
@@ -22,15 +23,15 @@ public class NBTBlockHolder implements NBTHolder {
     private final Lock readLock = readWriteLock.readLock();
     private final Lock writeLock = readWriteLock.writeLock();
 
-    private final BlockState blockState;
+    private final Location blockLocation;
     private final CustomBlockManager customBlockManager;
     private final BlockPersistentData blockPersistentData;
     private long lastUse = System.currentTimeMillis();
 
-    public NBTBlockHolder(BlockState blockState, BlockPersistentData blockPersistentData){
-        if(blockState == null)
+    public NBTBlockHolder(Location location, BlockPersistentData blockPersistentData){
+        if(location == null)
             throw new NullPointerException("blockState can't be null!");
-        this.blockState = blockState;
+        this.blockLocation = location;
         if(blockPersistentData == null)
             throw new NullPointerException("blockPersistentData can't be null!");
         this.blockPersistentData = blockPersistentData;
@@ -38,7 +39,7 @@ public class NBTBlockHolder implements NBTHolder {
     }
 
     private <T> void saveMetaDataKey(String key, Class<T> type, T value){
-        blockState.setMetadata(key, new FixedMetadataValue(VCorePaper.getInstance(), value));
+        //blockState.setMetadata(key, new FixedMetadataValue(VCorePaper.getInstance(), value));
         blockPersistentData.getJsonObject().put(key,value);
         lastUse = System.currentTimeMillis();
     }
@@ -48,19 +49,19 @@ public class NBTBlockHolder implements NBTHolder {
 
         Object dataFromJson = blockPersistentData.getJsonObject().get(key);
 
-        if(!blockState.hasMetadata(key)) {
-            return VCoreUtil.getTypeUtil().castData(dataFromJson,type);
-        }
-        FixedMetadataValue fixedMetadataValue = (FixedMetadataValue) blockState.getMetadata(key).parallelStream().filter(metadataValue -> metadataValue.getOwningPlugin().equals(VCorePaper.getInstance())).findAny().orElse(null);
-        if(fixedMetadataValue == null)
-            return VCoreUtil.getTypeUtil().castData(dataFromJson,type);
-        Object dataFromBlockState = fixedMetadataValue.value();
-        if(dataFromBlockState == null)
-            return VCoreUtil.getTypeUtil().castData(dataFromJson,type);
-        if(dataFromJson == null)
-            return VCoreUtil.getTypeUtil().castData(dataFromBlockState,type);
-        if(!dataFromJson.equals(dataFromBlockState))
-            return VCoreUtil.getTypeUtil().castData(dataFromBlockState,type);
+        //if(!blockState.hasMetadata(key)) {
+        //    return VCoreUtil.getTypeUtil().castData(dataFromJson,type);
+        //}
+        //FixedMetadataValue fixedMetadataValue = (FixedMetadataValue) blockState.getMetadata(key).parallelStream().filter(metadataValue -> metadataValue.getOwningPlugin().equals(VCorePaper.getInstance())).findAny().orElse(null);
+        //if(fixedMetadataValue == null)
+            //return VCoreUtil.getTypeUtil().castData(dataFromJson,type);
+        //Object dataFromBlockState = fixedMetadataValue.value();
+        //if(dataFromBlockState == null)
+            //return VCoreUtil.getTypeUtil().castData(dataFromJson,type);
+        //if(dataFromJson == null)
+            //return VCoreUtil.getTypeUtil().castData(dataFromBlockState,type);
+        //if(!dataFromJson.equals(dataFromBlockState))
+            //return VCoreUtil.getTypeUtil().castData(dataFromBlockState,type);
         return VCoreUtil.getTypeUtil().castData(dataFromJson,type);
     }
 
@@ -206,7 +207,7 @@ public class NBTBlockHolder implements NBTHolder {
     @Override
     public void removeKey(String key) {
         blockPersistentData.getJsonObject().remove(key);
-        blockState.removeMetadata(key,VCorePaper.getInstance());
+        //blockState.removeMetadata(key,VCorePaper.getInstance());
     }
 
     @Override

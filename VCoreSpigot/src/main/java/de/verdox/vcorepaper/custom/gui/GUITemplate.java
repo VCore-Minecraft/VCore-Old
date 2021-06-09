@@ -134,6 +134,8 @@ public class GUITemplate {
 
         private Stream<T> filterWithPattern(){
             return objectList.stream().filter(t -> {
+                if(t == null)
+                    return false;
                 ItemStack stack = objectToItemStack.apply(t);
                 if(stack == null || stack.getType().equals(Material.AIR) || stack.getType().isAir())
                     return false;

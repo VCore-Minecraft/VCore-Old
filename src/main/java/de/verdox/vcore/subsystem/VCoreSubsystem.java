@@ -3,6 +3,7 @@ package de.verdox.vcore.subsystem;
 import de.verdox.vcore.data.datatypes.PlayerData;
 import de.verdox.vcore.data.datatypes.ServerData;
 import de.verdox.vcore.data.datatypes.VCoreData;
+import de.verdox.vcore.data.session.DataSession;
 import de.verdox.vcore.plugin.VCorePlugin;
 import de.verdox.vcore.subsystem.exceptions.SubsystemDeactivatedException;
 
@@ -19,6 +20,10 @@ public abstract class VCoreSubsystem<S extends VCorePlugin<?,?>> {
         if(VCorePlugin.getMongoDBIdentifier(this.getClass()) == null)
             throw new RuntimeException(getClass().getName()+" has no MongoDBAnnotation");
         uuid = UUID.nameUUIDFromBytes(VCorePlugin.getMongoDBIdentifier(this.getClass()).getBytes());
+    }
+
+    public final DataSession<?> getSubsystemDataSession(){
+        return vCorePlugin.getServerDataManager().getDataSession(this);
     }
 
     public abstract boolean isActivated();

@@ -12,7 +12,7 @@ import de.verdox.vcorepaper.custom.blocks.files.VBlockSaveFile;
 import de.verdox.vcorepaper.custom.blocks.files.VBlockStorage;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
-import org.bukkit.block.BlockState;
+import org.bukkit.Location;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashSet;
@@ -26,7 +26,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-public class CustomBlockManager extends CustomDataManager<BlockState, VBlockCustomData<?>,VBlock> {
+public class CustomBlockManager extends CustomDataManager<Location, VBlockCustomData<?>,VBlock> {
 
     private final VBlockStorage vBlockStorage;
     private final Map<SplitChunkKey, Map<LocationKey,VBlockSaveFile>> cache = new ConcurrentHashMap<>();
@@ -39,20 +39,21 @@ public class CustomBlockManager extends CustomDataManager<BlockState, VBlockCust
             Benchmark benchmark = new Benchmark();
             //long timeStamp = System.currentTimeMillis();
             doTick();
-            benchmark.logTime();
-            //VCorePaper.getInstance().consoleMessage("&eVBlockManagerTick took&7: &b"+(System.currentTimeMillis()-timeStamp)+"ms&8[&6"+getCacheSize()+"&8]",true);
-        }),0,5, TimeUnit.SECONDS);
+            long benchmarkTime = benchmark.logTime();
+            if(benchmarkTime >= TimeUnit.MILLISECONDS.toMillis(100))
+                VCorePaper.getInstance().consoleMessage("&cVBlockManagerTick took&7: &b"+benchmark.getLastTimeStamp()+"ms&8[&6"+getCacheSize()+"&8]",true);
+        }),0,1, TimeUnit.SECONDS);
     }
 
     @Override
-    public <U extends VBlock> U wrap(Class<? extends U> type, BlockState inputObject) {
+    public <U extends VBlock> U wrap(Class<? extends U> type, Location blockLocation) {
         if(Bukkit.isPrimaryThread())
             getVCorePaper().consoleMessage("&4Loading / Creating VBlock with main thread&7!",false);
-        VBlockSaveFile vBlockSaveFile = loadSaveFile(inputObject);
+        VBlockSaveFile vBlockSaveFile = loadSaveFile(blockLocation);
         if(vBlockSaveFile == null)
             throw new NullPointerException("BlockPersistentData could not be created!");
         try {
-            return type.getDeclaredConstructor(BlockState.class, CustomBlockManager.class, BlockPersistentData.class).newInstance(inputObject,this,vBlockSaveFile.getBlockPersistentData());
+            return type.getDeclaredConstructor(Location.class, CustomBlockManager.class, BlockPersistentData.class).newInstance(blockLocation,this,vBlockSaveFile.getBlockPersistentData());
         } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
             e.printStackTrace();
             return null;
@@ -62,7 +63,7 @@ public class CustomBlockManager extends CustomDataManager<BlockState, VBlockCust
     @Override
     public <U extends VBlock> U convertTo(Class<? extends U> type, VBlock customData) {
         try {
-            return type.getDeclaredConstructor(BlockState.class, CustomBlockManager.class, BlockPersistentData.class).newInstance(customData.getDataHolder(),this,customData.getBlockPersistentData());
+            return type.getDeclaredConstructor(Location.class, CustomBlockManager.class, BlockPersistentData.class).newInstance(customData.getBlockPersistentData().getLocation(),this,customData.getBlockPersistentData());
         } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
             e.printStackTrace();
             return null;
@@ -93,12 +94,12 @@ public class CustomBlockManager extends CustomDataManager<BlockState, VBlockCust
 
     /**
      * Asynchronous callback for a VBlock that gets loaded from cache or storage
-     * @param blockState
+     * @param location
      * @param callback
      */
-    public void VBlockCallback(BlockState blockState, Consumer<VBlock> callback){
+    public void VBlockCallback(Location location, Consumer<VBlock> callback){
         Bukkit.getScheduler().runTaskAsynchronously(getVCorePaper().getPlugin(), () -> {
-            VBlock vBlock = wrap(VBlock.class,blockState);
+            VBlock vBlock = wrap(VBlock.class,location);
             if(vBlock == null)
                 return;
             callback.accept(vBlock);
@@ -143,48 +144,48 @@ public class CustomBlockManager extends CustomDataManager<BlockState, VBlockCust
 
     /**
      * Load a VBlock from Cache only.
-     * @param blockState
+     * @param location
      * @return The VBlock or null if not cached
      */
-    public VBlock getVBlock(BlockState blockState){
-        VBlockSaveFile vBlockSaveFile = getSaveFile(blockState);
+    public VBlock getVBlock(Location location){
+        VBlockSaveFile vBlockSaveFile = getSaveFile(location);
         if(vBlockSaveFile == null)
             return null;
-        return new VBlock(blockState,this,vBlockSaveFile.getBlockPersistentData());
+        return new VBlock(location,this,vBlockSaveFile.getBlockPersistentData());
     }
 
     /**
      * Loads a VBlockSaveFile from internal Cache
-     * @param blockState
+     * @param location
      * @return
      */
-    public VBlockSaveFile getSaveFile(BlockState blockState){
-        SplitChunkKey splitChunkKey = new SplitChunkKey(blockState.getChunk(),blockState.getLocation().getBlockY());
+    public VBlockSaveFile getSaveFile(Location location){
+        SplitChunkKey splitChunkKey = new SplitChunkKey(location.getChunk(),location.getBlockY());
         if(!cache.containsKey(splitChunkKey))
             cache.put(splitChunkKey,new ConcurrentHashMap<>());
         ConcurrentHashMap<LocationKey,VBlockSaveFile> saveFileSet = (ConcurrentHashMap<LocationKey, VBlockSaveFile>) cache.get(splitChunkKey);
-        return saveFileSet.get(new LocationKey(blockState.getLocation()));
+        return saveFileSet.get(new LocationKey(location));
     }
 
     /**
      * Loads a VBlockSaveFile from Cache or Storage
      * If loaded from Storage the VBlockSaveFile will be put into Cache
-     * @param blockState
+     * @param location
      * @return
      */
-    public VBlockSaveFile loadSaveFile(BlockState blockState){
-        SplitChunkKey splitChunkKey = new SplitChunkKey(blockState.getChunk(),blockState.getLocation().getBlockY());
+    public VBlockSaveFile loadSaveFile(Location location){
+        SplitChunkKey splitChunkKey = new SplitChunkKey(location.getChunk(),location.getBlockY());
         if(!cache.containsKey(splitChunkKey))
             cache.put(splitChunkKey,new ConcurrentHashMap<>());
         ConcurrentHashMap<LocationKey,VBlockSaveFile> chunkCache = (ConcurrentHashMap<LocationKey, VBlockSaveFile>) cache.get(splitChunkKey);
 
-        VBlockSaveFile foundSaveFile = chunkCache.get(new LocationKey(blockState.getLocation()));
+        VBlockSaveFile foundSaveFile = chunkCache.get(new LocationKey(location));
 
         if(foundSaveFile != null)
             return foundSaveFile;
-        VBlockSaveFile vBlockSaveFile = vBlockStorage.findSaveFile(blockState.getLocation());
+        VBlockSaveFile vBlockSaveFile = vBlockStorage.findSaveFile(location);
         if(!vBlockSaveFile.getBlockPersistentData().isEmpty())
-            chunkCache.put(new LocationKey(blockState.getLocation()),vBlockSaveFile);
+            chunkCache.put(new LocationKey(location),vBlockSaveFile);
         vBlockSaveFile.getBlockPersistentData().onDataLoad();
         return vBlockSaveFile;
     }

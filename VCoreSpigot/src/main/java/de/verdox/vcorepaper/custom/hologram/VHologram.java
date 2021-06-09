@@ -28,12 +28,11 @@ public class VHologram implements HologramInterface {
     private boolean updating = false;
 
     public VHologram(BukkitPlugin bukkitPlugin, Location location, boolean global){
+        if(Bukkit.getPluginManager().getPlugin("HolographicDisplays") == null)
+            throw new IllegalStateException("HolographicDisplays is needed to use this feature. Will be changed in a future release!");
         this.bukkitPlugin = bukkitPlugin;
         this.location = location;
         this.global = global;
-        this.hologram = HologramsAPI.createHologram(bukkitPlugin,location);
-        if(!global)
-            hologram.getVisibilityManager().setVisibleByDefault(false);
         hologramContent = new HologramContent(this);
     }
 

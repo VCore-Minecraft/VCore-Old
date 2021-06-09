@@ -14,6 +14,7 @@ import de.verdox.vcorepaper.custom.events.callbacks.EventBlockCallback;
 import de.verdox.vcorepaper.custom.items.VCoreItem;
 import org.bukkit.Bukkit;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockState;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -37,15 +38,14 @@ public class CustomDataListener extends VCoreListener.VCoreBukkitListener {
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onItemInteract(PlayerInteractEvent e){
-        Player player = e.getPlayer();
-        ItemStack stack = e.getItem();
-        Action action = e.getAction();
-
         if(e.isCancelled())
             return;
         if(e.getHand() != null && !e.getHand().equals(EquipmentSlot.HAND))
             return;
 
+        Action action = e.getAction();
+        ItemStack stack = e.getItem();
+        Player player = e.getPlayer();
         Block block = e.getClickedBlock();
         if(block == null)
             return;
@@ -54,7 +54,7 @@ public class CustomDataListener extends VCoreListener.VCoreBukkitListener {
         Bukkit.getScheduler().runTaskAsynchronously(getPlugin(),() -> { });
 
         threadObjectManager.submitTask(new ChunkKey(block.getChunk()),new CatchingRunnable(() -> {
-            VBlock vBlock = VCorePaper.getInstance().getCustomBlockManager().wrap(VBlock.class, block.getState());
+            VBlock vBlock = VCorePaper.getInstance().getCustomBlockManager().wrap(VBlock.class, block.getLocation());
             vBlock.updateBlockData(blockData);
 
             VCoreItem vCoreItem = null;
@@ -81,16 +81,16 @@ public class CustomDataListener extends VCoreListener.VCoreBukkitListener {
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onPlaceBlock(BlockPlaceEvent e){
+        if(e.isCancelled())
+            return;
+
         Player player = e.getPlayer();
         ItemStack stack = e.getItemInHand();
         Block block = e.getBlock();
         BlockData blockData = e.getBlock().getBlockData();
 
-        if(e.isCancelled())
-            return;
-
         threadObjectManager.submitTask(new ChunkKey(block.getChunk()),new CatchingRunnable(() -> {
-            VBlock vBlock = VCorePaper.getInstance().getCustomBlockManager().wrap(VBlock.class, block.getState());
+            VBlock vBlock = VCorePaper.getInstance().getCustomBlockManager().wrap(VBlock.class, block.getLocation());
             vBlock.updateBlockData(blockData);
 
             VCoreItem vCoreItem = null;
@@ -119,16 +119,16 @@ public class CustomDataListener extends VCoreListener.VCoreBukkitListener {
 
     @EventHandler
     public void onDestroyBlock(BlockBreakEvent e){
+        if(e.isCancelled())
+            return;
+
         Player player = e.getPlayer();
         ItemStack stack = player.getInventory().getItemInMainHand();
         Block block = e.getBlock();
         BlockData blockData = e.getBlock().getBlockData();
 
-        if(e.isCancelled())
-            return;
-
         Bukkit.getScheduler().runTaskAsynchronously(getPlugin(),() -> {
-            VBlock vBlock = VCorePaper.getInstance().getCustomBlockManager().wrap(VBlock.class, block.getState());
+            VBlock vBlock = VCorePaper.getInstance().getCustomBlockManager().wrap(VBlock.class, block.getLocation());
             vBlock.updateBlockData(blockData);
 
             VCoreItem vCoreItem = null;
