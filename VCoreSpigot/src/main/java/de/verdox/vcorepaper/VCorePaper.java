@@ -98,9 +98,6 @@ public class VCorePaper extends VCorePlugin.Minecraft {
                 public void onConnect() {
                     consoleMessage("&eMongoDB successfully connected!",false);
                 }
-
-                @Override
-                public void onDisconnect() { }
             };
         return mongoDB;
     }

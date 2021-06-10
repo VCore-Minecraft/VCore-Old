@@ -7,6 +7,7 @@ import de.verdox.vcore.data.events.RedisDataRemoveEvent;
 import de.verdox.vcore.data.messages.RedisObjectHandlerMessage;
 import de.verdox.vcore.data.session.DataSession;
 import de.verdox.vcore.dataconnection.DataConnection;
+import de.verdox.vcore.dataconnection.DataProvider;
 import de.verdox.vcore.plugin.VCorePlugin;
 import de.verdox.vcore.redisson.RedisManager;
 import org.redisson.api.RTopic;

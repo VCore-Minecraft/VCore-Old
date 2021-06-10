@@ -75,8 +75,8 @@ public abstract class VCoreData implements VCoreRedisData, VCorePersistentDataba
     //TODO: PushUpdate auslagern in die DataSession und Objekt als Eingabeparameter
     public final void pushUpdate(){
         DataSession session = getResponsibleDataSession();
-        session.localToRedis(this,this.getClass(),getUUID());
-        session.localToDatabase(this.getClass(),getUUID());
+        session.getLocalDataHandler().localToRedis(this,this.getClass(),getUUID());
+        session.getLocalDataHandler().localToDatabase(this.getClass(),getUUID());
     }
 
     public final void pushUpdateAsync(){

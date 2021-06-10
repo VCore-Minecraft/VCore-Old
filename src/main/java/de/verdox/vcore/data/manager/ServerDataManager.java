@@ -77,8 +77,8 @@ public class ServerDataManager <R extends VCorePlugin<?,?>> extends VCoreDataMan
         if(!subsystem.isActivated())
             return null;
         SSession serverDataSession = dataCache.get(subsystem.getUuid());
-        if(serverDataSession.dataExistLocally(dataClass,objectUUID))
-            return serverDataSession.getDataLocal(dataClass,objectUUID);
+        if(serverDataSession.getLocalDataHandler().dataExistLocally(dataClass,objectUUID))
+            return serverDataSession.getLocalDataHandler().getDataLocal(dataClass,objectUUID);
 
         try {
             ServerData dataObject =  dataClass.getDeclaredConstructor(ServerDataManager.class,UUID.class).newInstance(this,objectUUID);
@@ -99,7 +99,7 @@ public class ServerDataManager <R extends VCorePlugin<?,?>> extends VCoreDataMan
         getPlugin()
                 .getSubsystemManager()
                 .getSubSystems()
-                .forEach(vCoreSubsystem -> dataSet.addAll(getSession(vCoreSubsystem.getUuid()).getAllData(dataClass)));
+                .forEach(vCoreSubsystem -> dataSet.addAll(getSession(vCoreSubsystem.getUuid()).getLocalDataHandler().getAllLocalData(dataClass)));
         return dataSet;
     }
 

@@ -45,7 +45,7 @@ public abstract class PlayerSessionManager<R extends VCorePlugin<?,?>> extends V
         playerSessionCache
                 .values()
                 .stream()
-                .map(playerSession -> playerSession.getAllData(dataClass))
+                .map(playerSession -> playerSession.getLocalDataHandler().getAllLocalData(dataClass))
                 .forEach(dataSet::addAll);
         return dataSet;
     }
@@ -77,14 +77,14 @@ public abstract class PlayerSessionManager<R extends VCorePlugin<?,?>> extends V
         if(playerSession == null)
             throw new NullPointerException("PlayerSession can't be null!");
         plugin.getSubsystemManager().getRegisteredPlayerDataClasses()
-                .forEach(aClass -> keys.put(aClass, playerSession.getRedisKeys(aClass,playerSession.getUuid())));
+                .forEach(aClass -> keys.put(aClass, playerSession.getRedisHandler().getRedisKeys(aClass,playerSession.getUuid())));
         return keys;
     }
 
     @Override
     protected void onCleanupInterval() {
         plugin.getSubsystemManager().getActivePlayerDataClasses().forEach(aClass -> {
-            playerSessionCache.values().forEach(playerSession -> playerSession.getAllData(aClass).forEach(playerData -> {
+            playerSessionCache.values().forEach(playerSession -> playerSession.getLocalDataHandler().getAllLocalData(aClass).forEach(playerData -> {
                 if(System.currentTimeMillis() - playerData.getLastUse() <= 1000L*1800)
                     return;
                 // Wurde das Datum in den letzten 1800 Sekunden nicht genutzt wird es in Redis geladen

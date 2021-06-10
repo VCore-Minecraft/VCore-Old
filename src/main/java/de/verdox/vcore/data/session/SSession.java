@@ -1,10 +1,9 @@
 package de.verdox.vcore.data.session;
 
-import de.verdox.vcore.data.annotations.DataContext;
 import de.verdox.vcore.data.annotations.PreloadStrategy;
 import de.verdox.vcore.data.datatypes.ServerData;
 import de.verdox.vcore.data.manager.VCoreDataManager;
-import de.verdox.vcore.data.session.datahandler.LocalDataHandler;
+import de.verdox.vcore.data.session.datahandler.local.LocalDataHandler;
 import de.verdox.vcore.plugin.VCorePlugin;
 import de.verdox.vcore.subsystem.VCoreSubsystem;
 
@@ -33,7 +32,7 @@ public class SSession extends DataSession<ServerData>{
                 // Load Data on Server Start
                 .filter(aClass -> dataManager.getRedisManager().getPreloadStrategy(aClass).equals(PreloadStrategy.LOAD_BEFORE))
                 // PreLoad every Server Data (First from Redis, if it does not exist in redis, load from database)
-                .forEach(this::loadAllDataFromDatabase);
+                .forEach(this::loadAllDataFromDatabaseToPipeline);
     }
 
     @Override
@@ -52,11 +51,6 @@ public class SSession extends DataSession<ServerData>{
     }
 
     @Override
-    public Set<ServerData> getAllData(Class<? extends ServerData> dataClass) {
-        return new HashSet<>(serverDataObjects.get(dataClass).values());
-    }
-
-    @Override
     public void debugToConsole() {
         dataManager.getPlugin().consoleMessage("&8--- &6Debugging ServerDataSession&7: &b"+getUuid()+" &8---",false);
         serverDataObjects.forEach((aClass, serverDataMap) -> {
@@ -69,47 +63,52 @@ public class SSession extends DataSession<ServerData>{
     }
 
     @Override
-    protected LocalDataHandler<ServerData> setupLocalDatabaseHandler() {
-        return null;
-    }
+    protected LocalDataHandler<ServerData> setupLocalHandler() {
+        return new LocalDataHandler<>(this) {
+            @Override
+            public boolean dataExistLocally(Class<? extends ServerData> dataClass, UUID uuid) {
+                if(!serverDataObjects.containsKey(dataClass))
+                    return false;
+                return serverDataObjects.get(dataClass).containsKey(uuid);
+            }
 
-    @Override
-    public <T extends ServerData> T getDataLocal(Class<? extends T> type, UUID uuid) {
-        if(!dataExistLocally(type,uuid))
-            return null;
-        return type.cast(serverDataObjects.get(type).get(uuid));
-    }
+            @Override
+            public void addDataLocally(ServerData data, Class<? extends ServerData> dataClass, boolean push) {
+                if(dataExistLocally(dataClass,data.getUUID()))
+                    return;
+                if(!serverDataObjects.containsKey(dataClass))
+                    serverDataObjects.put(dataClass,new ConcurrentHashMap<>());
+                //TODO: Hier das Erstellen von neuen Daten reinpushen
+                serverDataObjects.get(dataClass).put(data.getUUID(),data);
 
-    @Override
-    public boolean dataExistLocally(Class<? extends ServerData> dataClass, UUID uuid) {
-        if(!serverDataObjects.containsKey(dataClass))
-            return false;
-        return serverDataObjects.get(dataClass).containsKey(uuid);
-    }
+                if(push)
+                    dataManager.pushCreation(dataClass,data);
+            }
 
-    @Override
-    public void addDataLocally(ServerData data, Class<? extends ServerData> dataClass, boolean push) {
-        if(dataExistLocally(dataClass,data.getUUID()))
-            return;
-        if(!serverDataObjects.containsKey(dataClass))
-            serverDataObjects.put(dataClass,new ConcurrentHashMap<>());
-        //TODO: Hier das Erstellen von neuen Daten reinpushen
-        serverDataObjects.get(dataClass).put(data.getUUID(),data);
+            @Override
+            public void removeDataLocally(Class<? extends ServerData> dataClass, UUID uuid, boolean push) {
+                if(!dataExistLocally(dataClass,uuid))
+                    return;
+                serverDataObjects.get(dataClass).remove(uuid);
+                if(serverDataObjects.get(dataClass).size() == 0)
+                    serverDataObjects.remove(dataClass);
+                //TODO: Hier das Löschen von Daten reinpushen
 
-        if(push)
-            dataManager.pushCreation(dataClass,data);
-    }
+                if(push)
+                    dataManager.pushRemoval(dataClass,uuid);
+            }
 
-    @Override
-    public void removeDataLocally(Class<? extends ServerData> dataClass, UUID uuid, boolean push) {
-        if(!dataExistLocally(dataClass,uuid))
-            return;
-        serverDataObjects.get(dataClass).remove(uuid);
-        if(serverDataObjects.get(dataClass).size() == 0)
-            serverDataObjects.remove(dataClass);
-        //TODO: Hier das Löschen von Daten reinpushen
+            @Override
+            public <T extends ServerData> T getDataLocal(Class<? extends T> type, UUID uuid) {
+                if(!dataExistLocally(type,uuid))
+                    return null;
+                return type.cast(serverDataObjects.get(type).get(uuid));
+            }
 
-        if(push)
-            dataManager.pushRemoval(dataClass,uuid);
+            @Override
+            public Set<ServerData> getAllLocalData(Class<? extends ServerData> dataClass) {
+                return new HashSet<>(serverDataObjects.get(dataClass).values());
+            }
+        };
     }
 }
