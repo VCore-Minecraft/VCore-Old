@@ -12,22 +12,20 @@ import org.redisson.api.RTopic;
 import org.redisson.api.RedissonClient;
 import org.redisson.config.Config;
 
+import javax.annotation.Nonnull;
 import java.util.UUID;
 
 public class RedisManager<R extends VCorePlugin<?,?>> {
 
+
     private final R plugin;
-    private DataConnection.MongoDB mongoDB;
+    private final DataConnection.MongoDB mongoDB;
     private final RedissonClient redissonClient;
 
-    public RedisManager (R plugin, boolean clusterMode, String[] addressArray, String redisPassword, DataConnection.MongoDB mongoDB){
+    public RedisManager (@Nonnull R plugin, boolean clusterMode, @Nonnull String[] addressArray, String redisPassword, @Nonnull DataConnection.MongoDB mongoDB){
         this.plugin = plugin;
         getPlugin().consoleMessage("&eStarting Redis Manager",true);
         this.mongoDB = mongoDB;
-        if(this.mongoDB == null)
-            throw new IllegalArgumentException("MongoDB can't be null!");
-        if(addressArray == null)
-            throw new IllegalArgumentException("Address Array null");
         if(addressArray.length == 0)
             throw new IllegalArgumentException("Address Array empty");
         Config config = new Config();
@@ -90,4 +88,6 @@ public class RedisManager<R extends VCorePlugin<?,?>> {
     public RedissonClient getRedissonClient() {
         return redissonClient;
     }
+
+
 }

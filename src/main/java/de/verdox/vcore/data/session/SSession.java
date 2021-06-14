@@ -9,6 +9,7 @@ import de.verdox.vcore.subsystem.VCoreSubsystem;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 public class SSession extends DataSession<ServerData>{
 
@@ -20,8 +21,10 @@ public class SSession extends DataSession<ServerData>{
         super(dataManager,vCoreSubsystem.getUuid());
         this.serverDataObjects = new ConcurrentHashMap<>();
         this.vCoreSubsystem = vCoreSubsystem;
+    }
 
-
+    @Override
+    public void preloadData() {
         dataManager
                 .getPlugin()
                 .getSubsystemManager()
@@ -43,6 +46,15 @@ public class SSession extends DataSession<ServerData>{
     @Override
     public void onCleanUp() {
 
+    }
+
+    @Override
+    public void saveAllData() {
+        serverDataObjects.forEach((aClass, uuidServerDataMap) -> {
+            uuidServerDataMap.forEach((uuid, serverData) -> {
+                serverData.pushUpdate();
+            });
+        });
     }
 
     @Override
@@ -101,14 +113,29 @@ public class SSession extends DataSession<ServerData>{
             @Override
             public <T extends ServerData> T getDataLocal(Class<? extends T> type, UUID uuid) {
                 if(!dataExistLocally(type,uuid))
-                    return null;
+                    throw new NullPointerException("No data in local cache with type "+type+" and uuid "+uuid);
                 return type.cast(serverDataObjects.get(type).get(uuid));
             }
 
             @Override
-            public Set<ServerData> getAllLocalData(Class<? extends ServerData> dataClass) {
-                return new HashSet<>(serverDataObjects.get(dataClass).values());
+            public <T extends ServerData> Set<T> getAllLocalData(Class<? extends T> dataClass) {
+                if(!serverDataObjects.containsKey(dataClass))
+                    return new HashSet<>();
+                return serverDataObjects.get(dataClass).values()
+                        .parallelStream()
+                        .filter(serverData -> serverData.getClass().equals(dataClass))
+                        .map(dataClass::cast)
+                        .collect(Collectors.toSet());
+            }
+
+            @Override
+            public Set<Object> getCachedKeys() {
+                return Collections.singleton(serverDataObjects.values());
             }
         };
+    }
+
+    public VCoreSubsystem<?> getVCoreSubsystem() {
+        return vCoreSubsystem;
     }
 }

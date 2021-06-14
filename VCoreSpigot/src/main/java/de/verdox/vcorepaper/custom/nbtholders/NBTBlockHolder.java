@@ -109,7 +109,10 @@ public class NBTBlockHolder implements NBTHolder {
     public UUID getUUID(String key) {
         try{
             getReadLock().lock();
-            return getMetaDataKey(key, UUID.class);
+            String serialized = getMetaDataKey(key, String.class);
+            if(serialized == null)
+                throw new NullPointerException("No serialized UUID found for key "+key);
+            return UUID.fromString(VCoreUtil.getTypeUtil().uuidFromBase64(serialized));
         } finally {
             getReadLock().unlock();
         }
@@ -131,7 +134,7 @@ public class NBTBlockHolder implements NBTHolder {
             getReadLock().lock();
             String serialized = getMetaDataKey(key, String.class);
             if(serialized == null)
-                return null;
+                throw new NullPointerException("No serialized ItemStack found for key "+key);
             return Serializer.Base64ToItemStack(serialized);
         } finally {
             getReadLock().unlock();
@@ -144,17 +147,17 @@ public class NBTBlockHolder implements NBTHolder {
             getReadLock().lock();
             if(type.equals(ItemStack.class))
                 return (T) getItemStack(key);
-            if(type.equals(Boolean.class))
+            else if(type.equals(Boolean.class))
                 return (T) getBoolean(key);
-            if(type.equals(Integer.class))
+            else if(type.equals(Integer.class))
                 return (T) getInteger(key);
-            if(type.equals(Double.class))
+            else if(type.equals(Double.class))
                 return (T) getDouble(key);
-            if(type.equals(String.class))
+            else if(type.equals(String.class))
                 return (T) getString(key);
-            if(type.equals(UUID.class))
+            else if(type.equals(UUID.class))
                 return (T) getUUID(key);
-            if(type.equals(Long.class))
+            else if(type.equals(Long.class))
                 return (T) getLong(key);
 
             return getMetaDataKey(key, type);
@@ -169,17 +172,17 @@ public class NBTBlockHolder implements NBTHolder {
             getWriteLock().lock();
             if(value instanceof Boolean)
                 saveMetaDataKey(key,Boolean.class,(Boolean) value);
-            if(value instanceof Integer)
+            else if(value instanceof Integer)
                 saveMetaDataKey(key,Integer.class,(Integer) value);
-            if(value instanceof Double)
+            else if(value instanceof Double)
                 saveMetaDataKey(key,Double.class,(Double) value);
-            if(value instanceof String)
+            else if(value instanceof String)
                 saveMetaDataKey(key,String.class,(String) value);
-            if(value instanceof UUID)
-                saveMetaDataKey(key,UUID.class,(UUID) value);
-            if(value instanceof Long)
+            else if(value instanceof UUID)
+                saveMetaDataKey(key, String.class, VCoreUtil.getTypeUtil().uuidToBase64(value.toString()));
+            else if(value instanceof Long)
                 saveMetaDataKey(key,Long.class,(Long) value);
-            if(value instanceof ItemStack) {
+            else if(value instanceof ItemStack) {
                 String serialized = Serializer.itemStackToBase64((ItemStack) value);
                 if(serialized != null)
                     saveMetaDataKey(key, String.class, serialized);

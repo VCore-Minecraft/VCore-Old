@@ -6,6 +6,10 @@ import de.verdox.vcore.plugin.VCorePlugin;
 
 import java.util.Objects;
 
+/**
+ * Type of DataStorage (e.g. MongoCollection)
+ * @param <T>
+ */
 public abstract class DataConnection <T> {
     private final VCorePlugin<?, ?> vCorePlugin;
 

@@ -8,9 +8,12 @@ import de.verdox.vcore.command.callback.CommandCallback;
 import de.verdox.vcore.command.callback.CommandSuggestionCallback;
 import de.verdox.vcore.plugin.VCorePlugin;
 import de.verdox.vcore.subsystem.VCoreSubsystem;
+import de.verdox.vcore.util.VCoreUtil;
+import net.md_5.bungee.api.ChatMessageType;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabExecutor;
+import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -66,6 +69,10 @@ public abstract class VCoreCommand <T extends VCorePlugin<?,?>, R> {
 
         public VCoreBukkitCommand(VCoreSubsystem.Bukkit vCoreSubsystem, String commandName) {
             super(vCoreSubsystem, commandName);
+        }
+
+        public void sendPlayerMessage(Player player, String message){
+            VCoreUtil.getBukkitPlayerUtil().sendPlayerMessage(player, ChatMessageType.CHAT,message);
         }
 
         @Override

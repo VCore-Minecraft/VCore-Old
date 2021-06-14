@@ -8,6 +8,7 @@ public class VCoreUtil {
     private static final TypeUtil typeUtil = new TypeUtil();
     private static final RandomUtil randomUtil = new RandomUtil();
     private static final MathUtil mathUtil = new MathUtil();
+    private static final MySQLUtil mySQLUtil = new MySQLUtil();
 
     public static GeometryUtil getGeometryUtil() {
         return geometryUtil;
@@ -32,4 +33,5 @@ public class VCoreUtil {
     public static MathUtil getMathUtil() {
         return mathUtil;
     }
+    public static MySQLUtil getMySQLUtil() {return mySQLUtil;}
 }

@@ -1,11 +1,11 @@
 package de.verdox.vcorepaper;
 
+import com.comphenix.protocol.ProtocolLibrary;
 import com.comphenix.protocol.ProtocolManager;
 import de.verdox.vcore.dataconnection.DataConnection;
 import de.verdox.vcore.plugin.VCorePlugin;
 import de.verdox.vcore.subsystem.VCoreSubsystem;
 import de.verdox.vcorepaper.commands.AdminCommands;
-import de.verdox.vcorepaper.commands.ConsoleCommands;
 import de.verdox.vcorepaper.custom.blocks.CustomBlockManager;
 import de.verdox.vcorepaper.custom.blocks.VBlockListener;
 import de.verdox.vcorepaper.custom.entities.CustomEntityListener;
@@ -14,6 +14,7 @@ import de.verdox.vcorepaper.custom.CustomDataListener;
 import de.verdox.vcorepaper.custom.events.AsyncEventWrapper;
 import de.verdox.vcorepaper.custom.items.CustomItemManager;
 import de.verdox.vcorepaper.files.VCorePaperSettings;
+import org.bukkit.Bukkit;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -53,8 +54,16 @@ public class VCorePaper extends VCorePlugin.Minecraft {
         getSessionManager();
         getServerDataManager();
 
-        getCommand("debug").setExecutor(new ConsoleCommands());
         new AdminCommands(this,"debug");
+
+        if(Bukkit.getPluginManager().getPlugin("ProtocolLib") != null)
+            protocolManager = ProtocolLibrary.getProtocolManager();
+    }
+
+    public ProtocolManager getProtocolManager() {
+        if(Bukkit.getPluginManager().getPlugin("ProtocolLib") == null)
+            throw new IllegalStateException("ProtocolLib could not be found on this server.");
+        return protocolManager;
     }
 
     @Override
@@ -112,5 +121,19 @@ public class VCorePaper extends VCorePlugin.Minecraft {
 
     public CustomBlockManager getCustomBlockManager() {
         return customBlockManager;
+    }
+
+    public void asyncThenSync(Runnable asyncTask, Runnable syncTask){
+        async(() -> {
+            asyncTask.run();
+            sync(syncTask);
+        });
+    }
+
+    public void syncThenAsync(Runnable syncTask, Runnable asyncTask){
+        sync(() -> {
+            syncTask.run();
+            async(asyncTask);
+        });
     }
 }

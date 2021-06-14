@@ -55,17 +55,17 @@ public class NBTEntityHolder implements NBTHolder {
     public <T> T getObject(String key, Class<T> type) {
         if(type.equals(Boolean.class))
             return (T) getBoolean(key);
-        if(type.equals(Integer.class))
+        else if(type.equals(Integer.class))
             return (T) getInteger(key);
-        if(type.equals(Double.class))
+        else if(type.equals(Double.class))
             return (T) getDouble(key);
-        if(type.equals(String.class))
+        else if(type.equals(String.class))
             return (T) getString(key);
-        if(type.equals(UUID.class))
+        else if(type.equals(UUID.class))
             return (T) getUUID(key);
-        if(type.equals(Long.class))
+        else if(type.equals(Long.class))
             return (T) getLong(key);
-        if(type.equals(ItemStack.class))
+        else if(type.equals(ItemStack.class))
             return (T) nbtEntity.getItemStack(key);
         return nbtEntity.getObject(key,type);
     }

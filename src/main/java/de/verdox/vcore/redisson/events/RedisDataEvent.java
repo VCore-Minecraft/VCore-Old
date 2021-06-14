@@ -1,4 +1,4 @@
-package de.verdox.vcore.data.events;
+package de.verdox.vcore.redisson.events;
 
 import de.verdox.vcore.data.datatypes.VCoreData;
 

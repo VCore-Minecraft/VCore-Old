@@ -1,5 +1,6 @@
 package de.verdox.vcore.data.manager;
 
+import com.fasterxml.jackson.databind.util.JSONPObject;
 import de.verdox.vcore.data.datatypes.PlayerData;
 import de.verdox.vcore.data.session.PlayerSession;
 import de.verdox.vcore.dataconnection.DataConnection;
@@ -17,9 +18,12 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerKickEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Consumer;
 
 public abstract class PlayerSessionManager<R extends VCorePlugin<?,?>> extends VCoreDataManager<PlayerData, R> {
 
@@ -27,10 +31,10 @@ public abstract class PlayerSessionManager<R extends VCorePlugin<?,?>> extends V
 
     public PlayerSessionManager(R plugin, boolean useRedisCluster, String[] addressArray, String redisPassword, DataConnection.MongoDB mongoDB){
         super(plugin,useRedisCluster,addressArray,redisPassword,mongoDB);
-        getPlugin().consoleMessage("&eStarting Session Manager",true);
+        getPlugin().consoleMessage("&eStarting PlayerSessionManager",false);
     }
 
-    protected PlayerSession createSession(UUID uuid){
+    protected PlayerSession createSession(@Nonnull UUID uuid){
         //getPlugin().consoleMessage("&eCreating Local Player Session&7: &b"+uuid);
         if(exist(uuid))
             return getSession(uuid);
@@ -40,8 +44,13 @@ public abstract class PlayerSessionManager<R extends VCorePlugin<?,?>> extends V
     }
 
     @Override
-    public Set<PlayerData> getAllData(Class<? extends PlayerData> dataClass) {
-        Set<PlayerData> dataSet = new HashSet<>();
+    public void saveAllData(){
+        playerSessionCache.forEach((uuid, playerSession) -> playerSession.saveAllData());
+    }
+
+    @Override
+    public <U extends PlayerData> Set<U> getAllData(@Nonnull Class<? extends U> dataClass) {
+        Set<U> dataSet = new HashSet<>();
         playerSessionCache
                 .values()
                 .stream()
@@ -51,11 +60,35 @@ public abstract class PlayerSessionManager<R extends VCorePlugin<?,?>> extends V
     }
 
     @Override
-    public PlayerData load(Class<? extends PlayerData> type, UUID uuid) {
-        return getSession(uuid).loadFromPipeline(type,uuid);
+    public <T extends PlayerData> T load(@Nonnull Class<? extends T> type, @Nonnull UUID uuid, @Nonnull LoadingStrategy loadingStrategy, @Nullable Consumer<T> callback) {
+        PlayerSession playerSession = getSession(uuid);
+        if (playerSession == null) {
+            if(loadingStrategy.equals(LoadingStrategy.LOAD_LOCAL))
+                throw new NullPointerException("There is no local Session for Player with uuid: "+uuid+". Check first!");
+            else
+                playerSession = createSession(uuid);
+        }
+        if(!loadingStrategy.equals(LoadingStrategy.LOAD_PIPELINE)) {
+            if(!playerSession.getLocalDataHandler().dataExistLocally(type, uuid)){
+                if(loadingStrategy.equals(LoadingStrategy.LOAD_LOCAL))
+                    throw new NullPointerException("Data with type "+type+" and uuid "+uuid+" is not cached locally. Check first!");
+                else{
+                    PlayerSession finalPlayerSession = playerSession;
+                    plugin.async(() -> {
+                        T data = finalPlayerSession.loadFromPipeline(type, uuid);
+                        if(callback != null)
+                            callback.accept(data);
+                    });
+                }
+            }
+            if(!playerSession.getLocalDataHandler().dataExistLocally(type, uuid))
+                return null;
+            return playerSession.getLocalDataHandler().getDataLocal(type, uuid);
+        }
+        return playerSession.loadFromPipeline(type,uuid);
     }
 
-    protected PlayerSession deleteSession(UUID uuid){
+    protected PlayerSession deleteSession(@Nonnull UUID uuid){
         //getPlugin().consoleMessage("&eDeleting Local Player Session&7: &b"+uuid);
         PlayerSession playerSession = getSession(uuid);
         playerSession.getPlayerDataObjects().forEach((aClass, playerData) -> playerData.pushUpdate());
@@ -64,11 +97,11 @@ public abstract class PlayerSessionManager<R extends VCorePlugin<?,?>> extends V
         return playerSession;
     }
 
-    public boolean exist(UUID playerUUID){
+    public boolean exist(@Nonnull UUID playerUUID){
         return playerSessionCache.containsKey(playerUUID);
     }
 
-    public PlayerSession getSession(UUID playerUUID){
+    public PlayerSession getSession(@Nonnull UUID playerUUID){
         return playerSessionCache.get(playerUUID);
     }
 
@@ -123,7 +156,18 @@ public abstract class PlayerSessionManager<R extends VCorePlugin<?,?>> extends V
     }
 
     @Override
-    public PlayerData instantiateVCoreData(Class<? extends PlayerData> dataClass, UUID objectUUID){
+    public PlayerData instantiateVCoreData(@Nonnull Class<? extends PlayerData> dataClass, UUID objectUUID){
+
+        if(VCorePlugin.findDependSubsystemClass(dataClass) == null)
+            throw new NullPointerException(dataClass+" does not have RequiredSubsystem Annotation set.");
+        if(objectUUID == null)
+            throw new NullPointerException("objectUUID can't be null!");
+        VCoreSubsystem<?> subsystem = plugin.findDependSubsystem(dataClass);
+        if(subsystem == null)
+            throw new NullPointerException("Provided Subsystem can't be null");
+        if(!subsystem.isActivated())
+            throw new NullPointerException("Provided Subsystem is not activated");
+
         try {
             return dataClass.getDeclaredConstructor(PlayerSessionManager.class,UUID.class).newInstance(this,objectUUID);
         } catch (NoSuchMethodException | IllegalAccessException | InstantiationException | InvocationTargetException noSuchMethodException) {

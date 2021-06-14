@@ -30,12 +30,13 @@ public abstract class DatabaseHandler <S extends VCoreData> {
 
     public final void dataBaseToRedis(Class<? extends S> dataClass, UUID objectUUID){
         S vCoreData = dataSession.getDataManager().instantiateVCoreData(dataClass,objectUUID);
-        RMap<String, Object> redisCache = dataSession.getRedisHandler().getRedisCache(dataClass);
+        RMap<String, Object> redisCache = dataSession.getRedisHandler().getRedisCache(dataClass,objectUUID);
 
         Map<String, Object> dataFromDatabase = loadDataFromDatabase(dataClass,objectUUID);
 
         vCoreData.dataForRedis().forEach(redisCache::put);
         vCoreData.restoreFromRedis(dataFromDatabase);
+        vCoreData.onLoad();
     }
 
     public final void databaseToLocal(Class<? extends S> dataClass, UUID objectUUID){

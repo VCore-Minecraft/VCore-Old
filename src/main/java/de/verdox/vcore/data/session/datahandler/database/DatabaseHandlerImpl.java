@@ -54,7 +54,7 @@ public class DatabaseHandlerImpl <S extends VCoreData> extends DatabaseHandler<S
         Set<String> dataKeysToSave = dataSession.getRedisHandler().getRedisKeys(dataClass,objectUUID);
         if(dataKeysToSave == null)
             return;
-        dataSession.getLocalDataHandler().getDataLocal(dataClass,objectUUID).cleanUp();
+        //dataSession.getLocalDataHandler().getDataLocal(dataClass,objectUUID).cleanUp();
 
         dataKeysToSave
                 .stream()

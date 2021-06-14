@@ -117,7 +117,7 @@ public class CustomDataListener extends VCoreListener.VCoreBukkitListener {
         Bukkit.getScheduler().runTaskAsynchronously(getPlugin(),() -> { });
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void onDestroyBlock(BlockBreakEvent e){
         if(e.isCancelled())
             return;

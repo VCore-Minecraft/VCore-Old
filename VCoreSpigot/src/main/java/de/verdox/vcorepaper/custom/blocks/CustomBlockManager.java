@@ -177,15 +177,14 @@ public class CustomBlockManager extends CustomDataManager<Location, VBlockCustom
         SplitChunkKey splitChunkKey = new SplitChunkKey(location.getChunk(),location.getBlockY());
         if(!cache.containsKey(splitChunkKey))
             cache.put(splitChunkKey,new ConcurrentHashMap<>());
-        ConcurrentHashMap<LocationKey,VBlockSaveFile> chunkCache = (ConcurrentHashMap<LocationKey, VBlockSaveFile>) cache.get(splitChunkKey);
-
-        VBlockSaveFile foundSaveFile = chunkCache.get(new LocationKey(location));
+        VBlockSaveFile foundSaveFile = cache.get(splitChunkKey).get(new LocationKey(location));
 
         if(foundSaveFile != null)
             return foundSaveFile;
+
         VBlockSaveFile vBlockSaveFile = vBlockStorage.findSaveFile(location);
         if(!vBlockSaveFile.getBlockPersistentData().isEmpty())
-            chunkCache.put(new LocationKey(location),vBlockSaveFile);
+            cache.get(splitChunkKey).put(new LocationKey(location),vBlockSaveFile);
         vBlockSaveFile.getBlockPersistentData().onDataLoad();
         return vBlockSaveFile;
     }

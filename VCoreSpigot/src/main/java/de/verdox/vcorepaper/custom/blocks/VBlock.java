@@ -19,7 +19,7 @@ import java.util.function.Consumer;
 public class VBlock extends CustomDataHolder<Location, NBTBlockHolder, CustomBlockManager> {
 
     private final BlockPersistentData blockPersistentData;
-    private BlockData blockData;
+    private String blockDataAsString;
 
     //TODO: BLOCKSTATE IN BLOCKDATA UMWANDELN
 
@@ -27,7 +27,7 @@ public class VBlock extends CustomDataHolder<Location, NBTBlockHolder, CustomBlo
         super(blockLocation, customBlockManager);
         this.blockPersistentData = blockPersistentData;
         if(getBlockPersistentData().getJsonObject().containsKey("vBlockBlockData"))
-            blockData = Bukkit.createBlockData((String) getBlockPersistentData().getJsonObject().get("vBlockBlockData"));
+            blockDataAsString = (String) getBlockPersistentData().getJsonObject().get("vBlockBlockData");
     }
 
     /**
@@ -35,8 +35,12 @@ public class VBlock extends CustomDataHolder<Location, NBTBlockHolder, CustomBlo
      * @param blockData
      */
     public void updateBlockData(BlockData blockData){
-        this.blockData = blockData;
-        getBlockPersistentData().getJsonObject().put("vBlockBlockData",blockData.getAsString());
+        this.blockDataAsString = blockData.getAsString();
+        getBlockPersistentData().getJsonObject().put("vBlockBlockData",blockDataAsString);
+    }
+
+    public void updateBlockData(){
+        blockDataAsString = getDataHolder().getBlock().getBlockData().getAsString();
     }
 
     public void dropItemInWorld(ItemStack itemStack, org.bukkit.util.Consumer<Item> beforeDrop){
@@ -46,8 +50,8 @@ public class VBlock extends CustomDataHolder<Location, NBTBlockHolder, CustomBlo
         });
     }
 
-    public BlockData getBlockData() {
-        return blockData;
+    public String getBlockDataString() {
+        return blockDataAsString;
     }
 
     public void addVBlockTickCallback(Consumer<VBlock> callback){

@@ -27,13 +27,13 @@ public abstract class RedisHandler <S extends VCoreData>{
     }
 
     public abstract Set<String> getRedisKeys(Class<? extends S> vCoreDataClass, UUID uuid);
-    public abstract RMap<String, Object> getRedisCache(Class<? extends S> dataClass);
+    public abstract RMap<String, Object> getRedisCache(Class<? extends S> dataClass, UUID uuid);
     public abstract boolean dataExistRedis(Class<? extends S> dataClass, UUID uuid);
 
     public final void redisToDatabase(Class<? extends S> dataClass,UUID objectUUID){
         if(dataClass == null)
             return;
-        RMap<String, Object> redisCache = getRedisCache(dataClass);
+        RMap<String, Object> redisCache = getRedisCache(dataClass, objectUUID);
         dataSession.getDatabaseHandler().saveToDatabase(dataClass,objectUUID,redisCache);
     }
 
@@ -42,7 +42,7 @@ public abstract class RedisHandler <S extends VCoreData>{
             return;
         if(objectUUID == null)
             return;
-        RMap<String, Object> redisCache = getRedisCache(dataClass);
+        RMap<String, Object> redisCache = getRedisCache(dataClass, objectUUID);
         S vCoreData = dataSession.getDataManager().instantiateVCoreData(dataClass,objectUUID);
 
         Set<String> redisKeys = getRedisKeys(dataClass,objectUUID);
@@ -51,6 +51,7 @@ public abstract class RedisHandler <S extends VCoreData>{
         redisKeys.forEach(key -> dataFromRedis.put(key,redisCache.get(key)));
 
         vCoreData.restoreFromRedis(dataFromRedis);
+        vCoreData.onLoad();
 
         dataSession.getLocalDataHandler().addDataLocally(vCoreData,dataClass,true);
     }

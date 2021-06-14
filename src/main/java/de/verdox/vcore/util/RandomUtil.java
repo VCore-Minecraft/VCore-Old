@@ -9,4 +9,9 @@ public class RandomUtil {
         return min + (max - min) * r.nextDouble();
     }
 
+    public int randomInt(int min, int max){
+        Random r = new Random();
+        return r.nextInt(max+1)+min;
+    }
+
 }

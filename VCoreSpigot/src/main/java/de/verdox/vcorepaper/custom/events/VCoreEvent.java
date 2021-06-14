@@ -8,6 +8,10 @@ public class VCoreEvent extends Event {
 
     private static final HandlerList handlers = new HandlerList();
 
+    public VCoreEvent(){
+        super(false);
+    }
+
     @Override
     public HandlerList getHandlers() {
         return handlers;

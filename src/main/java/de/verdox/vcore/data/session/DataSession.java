@@ -2,6 +2,7 @@ package de.verdox.vcore.data.session;
 
 import com.mongodb.client.MongoCollection;
 import de.verdox.vcore.data.annotations.DataContext;
+import de.verdox.vcore.data.annotations.PreloadStrategy;
 import de.verdox.vcore.data.datatypes.VCoreData;
 import de.verdox.vcore.data.manager.VCoreDataManager;
 import de.verdox.vcore.data.session.datahandler.database.DatabaseHandler;
@@ -9,14 +10,16 @@ import de.verdox.vcore.data.session.datahandler.database.DatabaseHandlerImpl;
 import de.verdox.vcore.data.session.datahandler.local.LocalDataHandler;
 import de.verdox.vcore.data.session.datahandler.redis.RedisHandler;
 import de.verdox.vcore.data.session.datahandler.redis.RedisHandlerImpl;
+import de.verdox.vcore.plugin.VCorePlugin;
 import org.bson.Document;
 
+import javax.annotation.Nonnull;
 import java.util.*;
 
 public abstract class DataSession <S extends VCoreData> {
 
     protected final VCoreDataManager<S,?> dataManager;
-    private UUID uuid;
+    private final UUID uuid;
     private final LocalDataHandler<S> localDataHandler;
     private final RedisHandler<S> redisHandler;
     private final DatabaseHandler<S> databaseHandler;
@@ -38,10 +41,7 @@ public abstract class DataSession <S extends VCoreData> {
         onCleanUp();
     }
 
-    public S loadFromPipeline(Class<? extends S> dataClass, UUID objectUUID){
-        if(dataClass == null || objectUUID == null)
-            return null;
-
+    public synchronized <T extends S> T loadFromPipeline(@Nonnull Class<? extends T> dataClass, @Nonnull UUID objectUUID){
         if(getLocalDataHandler().dataExistLocally(dataClass,objectUUID)) {
             dataManager.getPlugin().consoleMessage("&eFound Data in Local Cache &8[&b"+dataClass.getSimpleName()+"&8]", 1,true);
         }
@@ -65,11 +65,13 @@ public abstract class DataSession <S extends VCoreData> {
             getLocalDataHandler().addDataLocally(vCoreData,dataClass,true);
             getLocalDataHandler().localToRedis(vCoreData,dataClass,vCoreData.getUUID());
         }
-        dataManager.getPlugin().consoleMessage("&eLoaded &a"+dataClass.getSimpleName()+" &ewith uuid&7: "+objectUUID, 1,true);
+        dataManager.getPlugin().consoleMessage("&eCaller&7: &b"+getClass().getSimpleName()+" &7| &b"+getUuid()+"&7 >> &eLoaded &a"+dataClass.getSimpleName()+" &ewith uuid&7: "+objectUUID, 1,true);
+        if(!getLocalDataHandler().dataExistLocally(dataClass, objectUUID))
+            throw new NullPointerException("Error in dataPipeline while loading "+dataClass+" with uuid "+uuid);
         return getLocalDataHandler().getDataLocal(dataClass,objectUUID);
     }
 
-    public void saveToPipeline(Class<? extends S> dataClass, UUID objectUUID){
+    public synchronized void saveToPipeline(@Nonnull Class<? extends S> dataClass, @Nonnull UUID objectUUID){
         if(dataManager.getRedisManager().getContext(dataClass).equals(DataContext.GLOBAL)){
             if(!getRedisHandler().dataExistRedis(dataClass,objectUUID))
                 //TODO: Es wird hier nur in die Datenbank gespeichert, wenn remote die Daten noch existieren,
@@ -82,14 +84,12 @@ public abstract class DataSession <S extends VCoreData> {
         }
     }
 
-    public void saveAndRemoveLocally(Class<? extends S> dataClass, UUID objectUUID){
+    public void saveAndRemoveLocally(@Nonnull Class<? extends S> dataClass, @Nonnull UUID objectUUID){
         saveToPipeline(dataClass,objectUUID);
         getLocalDataHandler().removeDataLocally(dataClass,objectUUID,true);
     }
 
-
-    //TODO: First search in Redis then search in MongoDB
-    protected void loadAllDataFromDatabaseToPipeline(Class<? extends S> dataClass){
+    protected void loadAllDataFromDatabaseToPipeline(@Nonnull Class<? extends S> dataClass){
         dataManager.getPlugin().consoleMessage("&ePreloading Data for &a"+dataClass.getSimpleName()+" &efrom database&7!",true);
         getMongoCollection(dataClass)
                 .find()
@@ -100,13 +100,15 @@ public abstract class DataSession <S extends VCoreData> {
                 });
     }
 
-    public final MongoCollection<Document> getMongoCollection(Class<? extends S> dataClass){
+    public final MongoCollection<Document> getMongoCollection(@Nonnull Class<? extends S> dataClass){
         return dataManager.getRedisManager().getMongoDB().getDataStorage(dataClass,getMongoDBSuffix());
     }
     public abstract String getMongoDBSuffix();
 
+    public abstract void preloadData();
     public abstract void onLoad();
     public abstract void onCleanUp();
+    public abstract void saveAllData();
 
     public abstract void debugToConsole();
 

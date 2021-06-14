@@ -36,13 +36,13 @@ public class RedisHandlerImpl <S extends VCoreData> extends RedisHandler<S>{
     }
 
     @Override
-    public RMap<String, Object> getRedisCache(Class<? extends S> dataClass) {
-        return dataSession.getDataManager().getRedisManager().getRedisCache(dataClass,dataSession.getUuid());
+    public RMap<String, Object> getRedisCache(Class<? extends S> dataClass, UUID objectUUID) {
+        return dataSession.getDataManager().getRedisManager().getRedisCache(dataClass,objectUUID);
     }
 
     @Override
     public boolean dataExistRedis(Class<? extends S> dataClass, UUID uuid) {
-        RMap<String, Object> redisCache = getRedisCache(dataClass);
+        RMap<String, Object> redisCache = getRedisCache(dataClass, uuid);
 
         Set<String> redisKeys = getRedisKeys(dataClass,uuid);
 

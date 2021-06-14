@@ -1,4 +1,4 @@
-package de.verdox.vcore.data.messages;
+package de.verdox.vcore.redisson.messages;
 
 import java.io.Serializable;
 

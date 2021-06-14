@@ -1,8 +1,11 @@
 package de.verdox.vcore.data.session;
 
+import de.verdox.vcore.data.annotations.PreloadStrategy;
 import de.verdox.vcore.data.datatypes.PlayerData;
 import de.verdox.vcore.data.manager.VCoreDataManager;
 import de.verdox.vcore.data.session.datahandler.local.LocalDataHandler;
+import de.verdox.vcore.plugin.VCorePlugin;
+import org.bukkit.Bukkit;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -15,6 +18,19 @@ public class PlayerSession extends DataSession<PlayerData>{
     public PlayerSession(VCoreDataManager<PlayerData, ?> dataManager, UUID playerUUID) {
         super(dataManager, playerUUID);
         this.dataManager = dataManager;
+    }
+
+    @Override
+    public void preloadData() {
+        dataManager
+                .getPlugin()
+                .getSubsystemManager()
+                .getActivePlayerDataClasses()
+                .stream()
+                // Load Data on Server Start
+                .filter(aClass -> dataManager.getRedisManager().getPreloadStrategy(aClass).equals(PreloadStrategy.LOAD_BEFORE))
+                // PreLoad every Server Data (First from Redis, if it does not exist in redis, load from database)
+                .forEach(this::loadAllDataFromDatabaseToPipeline);
     }
 
     @Override
@@ -38,8 +54,6 @@ public class PlayerSession extends DataSession<PlayerData>{
     @Override
     public LocalDataHandler<PlayerData> setupLocalHandler() {
         return new LocalDataHandler<>(this) {
-            private final Map<Class<? extends PlayerData>, PlayerData> playerDataObjects = new HashMap<>();
-
             @Override
             public boolean dataExistLocally(Class<? extends PlayerData> dataClass, UUID uuid) {
                 return playerDataObjects.containsKey(dataClass);
@@ -62,13 +76,22 @@ public class PlayerSession extends DataSession<PlayerData>{
             @Override
             public <T extends PlayerData> T getDataLocal(Class<? extends T> type, UUID uuid) {
                 if(!playerDataObjects.containsKey(type))
-                    return null;
+                    throw new NullPointerException("No data in local cache with type "+type+" and uuid "+uuid);
                 return type.cast(playerDataObjects.get(type));
             }
 
             @Override
-            public Set<PlayerData> getAllLocalData(Class<? extends PlayerData> dataClass) {
-                return playerDataObjects.values().parallelStream().filter(playerData -> playerData.getClass().equals(dataClass)).collect(Collectors.toSet());
+            public <T extends PlayerData> Set<T> getAllLocalData(Class<? extends T> dataClass) {
+                return playerDataObjects.values()
+                        .parallelStream()
+                        .filter(playerData -> playerData.getClass().equals(dataClass))
+                        .map(dataClass::cast)
+                        .collect(Collectors.toSet());
+            }
+
+            @Override
+            public Set<Object> getCachedKeys() {
+                return Collections.singleton(playerDataObjects.keySet());
             }
         };
     }
@@ -77,6 +100,11 @@ public class PlayerSession extends DataSession<PlayerData>{
     @Override
     public void onCleanUp() {
         playerDataObjects.forEach((aClass, playerData) -> playerData.cleanUp());
+    }
+
+    @Override
+    public void saveAllData() {
+        playerDataObjects.forEach((aClass, playerData) -> playerData.pushUpdate());
     }
 
     @Override

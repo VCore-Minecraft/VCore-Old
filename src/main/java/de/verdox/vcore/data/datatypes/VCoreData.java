@@ -12,6 +12,8 @@ import de.verdox.vcore.redisson.RedisManager;
 import de.verdox.vcore.redisson.VCorePersistentDatabaseData;
 import de.verdox.vcore.redisson.VCoreRedisData;
 import de.verdox.vcore.subsystem.VCoreSubsystem;
+import de.verdox.vcore.util.TypeUtil;
+import de.verdox.vcore.util.VCoreUtil;
 import org.redisson.api.RTopic;
 import org.redisson.api.listener.MessageListener;
 
@@ -27,6 +29,12 @@ public abstract class VCoreData implements VCoreRedisData, VCorePersistentDataba
         return Arrays.stream(vCoreDataClass.getDeclaredFields())
                 .filter(field -> field.getAnnotation(VCorePersistentData.class) != null)
                 .map(Field::getName)
+                .collect(Collectors.toSet());
+    }
+
+    public static Set<Field> getPersistentDataFields(Class<? extends VCoreData> vCoreDataClass){
+        return Arrays.stream(vCoreDataClass.getDeclaredFields())
+                .filter(field -> field.getAnnotation(VCorePersistentData.class) != null)
                 .collect(Collectors.toSet());
     }
 
@@ -62,6 +70,7 @@ public abstract class VCoreData implements VCoreRedisData, VCorePersistentDataba
     public final void cleanUp(){
         if(getDataTopic() == null)
             return;
+        getPlugin().consoleMessage("&6Preparing DataCleanup "+getClass().getSimpleName(), true);
         onCleanUp();
         getDataTopic().removeListener(messageListener);
         cleaned = true;
@@ -74,6 +83,7 @@ public abstract class VCoreData implements VCoreRedisData, VCorePersistentDataba
 
     //TODO: PushUpdate auslagern in die DataSession und Objekt als Eingabeparameter
     public final void pushUpdate(){
+        updateLastUse();
         DataSession session = getResponsibleDataSession();
         session.getLocalDataHandler().localToRedis(this,this.getClass(),getUUID());
         session.getLocalDataHandler().localToDatabase(this.getClass(),getUUID());
@@ -91,9 +101,12 @@ public abstract class VCoreData implements VCoreRedisData, VCorePersistentDataba
 
         getRedisDataKeys(getClass()).forEach(dataKey -> {
             try {
-                Field field = getClass().getField(dataKey);
-                if(field.get(this) == null)
+                Field field = getClass().getDeclaredField(dataKey);
+                field.setAccessible(true);
+                if(field.get(this) == null) {
+                    getPlugin().consoleMessage("&cSkipping &e"+field.getName()+" &cas it is null!", true);
                     return;
+                }
                 dataForRedis.put(field.getName(), field.get(this));
             } catch (NoSuchFieldException | IllegalAccessException e) { e.printStackTrace(); }
         });
@@ -106,14 +119,38 @@ public abstract class VCoreData implements VCoreRedisData, VCorePersistentDataba
     @Override
     public final void restoreFromDataBase(Map<String, Object> dataFromDatabase) {
         dataFromDatabase.forEach((key, value) -> {
-            try { getClass().getField(key).set(this,value); } catch (IllegalAccessException | NoSuchFieldException e) { e.printStackTrace(); }
+            if(key.equals("objectUUID"))
+                return;
+            if(value == null)
+                return;
+            try {
+                Field field = getClass().getDeclaredField(key);
+                field.setAccessible(true);
+                if(!field.getType().isPrimitive())
+                    field.set(this,VCoreUtil.getTypeUtil().castData(value,field.getType()));
+                else
+                    field.set(this, value);
+            } catch (IllegalAccessException | NoSuchFieldException e) { e.printStackTrace(); }
         });
     }
 
     @Override
     public final void restoreFromRedis(Map<String, Object> dataFromRedis) {
         dataFromRedis.forEach((key, value) -> {
-            try { getClass().getField(key).set(this,value); } catch (IllegalAccessException | NoSuchFieldException ignored) { }
+            if(key.equals("objectUUID"))
+                return;
+            if(value == null)
+                return;
+            try {
+                Field field = getClass().getDeclaredField(key);
+                field.setAccessible(true);
+                if(!field.getType().isPrimitive())
+                    field.set(this,VCoreUtil.getTypeUtil().castData(value,field.getType()));
+                else
+                    field.set(this, value);
+            } catch (IllegalAccessException | NoSuchFieldException ignored) {
+                ignored.printStackTrace();
+            }
         });
     }
 

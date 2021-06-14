@@ -2,6 +2,7 @@ package de.verdox.vcorepaper.commands;
 
 import de.verdox.vcore.command.VCoreCommand;
 import de.verdox.vcore.command.callback.CommandCallback;
+import de.verdox.vcore.data.session.SSession;
 import de.verdox.vcore.plugin.VCorePlugin;
 import de.verdox.vcore.util.VCoreUtil;
 import de.verdox.vcorepaper.VCorePaper;
@@ -9,6 +10,7 @@ import de.verdox.vcorepaper.custom.blocks.VBlock;
 import de.verdox.vcorepaper.custom.blocks.enums.VBlockEventPermission;
 import de.verdox.vcorepaper.custom.items.VCoreItem;
 import net.md_5.bungee.api.ChatMessageType;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Chunk;
 import org.bukkit.Material;
@@ -16,6 +18,7 @@ import org.bukkit.block.Block;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.util.RayTraceResult;
 
 import java.util.Arrays;
@@ -25,7 +28,7 @@ import java.util.stream.Collectors;
 public class AdminCommands extends VCoreCommand.VCoreBukkitCommand {
     public AdminCommands(VCorePlugin.Minecraft vCorePlugin, String commandName) {
         super(vCorePlugin, commandName);
-        addCommandSuggestions(0,(commandSender, args) -> List.of("block","item","entity","chunk"));
+        addCommandSuggestions(0,(commandSender, args) -> List.of("listPlugins","plugin","block","item","entity","chunk"));
         addCommandSuggestions(1,(commandSender, args) -> {
             if(args[0].equalsIgnoreCase("block"))
                 return List.of("allow","deny","isCached");
@@ -44,15 +47,56 @@ public class AdminCommands extends VCoreCommand.VCoreBukkitCommand {
     @Override
     protected CommandCallback<CommandSender> commandCallback() {
         return (sender, args) -> {
-
-            if(!(sender instanceof Player))
-                return false;
-            Player player = (Player) sender;
-
-            if(!player.hasPermission("vcore.debug"))
+            if(!sender.hasPermission("vcore.debug"))
                 return false;
 
             if(args.length >= 1){
+                if(args[0].equalsIgnoreCase("listPlugins")){
+                    VCorePaper.getInstance().consoleMessage("&eDebuggable Plugins&7:",false);
+                    for (Plugin plugin : Bukkit.getPluginManager().getPlugins()) {
+                        if(!(plugin instanceof VCorePlugin.Minecraft))
+                            continue;
+                        VCorePaper.getInstance().consoleMessage("&a"+plugin.getName(),1,false);
+                    }
+                    return true;
+                }
+                else if(args[0].equalsIgnoreCase("plugin")){
+                    String pluginName = args[1];
+                    Plugin plugin = Bukkit.getPluginManager().getPlugin(pluginName);
+                    if(plugin == null){
+                        sender.sendMessage(ChatColor.translateAlternateColorCodes('&',"&cPlugin konnte nicht gefunden werden&7!"));
+                        return false;
+                    }
+
+                    if(!(plugin instanceof VCorePlugin.Minecraft)){
+                        sender.sendMessage(ChatColor.translateAlternateColorCodes('&',"&cDas Plugin ist kein VCorePlugin&7!"));
+                        return false;
+                    }
+
+                    VCorePlugin.Minecraft vCorePlugin = (VCorePlugin.Minecraft) plugin;
+
+                    if(args[2].equalsIgnoreCase("player")){
+                        Player player = Bukkit.getPlayer(args[3]);
+                        if(player == null){
+                            sender.sendMessage(ChatColor.translateAlternateColorCodes('&',"&cPlayer not found&7: &b"+args[3]));
+                            return false;
+                        }
+
+                        vCorePlugin.getSessionManager().getSession(player.getUniqueId()).debugToConsole();
+                        return true;
+                    }
+                    else if(args[2].equalsIgnoreCase("subsystems")){
+                        vCorePlugin.getServerDataManager().getAllSessions().forEach(SSession::debugToConsole);
+                        return true;
+                    }
+                }
+
+                if(!(sender instanceof Player)) {
+                    sender.sendMessage(ChatColor.translateAlternateColorCodes('&',"&cOnly players can execute this command&7: &b"+args[3]));
+                    return false;
+                }
+                Player player = (Player) sender;
+
                 if(args[0].equalsIgnoreCase("block")){
 
                     RayTraceResult rayTraceResult = player.rayTraceBlocks(20);
@@ -140,10 +184,16 @@ public class AdminCommands extends VCoreCommand.VCoreBukkitCommand {
                 }
             }
 
-            sender.sendMessage(ChatColor.translateAlternateColorCodes('&',"&7/&edebug block"));
-            sender.sendMessage(ChatColor.translateAlternateColorCodes('&',"&7/&edebug item"));
-            sender.sendMessage(ChatColor.translateAlternateColorCodes('&',"&7/&edebug entity"));
-            sender.sendMessage(ChatColor.translateAlternateColorCodes('&',"&7/&edebug chunk"));
+            if(sender instanceof Player) {
+                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&7/&edebug block"));
+                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&7/&edebug item"));
+                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&7/&edebug entity"));
+                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&7/&edebug chunk"));
+            }
+            sender.sendMessage(ChatColor.translateAlternateColorCodes('&',"&7/&edebug help"));
+            sender.sendMessage(ChatColor.translateAlternateColorCodes('&',"&7/&edebug listPlugins"));
+            sender.sendMessage(ChatColor.translateAlternateColorCodes('&',"&7/&edebug plugin &8<&bpluginName&8> &eplayer &8<&bplayerName&8>"));
+            sender.sendMessage(ChatColor.translateAlternateColorCodes('&',"&7/&edebug plugin &8<&bpluginName&8> &esubSystems"));
             return false;
         };
     }

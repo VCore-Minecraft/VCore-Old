@@ -85,17 +85,19 @@ public interface VCorePlugin <T, R extends VCoreSubsystem<?>> {
         public final void onEnable() {
             consoleMessage("&ePlugin starting&7!",false);
             onPluginEnable();
+            subsystemManager.enable();
 
             getSessionManager();
             getServerDataManager();
 
-            subsystemManager.enable();
             consoleMessage("&aPlugin started&7!",false);
         }
 
         @Override
         public final void onDisable() {
             consoleMessage("&ePlugin stopping&7!",false);
+            getServerDataManager().saveAllData();
+            getSessionManager().saveAllData();
             onPluginDisable();
             Bukkit.getWorlds().forEach(World::save);
             subsystemManager.disable();
@@ -152,16 +154,18 @@ public interface VCorePlugin <T, R extends VCoreSubsystem<?>> {
         @Override
         public final void onEnable() {
             onPluginEnable();
+            subsystemManager.enable();
 
             getSessionManager();
             getServerDataManager();
 
-            subsystemManager.enable();
             consoleMessage("&aPlugin started&7!",false);
         }
 
         @Override
         public final void onDisable() {
+            getServerDataManager().saveAllData();
+            getSessionManager().saveAllData();
             onPluginDisable();
             subsystemManager.disable();
             consoleMessage("&aPlugin started&7!",false);

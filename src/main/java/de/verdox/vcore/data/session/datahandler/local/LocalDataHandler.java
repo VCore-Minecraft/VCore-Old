@@ -30,7 +30,8 @@ public abstract class LocalDataHandler <S extends VCoreData> {
     public abstract void addDataLocally(S data, Class<? extends S> dataClass, boolean push);
     public abstract void removeDataLocally(Class<? extends S> dataClass, UUID uuid, boolean push);
     public abstract <T extends S> T getDataLocal(Class<? extends T> type, UUID uuid);
-    public abstract Set<S> getAllLocalData(Class<? extends S> dataClass);
+    public abstract <T extends S> Set<T> getAllLocalData(Class<? extends T> dataClass);
+    public abstract Set<Object> getCachedKeys();
 
     public final void localToRedis(S dataObject, Class<? extends S> dataClass, UUID objectUUID){
         if(dataClass == null)
@@ -42,7 +43,7 @@ public abstract class LocalDataHandler <S extends VCoreData> {
         if(dataSession.getDataManager().getRedisManager().getContext(dataClass).equals(DataContext.LOCAL))
             return;
 
-        RMap<String, Object> redisCache = dataSession.getRedisHandler().getRedisCache(dataClass);
+        RMap<String, Object> redisCache = dataSession.getRedisHandler().getRedisCache(dataClass, objectUUID);
 
         dataObject.dataForRedis().forEach(redisCache::put);
         RTopic topic = dataObject.getDataTopic();
