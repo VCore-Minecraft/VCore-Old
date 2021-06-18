@@ -1,4 +1,8 @@
-package de.verdox.vcore.util;
+/*
+ * Copyright (c) 2021. Lukas Jonsson
+ */
+
+package de.verdox.vcore.util.spigot;
 
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -8,7 +12,7 @@ import org.bukkit.block.data.Directional;
 
 public class BukkitWorldUtil {
 
-    BukkitWorldUtil(){}
+    public BukkitWorldUtil(){}
 
     public boolean blockLocationEqual(Location loc1, Location loc2){
         return loc1.getBlockX() == loc2.getBlockX()

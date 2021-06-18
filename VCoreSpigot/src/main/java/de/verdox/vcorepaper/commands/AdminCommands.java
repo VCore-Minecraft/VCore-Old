@@ -10,10 +10,7 @@ import de.verdox.vcorepaper.custom.blocks.VBlock;
 import de.verdox.vcorepaper.custom.blocks.enums.VBlockEventPermission;
 import de.verdox.vcorepaper.custom.items.VCoreItem;
 import net.md_5.bungee.api.ChatMessageType;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.Chunk;
-import org.bukkit.Material;
+import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -117,11 +114,6 @@ public class AdminCommands extends VCoreCommand.VCoreBukkitCommand {
                                 VCoreUtil.getBukkitPlayerUtil().sendPlayerMessage(player,ChatMessageType.CHAT,"  &7>> &6"+key+"&7: &b"+vBlock.getNBTCompound().getObject(key,Object.class));
                             });
                             VCoreUtil.getBukkitPlayerUtil().sendPlayerMessage(player,ChatMessageType.CHAT,"");
-                            VCoreUtil.getBukkitPlayerUtil().sendPlayerMessage(player,ChatMessageType.CHAT,"&cRules&7: ");
-                            for (VBlockEventPermission value : VBlockEventPermission.values()) {
-                                VCoreUtil.getBukkitPlayerUtil().sendPlayerMessage(player,ChatMessageType.CHAT,"&7>> &6"+value+"&7: &b"+vBlock.isBlockPermissionAllowed(value));
-                            }
-                            VCoreUtil.getBukkitPlayerUtil().sendPlayerMessage(player,ChatMessageType.CHAT,"");
                         });
                         return true;
                     }
@@ -163,7 +155,6 @@ public class AdminCommands extends VCoreCommand.VCoreBukkitCommand {
                         VCoreUtil.getBukkitPlayerUtil().sendPlayerMessage(player,ChatMessageType.CHAT,"&6Item Debug&7");
                         VCoreItem vCoreItem = VCorePaper.getInstance().getCustomItemManager().wrap(VCoreItem.class,itemInHand);
                         vCoreItem.getCustomDataKeys().forEach(key -> {
-
                             VCoreUtil.getBukkitPlayerUtil().sendPlayerMessage(player,ChatMessageType.CHAT,"  &7>> &6"+key+"&7: &b"+vCoreItem.getNBTCompound().getObject(key,Object.class));
                         });
                         VCoreUtil.getBukkitPlayerUtil().sendPlayerMessage(player,ChatMessageType.CHAT,"");

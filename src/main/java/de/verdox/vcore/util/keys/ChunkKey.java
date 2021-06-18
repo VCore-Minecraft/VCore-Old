@@ -23,6 +23,11 @@ public class ChunkKey extends VCoreKey{
         this.chunk = chunk;
     }
 
+    public ChunkKey(int chunkX, int chunkZ){
+        x = chunkX;
+        z = chunkZ;
+    }
+
     public ChunkKey(String key){
         String[] split = key.split("_");
         x = Integer.parseInt(split[0]);
@@ -37,11 +42,15 @@ public class ChunkKey extends VCoreKey{
         return split;
     }
 
+    public final boolean isChunkLoadedIn(World world){
+        return world.isChunkLoaded(this.x,this.z);
+    }
+
     public final Chunk getChunkIn(World world){
         return world.getChunkAt(x,z);
     }
 
-    public Chunk getChunk() {
+    protected Chunk getChunk() {
         return chunk;
     }
 

@@ -11,6 +11,8 @@ public enum VBlockEventPermission {
     BLOCK_GRAVITY_EVENT("vBlockPropertiesBlockGravityEvent"),
     BLOCK_PISTON_EVENT("vBlockPropertiesBlockPistonEvent"),
     BLOCK_BURN_EVENT("vBlockPropertiesBlockBurnEvent"),
+    BLOCK_LEAVES_DECAY_EVENT("vBlockPropertiesBlockLeavesDecayEvent"),
+    DELETE_DATA_ON_BREAK("vBlockPropertiesDeleteDataOnBreak"),
     ;
     private String nbtKey;
 

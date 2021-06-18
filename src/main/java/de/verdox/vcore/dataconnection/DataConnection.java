@@ -18,7 +18,6 @@ public abstract class DataConnection <T> {
     protected final int port;
     protected final String user;
     protected final String password;
-    protected final DataProvider<T> dataProvider;
 
     public DataConnection(VCorePlugin<?,?> vCorePlugin, String host, String database, int port, String user, String password){
         this.vCorePlugin = vCorePlugin;
@@ -27,10 +26,8 @@ public abstract class DataConnection <T> {
         this.port = port;
         this.user = user;
         this.password = password;
-        this.dataProvider = Objects.requireNonNull(setupDataProvider());
     }
 
-    protected abstract DataProvider<T> setupDataProvider();
     protected abstract void connect();
     protected abstract void onConnect();
 
@@ -40,9 +37,6 @@ public abstract class DataConnection <T> {
 
     public abstract T getDataStorage(Class<? extends VCoreData> dataClass, String suffix);
 
-    public DataProvider<T> getDataProvider() {
-        return dataProvider;
-    }
 
     public abstract static class MongoDB extends MongoDBDataConnection {
         public MongoDB(VCorePlugin<?,?> vCorePlugin, String host, String database, int port, String user, String password) {

@@ -30,11 +30,6 @@ public class MySQLDataConnection extends DataConnection<Dao<VCoreData, UUID>> {
     }
 
     @Override
-    protected DataProvider<Dao<VCoreData, UUID>> setupDataProvider() {
-        return null;
-    }
-
-    @Override
     protected void connect() {
 
     }

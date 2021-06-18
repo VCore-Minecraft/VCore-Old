@@ -4,6 +4,7 @@
 
 package de.verdox.vcore.redisson.messages;
 
+import javax.annotation.Nonnull;
 import java.util.UUID;
 
 /**
@@ -14,11 +15,13 @@ import java.util.UUID;
 public class RedisSimpleMessage implements RedisMessage{
     private String pluginName;
     private final UUID senderUUID;
+    private String[] parameters;
     private final Object[] dataToSend;
 
-    public RedisSimpleMessage(String pluginName, UUID senderUUID, Object... dataToSend){
+    RedisSimpleMessage(String pluginName, UUID senderUUID, String[] parameters, Object... dataToSend){
         this.pluginName = pluginName;
         this.senderUUID = senderUUID;
+        this.parameters = parameters;
         this.dataToSend = dataToSend;
     }
 
@@ -40,11 +43,36 @@ public class RedisSimpleMessage implements RedisMessage{
         return pluginName;
     }
 
+    public String[] getParameters() {
+        return parameters;
+    }
+
     public <S> S getData(Class<? extends S> type, int index){
         return type.cast(getDataToSend()[index]);
     }
 
     public int size(){
         return getDataToSend().length;
+    }
+
+    public static class Builder{
+
+        private final String[] parameters;
+        private Object[] dataToSend;
+
+        public Builder(@Nonnull String... parameters){
+            this.parameters = parameters;
+        }
+
+        public Builder setDataToSend(@Nonnull Object... dataToSend){
+            this.dataToSend = dataToSend;
+            return this;
+        }
+
+        public RedisSimpleMessage constructSimpleMessage(@Nonnull String pluginName, @Nonnull UUID senderUUID){
+            if(this.dataToSend == null)
+                throw new NullPointerException("You can not send empty messages");
+            return new RedisSimpleMessage(pluginName, senderUUID, parameters, dataToSend);
+        }
     }
 }

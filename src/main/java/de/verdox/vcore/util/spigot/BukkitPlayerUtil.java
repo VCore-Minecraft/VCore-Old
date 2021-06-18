@@ -1,17 +1,43 @@
-package de.verdox.vcore.util;
+/*
+ * Copyright (c) 2021. Lukas Jonsson
+ */
 
+package de.verdox.vcore.util.spigot;
+
+import de.verdox.vcore.util.DirectionEnum;
+import de.verdox.vcore.util.keys.ChunkKey;
 import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.chat.TextComponent;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
+import java.util.HashSet;
+import java.util.Set;
+
 public class BukkitPlayerUtil {
 
-    BukkitPlayerUtil(){}
+    public BukkitPlayerUtil(){}
 
     public void sendPlayerMessage(Player player, ChatMessageType chatMessageType, String message){
         player.spigot().sendMessage(chatMessageType,new TextComponent(ChatColor.translateAlternateColorCodes('&',message)));
+    }
+
+    public Set<ChunkKey> getChunksInServerViewDistance(Player player){
+        Set<ChunkKey> set = new HashSet<>();
+        Chunk chunk = player.getLocation().getChunk();
+        int chunkX = chunk.getX();
+        int chunkZ = chunk.getZ();
+        int viewDistance = Bukkit.getServer().getViewDistance();
+
+        for(int x = chunkX-viewDistance; x <= chunkX+viewDistance; x++){
+            for(int z = chunkZ-viewDistance; z <= chunkZ+viewDistance; z++){
+                set.add(new ChunkKey(x,z));
+            }
+        }
+        return set;
     }
 
     public double getFacingRotation(Player player) {

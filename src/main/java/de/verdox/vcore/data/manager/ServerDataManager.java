@@ -48,8 +48,8 @@ public class ServerDataManager <R extends VCorePlugin<?,?>> extends VCoreDataMan
         messenger.addListener(RedisSimpleMessage.class,channelListener);
     }
 
-    public void broadcastRedisMessage(Object... dataToSend){
-        long timeItTook = messenger.publish(new RedisSimpleMessage(plugin.getPluginName(),getSessionUUID(), dataToSend));
+    public void broadcastRedisMessage(RedisSimpleMessage.Builder builder){
+        long timeItTook = messenger.publish(builder.constructSimpleMessage(plugin.getPluginName(), getSessionUUID()));
         plugin.consoleMessage("&eMessage sent in &6"+timeItTook+"ms &8[&c"+plugin.getPluginName()+"&8]", true);
     }
 

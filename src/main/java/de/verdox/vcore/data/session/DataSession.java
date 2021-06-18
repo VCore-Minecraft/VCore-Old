@@ -52,8 +52,8 @@ public abstract class DataSession <S extends VCoreData> {
         else if(getDatabaseHandler().dataExistInDatabase(dataClass,objectUUID)) {
             dataManager.getPlugin().consoleMessage("&eFound Data in Database &8[&b"+dataClass.getSimpleName()+"&8]", 1,true);
             if(dataManager.getRedisManager().getContext(dataClass).equals(DataContext.GLOBAL)){
+                getDatabaseHandler().databaseToLocal(dataClass, objectUUID);
                 getDatabaseHandler().dataBaseToRedis(dataClass, objectUUID);
-                getRedisHandler().redisToLocal(dataClass,objectUUID);
             }
             else {
                 getDatabaseHandler().databaseToLocal(dataClass,objectUUID);
@@ -95,7 +95,7 @@ public abstract class DataSession <S extends VCoreData> {
                 .find()
                 .iterator()
                 .forEachRemaining(document -> {
-                    UUID uuid = UUID.fromString(document.getString("_id"));
+                    UUID uuid = UUID.fromString(document.getString("objectUUID"));
                     loadFromPipeline(dataClass,uuid);
                 });
     }

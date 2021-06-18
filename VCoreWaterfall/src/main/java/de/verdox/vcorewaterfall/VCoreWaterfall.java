@@ -1,12 +1,16 @@
 package de.verdox.vcorewaterfall;
 
 import de.verdox.vcore.dataconnection.DataConnection;
+import de.verdox.vcore.player.VCorePlayerManager;
 import de.verdox.vcore.plugin.VCorePlugin;
 import de.verdox.vcore.subsystem.VCoreSubsystem;
 
 import java.util.List;
 
 public class VCoreWaterfall extends VCorePlugin.BungeeCord {
+
+    private VCorePlayerManager vCorePlayerManager;
+
     @Override
     public void onPluginEnable() {
         getSessionManager();
@@ -14,7 +18,7 @@ public class VCoreWaterfall extends VCorePlugin.BungeeCord {
 
     @Override
     public void onPluginDisable() {
-
+        this.vCorePlayerManager = new VCorePlayerManager(this);
     }
 
     @Override
@@ -45,5 +49,9 @@ public class VCoreWaterfall extends VCorePlugin.BungeeCord {
     @Override
     public DataConnection.MongoDB mongoDB() {
         return null;
+    }
+
+    public VCorePlayerManager getvCorePlayerManager() {
+        return vCorePlayerManager;
     }
 }

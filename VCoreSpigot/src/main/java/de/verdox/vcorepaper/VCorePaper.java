@@ -3,6 +3,7 @@ package de.verdox.vcorepaper;
 import com.comphenix.protocol.ProtocolLibrary;
 import com.comphenix.protocol.ProtocolManager;
 import de.verdox.vcore.dataconnection.DataConnection;
+import de.verdox.vcore.player.VCorePlayerManager;
 import de.verdox.vcore.plugin.VCorePlugin;
 import de.verdox.vcore.subsystem.VCoreSubsystem;
 import de.verdox.vcorepaper.commands.AdminCommands;
@@ -14,6 +15,7 @@ import de.verdox.vcorepaper.custom.CustomDataListener;
 import de.verdox.vcorepaper.custom.events.AsyncEventWrapper;
 import de.verdox.vcorepaper.custom.items.CustomItemManager;
 import de.verdox.vcorepaper.files.VCorePaperSettings;
+import de.verdox.vcorepaper.nms.NMSManager;
 import org.bukkit.Bukkit;
 
 import java.util.List;
@@ -24,10 +26,15 @@ public class VCorePaper extends VCorePlugin.Minecraft {
 
     private DataConnection.MongoDB mongoDB;
 
+    private VCorePlayerManager vCorePlayerManager;
+
+    private NMSManager nmsManager;
+
     private CustomEntityManager customEntityManager;
     private CustomItemManager customItemManager;
     private CustomBlockManager customBlockManager;
     private ProtocolManager protocolManager;
+
 
     private VCorePaperSettings vCorePaperSettings;
 
@@ -38,6 +45,8 @@ public class VCorePaper extends VCorePlugin.Minecraft {
     @Override
     public void onPluginEnable() {
         instance = this;
+        this.nmsManager = new NMSManager(this);
+        this.vCorePlayerManager = new VCorePlayerManager(this);
 
         this.vCorePaperSettings = new VCorePaperSettings(this,"settings.yml","");
         this.vCorePaperSettings.init();
@@ -135,5 +144,13 @@ public class VCorePaper extends VCorePlugin.Minecraft {
             syncTask.run();
             async(asyncTask);
         });
+    }
+
+    public VCorePlayerManager getVCorePlayerManager() {
+        return vCorePlayerManager;
+    }
+
+    public NMSManager getNmsManager() {
+        return nmsManager;
     }
 }

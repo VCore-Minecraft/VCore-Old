@@ -1,6 +1,5 @@
 package de.verdox.vcorepaper.custom.blocks;
 
-import de.verdox.vcore.data.annotations.PreloadStrategy;
 import de.verdox.vcore.event.listener.VCoreListener;
 import de.verdox.vcore.plugin.VCorePlugin;
 import de.verdox.vcore.util.VCoreUtil;
@@ -9,10 +8,7 @@ import de.verdox.vcorepaper.custom.blocks.enums.VBlockEventPermission;
 import de.verdox.vcorepaper.custom.blocks.files.VBlockSaveFile;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
-import org.bukkit.Material;
 import org.bukkit.block.Block;
-import org.bukkit.block.BlockFace;
-import org.bukkit.block.data.Directional;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.block.*;
 import org.bukkit.event.world.ChunkLoadEvent;
@@ -103,6 +99,16 @@ public class VBlockListener extends VCoreListener.VCoreBukkitListener {
             return;
         vBlock.updateBlockData(block.getBlockData());
         e.setCancelled(!vBlock.isBlockPermissionAllowed(VBlockEventPermission.BLOCK_GRAVITY_EVENT));
+    }
+
+    @EventHandler
+    public void blockPhysicsEvent(LeavesDecayEvent e){
+        Block block = e.getBlock();
+        VBlock vBlock = VCorePaper.getInstance().getCustomBlockManager().getVBlock(block.getLocation());
+        if(vBlock == null)
+            return;
+        vBlock.updateBlockData(block.getBlockData());
+        e.setCancelled(!vBlock.isBlockPermissionAllowed(VBlockEventPermission.BLOCK_LEAVES_DECAY_EVENT));
     }
 
     @EventHandler

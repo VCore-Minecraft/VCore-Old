@@ -77,6 +77,18 @@ public class CustomItemManager extends CustomDataManager<ItemStack,ItemCustomDat
         return new VCoreItemBuilder(this, material);
     }
 
+    public VCoreItemBuilder createItemBuilder(ItemStack stack){
+        return new VCoreItemBuilder(this, stack);
+    }
+
+    public VCoreItemBuilder createItemBuilder(ItemStack stack, String displayName){
+        return new VCoreItemBuilder(this, stack, displayName);
+    }
+
+    public VCoreItemBuilder createItemBuilder(ItemStack stack,int  amount, String displayName){
+        return new VCoreItemBuilder(this, stack, amount, displayName);
+    }
+
     public VCoreItemBuilder createItemBuilder(Material material, int amount){
         return new VCoreItemBuilder(this, material, amount);
     }
@@ -94,6 +106,7 @@ public class CustomItemManager extends CustomDataManager<ItemStack,ItemCustomDat
         private List<String> lore;
         private List<EnchantmentInfo> enchantments;
         private Set<ItemFlag> itemFlags;
+        private ItemMeta meta;
 
         private Map<String, Object> nbtData;
 
@@ -119,6 +132,24 @@ public class CustomItemManager extends CustomDataManager<ItemStack,ItemCustomDat
             this.material = material;
             this.amount = amount;
             this.displayName =  displayName;
+        }
+
+        VCoreItemBuilder(CustomItemManager customItemManager, ItemStack stack){
+            this(customItemManager,stack,stack.getAmount(),stack.getI18NDisplayName());
+        }
+
+        VCoreItemBuilder(CustomItemManager customItemManager, ItemStack stack, String displayName){
+            this(customItemManager,stack,stack.getAmount(),displayName);
+        }
+
+        VCoreItemBuilder(CustomItemManager customItemManager, ItemStack stack, int amount, String displayName){
+            this.customItemManager = customItemManager;
+            this.material = stack.getType();
+            this.amount = amount;
+            this.displayName =  displayName;
+            this.lore = stack.getLore();
+            this.itemFlags = stack.getItemFlags();
+            this.meta = stack.getItemMeta();
         }
 
         public VCoreItemBuilder material(Material material){
@@ -173,7 +204,11 @@ public class CustomItemManager extends CustomDataManager<ItemStack,ItemCustomDat
             if(material == null)
                 throw new NullPointerException("Material can't be null!");
             ItemStack itemStack = new ItemStack(material,amount);
-            ItemMeta meta = itemStack.getItemMeta();
+            ItemMeta meta;
+            if(this.meta != null)
+                meta = this.meta;
+            else
+                meta = itemStack.getItemMeta();
             if(displayName != null && !displayName.isEmpty())
                 meta.setDisplayName(ChatColor.translateAlternateColorCodes('&',displayName));
             if(lore != null && !lore.isEmpty())

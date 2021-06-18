@@ -33,49 +33,6 @@ public abstract class MongoDBDataConnection extends DataConnection<MongoCollecti
     }
 
     @Override
-    protected DataProvider<MongoCollection<Document>> setupDataProvider() {
-        return new DataProvider<>() {
-            @Override
-            public void saveToDatabase(String suffix, Class<? extends VCoreData> dataClass, UUID objectUUID, Map<String, Object> dataToSave) {
-                MongoCollection<Document> mongoCollection = getDataStorage(dataClass, suffix);
-
-                Document filter = new Document("_id",objectUUID.toString());
-
-                if(mongoCollection.find(filter).first() == null){
-                    Document newData = new Document("_id",objectUUID.toString());
-                    newData.putAll(dataToSave);
-                    mongoCollection.insertOne(newData);
-                }
-                else {
-                    Document newData = new Document(dataToSave);
-                    Document updateFunc = new Document("$set",newData);
-                    mongoCollection.updateOne(filter,updateFunc);
-                }
-            }
-
-            @Override
-            public Map<String, Object> restoreFromDatabase(String suffix, Class<? extends VCoreData> dataClass, UUID objectUUID) {
-                MongoCollection<Document> mongoCollection = getDataStorage(dataClass, suffix);
-                Document filter = new Document("objectUUID",objectUUID.toString());
-
-                Document mongoDBData = mongoCollection.find(filter).first();
-
-                if(mongoDBData == null)
-                    mongoDBData = filter;
-                Map<String, Object> dataFromDatabase = new HashMap<>();
-                mongoDBData.forEach(dataFromDatabase::put);
-                return dataFromDatabase;
-            }
-
-            @Override
-            public boolean dataExistInDatabase(String suffix, Class<? extends VCoreData> dataClass, UUID objectUUID) {
-                Document document = getDataStorage(dataClass, suffix).find(new Document("_id",objectUUID.toString())).first();
-                return document != null;
-            }
-        };
-    }
-
-    @Override
     protected void connect() {
         if(user.isEmpty() && password.isEmpty())
             this.mongoClient = new MongoClient(host,port);

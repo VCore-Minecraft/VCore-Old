@@ -10,7 +10,9 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.ItemStack;
+import org.checkerframework.checker.index.qual.Positive;
 
+import javax.annotation.Nonnull;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiFunction;
@@ -21,20 +23,30 @@ import java.util.stream.Stream;
 public class GUITemplate {
 
     public static void createSelectConfirmationGUI(BukkitPlugin bukkitPlugin, Player player, Function<Boolean, VCoreGUI.Response<?,?>> callback){
+        VCoreItem yesItem = VCorePaper.getInstance().getCustomItemManager().createItemBuilder(Material.GREEN_STAINED_GLASS_PANE,1,"&aYes").buildItem();
+        VCoreItem noItem = VCorePaper.getInstance().getCustomItemManager().createItemBuilder(Material.RED_STAINED_GLASS_PANE,1,"&cNo").buildItem();
+        createSelectConfirmationGUI(bukkitPlugin, player, callback, "&eAre you sure?", yesItem, noItem);
+    }
+
+    public static void createSelectConfirmationGUI(BukkitPlugin bukkitPlugin, Player player, Function<Boolean, VCoreGUI.Response<?,?>> callback, String title, String yesTitle, String noTitle){
+        VCoreItem yesItem = VCorePaper.getInstance().getCustomItemManager().createItemBuilder(Material.GREEN_STAINED_GLASS_PANE,1, yesTitle).buildItem();
+        VCoreItem noItem = VCorePaper.getInstance().getCustomItemManager().createItemBuilder(Material.RED_STAINED_GLASS_PANE,1 ,noTitle).buildItem();
+        createSelectConfirmationGUI(bukkitPlugin, player, callback, "&eAre you sure?", yesItem, noItem);
+    }
+
+    public static void createSelectConfirmationGUI(BukkitPlugin bukkitPlugin, Player player, Function<Boolean, VCoreGUI.Response<?,?>> callback, String title, VCoreItem yesItem, VCoreItem noItem){
         CustomItemManager customItemManager = VCorePaper.getInstance().getCustomItemManager();
         new VCoreGUI.Builder<String>()
                 .plugin(bukkitPlugin)
-                .title(ChatColor.translateAlternateColorCodes('&',"&eAre you sure&7?"))
+                .title(ChatColor.translateAlternateColorCodes('&',title))
                 .type(InventoryType.HOPPER)
                 .content(objectContentBuilder -> {
                     objectContentBuilder.addContent(0,customItemManager.createItemBuilder(Material.BLACK_STAINED_GLASS_PANE,1,"")
                             .buildItem(),"");
-                    objectContentBuilder.addContent(1,customItemManager.createItemBuilder(Material.RED_STAINED_GLASS_PANE,1,"No")
-                            .buildItem(),"");
+                    objectContentBuilder.addContent(1, noItem,"");
                     objectContentBuilder.addContent(2,customItemManager.createItemBuilder(Material.BLACK_STAINED_GLASS_PANE,1,"")
                             .buildItem(),"");
-                    objectContentBuilder.addContent(3,customItemManager.createItemBuilder(Material.GREEN_STAINED_GLASS_PANE,1,"Yes")
-                            .buildItem(),"");
+                    objectContentBuilder.addContent(3,yesItem,"");
                     objectContentBuilder.addContent(4,customItemManager.createItemBuilder(Material.BLACK_STAINED_GLASS_PANE,1,"")
                             .buildItem(),"");
                 })
@@ -69,7 +81,7 @@ public class GUITemplate {
         private Runnable backCallback;
         private final Map<VCoreItem, Function<VCoreGUI.VCoreGUIClick<T>, VCoreGUI.Response<?,?>>> additionalItems = new HashMap<>();
 
-        public SelectionGUI(String title, List<T> objectList, BukkitPlugin bukkitPlugin, Function<T, ItemStack> objectToItemStack, int page){
+        public SelectionGUI(@Nonnull String title, @Nonnull List<T> objectList, @Nonnull BukkitPlugin bukkitPlugin, @Nonnull Function<T, ItemStack> objectToItemStack, @Positive int page){
             this.title = title;
             this.objectList = objectList;
             this.bukkitPlugin = bukkitPlugin;

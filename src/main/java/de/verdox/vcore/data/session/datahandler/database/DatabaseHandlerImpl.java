@@ -38,7 +38,7 @@ public class DatabaseHandlerImpl <S extends VCoreData> extends DatabaseHandler<S
     }
 
     public final boolean dataExistInDatabase(Class<? extends S> dataClass, UUID objectUUID){
-        Document document = dataSession.getMongoCollection(dataClass).find(new Document("_id",objectUUID.toString())).first();
+        Document document = dataSession.getMongoCollection(dataClass).find(new Document("objectUUID",objectUUID.toString())).first();
         return document != null;
     }
 
@@ -63,10 +63,10 @@ public class DatabaseHandlerImpl <S extends VCoreData> extends DatabaseHandler<S
 
         MongoCollection<Document> mongoCollection = dataSession.getMongoCollection(dataClass);
 
-        Document filter = new Document("_id",objectUUID.toString());
+        Document filter = new Document("objectUUID",objectUUID.toString());
 
         if(mongoCollection.find(filter).first() == null){
-            Document newData = new Document("_id",objectUUID.toString());
+            Document newData = new Document("objectUUID",objectUUID.toString());
             newData.putAll(dataToSave);
             mongoCollection.insertOne(newData);
         }

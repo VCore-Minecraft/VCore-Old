@@ -6,6 +6,7 @@ import de.verdox.vcore.data.session.PlayerSession;
 import de.verdox.vcore.dataconnection.DataConnection;
 import de.verdox.vcore.data.annotations.RequiredSubsystemInfo;
 import de.verdox.vcore.plugin.VCorePlugin;
+import de.verdox.vcore.redisson.messages.RedisSimpleMessage;
 import de.verdox.vcore.subsystem.VCoreSubsystem;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
@@ -194,17 +195,29 @@ public abstract class PlayerSessionManager<R extends VCorePlugin<?,?>> extends V
         @EventHandler
         public void onPlayerJoin(PlayerJoinEvent e){
             Player player = e.getPlayer();
-            plugin.async(() -> loginPipeline(player.getUniqueId()));
+            plugin.async(() -> {
+                getPlugin().getServerDataManager().broadcastRedisMessage(new RedisSimpleMessage.Builder("connection", "minecraft", "join").setDataToSend(player.getUniqueId(),player.getName()));
+                loginPipeline(player.getUniqueId());
+            });
+
         }
 
         @EventHandler
         public void onPlayerQuit(PlayerQuitEvent e){
-            getPlugin().async(() -> logoutPipeline(e.getPlayer().getUniqueId()));
+            Player player = e.getPlayer();
+            getPlugin().async(() -> {
+                getPlugin().getServerDataManager().broadcastRedisMessage(new RedisSimpleMessage.Builder("connection", "minecraft", "leave").setDataToSend(player.getUniqueId(),player.getName()));
+                logoutPipeline(e.getPlayer().getUniqueId());
+            });
         }
 
         @EventHandler
         public void onPlayerKick(PlayerKickEvent e){
-            getPlugin().async(() -> logoutPipeline(e.getPlayer().getUniqueId()));
+            Player player = e.getPlayer();
+            getPlugin().async(() -> {
+                getPlugin().getServerDataManager().broadcastRedisMessage(new RedisSimpleMessage.Builder("connection", "minecraft", "kick").setDataToSend(player.getUniqueId(),player.getName()));
+                logoutPipeline(e.getPlayer().getUniqueId());
+            });
         }
     }
 
@@ -220,12 +233,20 @@ public abstract class PlayerSessionManager<R extends VCorePlugin<?,?>> extends V
 
         @net.md_5.bungee.event.EventHandler
         public void onJoin(PostLoginEvent e){
-            loginPipeline(e.getPlayer().getUniqueId());
+            ProxiedPlayer player = e.getPlayer();
+            getPlugin().async(() -> {
+                getPlugin().getServerDataManager().broadcastRedisMessage(new RedisSimpleMessage.Builder("connection", "bungee", "join").setDataToSend(player.getUniqueId(),player.getName()));
+                loginPipeline(e.getPlayer().getUniqueId());
+            });
         }
 
         @net.md_5.bungee.event.EventHandler
         public void onDisconnect(PlayerDisconnectEvent e){
-            getPlugin().async(() -> logoutPipeline(e.getPlayer().getUniqueId()));
+            ProxiedPlayer player = e.getPlayer();
+            getPlugin().async(() -> {
+                getPlugin().getServerDataManager().broadcastRedisMessage(new RedisSimpleMessage.Builder("connection", "bungee", "leave").setDataToSend(player.getUniqueId(),player.getName()));
+                logoutPipeline(e.getPlayer().getUniqueId());
+            });
         }
     }
 }

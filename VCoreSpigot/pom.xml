@@ -134,6 +134,7 @@
             <groupId>com.destroystokyo.paper</groupId>
             <artifactId>paper</artifactId>
             <version>1.16.5</version>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
 

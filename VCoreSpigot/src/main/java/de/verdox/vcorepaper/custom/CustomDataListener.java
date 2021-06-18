@@ -7,6 +7,7 @@ import de.verdox.vcore.plugin.VCorePlugin;
 import de.verdox.vcore.util.keys.ChunkKey;
 import de.verdox.vcorepaper.VCorePaper;
 import de.verdox.vcorepaper.custom.blocks.VBlock;
+import de.verdox.vcorepaper.custom.blocks.enums.VBlockEventPermission;
 import de.verdox.vcorepaper.custom.events.callbacks.BlockDestroyCallback;
 import de.verdox.vcorepaper.custom.events.callbacks.BlockInteractCallback;
 import de.verdox.vcorepaper.custom.events.callbacks.BlockPlaceCallback;
@@ -14,7 +15,6 @@ import de.verdox.vcorepaper.custom.events.callbacks.EventBlockCallback;
 import de.verdox.vcorepaper.custom.items.VCoreItem;
 import org.bukkit.Bukkit;
 import org.bukkit.block.Block;
-import org.bukkit.block.BlockState;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -154,7 +154,8 @@ public class CustomDataListener extends VCoreListener.VCoreBukkitListener {
                         .forEach(vBlockCustomData -> ((BlockDestroyCallback) vBlockCustomData).blockCallback(player, Action.LEFT_CLICK_BLOCK,finalVCoreItem,vBlock,EventBlockCallback.CallbackType.BREAK_BLOCK));
             }
             finally {
-                vBlock.deleteData();
+                if(vBlock.isBlockPermissionAllowed(VBlockEventPermission.DELETE_DATA_ON_BREAK))
+                    vBlock.deleteData();
             }
         });
     }
