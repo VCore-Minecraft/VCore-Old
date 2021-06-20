@@ -74,6 +74,10 @@
           <artifactId>bungeecord-chat</artifactId>
           <groupId>net.md-5</groupId>
         </exclusion>
+        <exclusion>
+          <artifactId>snakeyaml</artifactId>
+          <groupId>org.yaml</groupId>
+        </exclusion>
       </exclusions>
     </dependency>
     <dependency>
@@ -101,6 +105,10 @@
         <exclusion>
           <artifactId>netty-transport-native-unix-common</artifactId>
           <groupId>io.netty</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>snakeyaml</artifactId>
+          <groupId>org.yaml</groupId>
         </exclusion>
       </exclusions>
     </dependency>

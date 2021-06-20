@@ -5,7 +5,6 @@
 package de.verdox.vcorepaper.nms.packetwrapper.v1_16_3;
 
 import de.verdox.vcore.util.VCoreUtil;
-import net.minecraft.server.v1_16_R3.NBTTagCompound;
 import net.minecraft.server.v1_16_R3.PacketPlayOutMapChunk;
 import org.bukkit.block.Biome;
 

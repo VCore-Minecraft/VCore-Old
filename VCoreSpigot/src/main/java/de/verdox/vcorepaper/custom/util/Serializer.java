@@ -1,5 +1,6 @@
 package de.verdox.vcorepaper.custom.util;
 
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.io.BukkitObjectInputStream;
 import org.bukkit.util.io.BukkitObjectOutputStream;
@@ -64,6 +65,7 @@ public class Serializer {
     public static ItemStack[] itemStackArrayFromBase64(String data) throws IOException {
         if(data == null)
             return null;
+        Player player;
         try {
             ByteArrayInputStream inputStream = new ByteArrayInputStream(Base64Coder.decodeLines(data));
             BukkitObjectInputStream dataInput = new BukkitObjectInputStream(inputStream);

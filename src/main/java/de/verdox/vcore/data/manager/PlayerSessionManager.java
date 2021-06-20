@@ -2,6 +2,9 @@ package de.verdox.vcore.data.manager;
 
 import com.fasterxml.jackson.databind.util.JSONPObject;
 import de.verdox.vcore.data.datatypes.PlayerData;
+import de.verdox.vcore.data.events.PlayerPreSessionLoadEvent;
+import de.verdox.vcore.data.events.PlayerPreSessionUnloadEvent;
+import de.verdox.vcore.data.events.PlayerSessionLoadedEvent;
 import de.verdox.vcore.data.session.PlayerSession;
 import de.verdox.vcore.dataconnection.DataConnection;
 import de.verdox.vcore.data.annotations.RequiredSubsystemInfo;
@@ -129,8 +132,9 @@ public abstract class PlayerSessionManager<R extends VCorePlugin<?,?>> extends V
 
     protected void loginPipeline(UUID playerUUID){
         long start = System.currentTimeMillis();
-            Map<Class<? extends PlayerData>,Set<String>> keys = getAllPlayerKeys(createSession(playerUUID));
-            getPlugin().consoleMessage("&eHandling Player Join&7: &a"+playerUUID.toString(),true);
+        PlayerSession playerSession = createSession(playerUUID);
+            Map<Class<? extends PlayerData>,Set<String>> keys = getAllPlayerKeys(playerSession);
+            getPlugin().consoleMessage("&eHandling Player Join&7: &a"+playerUUID,true);
 
             keys.forEach((playerDataClass, dataKeys) -> {
                 getPlugin().consoleMessage("&a"+playerDataClass.getSimpleName(),true);
@@ -147,8 +151,10 @@ public abstract class PlayerSessionManager<R extends VCorePlugin<?,?>> extends V
                 }
                 getSession(playerUUID).loadFromPipeline(playerDataClass,playerUUID);
             });
-            long end = System.currentTimeMillis() - start;
-            getPlugin().consoleMessage("&eSuccessfully loaded data&7: &a"+playerUUID.toString() + " &7[&e"+end+" ms&7]",true);
+            long success = System.currentTimeMillis();
+            long end = success - start;
+        getPlugin().getEventBus().post(new PlayerSessionLoadedEvent(playerSession, success));
+            getPlugin().consoleMessage("&eSuccessfully loaded data&7: &a"+playerUUID + " &7[&e"+end+" ms&7]",true);
     }
 
     protected void logoutPipeline(UUID playerUUID){
@@ -195,6 +201,7 @@ public abstract class PlayerSessionManager<R extends VCorePlugin<?,?>> extends V
         @EventHandler
         public void onPlayerJoin(PlayerJoinEvent e){
             Player player = e.getPlayer();
+            getPlugin().getEventBus().post(new PlayerPreSessionLoadEvent(e.getPlayer().getUniqueId()));
             plugin.async(() -> {
                 getPlugin().getServerDataManager().broadcastRedisMessage(new RedisSimpleMessage.Builder("connection", "minecraft", "join").setDataToSend(player.getUniqueId(),player.getName()));
                 loginPipeline(player.getUniqueId());
@@ -205,6 +212,7 @@ public abstract class PlayerSessionManager<R extends VCorePlugin<?,?>> extends V
         @EventHandler
         public void onPlayerQuit(PlayerQuitEvent e){
             Player player = e.getPlayer();
+            getPlugin().getEventBus().post(new PlayerPreSessionUnloadEvent(e.getPlayer().getUniqueId()));
             getPlugin().async(() -> {
                 getPlugin().getServerDataManager().broadcastRedisMessage(new RedisSimpleMessage.Builder("connection", "minecraft", "leave").setDataToSend(player.getUniqueId(),player.getName()));
                 logoutPipeline(e.getPlayer().getUniqueId());
@@ -214,6 +222,7 @@ public abstract class PlayerSessionManager<R extends VCorePlugin<?,?>> extends V
         @EventHandler
         public void onPlayerKick(PlayerKickEvent e){
             Player player = e.getPlayer();
+            getPlugin().getEventBus().post(new PlayerPreSessionUnloadEvent(e.getPlayer().getUniqueId()));
             getPlugin().async(() -> {
                 getPlugin().getServerDataManager().broadcastRedisMessage(new RedisSimpleMessage.Builder("connection", "minecraft", "kick").setDataToSend(player.getUniqueId(),player.getName()));
                 logoutPipeline(e.getPlayer().getUniqueId());
@@ -234,6 +243,7 @@ public abstract class PlayerSessionManager<R extends VCorePlugin<?,?>> extends V
         @net.md_5.bungee.event.EventHandler
         public void onJoin(PostLoginEvent e){
             ProxiedPlayer player = e.getPlayer();
+            plugin.getEventBus().post(new PlayerPreSessionLoadEvent(e.getPlayer().getUniqueId()));
             getPlugin().async(() -> {
                 getPlugin().getServerDataManager().broadcastRedisMessage(new RedisSimpleMessage.Builder("connection", "bungee", "join").setDataToSend(player.getUniqueId(),player.getName()));
                 loginPipeline(e.getPlayer().getUniqueId());
@@ -243,6 +253,7 @@ public abstract class PlayerSessionManager<R extends VCorePlugin<?,?>> extends V
         @net.md_5.bungee.event.EventHandler
         public void onDisconnect(PlayerDisconnectEvent e){
             ProxiedPlayer player = e.getPlayer();
+            plugin.getEventBus().post(new PlayerPreSessionUnloadEvent(e.getPlayer().getUniqueId()));
             getPlugin().async(() -> {
                 getPlugin().getServerDataManager().broadcastRedisMessage(new RedisSimpleMessage.Builder("connection", "bungee", "leave").setDataToSend(player.getUniqueId(),player.getName()));
                 logoutPipeline(e.getPlayer().getUniqueId());

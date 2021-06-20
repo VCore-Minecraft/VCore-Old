@@ -44,6 +44,7 @@ public abstract class DatabaseHandler <S extends VCoreData> {
 
         Map<String, Object> dataFromDatabase = loadDataFromDatabase(dataClass,objectUUID);
         vCoreData.restoreFromDataBase(dataFromDatabase);
+        dataSession.getLocalDataHandler().addDataLocally(vCoreData, dataClass, true);
     }
 
 }

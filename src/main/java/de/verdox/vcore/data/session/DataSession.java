@@ -95,6 +95,8 @@ public abstract class DataSession <S extends VCoreData> {
                 .find()
                 .iterator()
                 .forEachRemaining(document -> {
+                    if(document == null)
+                        return;
                     UUID uuid = UUID.fromString(document.getString("objectUUID"));
                     loadFromPipeline(dataClass,uuid);
                 });

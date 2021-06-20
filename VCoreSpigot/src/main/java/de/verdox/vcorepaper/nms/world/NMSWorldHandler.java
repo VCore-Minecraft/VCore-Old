@@ -114,7 +114,7 @@ public interface NMSWorldHandler extends NMSHandler {
                 return;
             }
 
-
+            CraftChunk chunk;
 
             Location location = player.getLocation().clone();
 
@@ -149,7 +149,10 @@ public interface NMSWorldHandler extends NMSHandler {
             worldServer.getChunkProvider().addTicket(TicketType.POST_TELEPORT, new ChunkCoordIntPair(location.getBlockX() >> 4, location.getBlockZ() >> 4), 1, entityPlayer.getId());
             entityPlayer.forceCheckHighPriority();
 
-            craftPlayer.getHandle().playerConnection.sendPacket(new PacketPlayOutRespawn(dimensionManager, world, seed, EnumGamemode.SURVIVAL, EnumGamemode.ADVENTURE, false, false, flag));
+            EnumGamemode enumGamemode = EnumGamemode.getById(player.getGameMode().getValue());
+
+            //TODO: BUGG Anfällig bitte richtigen mülll reinmachen
+            craftPlayer.getHandle().playerConnection.sendPacket(new PacketPlayOutRespawn(dimensionManager, world, seed, enumGamemode, enumGamemode, false, false, flag));
             craftPlayer.getHandle().playerConnection.sendPacket(new PacketPlayOutViewDistance(worldServer.getChunkProvider().playerChunkMap.getLoadViewDistance()));
             entityPlayer.spawnIn(worldServer);
             entityPlayer.dead = false;

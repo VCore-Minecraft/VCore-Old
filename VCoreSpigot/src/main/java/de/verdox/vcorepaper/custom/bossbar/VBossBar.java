@@ -45,7 +45,7 @@ public class VBossBar {
     }
 
     public void showForTime(Player player, long timeInTicks){
-        showToPlayer(player);
+        bossBar.addPlayer(player);
         startHideTask(player.getUniqueId(), timeInTicks);
     }
 
@@ -54,7 +54,7 @@ public class VBossBar {
             Player player = Bukkit.getPlayer(uuid);
             if(player == null)
                 return;
-            stopHideTask(uuid);
+            hideFromPlayer(player);
         }, whenToHideInTicks));
     }
 

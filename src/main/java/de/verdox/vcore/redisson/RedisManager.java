@@ -10,6 +10,8 @@ import org.redisson.Redisson;
 import org.redisson.api.RMap;
 import org.redisson.api.RTopic;
 import org.redisson.api.RedissonClient;
+import org.redisson.codec.JsonJacksonCodec;
+import org.redisson.codec.SerializationCodec;
 import org.redisson.config.Config;
 
 import javax.annotation.Nonnull;
@@ -55,7 +57,7 @@ public class RedisManager<R extends VCorePlugin<?,?>> {
     }
 
     public RMap<String, Object> getRedisCache(Class<? extends VCoreData> dataClass, UUID objectUUID){
-        return getRedissonClient().getMap(plugin.getPluginName()+"Cache:"+objectUUID+":"+VCorePlugin.getMongoDBIdentifier(dataClass));
+        return getRedissonClient().getMap(plugin.getPluginName()+"Cache:"+objectUUID+":"+VCorePlugin.getMongoDBIdentifier(dataClass), new SerializationCodec());
     }
 
     public RTopic getTopic(Class<? extends VCoreData> dataClass, UUID objectUUID){

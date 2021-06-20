@@ -4,13 +4,13 @@ import org.apache.commons.codec.binary.Base64;
 import org.bukkit.inventory.ItemStack;
 
 import java.nio.ByteBuffer;
-import java.util.UUID;
+import java.util.*;
 
 public class TypeUtil {
 
     TypeUtil(){}
 
-    public <T> T castData(Object data, Class<T> type){
+    public <T> T castData(Object data, Class<T> type) throws ClassCastException{
         if(data == null)
             return null;
         if(type.equals(Boolean.class))
@@ -27,6 +27,8 @@ public class TypeUtil {
             return type.cast(UUID.fromString(data.toString()));
         else if(type.equals(Long.class))
             return type.cast(Long.parseLong(data.toString()));
+        if(data instanceof List && type.equals(java.util.Set.class))
+            return type.cast(Set.copyOf((List) data));
         return type.cast(data);
     }
 

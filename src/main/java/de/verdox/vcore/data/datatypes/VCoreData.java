@@ -83,14 +83,23 @@ public abstract class VCoreData implements VCoreRedisData, VCorePersistentDataba
 
     //TODO: PushUpdate auslagern in die DataSession und Objekt als Eingabeparameter
     public final void pushUpdate(){
+        pushUpdate(false);
+    }
+
+    public final void pushUpdate(boolean saveToDatabase){
         updateLastUse();
         DataSession session = getResponsibleDataSession();
         session.getLocalDataHandler().localToRedis(this,this.getClass(),getUUID());
-        session.getLocalDataHandler().localToDatabase(this.getClass(),getUUID());
+        if(saveToDatabase)
+            session.getLocalDataHandler().localToDatabase(this.getClass(),getUUID());
     }
 
     public final void pushUpdateAsync(){
         getPlugin().async(this::pushUpdate);
+    }
+
+    public final void pushUpdateAsync(boolean saveToDatabase){
+        getPlugin().async(() -> pushUpdate(saveToDatabase));
     }
 
     public final Map<String, Object> dataForRedis() {
@@ -121,13 +130,21 @@ public abstract class VCoreData implements VCoreRedisData, VCorePersistentDataba
         dataFromDatabase.forEach((key, value) -> {
             if(key.equals("objectUUID"))
                 return;
+            if(key.equals("_id"))
+                return;
             if(value == null)
                 return;
             try {
                 Field field = getClass().getDeclaredField(key);
                 field.setAccessible(true);
-                if(!field.getType().isPrimitive())
-                    field.set(this,VCoreUtil.getTypeUtil().castData(value,field.getType()));
+                if(!field.getType().isPrimitive()){
+                    try{
+                        field.set(this,VCoreUtil.getTypeUtil().castData(value,field.getType()));
+                    }
+                    catch (ClassCastException e){
+                        field.set(this,value);
+                    }
+                }
                 else
                     field.set(this, value);
             } catch (IllegalAccessException | NoSuchFieldException e) { e.printStackTrace(); }
@@ -139,13 +156,24 @@ public abstract class VCoreData implements VCoreRedisData, VCorePersistentDataba
         dataFromRedis.forEach((key, value) -> {
             if(key.equals("objectUUID"))
                 return;
+            if(key.equals("_id"))
+                return;
             if(value == null)
                 return;
             try {
                 Field field = getClass().getDeclaredField(key);
                 field.setAccessible(true);
-                if(!field.getType().isPrimitive())
-                    field.set(this,VCoreUtil.getTypeUtil().castData(value,field.getType()));
+
+
+
+                if(!field.getType().isPrimitive()){
+                    try{
+                        field.set(this,VCoreUtil.getTypeUtil().castData(value,field.getType()));
+                    }
+                    catch (ClassCastException e){
+                        field.set(this,value);
+                    }
+                }
                 else
                     field.set(this, value);
             } catch (IllegalAccessException | NoSuchFieldException ignored) {
