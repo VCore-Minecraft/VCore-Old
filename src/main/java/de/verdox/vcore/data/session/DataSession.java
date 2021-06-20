@@ -114,7 +114,7 @@ public abstract class DataSession <S extends VCoreData> {
                 .filter(redisCachedUUID -> !getLocalDataHandler().dataExistLocally(dataClass, redisCachedUUID))
                 .forEach(redisCachedUUID -> {
                     getRedisHandler().redisToLocal(dataClass, redisCachedUUID);
-                    dataManager.getPlugin().consoleMessage("&eLoaded &a"+dataClass.getSimpleName()+" &efrom redis with uuid &b"+uuid+"&7!",1, true);
+                    dataManager.getPlugin().consoleMessage("&eLoaded &a"+dataClass.getSimpleName()+" &efrom redis with uuid &b"+redisCachedUUID+"&7!",1, true);
                 });
     }
 

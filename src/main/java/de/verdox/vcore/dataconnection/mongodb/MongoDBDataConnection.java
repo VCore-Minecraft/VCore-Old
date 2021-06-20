@@ -1,8 +1,6 @@
 package de.verdox.vcore.dataconnection.mongodb;
 
-import com.mongodb.MongoClient;
-import com.mongodb.MongoCredential;
-import com.mongodb.ServerAddress;
+import com.mongodb.*;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import de.verdox.vcore.data.datatypes.VCoreData;
@@ -11,11 +9,19 @@ import de.verdox.vcore.dataconnection.DataProvider;
 import de.verdox.vcore.plugin.VCorePlugin;
 import de.verdox.vcore.subsystem.VCoreSubsystem;
 import org.bson.Document;
+import org.bson.UuidRepresentation;
+import org.bson.codecs.UuidCodec;
+import org.bson.codecs.configuration.CodecRegistries;
+import org.bson.codecs.configuration.CodecRegistry;
+import org.bson.codecs.pojo.PojoCodecProvider;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+
+import static org.bson.codecs.configuration.CodecRegistries.fromProviders;
+import static org.bson.codecs.configuration.CodecRegistries.fromRegistries;
 
 public abstract class MongoDBDataConnection extends DataConnection<MongoCollection<Document>> {
 
@@ -38,7 +44,12 @@ public abstract class MongoDBDataConnection extends DataConnection<MongoCollecti
             this.mongoClient = new MongoClient(host,port);
         else
             this.mongoClient = new MongoClient(new ServerAddress(host,port), List.of(MongoCredential.createCredential(user,database,password.toCharArray())));
-        this.mongoDatabase = mongoClient.getDatabase(database);
+        // Make Java Objects bson serializable
+        CodecRegistry pojoCodecRegistry = fromRegistries(
+                MongoClient.getDefaultCodecRegistry(),
+                fromProviders(PojoCodecProvider.builder().automatic(true).build(),
+                        CodecRegistries.fromCodecs(new UuidCodec(UuidRepresentation.JAVA_LEGACY))));
+        this.mongoDatabase = mongoClient.getDatabase(database).withCodecRegistry(pojoCodecRegistry);
         onConnect();
     }
 

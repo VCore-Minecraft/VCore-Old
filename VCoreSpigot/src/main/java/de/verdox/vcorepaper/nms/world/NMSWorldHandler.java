@@ -7,6 +7,8 @@ package de.verdox.vcorepaper.nms.world;
 import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.events.ListenerPriority;
 import com.comphenix.protocol.events.PacketEvent;
+import de.verdox.vcore.concurrent.CatchingRunnable;
+import de.verdox.vcore.concurrent.TaskBatch;
 import de.verdox.vcore.util.VCoreUtil;
 import de.verdox.vcorepaper.VCorePaper;
 import de.verdox.vcorepaper.nms.NMSHandler;
@@ -140,32 +142,70 @@ public interface NMSWorldHandler extends NMSHandler {
             }
             if(world == null)
                 return;
-            entityPlayer.getWorldServer().removePlayer(entityPlayer);
+                    VCorePaper.getInstance().createTaskBatch().doSync(new CatchingRunnable(() -> {
+                        entityPlayer.getWorldServer().removePlayer(entityPlayer);
+                    })).doAsync(new CatchingRunnable(() -> {
+                        EnumGamemode enumGamemode = EnumGamemode.getById(player.getGameMode().getValue());
+                        craftPlayer.getHandle().playerConnection.sendPacket(new PacketPlayOutRespawn(dimensionManager, world, seed, enumGamemode, enumGamemode, false, false, flag));
+                        craftPlayer.getHandle().playerConnection.sendPacket(new PacketPlayOutViewDistance(worldServer.getChunkProvider().playerChunkMap.getLoadViewDistance()));
+                        entityPlayer.spawnIn(worldServer);
+                        entityPlayer.dead = false;
+                        entityPlayer.playerConnection.teleport(new Location(worldServer.getWorld(), entityPlayer.locX(), entityPlayer.locY(), entityPlayer.locZ(), entityPlayer.yaw, entityPlayer.pitch));
+                        entityPlayer.setSneaking(false);
+                        entityPlayer.playerConnection.sendPacket(new PacketPlayOutSpawnPosition(worldServer.getSpawn(), worldServer.v()));
+                        entityPlayer.playerConnection.sendPacket(new PacketPlayOutServerDifficulty(worldServer.getDifficulty(), worldData.isDifficultyLocked()));
+                        entityPlayer.playerConnection.sendPacket(new PacketPlayOutExperience(entityPlayer.exp, entityPlayer.expTotal, entityPlayer.expLevel));
+                        dedicatedServer.getPlayerList().updateClient(entityPlayer);
+                        entityPlayer.updateAbilities();
+                    })).doSync(new CatchingRunnable(() -> {
+                        worldServer.addPlayerRespawn(entityPlayer);
+                    })).executeBatch();
+                        //entityPlayer.getWorldServer().removePlayer(entityPlayer);
+                        //entityPlayer.forceSetPositionRotation(location.getX(), location.getY(), location.getZ(), location.getYaw(), location.getPitch());
+                        //worldServer.getChunkProvider().addTicket(TicketType.POST_TELEPORT, new ChunkCoordIntPair(location.getBlockX() >> 4, location.getBlockZ() >> 4), 1, entityPlayer.getId());
+                        //entityPlayer.forceCheckHighPriority();
+
+                        //EnumGamemode enumGamemode = EnumGamemode.getById(player.getGameMode().getValue());
+                        //craftPlayer.getHandle().playerConnection.sendPacket(new PacketPlayOutRespawn(dimensionManager, world, seed, enumGamemode, enumGamemode, false, false, flag));
+                        //craftPlayer.getHandle().playerConnection.sendPacket(new PacketPlayOutViewDistance(worldServer.getChunkProvider().playerChunkMap.getLoadViewDistance()));
+                        //entityPlayer.spawnIn(worldServer);
+                        //entityPlayer.dead = false;
+                        //entityPlayer.playerConnection.teleport(new Location(worldServer.getWorld(), entityPlayer.locX(), entityPlayer.locY(), entityPlayer.locZ(), entityPlayer.yaw, entityPlayer.pitch));
+                        //entityPlayer.setSneaking(false);
+                        //entityPlayer.playerConnection.sendPacket(new PacketPlayOutSpawnPosition(worldServer.getSpawn(), worldServer.v()));
+                        //entityPlayer.playerConnection.sendPacket(new PacketPlayOutServerDifficulty(worldServer.getDifficulty(), worldData.isDifficultyLocked()));
+                        //entityPlayer.playerConnection.sendPacket(new PacketPlayOutExperience(entityPlayer.exp, entityPlayer.expTotal, entityPlayer.expLevel));
+//
+                        //dedicatedServer.getPlayerList().updateClient(entityPlayer);
+                        //entityPlayer.updateAbilities();
+                        ////entityPlayer.triggerDimensionAdvancements(((CraftWorld) craftPlayer.getWorld()).getHandle());
+                        //worldServer.addPlayerRespawn(entityPlayer);
+
+
+            //entityPlayer.getWorldServer().removePlayer(entityPlayer);
 
             //entityPlayer.playerConnection.sendPacket(new PacketPlayOutGameStateChange(PacketPlayOutGameStateChange.a, 0.0F));
 
-            worldServer = ((CraftWorld)location.getWorld()).getHandle();
-            entityPlayer.forceSetPositionRotation(location.getX(), location.getY(), location.getZ(), location.getYaw(), location.getPitch());
-            worldServer.getChunkProvider().addTicket(TicketType.POST_TELEPORT, new ChunkCoordIntPair(location.getBlockX() >> 4, location.getBlockZ() >> 4), 1, entityPlayer.getId());
-            entityPlayer.forceCheckHighPriority();
 
-            EnumGamemode enumGamemode = EnumGamemode.getById(player.getGameMode().getValue());
+
+
+
 
             //TODO: BUGG Anfällig bitte richtigen mülll reinmachen
-            craftPlayer.getHandle().playerConnection.sendPacket(new PacketPlayOutRespawn(dimensionManager, world, seed, enumGamemode, enumGamemode, false, false, flag));
-            craftPlayer.getHandle().playerConnection.sendPacket(new PacketPlayOutViewDistance(worldServer.getChunkProvider().playerChunkMap.getLoadViewDistance()));
-            entityPlayer.spawnIn(worldServer);
-            entityPlayer.dead = false;
-            entityPlayer.playerConnection.teleport(new Location(worldServer.getWorld(), entityPlayer.locX(), entityPlayer.locY(), entityPlayer.locZ(), entityPlayer.yaw, entityPlayer.pitch));
-            entityPlayer.setSneaking(false);
-            entityPlayer.playerConnection.sendPacket(new PacketPlayOutSpawnPosition(worldServer.getSpawn(), worldServer.v()));
-            entityPlayer.playerConnection.sendPacket(new PacketPlayOutServerDifficulty(worldServer.getDifficulty(), worldData.isDifficultyLocked()));
-            entityPlayer.playerConnection.sendPacket(new PacketPlayOutExperience(entityPlayer.exp, entityPlayer.expTotal, entityPlayer.expLevel));
-            dedicatedServer.getPlayerList().updateClient(entityPlayer);
-            entityPlayer.updateAbilities();
-            entityPlayer.triggerDimensionAdvancements(((CraftWorld) craftPlayer.getWorld()).getHandle());
-
-            worldServer.addPlayerRespawn(entityPlayer);
+            //craftPlayer.getHandle().playerConnection.sendPacket(new PacketPlayOutRespawn(dimensionManager, world, seed, enumGamemode, enumGamemode, false, false, flag));
+            //craftPlayer.getHandle().playerConnection.sendPacket(new PacketPlayOutViewDistance(worldServer.getChunkProvider().playerChunkMap.getLoadViewDistance()));
+            //entityPlayer.spawnIn(worldServer);
+            //entityPlayer.dead = false;
+            //entityPlayer.playerConnection.teleport(new Location(worldServer.getWorld(), entityPlayer.locX(), entityPlayer.locY(), entityPlayer.locZ(), entityPlayer.yaw, entityPlayer.pitch));
+            //entityPlayer.setSneaking(false);
+            //entityPlayer.playerConnection.sendPacket(new PacketPlayOutSpawnPosition(worldServer.getSpawn(), worldServer.v()));
+            //entityPlayer.playerConnection.sendPacket(new PacketPlayOutServerDifficulty(worldServer.getDifficulty(), worldData.isDifficultyLocked()));
+            //entityPlayer.playerConnection.sendPacket(new PacketPlayOutExperience(entityPlayer.exp, entityPlayer.expTotal, entityPlayer.expLevel));
+            //dedicatedServer.getPlayerList().updateClient(entityPlayer);
+            //entityPlayer.updateAbilities();
+            //entityPlayer.triggerDimensionAdvancements(((CraftWorld) craftPlayer.getWorld()).getHandle());
+//
+            //worldServer.addPlayerRespawn(entityPlayer);
 
             //PacketPlayOutRespawn packetPlayOutRespawn = new PacketPlayOutRespawn(dimensionManager, world, seed, EnumGamemode.SURVIVAL, EnumGamemode.ADVENTURE, false, false, true);
             //craftPlayer.getHandle().playerConnection.sendPacket(packetPlayOutRespawn);

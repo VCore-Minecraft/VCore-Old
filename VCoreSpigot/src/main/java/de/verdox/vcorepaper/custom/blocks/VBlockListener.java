@@ -88,21 +88,28 @@ public class VBlockListener extends VCoreListener.VCoreBukkitListener {
             e.setCancelled(!vBlock.isBlockPermissionAllowed(VBlockEventPermission.BLOCK_GROW_EVENT));
             return;
         }
-        Block stemBlock = VCoreUtil.getBukkitWorldUtil().findStem(block);
+        //Block stemBlock = VCoreUtil.getBukkitWorldUtil().findStem(block);
+        //TODO: Für Crops fertig machen
     }
 
     @EventHandler
     public void blockPhysicsEvent(BlockPhysicsEvent e){
         Block block = e.getBlock();
+        Block sourceBlock = e.getSourceBlock();
         VBlock vBlock = VCorePaper.getInstance().getCustomBlockManager().getVBlock(block.getLocation());
-        if(vBlock == null)
-            return;
-        vBlock.updateBlockData(block.getBlockData());
-        e.setCancelled(!vBlock.isBlockPermissionAllowed(VBlockEventPermission.BLOCK_GRAVITY_EVENT));
+        VBlock sourceVBlock = VCorePaper.getInstance().getCustomBlockManager().getVBlock(sourceBlock.getLocation());
+        if(vBlock != null) {
+            vBlock.updateBlockData(block.getBlockData());
+            e.setCancelled(!vBlock.isBlockPermissionAllowed(VBlockEventPermission.BLOCK_GRAVITY_EVENT));
+        }
+        else if(sourceVBlock != null){
+            sourceVBlock.updateBlockData(sourceBlock.getBlockData());
+            e.setCancelled(!sourceVBlock.isBlockPermissionAllowed(VBlockEventPermission.BLOCK_GRAVITY_EVENT));
+        }
     }
 
     @EventHandler
-    public void blockPhysicsEvent(LeavesDecayEvent e){
+    public void leavesDecayEvent(LeavesDecayEvent e){
         Block block = e.getBlock();
         VBlock vBlock = VCorePaper.getInstance().getCustomBlockManager().getVBlock(block.getLocation());
         if(vBlock == null)

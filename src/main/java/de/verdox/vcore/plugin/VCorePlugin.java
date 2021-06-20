@@ -1,6 +1,8 @@
 package de.verdox.vcore.plugin;
 
 import com.google.common.eventbus.EventBus;
+import de.verdox.vcore.concurrent.CatchingRunnable;
+import de.verdox.vcore.concurrent.TaskBatch;
 import de.verdox.vcore.data.manager.ServerDataManager;
 import de.verdox.vcore.data.annotations.RequiredSubsystemInfo;
 import de.verdox.vcore.dataconnection.DataConnection;
@@ -10,11 +12,15 @@ import de.verdox.vcore.plugin.bukkit.BukkitPlugin;
 import de.verdox.vcore.plugin.bungeecord.BungeeCordPlugin;
 import de.verdox.vcore.subsystem.VCoreSubsystem;
 import net.md_5.bungee.api.ProxyServer;
+import net.md_5.bungee.api.plugin.Plugin;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
+import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public interface VCorePlugin <T, R extends VCoreSubsystem<?>> extends SystemLoadable {
 
@@ -32,6 +38,7 @@ public interface VCorePlugin <T, R extends VCoreSubsystem<?>> extends SystemLoad
     void consoleMessage(String message, int tabSize, boolean debug);
     VCoreScheduler getScheduler();
     boolean debug();
+    TaskBatch<VCorePlugin<T,R>> createTaskBatch();
 
     void async(Runnable runnable);
     void sync(Runnable runnable);
@@ -110,6 +117,27 @@ public interface VCorePlugin <T, R extends VCoreSubsystem<?>> extends SystemLoad
         }
 
         @Override
+        public TaskBatch<VCorePlugin<JavaPlugin, VCoreSubsystem.Bukkit>> createTaskBatch() {
+
+            return new TaskBatch<>(this) {
+                @Override
+                public void runSync(CatchingRunnable runnable) {
+                    Bukkit.getScheduler().runTask(getPlugin().getPlugin(), runnable);
+                }
+
+                @Override
+                public void runAsync(CatchingRunnable runnable) {
+                    Bukkit.getScheduler().runTaskAsynchronously(getPlugin().getPlugin(), runnable);
+                }
+
+                @Override
+                public void onFinishBatch() {
+
+                }
+            };
+        }
+
+        @Override
         public VCoreScheduler getScheduler() {
             return vCoreScheduler;
         }
@@ -174,6 +202,11 @@ public interface VCorePlugin <T, R extends VCoreSubsystem<?>> extends SystemLoad
             onPluginDisable();
             subsystemManager.disable();
             consoleMessage("&aPlugin started&7!",false);
+        }
+
+        @Override
+        public TaskBatch<VCorePlugin<Plugin, VCoreSubsystem.BungeeCord>> createTaskBatch() {
+            return null;
         }
 
         @Override
