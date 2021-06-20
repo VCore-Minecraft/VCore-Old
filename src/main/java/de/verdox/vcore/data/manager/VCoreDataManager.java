@@ -1,6 +1,7 @@
 package de.verdox.vcore.data.manager;
 
 import de.verdox.vcore.data.datatypes.VCoreData;
+import de.verdox.vcore.plugin.SystemLoadable;
 import de.verdox.vcore.redisson.events.RedisDataCreationEvent;
 import de.verdox.vcore.redisson.events.RedisDataRemoveEvent;
 import de.verdox.vcore.redisson.messages.RedisObjectHandlerMessage;
@@ -17,12 +18,13 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.function.Consumer;
 
-public abstract class VCoreDataManager <S extends VCoreData, R extends VCorePlugin<?,?>> {
+public abstract class VCoreDataManager <S extends VCoreData, R extends VCorePlugin<?,?>> implements SystemLoadable {
 
     protected final RedisManager<VCorePlugin<?,?>> redisManager;
     protected final R plugin;
     private final RTopic objectHandlerTopic;
     private final MessageListener<RedisObjectHandlerMessage<S>> channelListener;
+    protected boolean loaded = false;
 
     public VCoreDataManager(@Nonnull R plugin, boolean useRedisCluster, @Nonnull String[] addressArray, String redisPassword, DataConnection.MongoDB mongoDB){
         plugin.consoleMessage("&6Starting &b"+this,true);
@@ -41,6 +43,11 @@ public abstract class VCoreDataManager <S extends VCoreData, R extends VCorePlug
         objectHandlerTopic.addListener(RedisObjectHandlerMessage.class,channelListener);
         plugin.consoleMessage("&eCleanup Task started",true);
         redisManager.getPlugin().getScheduler().asyncInterval(this::onCleanupInterval,20L*120,20L*1800);
+    }
+
+    @Override
+    public boolean isLoaded() {
+        return loaded;
     }
 
     public void pushCreation(@Nonnull Class<? extends S> type, @Nonnull S dataObject){

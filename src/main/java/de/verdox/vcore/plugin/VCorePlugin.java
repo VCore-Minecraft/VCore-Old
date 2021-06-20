@@ -16,7 +16,7 @@ import org.bukkit.World;
 import java.io.File;
 import java.util.List;
 
-public interface VCorePlugin <T, R extends VCoreSubsystem<?>> {
+public interface VCorePlugin <T, R extends VCoreSubsystem<?>> extends SystemLoadable {
 
     void onPluginEnable();
     void onPluginDisable();
@@ -43,6 +43,11 @@ public interface VCorePlugin <T, R extends VCoreSubsystem<?>> {
     EventBus getEventBus();
     PlayerSessionManager<?> getSessionManager();
     ServerDataManager<?> getServerDataManager();
+
+    @Override
+    default boolean isLoaded(){
+        return getServerDataManager().isLoaded() && getSessionManager().isLoaded() && getSubsystemManager().isLoaded();
+    }
 
     default void registerVCoreEventListener(Object o){
         getEventBus().register(o);

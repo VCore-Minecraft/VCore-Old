@@ -7,6 +7,7 @@ package de.verdox.vcore.data.session.datahandler.database;
 import de.verdox.vcore.data.datatypes.VCoreData;
 import de.verdox.vcore.data.session.DataSession;
 import org.redisson.api.RMap;
+import org.redisson.api.RTopic;
 
 import java.util.Map;
 import java.util.UUID;
@@ -33,10 +34,14 @@ public abstract class DatabaseHandler <S extends VCoreData> {
         RMap<String, Object> redisCache = dataSession.getRedisHandler().getRedisCache(dataClass,objectUUID);
 
         Map<String, Object> dataFromDatabase = loadDataFromDatabase(dataClass,objectUUID);
+        redisCache.putAll(dataFromDatabase);
 
-        vCoreData.dataForRedis().forEach(redisCache::put);
-        vCoreData.restoreFromRedis(dataFromDatabase);
-        vCoreData.onLoad();
+        RTopic topic = vCoreData.getDataTopic();
+
+        long start = System.currentTimeMillis();
+        topic.publishAsync(dataFromDatabase);
+        long end = System.currentTimeMillis() - start;
+        dataSession.getDataManager().getPlugin().consoleMessage("&ePushing Update&7: &b"+objectUUID+" &7[&e"+end+" ms&7]",true);
     }
 
     public final void databaseToLocal(Class<? extends S> dataClass, UUID objectUUID){
@@ -44,6 +49,7 @@ public abstract class DatabaseHandler <S extends VCoreData> {
 
         Map<String, Object> dataFromDatabase = loadDataFromDatabase(dataClass,objectUUID);
         vCoreData.restoreFromDataBase(dataFromDatabase);
+        vCoreData.onLoad();
         dataSession.getLocalDataHandler().addDataLocally(vCoreData, dataClass, true);
     }
 

@@ -35,7 +35,11 @@ public class SSession extends DataSession<ServerData>{
                 // Load Data on Server Start
                 .filter(aClass -> dataManager.getRedisManager().getPreloadStrategy(aClass).equals(PreloadStrategy.LOAD_BEFORE))
                 // PreLoad every Server Data (First from Redis, if it does not exist in redis, load from database)
-                .forEach(this::loadAllDataFromDatabaseToPipeline);
+                //TODO: Wenn Daten bisher nicht in die Datenbank gesaved wurden werden sie NICHT preLoaded -> Das muss man fixen
+                .forEach(dataClass -> {
+                    loadAllFromRedis(dataClass);
+                    loadAllFromDatabase(dataClass);
+                });
     }
 
     @Override
@@ -52,7 +56,7 @@ public class SSession extends DataSession<ServerData>{
     public void saveAllData() {
         serverDataObjects.forEach((aClass, uuidServerDataMap) -> {
             uuidServerDataMap.forEach((uuid, serverData) -> {
-                serverData.pushUpdate();
+                serverData.pushUpdate(true);
             });
         });
     }

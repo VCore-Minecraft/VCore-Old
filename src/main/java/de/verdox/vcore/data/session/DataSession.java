@@ -89,7 +89,8 @@ public abstract class DataSession <S extends VCoreData> {
         getLocalDataHandler().removeDataLocally(dataClass,objectUUID,true);
     }
 
-    protected void loadAllDataFromDatabaseToPipeline(@Nonnull Class<? extends S> dataClass){
+
+    protected void loadAllFromDatabase(@Nonnull Class<? extends S> dataClass){
         dataManager.getPlugin().consoleMessage("&ePreloading Data for &a"+dataClass.getSimpleName()+" &efrom database&7!",true);
         getMongoCollection(dataClass)
                 .find()
@@ -98,7 +99,22 @@ public abstract class DataSession <S extends VCoreData> {
                     if(document == null)
                         return;
                     UUID uuid = UUID.fromString(document.getString("objectUUID"));
-                    loadFromPipeline(dataClass,uuid);
+                    if(getLocalDataHandler().dataExistLocally(dataClass, uuid))
+                        return;
+                    getDatabaseHandler().databaseToLocal(dataClass, uuid);
+                    dataManager.getPlugin().consoleMessage("&eLoaded &a"+dataClass.getSimpleName()+" &efrom database with uuid &b"+uuid+"&7!",1, true);
+                });
+
+    }
+
+    protected void loadAllFromRedis(@Nonnull Class<? extends S> dataClass){
+        dataManager.getPlugin().consoleMessage("&ePreloading Data for &a"+dataClass.getSimpleName()+" &efrom redis&7!",true);
+        getRedisHandler().getSavedRedisData(dataClass)
+                .stream()
+                .filter(redisCachedUUID -> !getLocalDataHandler().dataExistLocally(dataClass, redisCachedUUID))
+                .forEach(redisCachedUUID -> {
+                    getRedisHandler().redisToLocal(dataClass, redisCachedUUID);
+                    dataManager.getPlugin().consoleMessage("&eLoaded &a"+dataClass.getSimpleName()+" &efrom redis with uuid &b"+uuid+"&7!",1, true);
                 });
     }
 

@@ -12,15 +12,16 @@ import de.verdox.vcore.plugin.VCorePlugin;
 import de.verdox.vcore.redisson.messages.RedisSimpleMessage;
 import de.verdox.vcore.subsystem.VCoreSubsystem;
 import net.md_5.bungee.api.ProxyServer;
+import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.event.PlayerDisconnectEvent;
 import net.md_5.bungee.api.event.PostLoginEvent;
+import net.md_5.bungee.api.event.PreLoginEvent;
+import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.event.player.PlayerKickEvent;
-import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.player.*;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -36,6 +37,7 @@ public abstract class PlayerSessionManager<R extends VCorePlugin<?,?>> extends V
     public PlayerSessionManager(R plugin, boolean useRedisCluster, String[] addressArray, String redisPassword, DataConnection.MongoDB mongoDB){
         super(plugin,useRedisCluster,addressArray,redisPassword,mongoDB);
         getPlugin().consoleMessage("&eStarting PlayerSessionManager",false);
+        loaded = true;
     }
 
     protected PlayerSession createSession(@Nonnull UUID uuid){
@@ -199,6 +201,14 @@ public abstract class PlayerSessionManager<R extends VCorePlugin<?,?>> extends V
         }
 
         @EventHandler
+        public void preConnect(AsyncPlayerPreLoginEvent asyncPlayerPreLoginEvent){
+            if(plugin.isLoaded())
+                return;
+            asyncPlayerPreLoginEvent.setLoginResult(AsyncPlayerPreLoginEvent.Result.KICK_OTHER);
+            asyncPlayerPreLoginEvent.setKickMessage(ChatColor.translateAlternateColorCodes('&',"&eDer Server fährt gerade hoch&7!"));
+        }
+
+        @EventHandler
         public void onPlayerJoin(PlayerJoinEvent e){
             Player player = e.getPlayer();
             getPlugin().getEventBus().post(new PlayerPreSessionLoadEvent(e.getPlayer().getUniqueId()));
@@ -238,6 +248,14 @@ public abstract class PlayerSessionManager<R extends VCorePlugin<?,?>> extends V
 
         public PlayerSession getPlayerSession(ProxiedPlayer player){
             return getSession(player.getUniqueId());
+        }
+
+        @net.md_5.bungee.event.EventHandler
+        public void onPreLogin(PreLoginEvent e){
+            if(plugin.isLoaded())
+                return;
+            e.setCancelReason(new TextComponent(ChatColor.translateAlternateColorCodes('&',"&eDer server fährt gerade hoch&7!")));
+            e.setCancelled(true);
         }
 
         @net.md_5.bungee.event.EventHandler

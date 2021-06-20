@@ -10,12 +10,14 @@ import org.redisson.Redisson;
 import org.redisson.api.RMap;
 import org.redisson.api.RTopic;
 import org.redisson.api.RedissonClient;
-import org.redisson.codec.JsonJacksonCodec;
 import org.redisson.codec.SerializationCodec;
 import org.redisson.config.Config;
 
 import javax.annotation.Nonnull;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 public class RedisManager<R extends VCorePlugin<?,?>> {
 
@@ -58,6 +60,19 @@ public class RedisManager<R extends VCorePlugin<?,?>> {
 
     public RMap<String, Object> getRedisCache(Class<? extends VCoreData> dataClass, UUID objectUUID){
         return getRedissonClient().getMap(plugin.getPluginName()+"Cache:"+objectUUID+":"+VCorePlugin.getMongoDBIdentifier(dataClass), new SerializationCodec());
+    }
+
+    public Set<RMap<String, Object>> getRedisCacheList(Class<? extends VCoreData> dataClass){
+        Set<String> keys = getRedisMapKeys(dataClass);
+        Set<RMap<String, Object>> set = new HashSet<>();
+        keys.forEach(s -> set.add(getRedissonClient().getMap(s)));
+        return set;
+    }
+
+    public Set<String> getRedisMapKeys(Class<? extends VCoreData> dataClass){
+        String pluginName = plugin.getPluginName();
+        String mongoIdentifier = VCorePlugin.getMongoDBIdentifier(dataClass);
+        return getRedissonClient().getKeys().getKeysStream().filter(s -> s.contains(pluginName) && s.contains(mongoIdentifier)).collect(Collectors.toSet());
     }
 
     public RTopic getTopic(Class<? extends VCoreData> dataClass, UUID objectUUID){

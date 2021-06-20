@@ -112,10 +112,8 @@ public abstract class VCoreData implements VCoreRedisData, VCorePersistentDataba
             try {
                 Field field = getClass().getDeclaredField(dataKey);
                 field.setAccessible(true);
-                if(field.get(this) == null) {
-                    getPlugin().consoleMessage("&cSkipping &e"+field.getName()+" &cas it is null!", true);
+                if(field.get(this) == null)
                     return;
-                }
                 dataForRedis.put(field.getName(), field.get(this));
             } catch (NoSuchFieldException | IllegalAccessException e) { e.printStackTrace(); }
         });

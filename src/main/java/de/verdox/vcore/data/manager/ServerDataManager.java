@@ -46,6 +46,7 @@ public class ServerDataManager <R extends VCorePlugin<?,?>> extends VCoreDataMan
             plugin.getEventBus().post(new RedisMessageEvent(sessionUUID, msg));
         };
         messenger.addListener(RedisSimpleMessage.class,channelListener);
+        loaded = true;
     }
 
     public void broadcastRedisMessage(RedisSimpleMessage.Builder builder){

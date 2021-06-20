@@ -9,7 +9,7 @@ import de.verdox.vcore.subsystem.VCoreSubsystem;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class VCoreSubsystemManager<T extends VCorePlugin<?,R>, R extends VCoreSubsystem<T>>{
+public class VCoreSubsystemManager<T extends VCorePlugin<?,R>, R extends VCoreSubsystem<T>> implements SystemLoadable{
 
     private T plugin;
     private final List<R> subSystems = new ArrayList<>();
@@ -23,6 +23,8 @@ public class VCoreSubsystemManager<T extends VCorePlugin<?,R>, R extends VCoreSu
 
     private Set<Class<? extends ServerData>> registeredServerDataClasses = new HashSet<>();
     private Set<Class<? extends ServerData>> activeServerDataClasses = new HashSet<>();
+
+    private boolean loaded = false;
 
     VCoreSubsystemManager(T plugin){
         this.plugin = plugin;
@@ -45,6 +47,7 @@ public class VCoreSubsystemManager<T extends VCorePlugin<?,R>, R extends VCoreSu
                     });
         }
         findActiveDataClasses();
+        loaded = true;
     }
 
     public List<R> getActivatedSubSystems() {
@@ -132,5 +135,10 @@ public class VCoreSubsystemManager<T extends VCorePlugin<?,R>, R extends VCoreSu
 
     public Set<Class<? extends ServerData>> getActiveServerDataClasses() {
         return this.activeServerDataClasses;
+    }
+
+    @Override
+    public boolean isLoaded() {
+        return loaded;
     }
 }

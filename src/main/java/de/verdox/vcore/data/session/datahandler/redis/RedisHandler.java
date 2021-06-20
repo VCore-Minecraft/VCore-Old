@@ -29,6 +29,7 @@ public abstract class RedisHandler <S extends VCoreData>{
     public abstract Set<String> getRedisKeys(Class<? extends S> vCoreDataClass, UUID uuid);
     public abstract RMap<String, Object> getRedisCache(Class<? extends S> dataClass, UUID uuid);
     public abstract boolean dataExistRedis(Class<? extends S> dataClass, UUID uuid);
+    public abstract Set<UUID> getSavedRedisData(Class<? extends S> dataClass);
 
     public final void redisToDatabase(Class<? extends S> dataClass,UUID objectUUID){
         if(dataClass == null)

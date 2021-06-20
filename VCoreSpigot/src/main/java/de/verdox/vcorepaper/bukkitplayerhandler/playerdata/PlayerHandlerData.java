@@ -40,6 +40,9 @@ public class PlayerHandlerData extends PlayerData {
     @VCorePersistentData
     public boolean restoreVanillaInventory = true;
 
+    @VCorePersistentData
+    private String activeInventoryID = null;
+
     public PlayerHandlerData(PlayerSessionManager<?> playerSessionManager, UUID playerUUID) {
         super(playerSessionManager, playerUUID);
     }
@@ -52,7 +55,10 @@ public class PlayerHandlerData extends PlayerData {
     }
 
     public void saveInventory(Supplier<Player> supplier){
-        saveInventory(supplier,"vanilla");
+        if(activeInventoryID == null)
+            saveInventory(supplier,"vanilla");
+        else
+            saveInventory(supplier,activeInventoryID);
 
     }
 
@@ -68,15 +74,27 @@ public class PlayerHandlerData extends PlayerData {
     }
 
     public void restoreInventory(){
-        restoreInventory("vanilla");
+        if(this.activeInventoryID == null)
+            restoreInventory("vanilla");
+        else
+            restoreInventory(activeInventoryID);
+    }
+
+    public void createInventory(String inventoryID){
+        inventoryCache.put(inventoryID,new SerializableInventory(inventoryID,new ItemStack[0],new ItemStack[0]));
+    }
+
+    public boolean hasInventory(String inventoryID){
+        return inventoryCache.containsKey(inventoryID);
     }
 
     public void restoreInventory(String inventoryID){
         VCorePlayer vCorePlayer = VCorePaper.getInstance().getVCorePlayerManager().getPlayer(getUUID());
         if(!vCorePlayer.isOnThisServer())
             return;
-        if(!inventoryCache.containsKey("vanilla"))
+        if(!inventoryCache.containsKey(inventoryID))
             return;
+        this.activeInventoryID = inventoryID;
         SerializableInventory serializableInventory = inventoryCache.get(inventoryID);
         try{
             vCorePlayer.toBukkitPlayer().getInventory().setArmorContents(serializableInventory.deSerializeArmorContents());

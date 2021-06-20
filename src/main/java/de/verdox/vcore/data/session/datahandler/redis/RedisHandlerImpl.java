@@ -12,6 +12,7 @@ import org.redisson.api.RMap;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 /**
  * @version 1.0
@@ -47,5 +48,10 @@ public class RedisHandlerImpl <S extends VCoreData> extends RedisHandler<S>{
         Set<String> redisKeys = getRedisKeys(dataClass,uuid);
 
         return redisKeys.parallelStream().anyMatch(redisCache::containsKey);
+    }
+
+    @Override
+    public Set<UUID> getSavedRedisData(Class<? extends S> dataClass) {
+        return dataSession.getDataManager().getRedisManager().getRedisMapKeys(dataClass).stream().map(s -> UUID.fromString(s.split(":")[1])).collect(Collectors.toSet());
     }
 }

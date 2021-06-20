@@ -30,7 +30,10 @@ public class PlayerSession extends DataSession<PlayerData>{
                 // Load Data on Server Start
                 .filter(aClass -> dataManager.getRedisManager().getPreloadStrategy(aClass).equals(PreloadStrategy.LOAD_BEFORE))
                 // PreLoad every Server Data (First from Redis, if it does not exist in redis, load from database)
-                .forEach(this::loadAllDataFromDatabaseToPipeline);
+                .forEach(aClass -> {
+                    loadAllFromRedis(aClass);
+                    loadAllFromDatabase(aClass);
+                });
     }
 
     @Override
@@ -104,7 +107,7 @@ public class PlayerSession extends DataSession<PlayerData>{
 
     @Override
     public void saveAllData() {
-        playerDataObjects.forEach((aClass, playerData) -> playerData.pushUpdate());
+        playerDataObjects.forEach((aClass, playerData) -> playerData.pushUpdate(true));
     }
 
     @Override
