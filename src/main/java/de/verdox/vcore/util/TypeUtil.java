@@ -28,7 +28,7 @@ public class TypeUtil {
         else if(type.equals(Long.class))
             return type.cast(Long.parseLong(data.toString()));
         if(data instanceof List && type.equals(java.util.Set.class))
-            return type.cast(Set.copyOf((List) data));
+            return type.cast(new HashSet<>((List) data));
         return type.cast(data);
     }
 

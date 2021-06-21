@@ -5,32 +5,22 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import de.verdox.vcore.data.datatypes.VCoreData;
 import de.verdox.vcore.dataconnection.DataConnection;
-import de.verdox.vcore.dataconnection.DataProvider;
 import de.verdox.vcore.plugin.VCorePlugin;
 import de.verdox.vcore.subsystem.VCoreSubsystem;
 import org.bson.Document;
-import org.bson.UuidRepresentation;
-import org.bson.codecs.UuidCodec;
-import org.bson.codecs.configuration.CodecRegistries;
-import org.bson.codecs.configuration.CodecRegistry;
-import org.bson.codecs.pojo.PojoCodecProvider;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-
-import static org.bson.codecs.configuration.CodecRegistries.fromProviders;
-import static org.bson.codecs.configuration.CodecRegistries.fromRegistries;
 
 public abstract class MongoDBDataConnection extends DataConnection<MongoCollection<Document>> {
 
     private MongoClient mongoClient;
     private MongoDatabase mongoDatabase;
+    //private final CodecRegistry codecRegistry;
 
     public MongoDBDataConnection(VCorePlugin<?,?> vCorePlugin, String host, String database, int port, String user, String password) {
         super(vCorePlugin,host,database,port,user,password);
         vCorePlugin.consoleMessage("&6Starting MongoDB Manager",true);
+        //this.codecRegistry = fromRegistries(MongoClient.getDefaultCodecRegistry(),CodecRegistries.fromProviders(new UuidCodecProvider(UuidRepresentation.JAVA_LEGACY)));
         connect();
     }
 
@@ -44,12 +34,7 @@ public abstract class MongoDBDataConnection extends DataConnection<MongoCollecti
             this.mongoClient = new MongoClient(host,port);
         else
             this.mongoClient = new MongoClient(new ServerAddress(host,port), List.of(MongoCredential.createCredential(user,database,password.toCharArray())));
-        // Make Java Objects bson serializable
-        CodecRegistry pojoCodecRegistry = fromRegistries(
-                MongoClient.getDefaultCodecRegistry(),
-                fromProviders(PojoCodecProvider.builder().automatic(true).build(),
-                        CodecRegistries.fromCodecs(new UuidCodec(UuidRepresentation.JAVA_LEGACY))));
-        this.mongoDatabase = mongoClient.getDatabase(database).withCodecRegistry(pojoCodecRegistry);
+        this.mongoDatabase = mongoClient.getDatabase(database);
         onConnect();
     }
 

@@ -49,6 +49,8 @@ public class PlayerHandlerData extends PlayerData {
 
     public void saveInventory(){
         VCorePlayer vCorePlayer = VCorePaper.getInstance().getVCorePlayerManager().getPlayer(getUUID());
+        if(vCorePlayer == null)
+            return;
         if(!vCorePlayer.isOnThisServer())
             return;
         saveInventory(vCorePlayer::toBukkitPlayer);
@@ -59,7 +61,6 @@ public class PlayerHandlerData extends PlayerData {
             saveInventory(supplier,"vanilla");
         else
             saveInventory(supplier,activeInventoryID);
-
     }
 
     public void saveInventory(Supplier<Player> supplier, String inventoryID){
@@ -90,6 +91,8 @@ public class PlayerHandlerData extends PlayerData {
 
     public void restoreInventory(String inventoryID){
         VCorePlayer vCorePlayer = VCorePaper.getInstance().getVCorePlayerManager().getPlayer(getUUID());
+        if(vCorePlayer == null)
+            return;
         if(!vCorePlayer.isOnThisServer())
             return;
         if(!inventoryCache.containsKey(inventoryID))
@@ -97,8 +100,12 @@ public class PlayerHandlerData extends PlayerData {
         this.activeInventoryID = inventoryID;
         SerializableInventory serializableInventory = inventoryCache.get(inventoryID);
         try{
-            vCorePlayer.toBukkitPlayer().getInventory().setArmorContents(serializableInventory.deSerializeArmorContents());
-            vCorePlayer.toBukkitPlayer().getInventory().setStorageContents(serializableInventory.deSerializeStorageContents());
+            ItemStack[] armorContents = serializableInventory.deSerializeArmorContents();
+            ItemStack[] storageContents = serializableInventory.deSerializeStorageContents();
+            if(armorContents != null)
+                vCorePlayer.toBukkitPlayer().getInventory().setArmorContents(armorContents);
+            if(storageContents != null)
+                vCorePlayer.toBukkitPlayer().getInventory().setStorageContents(storageContents);
             VCoreUtil.getBukkitPlayerUtil().sendPlayerMessage(vCorePlayer.toBukkitPlayer(), ChatMessageType.ACTION_BAR, "&eInventar wurde geladen");
             VCorePaper.getInstance().consoleMessage("&eInventory &6"+inventoryID+" &eof player &b"+getUUID()+" &erestored&7!", true);
         }

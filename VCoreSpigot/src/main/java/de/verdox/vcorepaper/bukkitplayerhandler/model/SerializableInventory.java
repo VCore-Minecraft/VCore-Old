@@ -4,50 +4,35 @@
 
 package de.verdox.vcorepaper.bukkitplayerhandler.model;
 
+import de.verdox.vcore.data.serializables.VCoreSerializable;
+import de.verdox.vcore.data.serializables.references.objects.StringBsonReference;
 import de.verdox.vcorepaper.custom.util.Serializer;
 import org.bukkit.inventory.ItemStack;
-import org.redisson.api.annotation.REntity;
-import org.redisson.api.annotation.RId;
 
 import java.io.IOException;
-import java.io.Serializable;
 
 /**
  * @version 1.0
  * @Author: Lukas Jonsson (Verdox)
  * @date 20.06.2021 00:19
  */
-public class SerializableInventory implements Serializable {
-
-    private String id;
-    private String storageContents;
-    private String armorContents;
+public class SerializableInventory extends VCoreSerializable {
 
     public SerializableInventory(String id, ItemStack[] storageContents, ItemStack[] armorContents){
-        this.id = id;
-        this.storageContents = Serializer.itemStackArrayToBase64(storageContents);
-        this.armorContents = Serializer.itemStackArrayToBase64(armorContents);
+        new StringBsonReference(this, "id").setValue(id);
+        new StringBsonReference(this, "armorContents").setValue(Serializer.itemStackArrayToBase64(armorContents));
+        new StringBsonReference(this, "storageContents").setValue(Serializer.itemStackArrayToBase64(storageContents));
     }
 
-    SerializableInventory(){}
-
     public ItemStack[] deSerializeStorageContents() throws IOException {
-        return Serializer.itemStackArrayFromBase64(storageContents);
+        return Serializer.itemStackArrayFromBase64(new StringBsonReference(this, "storageContents").orElse(null));
     }
 
     public ItemStack[] deSerializeArmorContents() throws IOException {
-        return Serializer.itemStackArrayFromBase64(armorContents);
+        return Serializer.itemStackArrayFromBase64(new StringBsonReference(this, "armorContents").orElse(null));
     }
 
-    public String getId() {
-        return id;
-    }
-
-    public String getArmorContents() {
-        return armorContents;
-    }
-
-    public String getStorageContents() {
-        return storageContents;
+    public String getID(){
+        return new StringBsonReference(this, "storageContents").getValue();
     }
 }

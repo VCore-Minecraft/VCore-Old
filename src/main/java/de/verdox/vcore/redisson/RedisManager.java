@@ -72,7 +72,10 @@ public class RedisManager<R extends VCorePlugin<?,?>> {
     public Set<String> getRedisMapKeys(Class<? extends VCoreData> dataClass){
         String pluginName = plugin.getPluginName();
         String mongoIdentifier = VCorePlugin.getMongoDBIdentifier(dataClass);
-        return getRedissonClient().getKeys().getKeysStream().filter(s -> s.contains(pluginName) && s.contains(mongoIdentifier)).collect(Collectors.toSet());
+        return getRedissonClient().getKeys().getKeysStream().filter(s -> {
+            String[] parts = s.split(":");
+            return parts[0].equals(pluginName) && parts[2].equals(mongoIdentifier);
+        }).collect(Collectors.toSet());
     }
 
     public RTopic getTopic(Class<? extends VCoreData> dataClass, UUID objectUUID){

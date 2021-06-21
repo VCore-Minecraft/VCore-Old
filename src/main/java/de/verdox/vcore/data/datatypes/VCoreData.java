@@ -14,6 +14,7 @@ import de.verdox.vcore.redisson.VCoreRedisData;
 import de.verdox.vcore.subsystem.VCoreSubsystem;
 import de.verdox.vcore.util.TypeUtil;
 import de.verdox.vcore.util.VCoreUtil;
+import org.bson.types.Binary;
 import org.redisson.api.RTopic;
 import org.redisson.api.listener.MessageListener;
 

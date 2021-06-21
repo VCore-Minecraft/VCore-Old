@@ -34,6 +34,8 @@ public abstract class DatabaseHandler <S extends VCoreData> {
         RMap<String, Object> redisCache = dataSession.getRedisHandler().getRedisCache(dataClass,objectUUID);
 
         Map<String, Object> dataFromDatabase = loadDataFromDatabase(dataClass,objectUUID);
+        dataFromDatabase.remove("objectUUID");
+        dataFromDatabase.remove("_id");
         redisCache.putAll(dataFromDatabase);
 
         RTopic topic = vCoreData.getDataTopic();
