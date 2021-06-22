@@ -5,7 +5,8 @@
 package de.verdox.vcorepaper.nms;
 
 import de.verdox.vcorepaper.VCorePaper;
-import de.verdox.vcorepaper.nms.world.NMSWorldHandler;
+import de.verdox.vcorepaper.nms.interfaces.server.NMSServerHandler;
+import de.verdox.vcorepaper.nms.interfaces.world.NMSWorldHandler;
 import org.bukkit.Bukkit;
 
 /**
@@ -31,5 +32,8 @@ public class NMSManager {
 
     public NMSWorldHandler getNmsWorldHandler() {
         return NMSWorldHandler.getRightHandler(nmsVersion);
+    }
+    public NMSServerHandler getNMSServerHandler() {
+        return NMSServerHandler.getRightHandler(nmsVersion);
     }
 }

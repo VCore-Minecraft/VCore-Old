@@ -121,12 +121,12 @@ public interface VCorePlugin <T, R extends VCoreSubsystem<?>> extends SystemLoad
 
             return new TaskBatch<>(this) {
                 @Override
-                public void runSync(CatchingRunnable runnable) {
+                public void runSync(Runnable runnable) {
                     Bukkit.getScheduler().runTask(getPlugin().getPlugin(), runnable);
                 }
 
                 @Override
-                public void runAsync(CatchingRunnable runnable) {
+                public void runAsync(Runnable runnable) {
                     Bukkit.getScheduler().runTaskAsynchronously(getPlugin().getPlugin(), runnable);
                 }
 

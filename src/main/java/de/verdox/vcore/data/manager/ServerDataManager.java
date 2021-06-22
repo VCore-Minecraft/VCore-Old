@@ -60,7 +60,7 @@ public class ServerDataManager <R extends VCorePlugin<?,?>> extends VCoreDataMan
     }
 
     @Override
-    public <T extends ServerData> T load(@Nonnull Class<? extends T> type, @Nonnull UUID uuid, @Nonnull LoadingStrategy loadingStrategy, Consumer<T> callback) {
+    public <T extends ServerData> T load(@Nonnull Class<? extends T> type, @Nonnull UUID uuid, @Nonnull LoadingStrategy loadingStrategy, boolean createIfNotExist, Consumer<T> callback) {
         VCoreSubsystem<?> subsystem = plugin.findDependSubsystem(type);
         if(subsystem == null)
             throw new NullPointerException("Subsystem "+subsystem.getClass()+" could not be found in plugin"+plugin.getPluginName());
@@ -78,7 +78,7 @@ public class ServerDataManager <R extends VCorePlugin<?,?>> extends VCoreDataMan
                 else{
                     DataSession<ServerData> finalDataSession = dataSession;
                     plugin.async(() -> {
-                        T data = finalDataSession.loadFromPipeline(type, uuid);
+                        T data = finalDataSession.loadFromPipeline(type, uuid, createIfNotExist);
                         if(callback != null)
                             callback.accept(data);
                     });
@@ -88,7 +88,7 @@ public class ServerDataManager <R extends VCorePlugin<?,?>> extends VCoreDataMan
                 return null;
             return dataSession.getLocalDataHandler().getDataLocal(type,uuid);
         }
-        return dataSession.loadFromPipeline(type,uuid);
+        return dataSession.loadFromPipeline(type, uuid, createIfNotExist);
     }
 
     @Override

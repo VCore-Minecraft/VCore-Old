@@ -28,6 +28,11 @@ public enum NMSVersion {
         this.bukkitVersionTag = bukkitVersionTag;
     }
 
+    @Override
+    public String toString() {
+        return nmsVersionTag;
+    }
+
     public String getBukkitVersionTag() {
         return bukkitVersionTag;
     }

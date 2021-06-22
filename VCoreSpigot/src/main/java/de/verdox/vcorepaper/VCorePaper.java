@@ -7,6 +7,7 @@ import de.verdox.vcore.player.VCorePlayerManager;
 import de.verdox.vcore.plugin.VCorePlugin;
 import de.verdox.vcore.subsystem.VCoreSubsystem;
 import de.verdox.vcorepaper.commands.AdminCommands;
+import de.verdox.vcorepaper.commands.NMSCommand;
 import de.verdox.vcorepaper.custom.blocks.CustomBlockManager;
 import de.verdox.vcorepaper.custom.blocks.VBlockListener;
 import de.verdox.vcorepaper.custom.entities.CustomEntityListener;
@@ -36,7 +37,6 @@ public class VCorePaper extends VCorePlugin.Minecraft {
     private CustomBlockManager customBlockManager;
     private ProtocolManager protocolManager;
 
-
     private VCorePaperSettings vCorePaperSettings;
 
     public static VCorePaper getInstance() {
@@ -65,6 +65,7 @@ public class VCorePaper extends VCorePlugin.Minecraft {
         getServerDataManager();
 
         new AdminCommands(this,"debug");
+        new NMSCommand(this,"nms");
 
         if(Bukkit.getPluginManager().getPlugin("ProtocolLib") != null)
             protocolManager = ProtocolLibrary.getProtocolManager();

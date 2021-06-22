@@ -66,7 +66,7 @@ public abstract class PlayerSessionManager<R extends VCorePlugin<?,?>> extends V
     }
 
     @Override
-    public <T extends PlayerData> T load(@Nonnull Class<? extends T> type, @Nonnull UUID uuid, @Nonnull LoadingStrategy loadingStrategy, @Nullable Consumer<T> callback) {
+    public <T extends PlayerData> T load(@Nonnull Class<? extends T> type, @Nonnull UUID uuid, @Nonnull LoadingStrategy loadingStrategy, boolean createIfNotExist, @Nullable Consumer<T> callback) {
         PlayerSession playerSession = getSession(uuid);
         if (playerSession == null) {
             if(loadingStrategy.equals(LoadingStrategy.LOAD_LOCAL))
@@ -81,7 +81,7 @@ public abstract class PlayerSessionManager<R extends VCorePlugin<?,?>> extends V
                 else{
                     PlayerSession finalPlayerSession = playerSession;
                     plugin.async(() -> {
-                        T data = finalPlayerSession.loadFromPipeline(type, uuid);
+                        T data = finalPlayerSession.loadFromPipeline(type, uuid, createIfNotExist);
                         if(callback != null)
                             callback.accept(data);
                     });
@@ -91,7 +91,7 @@ public abstract class PlayerSessionManager<R extends VCorePlugin<?,?>> extends V
                 return null;
             return playerSession.getLocalDataHandler().getDataLocal(type, uuid);
         }
-        return playerSession.loadFromPipeline(type,uuid);
+        return playerSession.loadFromPipeline(type, uuid, createIfNotExist);
     }
 
     protected PlayerSession deleteSession(@Nonnull UUID uuid){

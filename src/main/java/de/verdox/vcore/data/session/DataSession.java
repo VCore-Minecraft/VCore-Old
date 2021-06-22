@@ -41,7 +41,7 @@ public abstract class DataSession <S extends VCoreData> {
         onCleanUp();
     }
 
-    public synchronized <T extends S> T loadFromPipeline(@Nonnull Class<? extends T> dataClass, @Nonnull UUID objectUUID){
+    public final synchronized <T extends S> T loadFromPipeline(@Nonnull Class<? extends T> dataClass, @Nonnull UUID objectUUID, boolean createIfNotExist){
         if(getLocalDataHandler().dataExistLocally(dataClass,objectUUID)) {
             dataManager.getPlugin().consoleMessage("&eFound Data in Local Cache &8[&b"+dataClass.getSimpleName()+"&8]", 1,true);
         }
@@ -60,6 +60,8 @@ public abstract class DataSession <S extends VCoreData> {
             }
         }
         else {
+            if(!createIfNotExist)
+                return null;
             dataManager.getPlugin().consoleMessage("&eNo Data was found. Creating new data! &8[&b"+dataClass.getSimpleName()+"&8]", 1,true);
             S vCoreData = dataManager.instantiateVCoreData(dataClass,objectUUID);
             getLocalDataHandler().addDataLocally(vCoreData,dataClass,true);
@@ -69,6 +71,10 @@ public abstract class DataSession <S extends VCoreData> {
         if(!getLocalDataHandler().dataExistLocally(dataClass, objectUUID))
             throw new NullPointerException("Error in dataPipeline while loading "+dataClass+" with uuid "+uuid);
         return getLocalDataHandler().getDataLocal(dataClass,objectUUID);
+    }
+
+    public final synchronized <T extends S> T loadFromPipeline(@Nonnull Class<? extends T> dataClass, @Nonnull UUID objectUUID){
+        return loadFromPipeline(dataClass, objectUUID, false);
     }
 
     public synchronized void saveToPipeline(@Nonnull Class<? extends S> dataClass, @Nonnull UUID objectUUID){

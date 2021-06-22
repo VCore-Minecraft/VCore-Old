@@ -11,3 +11,6 @@ commands:
   debug:
     description: "Main Debug Command for VCorePaper"
     permission: "VCore.debug"
+  nms:
+    description: "Main Debug for NMS Testing"
+    permission: "VCore.nms"

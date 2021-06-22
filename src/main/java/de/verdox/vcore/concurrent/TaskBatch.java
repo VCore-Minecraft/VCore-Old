@@ -28,12 +28,12 @@ public abstract class TaskBatch<V extends VCorePlugin<?,?>> {
         this.plugin = plugin;
     }
 
-    public TaskBatch<V> doSync(CatchingRunnable runnable){
+    public TaskBatch<V> doSync(Runnable runnable){
         addTask(TaskType.SYNC,runnable);
         return this;
     }
 
-    public TaskBatch<V> doAsync(CatchingRunnable runnable){
+    public TaskBatch<V> doAsync(Runnable runnable){
         addTask(TaskType.ASYNC,runnable);
         return this;
     }
@@ -46,7 +46,6 @@ public abstract class TaskBatch<V extends VCorePlugin<?,?>> {
         for (int i = 0; i < tasks.size(); i++) {
             while(locked.get()){}
             TaskInfo task = tasks.get(i);
-            System.out.println("Starting: "+i);
             locked.set(true);
             if(task.taskType.equals(TaskType.SYNC))
                 runSync(task.runnable);
@@ -56,27 +55,26 @@ public abstract class TaskBatch<V extends VCorePlugin<?,?>> {
         onFinishBatch();
     }
 
-    protected abstract void runSync(CatchingRunnable runnable);
-    protected abstract void runAsync(CatchingRunnable runnable);
+    protected abstract void runSync(Runnable runnable);
+    protected abstract void runAsync(Runnable runnable);
     protected abstract void onFinishBatch();
 
     protected V getPlugin() {
         return plugin;
     }
 
-    private void addTask(TaskType taskType, CatchingRunnable runnable){
-        tasks.add(new TaskInfo(taskType, new CatchingRunnable(() -> {
+    private void addTask(TaskType taskType, Runnable runnable){
+        tasks.add(new TaskInfo(taskType, () -> {
             runnable.run();
-            System.out.println("unlocking now");
             locked.set(false);
-        })));
+        }));
     }
 
     static class TaskInfo{
         private final TaskType taskType;
-        private final CatchingRunnable runnable;
+        private final Runnable runnable;
 
-        public TaskInfo(TaskType taskType, CatchingRunnable runnable){
+        public TaskInfo(TaskType taskType, Runnable runnable){
             this.taskType = taskType;
             this.runnable = runnable;
         }

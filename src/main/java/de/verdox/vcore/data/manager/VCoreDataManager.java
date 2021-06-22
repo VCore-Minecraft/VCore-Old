@@ -66,7 +66,13 @@ public abstract class VCoreDataManager <S extends VCoreData, R extends VCorePlug
      * @param <T>
      * @return
      */
-    public abstract <T extends S> T load(@Nonnull Class<? extends T> type, @Nonnull UUID uuid, @Nonnull LoadingStrategy loadingStrategy, @Nullable Consumer<T> callback);
+    public abstract <T extends S> T load(@Nonnull Class<? extends T> type, @Nonnull UUID uuid, @Nonnull LoadingStrategy loadingStrategy, boolean createIfNotExist, @Nullable Consumer<T> callback);
+    public final  <T extends S> T load(@Nonnull Class<? extends T> type, @Nonnull UUID uuid, @Nonnull LoadingStrategy loadingStrategy, boolean createIfNotExist){
+        return load(type, uuid, loadingStrategy, createIfNotExist, null);
+    }
+    public final  <T extends S> T load(@Nonnull Class<? extends T> type, @Nonnull UUID uuid, @Nonnull LoadingStrategy loadingStrategy, @Nullable Consumer<T> callback){
+        return load(type, uuid, loadingStrategy, false, callback);
+    }
     public final <T extends S> T load(@Nonnull Class<? extends T> type, @Nonnull UUID uuid, @Nonnull LoadingStrategy loadingStrategy){
         return load(type, uuid, loadingStrategy, null);
     }
