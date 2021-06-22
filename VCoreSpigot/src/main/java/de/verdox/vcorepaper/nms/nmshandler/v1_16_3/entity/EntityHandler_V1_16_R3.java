@@ -4,10 +4,11 @@
 
 package de.verdox.vcorepaper.nms.nmshandler.v1_16_3.entity;
 
-import net.minecraft.server.v1_16_R3.EntityTypes;
-import net.minecraft.server.v1_16_R3.PacketPlayOutSpawnEntity;
-import net.minecraft.server.v1_16_R3.Vec3D;
+import net.minecraft.server.v1_16_R3.*;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.craftbukkit.v1_16_R3.CraftWorld;
 import org.bukkit.craftbukkit.v1_16_R3.entity.CraftPlayer;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
@@ -38,7 +39,7 @@ public class EntityHandler_V1_16_R3 implements NMSEntityHandler {
         float pitch = location.getPitch();
         // When data is greater 0 Vec3D is used as velocity vector
         int data = 0;
-        Vec3D vec3D = new Vec3D(0,0,0);
+        Vec3D vec3D = new Vec3D(0,1,0);
 
         EntityTypes<?> types = EntityTypes.a(entityType.name().toLowerCase(Locale.ROOT)).orElse(null);
         if(types == null)
@@ -66,5 +67,47 @@ public class EntityHandler_V1_16_R3 implements NMSEntityHandler {
     @Override
     public void sendFakeEntityTeleport(EntityType entityType, Location location, List<Player> visibleTo) {
 
+    }
+
+    @Override
+    public void sendArmorStandWithName(String name, Location location, List<Player> visibleTo) {
+
+        CraftWorld craftWorld = (CraftWorld) location.getWorld();
+        WorldServer worldServer = craftWorld.getHandle();
+        EntityArmorStand entityArmorStand = new EntityArmorStand(EntityTypes.ARMOR_STAND, worldServer);
+        entityArmorStand.setInvisible(true);
+        entityArmorStand.setSmall(true);
+        entityArmorStand.setCustomNameVisible(true);
+        entityArmorStand.setCustomName(new ChatComponentText(name));
+        entityArmorStand.setLocation(location.getX(),location.getY(),location.getZ(),0,0);
+        entityArmorStand.setSlot(EnumItemSlot.HEAD, ItemStack.fromBukkitCopy(new org.bukkit.inventory.ItemStack(Material.DIRT)));
+        PacketPlayOutSpawnEntity packetPlayOutSpawnEntity = new PacketPlayOutSpawnEntity(entityArmorStand);
+        PacketPlayOutEntityMetadata packetPlayOutEntityMetadata = new PacketPlayOutEntityMetadata(entityArmorStand.getId(),entityArmorStand.getDataWatcher(),true);
+
+        visibleTo.forEach(player -> {
+            CraftPlayer craftPlayer = (CraftPlayer) player;
+            craftPlayer.getHandle().playerConnection.sendPacket(packetPlayOutSpawnEntity);
+            craftPlayer.getHandle().playerConnection.sendPacket(packetPlayOutEntityMetadata);
+        });
+
+
+    }
+
+    @Override
+    public void sendFakeItem(org.bukkit.inventory.ItemStack itemStack, Location location, List<Player> visibleTo) {
+        CraftWorld craftWorld = (CraftWorld) location.getWorld();
+        WorldServer worldServer = craftWorld.getHandle();
+        EntityItem entityItem = new EntityItem(worldServer,location.getX(),location.getY(),location.getZ(),ItemStack.fromBukkitCopy(itemStack));
+        entityItem.setOwner(UUID.randomUUID());
+        entityItem.setNoGravity(true);
+
+        PacketPlayOutSpawnEntity packetPlayOutSpawnEntity = new PacketPlayOutSpawnEntity(entityItem);
+        PacketPlayOutEntityMetadata packetPlayOutEntityMetadata = new PacketPlayOutEntityMetadata(entityItem.getId(),entityItem.getDataWatcher(),true);
+
+        visibleTo.forEach(player -> {
+            CraftPlayer craftPlayer = (CraftPlayer) player;
+            craftPlayer.getHandle().playerConnection.sendPacket(packetPlayOutSpawnEntity);
+            craftPlayer.getHandle().playerConnection.sendPacket(packetPlayOutEntityMetadata);
+        });
     }
 }

@@ -5,11 +5,14 @@
 package de.verdox.vcore.concurrent;
 
 import de.verdox.vcore.plugin.VCorePlugin;
+import reactor.util.annotation.Nullable;
 
+import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -23,23 +26,38 @@ public abstract class TaskBatch<V extends VCorePlugin<?,?>> {
     private final V plugin;
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
     private final AtomicBoolean locked = new AtomicBoolean(false);
+    private Runnable callback;
 
     public TaskBatch(V plugin){
         this.plugin = plugin;
     }
 
-    public TaskBatch<V> doSync(Runnable runnable){
-        addTask(TaskType.SYNC,runnable);
+    public TaskBatch<V> doSync(@Nonnull Runnable runnable){
+        addTask(TaskType.SYNC,runnable,0);
         return this;
     }
 
-    public TaskBatch<V> doAsync(Runnable runnable){
-        addTask(TaskType.ASYNC,runnable);
+    public TaskBatch<V> doAsync(@Nonnull Runnable runnable){
+        addTask(TaskType.ASYNC,runnable,0);
         return this;
+    }
+
+    public TaskBatch<V> wait(long delay, @Nonnull TimeUnit timeUnit){
+        addTask(TaskType.WAIT,null,timeUnit.toMillis(delay));
+        return this;
+    }
+
+    public void executeBatch(@Nullable Runnable callback){
+        this.callback = callback;
+        executor.submit(new CatchingRunnable(this::runBatch));
     }
 
     public void executeBatch(){
-        executor.submit(new CatchingRunnable(this::runBatch));
+        executeBatch(null);
+    }
+
+    public List<Runnable> interrupt(){
+        return executor.shutdownNow();
     }
 
     private void runBatch(){
@@ -49,32 +67,41 @@ public abstract class TaskBatch<V extends VCorePlugin<?,?>> {
             locked.set(true);
             if(task.taskType.equals(TaskType.SYNC))
                 runSync(task.runnable);
-            else
+            else if(task.taskType.equals(TaskType.ASYNC))
                 runAsync(task.runnable);
+            else{
+                try { Thread.sleep(task.delay); } catch (InterruptedException e) { e.printStackTrace(); }
+                locked.set(false);
+            }
         }
+        if(callback != null)
+            callback.run();
         onFinishBatch();
     }
 
-    protected abstract void runSync(Runnable runnable);
-    protected abstract void runAsync(Runnable runnable);
+    protected abstract void runSync(@Nonnull Runnable runnable);
+    protected abstract void runAsync(@Nonnull Runnable runnable);
     protected abstract void onFinishBatch();
 
     protected V getPlugin() {
         return plugin;
     }
 
-    private void addTask(TaskType taskType, Runnable runnable){
-        tasks.add(new TaskInfo(taskType, () -> {
-            runnable.run();
+    private void addTask(@Nonnull TaskType taskType, @Nullable Runnable runnable, long delay){
+        tasks.add(new TaskInfo(delay, taskType, () -> {
+            if(runnable != null)
+                runnable.run();
             locked.set(false);
         }));
     }
 
     static class TaskInfo{
+        private long delay;
         private final TaskType taskType;
         private final Runnable runnable;
 
-        public TaskInfo(TaskType taskType, Runnable runnable){
+        public TaskInfo(long delay, TaskType taskType, Runnable runnable){
+            this.delay = delay;
             this.taskType = taskType;
             this.runnable = runnable;
         }
@@ -82,6 +109,7 @@ public abstract class TaskBatch<V extends VCorePlugin<?,?>> {
 
     enum TaskType{
         SYNC,
-        ASYNC
+        ASYNC,
+        WAIT
     }
 }

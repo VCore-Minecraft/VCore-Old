@@ -115,8 +115,11 @@ public class PlayerHandlerData extends PlayerData {
     }
 
     @Override
-    public void onLoad() {}
+    public void onLoad() {
+    }
 
     @Override
-    public void onCleanUp() {}
+    public void onCleanUp() {
+        saveInventory();
+    }
 }

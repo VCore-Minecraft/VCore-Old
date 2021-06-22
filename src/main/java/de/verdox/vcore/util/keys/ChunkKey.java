@@ -6,6 +6,7 @@ import org.bukkit.World;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 
 public class ChunkKey extends VCoreKey{
 
@@ -48,6 +49,10 @@ public class ChunkKey extends VCoreKey{
 
     public final Chunk getChunkIn(World world){
         return world.getChunkAt(x,z);
+    }
+
+    public final CompletableFuture<Chunk> getChunkInAsync(World world){
+        return world.getChunkAtAsync(x,z);
     }
 
     protected Chunk getChunk() {

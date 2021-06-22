@@ -12,6 +12,7 @@ import org.apache.commons.lang.NotImplementedException;
 import org.bukkit.Location;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 
 import java.util.List;
 
@@ -47,4 +48,6 @@ public interface NMSEntityHandler extends NMSHandler {
     int sendFakeLivingEntity(EntityType entityType, Location location, List<Player> visibleTo);
     void sendFakeEntityMovement(EntityType entityType, Location location, List<Player> visibleTo);
     void sendFakeEntityTeleport(EntityType entityType, Location location, List<Player> visibleTo);
+    void sendArmorStandWithName(String name, Location location, List<Player> visibleTo);
+    void sendFakeItem(ItemStack itemStack, Location location, List<Player> visibleTo);
 }

@@ -95,6 +95,7 @@ public abstract class VCoreDataManager <S extends VCoreData, R extends VCorePlug
     protected abstract DataSession<S> deleteSession (@Nonnull UUID objectUUID);
     public abstract DataSession<S> getSession(@Nonnull UUID objectUUID);
     public abstract void saveAllData();
+    public abstract void shutDown();
 
     public abstract S instantiateVCoreData(@Nonnull Class<? extends S> dataClass, UUID objectUUID);
 

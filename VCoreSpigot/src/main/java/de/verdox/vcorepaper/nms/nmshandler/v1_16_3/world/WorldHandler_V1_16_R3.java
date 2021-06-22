@@ -4,14 +4,10 @@
 
 package de.verdox.vcorepaper.nms.nmshandler.v1_16_3.world;
 
-import com.comphenix.protocol.PacketType;
-import com.comphenix.protocol.events.ListenerPriority;
-import com.comphenix.protocol.events.PacketEvent;
 import de.verdox.vcore.concurrent.CatchingRunnable;
 import de.verdox.vcore.util.VCoreUtil;
 import de.verdox.vcorepaper.VCorePaper;
 import de.verdox.vcorepaper.nms.nmshandler.api.world.NMSWorldHandler;
-import de.verdox.vcorepaper.nms.packetabstraction.PacketListener;
 import de.verdox.vcorepaper.nms.packetabstraction.wrapper.ChunkPacketWrapper;
 import de.verdox.vcorepaper.nms.packetabstraction.wrapper.WorldBorderPacketWrapper;
 import de.verdox.vcorepaper.nms.reflection.java.FieldReflection;
@@ -23,12 +19,13 @@ import org.bukkit.craftbukkit.v1_16_R3.CraftChunk;
 import org.bukkit.craftbukkit.v1_16_R3.CraftServer;
 import org.bukkit.craftbukkit.v1_16_R3.entity.CraftPlayer;
 import org.bukkit.entity.Player;
-import reactor.util.annotation.NonNull;
+import org.checkerframework.checker.index.qual.NonNegative;
 
 import javax.annotation.Nonnull;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @version 1.0
@@ -37,65 +34,48 @@ import java.util.UUID;
  */
 public class WorldHandler_V1_16_R3 implements NMSWorldHandler {
 
-    private final PacketListener chunkPacketListener = new PacketListener(ListenerPriority.NORMAL, true, PacketType.Play.Server.MAP_CHUNK) {
-
-        @Override
-        public void onSend(PacketEvent event, PacketInstruction packetInstruction) {
-            // Send Fake Biome
-        }
-
-        @Override
-        public void onReceive(PacketEvent event, PacketInstruction packetInstruction) {
-
-        }
-    };
-
     @Override
-    public void resetView(Player player) {
-        CraftPlayer craftPlayer = (CraftPlayer) player;
-        CraftServer craftServer = (CraftServer) craftPlayer.getServer();
-        DedicatedServer dedicatedServer = craftServer.getServer();
-        dedicatedServer.getPlayerList().moveToWorld(craftPlayer.getHandle(), false);
+    public void resetView(Player player, Runnable callback) {
+        VCorePaper.getInstance().createTaskBatch().doAsync(() -> {
+            CraftPlayer craftPlayer = (CraftPlayer) player;
+            CraftServer craftServer = (CraftServer) craftPlayer.getServer();
+            DedicatedServer dedicatedServer = craftServer.getServer();
+            dedicatedServer.getPlayerList().moveToWorld(craftPlayer.getHandle(), false);
+        }).executeBatch(callback);
     }
 
     @Override
-    public void refreshChunks(Player player) {
-        VCoreUtil.getBukkitPlayerUtil().getChunksInServerViewDistance(player).forEach(chunkKey -> {
-            org.bukkit.World world = player.getWorld();
-            sendChunk(player,chunkKey.getChunkIn(world));
-        });
+    public void refreshChunks(Player player, Runnable callback) {
+        VCorePaper.getInstance().createTaskBatch().doAsync(() -> {
+            VCoreUtil.getBukkitPlayerUtil().getChunksInServerViewDistance(player).forEach(chunkKey -> {
+                org.bukkit.World world = player.getWorld();
+                refreshChunk(player,chunkKey.getChunkIn(world));
+            });
+        }).executeBatch(callback);
     }
 
     @Override
-    public void sendChunk(@NonNull Player player, @NonNull Chunk chunk) {
-        PacketPlayOutMapChunk packetPlayOutMapChunk = new PacketPlayOutMapChunk(((CraftChunk) chunk).getHandle(), 65535,true);
-        ((CraftPlayer) player).getHandle().playerConnection.sendPacket(packetPlayOutMapChunk);
-        VCorePaper.getInstance().consoleMessage("Sent Fake Chunk ["+chunk.getX()+"|"+chunk.getZ()+"]", true);
+    public void refreshChunk(@Nonnull Player player, @Nonnull Chunk chunk, Runnable callback) {
+        VCorePaper.getInstance().createTaskBatch().doAsync(() -> {
+            PacketPlayOutMapChunk packetPlayOutMapChunk = new PacketPlayOutMapChunk(((CraftChunk) chunk).getHandle(), 65535,true);
+            ((CraftPlayer) player).getHandle().playerConnection.sendPacket(packetPlayOutMapChunk);
+            VCorePaper.getInstance().consoleMessage("Sent Fake Chunk ["+chunk.getX()+"|"+chunk.getZ()+"]", true);
+        }).executeBatch(callback);
     }
 
     @Override
-    public void sendFakeBiome(@NonNull Player player, @NonNull Chunk chunk, @NonNull Biome biome) {
-
-        PacketPlayOutMapChunk packetPlayOutMapChunk = new PacketPlayOutMapChunk(((CraftChunk) chunk).getHandle(), 65535,true);
-
-        ChunkPacketWrapper.V_1_16_R3 chunkPacketWrapper = new ChunkPacketWrapper.V_1_16_R3(chunk, 65535,true);
-        int[] biomeArray = chunkPacketWrapper.biomes.readField();
-        Arrays.fill(biomeArray, VCoreUtil.getVanillaUtil().getBiomeID_1_16(biome));
-        chunkPacketWrapper.biomes.setField(biomeArray);
-        chunkPacketWrapper.sendPlayer(player);
-
-
-        //ChunkPacketWrapper_V1_16_R3 chunkPacketWrapperV116R3 = new ChunkPacketWrapper_V1_16_R3(packetPlayOutMapChunk);
-        //chunkPacketWrapperV116R3.setBiome(biome);
-        //((CraftPlayer) player).getHandle().playerConnection.sendPacket(packetPlayOutMapChunk);
-        //VCorePaper.getInstance().consoleMessage("Sent Fake Biome ["+biome+" | "+VCoreUtil.getVanillaUtil().getBiomeID_1_16(biome)+"] " +
-        //        "["+ chunkPacketWrapperV116R3.getChunkX()+" | "+ chunkPacketWrapperV116R3.getChunkZ()+"]", true);
-        //TODO: Remove Player Instruction here
-
+    public void sendFakeBiome(@Nonnull Player player, @Nonnull Chunk chunk, @Nonnull Biome biome, Runnable callback) {
+        VCorePaper.getInstance().createTaskBatch().doAsync(() -> {
+            ChunkPacketWrapper.V_1_16_R3 chunkPacketWrapper = new ChunkPacketWrapper.V_1_16_R3(chunk, 65535,true);
+            int[] biomeArray = chunkPacketWrapper.biomes.readField();
+            Arrays.fill(biomeArray, VCoreUtil.getVanillaUtil().getBiomeID_1_16(biome));
+            chunkPacketWrapper.biomes.setField(biomeArray);
+            chunkPacketWrapper.sendPlayer(player);
+        }).executeBatch(callback);
     }
 
     @Override
-    public void sendFakeDimension(@NonNull Player player, @NonNull org.bukkit.World.Environment environment) {
+    public void sendFakeDimension(@Nonnull Player player, @Nonnull org.bukkit.World.Environment environment, Runnable callback) {
         Location location = player.getLocation().clone();
         boolean flag = !location.getWorld().getEnvironment().equals(environment);
         CraftPlayer craftPlayer = (CraftPlayer) player;
@@ -153,26 +133,40 @@ public class WorldHandler_V1_16_R3 implements NMSWorldHandler {
             Map<UUID, Entity> map = entitiesByUUID.readField();
             if(!map.containsKey(entityPlayer.getUniqueID()))
                 worldServer.addPlayerRespawn(entityPlayer);
-        }).executeBatch();
+        }).executeBatch(callback);
     }
 
     @Override
-    public void sendFakeWorldBorder(@Nonnull Player player, @Nonnull Location center, double size) {
-        VCorePaper.getInstance().createTaskBatch().doAsync(() -> {
-            CraftPlayer craftPlayer = (CraftPlayer) player;
-            double coordinateScale = craftPlayer.getHandle().getWorldServer().getDimensionManager().getCoordinateScale();
-            WorldBorderPacketWrapper.V_1_16_R3 worldBorderPacketWrapper = new WorldBorderPacketWrapper.V_1_16_R3();
-            worldBorderPacketWrapper.x.setField(center.getX() * coordinateScale);
-            worldBorderPacketWrapper.z.setField(center.getZ() * coordinateScale);
-            worldBorderPacketWrapper.speed.setField(0L);
-            worldBorderPacketWrapper.warningBlocks.setField(0);
-            worldBorderPacketWrapper.warningTime.setField(0);
-            worldBorderPacketWrapper.size.setField(size);
-            worldBorderPacketWrapper.newSize.setField(size);
+    public void sendFakeWorldBorder(@Nonnull Player player, @Nonnull Location center, @NonNegative double size, Runnable callback) {
+        WorldBorderPacketWrapper.V_1_16_R3 worldBorderPacketWrapper = new WorldBorderPacketWrapper.V_1_16_R3();
+        VCorePaper.getInstance()
+                .createTaskBatch()
+                .doAsync(() -> {
+                    CraftPlayer craftPlayer = (CraftPlayer) player;
+                    double coordinateScale = craftPlayer.getHandle().getWorldServer().getDimensionManager().getCoordinateScale();
+                    worldBorderPacketWrapper.x.setField(center.getX() * coordinateScale);
+                    worldBorderPacketWrapper.z.setField(center.getZ() * coordinateScale);
+                    worldBorderPacketWrapper.speed.setField(0L);
+                    worldBorderPacketWrapper.warningBlocks.setField(0);
+                    worldBorderPacketWrapper.warningTime.setField(0);
+                    worldBorderPacketWrapper.size.setField(size);
+                    worldBorderPacketWrapper.newSize.setField(size);
+                    worldBorderPacketWrapper.worldBorderAction.setField(PacketPlayOutWorldBorder.EnumWorldBorderAction.SET_SIZE);
+                    worldBorderPacketWrapper.sendPlayer(player);
+                }).wait(50L, TimeUnit.MILLISECONDS).doAsync(() -> {
             worldBorderPacketWrapper.worldBorderAction.setField(PacketPlayOutWorldBorder.EnumWorldBorderAction.SET_CENTER);
             worldBorderPacketWrapper.sendPlayer(player);
-            worldBorderPacketWrapper.worldBorderAction.setField(PacketPlayOutWorldBorder.EnumWorldBorderAction.SET_SIZE);
-            worldBorderPacketWrapper.sendPlayer(player);
-        }).executeBatch();
+        }).executeBatch(callback);
+    }
+
+    @Override
+    public void refreshWorldBorder(@Nonnull Player player, Runnable callback) {
+        VCorePaper.getInstance()
+                .createTaskBatch()
+                .doAsync(() -> {
+                    CraftPlayer craftPlayer = (CraftPlayer) player;
+                    PacketPlayOutWorldBorder packetPlayOutWorldBorder = new PacketPlayOutWorldBorder(craftPlayer.getHandle().getWorld().getWorldBorder(), PacketPlayOutWorldBorder.EnumWorldBorderAction.INITIALIZE);
+                    craftPlayer.getHandle().playerConnection.sendPacket(packetPlayOutWorldBorder);
+                }).executeBatch(callback);
     }
 }

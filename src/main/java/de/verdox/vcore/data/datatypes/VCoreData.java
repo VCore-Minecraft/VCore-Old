@@ -73,6 +73,7 @@ public abstract class VCoreData implements VCoreRedisData, VCorePersistentDataba
             return;
         getPlugin().consoleMessage("&6Preparing DataCleanup "+getClass().getSimpleName(), true);
         onCleanUp();
+        pushUpdate();
         getDataTopic().removeListener(messageListener);
         cleaned = true;
         updateLastUse();
@@ -82,7 +83,7 @@ public abstract class VCoreData implements VCoreRedisData, VCorePersistentDataba
         return redisManager.getTopic(getClass(),getUUID());
     }
 
-    //TODO: PushUpdate auslagern in die DataSession und Objekt als Eingabeparameter
+    //TODO: PushUpdate EXPIRE Key irgendwie setzen
     public final void pushUpdate(){
         pushUpdate(false);
     }

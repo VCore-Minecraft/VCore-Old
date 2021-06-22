@@ -17,6 +17,7 @@ import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.event.PlayerDisconnectEvent;
 import net.md_5.bungee.api.event.PostLoginEvent;
 import net.md_5.bungee.api.event.PreLoginEvent;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -196,6 +197,14 @@ public abstract class PlayerSessionManager<R extends VCorePlugin<?,?>> extends V
             plugin.getPlugin().getServer().getPluginManager().registerEvents(this,plugin);
         }
 
+        @Override
+        public void shutDown() {
+            saveAllData();
+            Bukkit.getOnlinePlayers().forEach(player -> {
+                player.kickPlayer("Server is restarting");
+            });
+        }
+
         public PlayerSession getPlayerSession(Player player){
             return getSession(player.getUniqueId());
         }
@@ -244,6 +253,14 @@ public abstract class PlayerSessionManager<R extends VCorePlugin<?,?>> extends V
         public BungeePlayerSessionManager(VCorePlugin.BungeeCord plugin, boolean useRedisCluster, String[] addressArray, String redisPassword, DataConnection.MongoDB mongoDB) {
             super(plugin, useRedisCluster, addressArray, redisPassword, mongoDB);
             ProxyServer.getInstance().getPluginManager().registerListener(plugin,this);
+        }
+
+        @Override
+        public void shutDown() {
+            saveAllData();
+            ProxyServer.getInstance().getPlayers().forEach(proxiedPlayer -> {
+                proxiedPlayer.disconnect(new TextComponent(ChatColor.translateAlternateColorCodes('&',"&eProxy is restarting")));
+            });
         }
 
         public PlayerSession getPlayerSession(ProxiedPlayer player){

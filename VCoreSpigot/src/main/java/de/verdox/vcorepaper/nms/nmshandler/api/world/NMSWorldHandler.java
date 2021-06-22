@@ -12,6 +12,7 @@ import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.checkerframework.checker.index.qual.NonNegative;
 import reactor.util.annotation.NonNull;
+import reactor.util.annotation.Nullable;
 
 /**
  * @version 1.0
@@ -27,16 +28,26 @@ public interface NMSWorldHandler extends NMSHandler {
         throw new NotImplementedException("This Handler ["+NMSWorldHandler.class.getName()+"] is not implemented for NMS version: "+nmsVersion.getNmsVersionTag());
     }
 
-    void resetView(Player player);
+    void resetView(Player player, Runnable callback);
+    default void resetView(Player player){
+        resetView(player, null);
+    }
 
-    void refreshChunks(Player player);
+    void refreshChunks(Player player, Runnable callback);
+    default void refreshChunks(Player player){
+        refreshChunks(player, null);
+    }
+
 
     /**
      *
      * @param player Player to send Chunk to
      * @param chunk Chunk to send
      */
-    void sendChunk( @NonNull Player player,  @NonNull org.bukkit.Chunk chunk);
+    void refreshChunk(@NonNull Player player, @NonNull org.bukkit.Chunk chunk, @Nullable Runnable callback);
+    default void refreshChunk(@NonNull Player player, @NonNull org.bukkit.Chunk chunk){
+        refreshChunk(player, chunk, null);
+    }
 
     /**
      *
@@ -44,14 +55,35 @@ public interface NMSWorldHandler extends NMSHandler {
      * @param chunk Chunk to send
      * @param biome Fake Biome to send
      */
-    void sendFakeBiome(@NonNull Player player,  @NonNull org.bukkit.Chunk chunk,  @NonNull org.bukkit.block.Biome biome);
+    void sendFakeBiome(@NonNull Player player,  @NonNull org.bukkit.Chunk chunk,  @NonNull org.bukkit.block.Biome biome, @Nullable Runnable callback);
+    default void sendFakeBiome(@NonNull Player player,  @NonNull org.bukkit.Chunk chunk,  @NonNull org.bukkit.block.Biome biome){
+        sendFakeBiome(player, chunk, biome, null);
+    }
 
     /**
      *
      * @param player Player to send Chunk to
      * @param environment Fake DimensionType to send
      */
-    void sendFakeDimension(@NonNull Player player, @NonNull org.bukkit.World.Environment environment);
+    void sendFakeDimension(@NonNull Player player, @NonNull org.bukkit.World.Environment environment, @Nullable Runnable callback);
+    default void sendFakeDimension(@NonNull Player player, @NonNull org.bukkit.World.Environment environment){
+        sendFakeDimension(player, environment, null);
+    }
 
-    void sendFakeWorldBorder(@NonNull Player player, @NonNull Location center, @NonNegative double size);
+    default void refreshDimension(@NonNull Player player, @Nullable Runnable callback){
+        sendFakeDimension(player, player.getWorld().getEnvironment(),callback);
+    }
+    default void refreshDimension(@NonNull Player player){
+        refreshDimension(player, null);
+    }
+
+    void sendFakeWorldBorder(@NonNull Player player, @NonNull Location center, @NonNegative double size, @Nullable Runnable callback);
+    default void sendFakeWorldBorder(@NonNull Player player, @NonNull Location center, @NonNegative double size){
+        sendFakeWorldBorder(player, center, size, null);
+    }
+
+    void refreshWorldBorder(@NonNull Player player, @Nullable Runnable callback);
+    default void refreshWorldBorder(@NonNull Player player){
+        refreshWorldBorder(player, null);
+    }
 }

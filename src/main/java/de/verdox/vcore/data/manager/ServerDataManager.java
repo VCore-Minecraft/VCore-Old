@@ -60,6 +60,11 @@ public class ServerDataManager <R extends VCorePlugin<?,?>> extends VCoreDataMan
     }
 
     @Override
+    public void shutDown() {
+        saveAllData();
+    }
+
+    @Override
     public <T extends ServerData> T load(@Nonnull Class<? extends T> type, @Nonnull UUID uuid, @Nonnull LoadingStrategy loadingStrategy, boolean createIfNotExist, Consumer<T> callback) {
         VCoreSubsystem<?> subsystem = plugin.findDependSubsystem(type);
         if(subsystem == null)
@@ -91,6 +96,7 @@ public class ServerDataManager <R extends VCorePlugin<?,?>> extends VCoreDataMan
         return dataSession.loadFromPipeline(type, uuid, createIfNotExist);
     }
 
+    //TODO: Push and Save to database
     @Override
     protected void onCleanupInterval() {
         plugin.getSubsystemManager().getActiveServerDataClasses().forEach(aClass -> {

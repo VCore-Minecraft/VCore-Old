@@ -17,6 +17,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import javax.annotation.Nonnull;
 import java.io.File;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -108,11 +109,11 @@ public interface VCorePlugin <T, R extends VCoreSubsystem<?>> extends SystemLoad
         @Override
         public final void onDisable() {
             consoleMessage("&ePlugin stopping&7!",false);
-            getServerDataManager().saveAllData();
-            getSessionManager().saveAllData();
+            getSessionManager().shutDown();
+            getServerDataManager().shutDown();
             onPluginDisable();
             Bukkit.getWorlds().forEach(World::save);
-            subsystemManager.disable();
+            vCoreScheduler.waitUntilShutdown();
             consoleMessage("&aPlugin stopped&7!",false);
         }
 
@@ -121,13 +122,13 @@ public interface VCorePlugin <T, R extends VCoreSubsystem<?>> extends SystemLoad
 
             return new TaskBatch<>(this) {
                 @Override
-                public void runSync(Runnable runnable) {
+                public void runSync(@Nonnull Runnable runnable) {
                     Bukkit.getScheduler().runTask(getPlugin().getPlugin(), runnable);
                 }
 
                 @Override
-                public void runAsync(Runnable runnable) {
-                    Bukkit.getScheduler().runTaskAsynchronously(getPlugin().getPlugin(), runnable);
+                public void runAsync(@Nonnull Runnable runnable) {
+                    getScheduler().async(new CatchingRunnable(runnable));
                 }
 
                 @Override
@@ -144,7 +145,7 @@ public interface VCorePlugin <T, R extends VCoreSubsystem<?>> extends SystemLoad
 
         @Override
         public void async(Runnable runnable) {
-            org.bukkit.Bukkit.getScheduler().runTaskAsynchronously(this,runnable);
+            getScheduler().async(new CatchingRunnable(runnable));
         }
 
         @Override
@@ -197,10 +198,11 @@ public interface VCorePlugin <T, R extends VCoreSubsystem<?>> extends SystemLoad
 
         @Override
         public final void onDisable() {
-            getServerDataManager().saveAllData();
             getSessionManager().saveAllData();
+            getServerDataManager().saveAllData();
             onPluginDisable();
             subsystemManager.disable();
+            vCoreScheduler.waitUntilShutdown();
             consoleMessage("&aPlugin started&7!",false);
         }
 
@@ -216,7 +218,7 @@ public interface VCorePlugin <T, R extends VCoreSubsystem<?>> extends SystemLoad
 
         @Override
         public void async(Runnable runnable) {
-            ProxyServer.getInstance().getScheduler().runAsync(this,runnable);
+            getScheduler().async(new CatchingRunnable(runnable));
         }
 
         @Override

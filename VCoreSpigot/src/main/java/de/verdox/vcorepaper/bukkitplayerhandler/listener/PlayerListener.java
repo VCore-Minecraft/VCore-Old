@@ -31,7 +31,7 @@ public class PlayerListener extends VCoreListener.VCoreBukkitListener {
     @Subscribe
     public void onSessionLoaded(PlayerSessionLoadedEvent e){
         PlayerSession playerSession = e.getPlayerSession();
-        PlayerHandlerData playerHandlerData = playerSession.getDataManager().load(PlayerHandlerData.class, playerSession.getUuid(), LoadingStrategy.LOAD_PIPELINE);
+        PlayerHandlerData playerHandlerData = playerSession.getDataManager().load(PlayerHandlerData.class, playerSession.getUuid(), LoadingStrategy.LOAD_PIPELINE,true);
         if(playerHandlerData.restoreVanillaInventory){
             playerHandlerData.restoreInventory();
         }
@@ -42,7 +42,7 @@ public class PlayerListener extends VCoreListener.VCoreBukkitListener {
         VCorePlayer vCorePlayer = VCorePaper.getInstance().getVCorePlayerManager().getPlayer(playerPreSessionUnloadEvent.getPlayerUUID());
         Player player = vCorePlayer.toBukkitPlayer();
         VCorePaper.getInstance().async(() -> {
-            PlayerHandlerData playerHandlerData = VCorePaper.getInstance().getSessionManager().load(PlayerHandlerData.class, vCorePlayer.getPlayerUUID(), LoadingStrategy.LOAD_PIPELINE);
+            PlayerHandlerData playerHandlerData = VCorePaper.getInstance().getSessionManager().load(PlayerHandlerData.class, vCorePlayer.getPlayerUUID(), LoadingStrategy.LOAD_PIPELINE,true);
             playerHandlerData.saveInventory(() -> player);
         });
     }

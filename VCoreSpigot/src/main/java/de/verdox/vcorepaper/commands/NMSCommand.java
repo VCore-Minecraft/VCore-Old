@@ -8,12 +8,17 @@ import de.verdox.vcore.command.VCoreCommand;
 import de.verdox.vcore.command.callback.CommandCallback;
 import de.verdox.vcore.plugin.VCorePlugin;
 import de.verdox.vcorepaper.VCorePaper;
-import org.apache.commons.lang.math.NumberUtils;
 import org.bukkit.ChatColor;
+import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.block.Biome;
+import org.bukkit.block.Block;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.util.RayTraceResult;
+import org.bukkit.util.Vector;
 
 import java.util.Arrays;
 import java.util.List;
@@ -31,6 +36,8 @@ public class NMSCommand extends VCoreCommand.VCoreBukkitCommand{
         addCommandSuggestions(1,(commandSender, args) -> {
             if(args[0].equalsIgnoreCase("world"))
                 return List.of("sendChunks","resetView","sendFakeBiome","sendFakeDimension","sendFakeBorder");
+            if(args[0].equalsIgnoreCase("entity"))
+                return List.of("fakeNonLiving","sendFakeHologram","sendFakeItem");
             return List.of("");
         });
         addCommandSuggestions(2, (commandSender, args) -> {
@@ -38,6 +45,8 @@ public class NMSCommand extends VCoreCommand.VCoreBukkitCommand{
                 return Arrays.stream(Biome.values()).map(Enum::name).collect(Collectors.toList());
             else if(args[0].equalsIgnoreCase("world") && args[1].equalsIgnoreCase("sendFakeDimension"))
                 return List.of(World.Environment.NORMAL.name(), World.Environment.NETHER.name(), World.Environment.THE_END.name());
+            else if(args[0].equalsIgnoreCase("entity") && args[1].equalsIgnoreCase("fakeNonLiving"))
+                return List.of(EntityType.ARMOR_STAND.name());
             return null;
         });
     }
@@ -108,6 +117,58 @@ public class NMSCommand extends VCoreCommand.VCoreBukkitCommand{
                                     return false;
                                 }
                             }
+                        }
+                    }
+                }
+                else if(args[0].equalsIgnoreCase("entity")){
+                    if(args.length >= 2){
+                        if(args[1].equalsIgnoreCase("fakeNonLiving")){
+                            if(args.length == 3){
+                                RayTraceResult rayTraceResult = player.rayTraceBlocks(10);
+                                if(rayTraceResult == null){
+                                    player.sendMessage(ChatColor.translateAlternateColorCodes('&',"&cLook at a block&7!"));
+                                    return false;
+                                }
+                                Vector hitPosition = rayTraceResult.getHitPosition();
+                                try{
+                                    EntityType entityType = EntityType.valueOf(args[2]);
+                                    VCorePaper.getInstance().getNmsManager().getNMSEntityHandler().sendFakeNonLivingEntity(entityType, new Location(player.getWorld(),hitPosition.getX(),hitPosition.getY(),hitPosition.getZ()),List.of(player));
+                                    player.sendMessage(ChatColor.translateAlternateColorCodes('&',"&eSende Fake Entity&7: &b"+entityType+"&7!"));
+                                    return true;
+                                }
+                                catch (IllegalArgumentException e){
+                                    player.sendMessage(ChatColor.translateAlternateColorCodes('&',"&cUnknown EntityType &b"+args[2]+"&7!"));
+                                    return false;
+                                }
+                            }
+                        }
+                        else if(args[1].equalsIgnoreCase("sendFakeHologram")){
+                            RayTraceResult rayTraceResult = player.rayTraceBlocks(10);
+                            if(rayTraceResult == null){
+                                player.sendMessage(ChatColor.translateAlternateColorCodes('&',"&cLook at a block&7!"));
+                                return false;
+                            }
+                            Vector hitPosition = rayTraceResult.getHitPosition();
+                            player.sendMessage(ChatColor.translateAlternateColorCodes('&',"&eSending Fake Hologram&7!"));
+                            VCorePaper.getInstance().getNmsManager().getNMSEntityHandler().sendArmorStandWithName(ChatColor.translateAlternateColorCodes('&',"&aHallo"),new Location(player.getWorld(),hitPosition.getX(),hitPosition.getY(),hitPosition.getZ()),List.of(player));
+                            return true;
+                        }
+                        else if(args[1].equalsIgnoreCase("sendFakeItem")){
+                            RayTraceResult rayTraceResult = player.rayTraceBlocks(10);
+                            if(rayTraceResult == null){
+                                player.sendMessage(ChatColor.translateAlternateColorCodes('&',"&cLook at a block&7!"));
+                                return false;
+                            }
+
+                            Vector hitPosition = rayTraceResult.getHitPosition();
+                            ItemStack itemInHand = player.getInventory().getItemInMainHand();
+                            if(itemInHand.getType().isAir()){
+                                player.sendMessage(ChatColor.translateAlternateColorCodes('&',"&cHold an item in your main hand&7!"));
+                                return false;
+                            }
+                            VCorePaper.getInstance().getNmsManager().getNMSEntityHandler().sendFakeItem(itemInHand,new Location(player.getWorld(),hitPosition.getX(),hitPosition.getY()+1,hitPosition.getZ()), List.of(player));
+                            player.sendMessage(ChatColor.translateAlternateColorCodes('&',"&eSending Fake Item&7!"));
+                            return true;
                         }
                     }
                 }
