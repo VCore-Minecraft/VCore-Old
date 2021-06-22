@@ -12,7 +12,7 @@ import de.verdox.vcore.util.VCoreUtil;
 import de.verdox.vcorepaper.VCorePaper;
 import de.verdox.vcorepaper.nms.nmshandler.api.world.NMSWorldHandler;
 import de.verdox.vcorepaper.nms.packetabstraction.PacketListener;
-import de.verdox.vcorepaper.nms.packetabstraction.wrapper.ChunkPacketWrapper_V1_16_R3;
+import de.verdox.vcorepaper.nms.packetabstraction.wrapper.ChunkPacketWrapper;
 import de.verdox.vcorepaper.nms.packetabstraction.wrapper.WorldBorderPacketWrapper;
 import de.verdox.vcorepaper.nms.reflection.java.FieldReflection;
 import net.minecraft.server.v1_16_R3.*;
@@ -26,6 +26,7 @@ import org.bukkit.entity.Player;
 import reactor.util.annotation.NonNull;
 
 import javax.annotation.Nonnull;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.UUID;
 
@@ -77,11 +78,18 @@ public class WorldHandler_V1_16_R3 implements NMSWorldHandler {
 
         PacketPlayOutMapChunk packetPlayOutMapChunk = new PacketPlayOutMapChunk(((CraftChunk) chunk).getHandle(), 65535,true);
 
-        ChunkPacketWrapper_V1_16_R3 chunkPacketWrapperV116R3 = new ChunkPacketWrapper_V1_16_R3(packetPlayOutMapChunk);
-        chunkPacketWrapperV116R3.setBiome(biome);
-        ((CraftPlayer) player).getHandle().playerConnection.sendPacket(packetPlayOutMapChunk);
-        VCorePaper.getInstance().consoleMessage("Sent Fake Biome ["+biome+" | "+VCoreUtil.getVanillaUtil().getBiomeID_1_16(biome)+"] " +
-                "["+ chunkPacketWrapperV116R3.getChunkX()+" | "+ chunkPacketWrapperV116R3.getChunkZ()+"]", true);
+        ChunkPacketWrapper.V_1_16_R3 chunkPacketWrapper = new ChunkPacketWrapper.V_1_16_R3(chunk, 65535,true);
+        int[] biomeArray = chunkPacketWrapper.biomes.readField();
+        Arrays.fill(biomeArray, VCoreUtil.getVanillaUtil().getBiomeID_1_16(biome));
+        chunkPacketWrapper.biomes.setField(biomeArray);
+        chunkPacketWrapper.sendPlayer(player);
+
+
+        //ChunkPacketWrapper_V1_16_R3 chunkPacketWrapperV116R3 = new ChunkPacketWrapper_V1_16_R3(packetPlayOutMapChunk);
+        //chunkPacketWrapperV116R3.setBiome(biome);
+        //((CraftPlayer) player).getHandle().playerConnection.sendPacket(packetPlayOutMapChunk);
+        //VCorePaper.getInstance().consoleMessage("Sent Fake Biome ["+biome+" | "+VCoreUtil.getVanillaUtil().getBiomeID_1_16(biome)+"] " +
+        //        "["+ chunkPacketWrapperV116R3.getChunkX()+" | "+ chunkPacketWrapperV116R3.getChunkZ()+"]", true);
         //TODO: Remove Player Instruction here
 
     }

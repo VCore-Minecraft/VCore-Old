@@ -6,7 +6,9 @@ package de.verdox.vcorepaper.nms.nmshandler.api.server;
 
 import de.verdox.vcorepaper.nms.NMSHandler;
 import de.verdox.vcorepaper.nms.NMSVersion;
+import de.verdox.vcorepaper.nms.nmshandler.api.world.NMSWorldHandler;
 import de.verdox.vcorepaper.nms.nmshandler.v1_16_3.server.ServerHandler_V1_16_R3;
+import org.apache.commons.lang.NotImplementedException;
 
 /**
  * @version 1.0
@@ -19,7 +21,7 @@ public interface NMSServerHandler extends NMSHandler {
         if(nmsVersion.equals(NMSVersion.V1_16_5)){
             return new ServerHandler_V1_16_R3();
         }
-        return null;
+        throw new NotImplementedException("This Handler ["+ NMSVersion.class.getName()+"] is not implemented for NMS version: "+nmsVersion.getNmsVersionTag());
     }
 
     boolean readPropertySetting(SERVER_PROPERTY_BOOLEAN server_property_boolean);

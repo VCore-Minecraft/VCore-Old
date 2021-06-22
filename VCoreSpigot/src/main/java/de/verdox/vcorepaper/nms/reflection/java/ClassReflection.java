@@ -44,7 +44,7 @@ public class ClassReflection {
             return FieldReflection.getField(reflectedClass, fieldName, fieldType);
         }
 
-        public ConstructorReflection.ReferenceConstructor fiendConstructor(Class<?>... paramTypes){
+        public ConstructorReflection.ReferenceConstructor findConstructor(Class<?>... paramTypes){
             return ConstructorReflection.findConstructor(reflectedClass, paramTypes);
         }
 

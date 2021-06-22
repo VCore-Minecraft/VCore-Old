@@ -15,11 +15,15 @@ import org.bukkit.entity.Player;
  */
 public abstract class PacketWrapper {
     private final ClassReflection.ReferenceClass referenceClass;
-    private final Object packet;
+    private Object packet;
 
     public PacketWrapper(String packetName){
         referenceClass = MinecraftClassFinder.findMinecraftClass(MinecraftClassFinder.MinecraftPackage.NMS,null,packetName);
-        packet = referenceClass.fiendConstructor().instantiate();
+        packet = referenceClass.findConstructor().instantiate();
+    }
+
+    protected void setPacket(Object object){
+        packet = object;
     }
 
     public Object getPacket() {

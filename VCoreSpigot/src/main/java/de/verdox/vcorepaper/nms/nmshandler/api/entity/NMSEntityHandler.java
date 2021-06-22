@@ -6,7 +6,9 @@ package de.verdox.vcorepaper.nms.nmshandler.api.entity;
 
 import de.verdox.vcorepaper.nms.NMSHandler;
 import de.verdox.vcorepaper.nms.NMSVersion;
+import de.verdox.vcorepaper.nms.nmshandler.api.world.NMSWorldHandler;
 import de.verdox.vcorepaper.nms.nmshandler.v1_16_3.entity.EntityHandler_V1_16_R3;
+import org.apache.commons.lang.NotImplementedException;
 import org.bukkit.Location;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
@@ -24,7 +26,7 @@ public interface NMSEntityHandler extends NMSHandler {
         if(nmsVersion.equals(NMSVersion.V1_16_5)){
             return new EntityHandler_V1_16_R3();
         }
-        return null;
+        throw new NotImplementedException("This Handler ["+ NMSEntityHandler.class.getName()+"] is not implemented for NMS version: "+nmsVersion.getNmsVersionTag());
     }
 
     /**
