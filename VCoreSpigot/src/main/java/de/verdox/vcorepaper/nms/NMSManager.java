@@ -5,8 +5,8 @@
 package de.verdox.vcorepaper.nms;
 
 import de.verdox.vcorepaper.VCorePaper;
-import de.verdox.vcorepaper.nms.interfaces.server.NMSServerHandler;
-import de.verdox.vcorepaper.nms.interfaces.world.NMSWorldHandler;
+import de.verdox.vcorepaper.nms.nmshandler.api.server.NMSServerHandler;
+import de.verdox.vcorepaper.nms.nmshandler.api.world.NMSWorldHandler;
 import org.bukkit.Bukkit;
 
 /**

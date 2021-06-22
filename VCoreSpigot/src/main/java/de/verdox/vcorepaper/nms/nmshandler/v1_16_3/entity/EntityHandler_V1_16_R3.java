@@ -2,10 +2,8 @@
  * Copyright (c) 2021. Lukas Jonsson
  */
 
-package de.verdox.vcorepaper.nms.v1_16_3.entity;
+package de.verdox.vcorepaper.nms.nmshandler.v1_16_3.entity;
 
-import de.verdox.vcorepaper.nms.interfaces.entity.NMSEntityHandler;
-import net.minecraft.server.v1_16_R3.BlockPosition;
 import net.minecraft.server.v1_16_R3.EntityTypes;
 import net.minecraft.server.v1_16_R3.PacketPlayOutSpawnEntity;
 import net.minecraft.server.v1_16_R3.Vec3D;
@@ -18,6 +16,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Random;
 import java.util.UUID;
+
+import de.verdox.vcorepaper.nms.nmshandler.api.entity.NMSEntityHandler;
 
 /**
  * @version 1.0

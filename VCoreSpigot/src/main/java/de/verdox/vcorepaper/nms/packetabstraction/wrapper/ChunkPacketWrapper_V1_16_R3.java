@@ -2,15 +2,13 @@
  * Copyright (c) 2021. Lukas Jonsson
  */
 
-package de.verdox.vcorepaper.nms.v1_16_3.world.wrapper;
+package de.verdox.vcorepaper.nms.packetabstraction.wrapper;
 
 import de.verdox.vcore.util.VCoreUtil;
 import de.verdox.vcorepaper.nms.reflection.java.FieldReflection;
 import net.minecraft.server.v1_16_R3.PacketPlayOutMapChunk;
-import net.minecraft.server.v1_16_R3.PacketPlayOutWorldBorder;
 import org.bukkit.block.Biome;
 
-import java.lang.reflect.Field;
 import java.util.Arrays;
 
 /**

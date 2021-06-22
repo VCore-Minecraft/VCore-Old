@@ -96,10 +96,12 @@ public class NMSCommand extends VCoreCommand.VCoreBukkitCommand{
                                 try{
                                     double size = Double.parseDouble(args[2]);
                                     VCorePaper.getInstance().getNmsManager().getNmsWorldHandler().sendFakeWorldBorder(player, player.getLocation(), size);
+                                    player.sendMessage(ChatColor.translateAlternateColorCodes('&',"&eSending World Border with size&7: &b"+size+"&7!"));
                                     if(size < 0){
                                         player.sendMessage(ChatColor.translateAlternateColorCodes('&',"&cPlease provide a valid size&7!"));
                                         return false;
                                     }
+                                    return true;
                                 }
                                 catch (NumberFormatException e){
                                     player.sendMessage(ChatColor.translateAlternateColorCodes('&',"&cPlease provide a valid size&7!"));

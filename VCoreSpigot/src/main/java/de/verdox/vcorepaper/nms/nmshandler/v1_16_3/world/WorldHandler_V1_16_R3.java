@@ -2,7 +2,7 @@
  * Copyright (c) 2021. Lukas Jonsson
  */
 
-package de.verdox.vcorepaper.nms.v1_16_3.world;
+package de.verdox.vcorepaper.nms.nmshandler.v1_16_3.world;
 
 import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.events.ListenerPriority;
@@ -10,12 +10,11 @@ import com.comphenix.protocol.events.PacketEvent;
 import de.verdox.vcore.concurrent.CatchingRunnable;
 import de.verdox.vcore.util.VCoreUtil;
 import de.verdox.vcorepaper.VCorePaper;
+import de.verdox.vcorepaper.nms.nmshandler.api.world.NMSWorldHandler;
 import de.verdox.vcorepaper.nms.packetabstraction.PacketListener;
-import de.verdox.vcorepaper.nms.reflection.java.ClassReflection;
+import de.verdox.vcorepaper.nms.packetabstraction.wrapper.ChunkPacketWrapper_V1_16_R3;
+import de.verdox.vcorepaper.nms.packetabstraction.wrapper.WorldBorderPacketWrapper;
 import de.verdox.vcorepaper.nms.reflection.java.FieldReflection;
-import de.verdox.vcorepaper.nms.v1_16_3.world.wrapper.ChunkPacketWrapper_V1_16_R3;
-import de.verdox.vcorepaper.nms.interfaces.world.NMSWorldHandler;
-import de.verdox.vcorepaper.nms.v1_16_3.world.wrapper.WorldBorderPacketWrapper;
 import net.minecraft.server.v1_16_R3.*;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
@@ -27,7 +26,8 @@ import org.bukkit.entity.Player;
 import reactor.util.annotation.NonNull;
 
 import javax.annotation.Nonnull;
-import java.lang.reflect.Field;
+import java.util.Map;
+import java.util.UUID;
 
 /**
  * @version 1.0
@@ -121,6 +121,7 @@ public class WorldHandler_V1_16_R3 implements NMSWorldHandler {
 
         if(world == null)
             return;
+
         VCorePaper.getInstance().createTaskBatch().doSync(new CatchingRunnable(() -> {
             worldServer.removePlayer(entityPlayer);
         })).doAsync(() -> {
@@ -140,19 +141,29 @@ public class WorldHandler_V1_16_R3 implements NMSWorldHandler {
             dedicatedServer.getPlayerList().updateClient(entityPlayer);
             entityPlayer.updateAbilities();
         })).doSync(() -> {
-            worldServer.addPlayerRespawn(entityPlayer);
+            FieldReflection.ReferenceField<Map> entitiesByUUID  = FieldReflection.getField(WorldServer.class, "entitiesByUUID", Map.class).of(worldServer);
+            Map<UUID, Entity> map = entitiesByUUID.readField();
+            if(!map.containsKey(entityPlayer.getUniqueID()))
+                worldServer.addPlayerRespawn(entityPlayer);
         }).executeBatch();
     }
 
     @Override
     public void sendFakeWorldBorder(@Nonnull Player player, @Nonnull Location center, double size) {
         VCorePaper.getInstance().createTaskBatch().doAsync(() -> {
+            CraftPlayer craftPlayer = (CraftPlayer) player;
+            double coordinateScale = craftPlayer.getHandle().getWorldServer().getDimensionManager().getCoordinateScale();
             WorldBorderPacketWrapper.V_1_16_R3 worldBorderPacketWrapper = new WorldBorderPacketWrapper.V_1_16_R3();
-            worldBorderPacketWrapper.worldBorderAction.setField(PacketPlayOutWorldBorder.EnumWorldBorderAction.SET_SIZE);
-            worldBorderPacketWrapper.x.setField(center.getX());
-            worldBorderPacketWrapper.z.setField(center.getZ());
+            worldBorderPacketWrapper.x.setField(center.getX() * coordinateScale);
+            worldBorderPacketWrapper.z.setField(center.getZ() * coordinateScale);
+            worldBorderPacketWrapper.speed.setField(0L);
+            worldBorderPacketWrapper.warningBlocks.setField(0);
+            worldBorderPacketWrapper.warningTime.setField(0);
             worldBorderPacketWrapper.size.setField(size);
             worldBorderPacketWrapper.newSize.setField(size);
+            worldBorderPacketWrapper.worldBorderAction.setField(PacketPlayOutWorldBorder.EnumWorldBorderAction.SET_CENTER);
+            worldBorderPacketWrapper.sendPlayer(player);
+            worldBorderPacketWrapper.worldBorderAction.setField(PacketPlayOutWorldBorder.EnumWorldBorderAction.SET_SIZE);
             worldBorderPacketWrapper.sendPlayer(player);
         }).executeBatch();
     }

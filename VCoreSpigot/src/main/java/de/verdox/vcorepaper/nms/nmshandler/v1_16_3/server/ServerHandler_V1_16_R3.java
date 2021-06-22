@@ -2,9 +2,9 @@
  * Copyright (c) 2021. Lukas Jonsson
  */
 
-package de.verdox.vcorepaper.nms.v1_16_3.server;
+package de.verdox.vcorepaper.nms.nmshandler.v1_16_3.server;
 
-import de.verdox.vcorepaper.nms.interfaces.server.NMSServerHandler;
+import de.verdox.vcorepaper.nms.nmshandler.api.server.NMSServerHandler;
 import net.minecraft.server.v1_16_R3.DedicatedServer;
 import net.minecraft.server.v1_16_R3.MinecraftServer;
 

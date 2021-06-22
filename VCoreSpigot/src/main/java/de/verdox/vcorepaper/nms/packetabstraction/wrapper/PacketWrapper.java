@@ -2,7 +2,7 @@
  * Copyright (c) 2021. Lukas Jonsson
  */
 
-package de.verdox.vcorepaper.nms.v1_16_3.world.wrapper;
+package de.verdox.vcorepaper.nms.packetabstraction.wrapper;
 
 import de.verdox.vcorepaper.nms.reflection.java.ClassReflection;
 import de.verdox.vcorepaper.nms.reflection.nms.MinecraftClassFinder;

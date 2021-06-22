@@ -2,11 +2,11 @@
  * Copyright (c) 2021. Lukas Jonsson
  */
 
-package de.verdox.vcorepaper.nms.interfaces.world;
+package de.verdox.vcorepaper.nms.nmshandler.api.world;
 
 import de.verdox.vcorepaper.nms.NMSHandler;
 import de.verdox.vcorepaper.nms.NMSVersion;
-import de.verdox.vcorepaper.nms.v1_16_3.world.WorldHandler_V1_16_R3;
+import de.verdox.vcorepaper.nms.nmshandler.v1_16_3.world.WorldHandler_V1_16_R3;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.checkerframework.checker.index.qual.NonNegative;

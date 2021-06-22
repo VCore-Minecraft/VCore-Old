@@ -2,11 +2,11 @@
  * Copyright (c) 2021. Lukas Jonsson
  */
 
-package de.verdox.vcorepaper.nms.interfaces.server;
+package de.verdox.vcorepaper.nms.nmshandler.api.server;
 
 import de.verdox.vcorepaper.nms.NMSHandler;
 import de.verdox.vcorepaper.nms.NMSVersion;
-import de.verdox.vcorepaper.nms.v1_16_3.server.ServerHandler_V1_16_R3;
+import de.verdox.vcorepaper.nms.nmshandler.v1_16_3.server.ServerHandler_V1_16_R3;
 
 /**
  * @version 1.0

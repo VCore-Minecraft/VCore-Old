@@ -17,7 +17,6 @@ import java.io.IOException;
  * @date 20.06.2021 00:19
  */
 public class SerializableInventory extends VCoreSerializable {
-
     public SerializableInventory(String id, ItemStack[] storageContents, ItemStack[] armorContents){
         new StringBsonReference(this, "id").setValue(id);
         new StringBsonReference(this, "armorContents").setValue(Serializer.itemStackArrayToBase64(armorContents));
