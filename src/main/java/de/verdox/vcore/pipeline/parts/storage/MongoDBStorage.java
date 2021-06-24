@@ -2,7 +2,7 @@
  * Copyright (c) 2021. Lukas Jonsson
  */
 
-package de.verdox.vcore.pipeline.dataconnection.storage;
+package de.verdox.vcore.pipeline.parts.storage;
 
 import com.mongodb.MongoClient;
 import com.mongodb.MongoCredential;

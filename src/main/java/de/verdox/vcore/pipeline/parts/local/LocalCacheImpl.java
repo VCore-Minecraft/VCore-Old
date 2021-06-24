@@ -2,7 +2,7 @@
  * Copyright (c) 2021. Lukas Jonsson
  */
 
-package de.verdox.vcore.pipeline.dataconnection.local;
+package de.verdox.vcore.pipeline.parts.local;
 
 import de.verdox.vcore.data.datatypes.PlayerData;
 import de.verdox.vcore.data.datatypes.ServerData;

@@ -2,7 +2,7 @@
  * Copyright (c) 2021. Lukas Jonsson
  */
 
-package de.verdox.vcore.pipeline.dataconnection.storage;
+package de.verdox.vcore.pipeline.parts.storage;
 
 /**
  * @version 1.0

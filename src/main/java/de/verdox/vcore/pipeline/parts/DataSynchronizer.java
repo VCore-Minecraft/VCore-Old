@@ -2,7 +2,7 @@
  * Copyright (c) 2021. Lukas Jonsson
  */
 
-package de.verdox.vcore.pipeline.dataconnection;
+package de.verdox.vcore.pipeline.parts;
 
 import de.verdox.vcore.data.datatypes.VCoreData;
 

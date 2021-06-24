@@ -2,13 +2,13 @@
  * Copyright (c) 2021. Lukas Jonsson
  */
 
-package de.verdox.vcore.pipeline.dataconnection.cache;
+package de.verdox.vcore.pipeline.parts.cache;
 
 import de.verdox.vcore.data.annotations.DataContext;
 import de.verdox.vcore.data.annotations.PreloadStrategy;
 import de.verdox.vcore.data.annotations.VCoreDataContext;
 import de.verdox.vcore.data.datatypes.VCoreData;
-import de.verdox.vcore.pipeline.dataconnection.DataProvider;
+import de.verdox.vcore.pipeline.parts.DataProvider;
 
 import javax.annotation.Nonnull;
 import java.util.Map;
