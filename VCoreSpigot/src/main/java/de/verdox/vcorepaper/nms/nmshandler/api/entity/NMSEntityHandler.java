@@ -6,7 +6,6 @@ package de.verdox.vcorepaper.nms.nmshandler.api.entity;
 
 import de.verdox.vcorepaper.nms.NMSHandler;
 import de.verdox.vcorepaper.nms.NMSVersion;
-import de.verdox.vcorepaper.nms.nmshandler.api.world.NMSWorldHandler;
 import de.verdox.vcorepaper.nms.nmshandler.v1_16_3.entity.EntityHandler_V1_16_R3;
 import org.apache.commons.lang.NotImplementedException;
 import org.bukkit.Location;

@@ -1,7 +1,3 @@
-/*
- * Copyright (c) 2021. Lukas Jonsson
- */
-
 package de.verdox.vcorepaper.nms.nmshandler.v1_16_3.entity;
 
 import net.minecraft.server.v1_16_R3.*;

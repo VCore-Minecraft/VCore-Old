@@ -31,9 +31,9 @@ public class RedisHandlerImpl <S extends VCoreData> extends RedisHandler<S>{
             throw new RuntimeException(getClass().getSimpleName()+" does not have RequiredSubsystemInfo Annotation set");
         if(uuid == null)
             return new HashSet<>();
-        if(VCoreData.getRedisDataKeys(vCoreDataClass) == null)
+        if(VCoreData.getPersistentDataFieldNames(vCoreDataClass) == null)
             throw new NullPointerException(VCoreData.class.getSimpleName()+" does not provide RedisDataKeys");
-        return VCoreData.getRedisDataKeys(vCoreDataClass);
+        return VCoreData.getPersistentDataFieldNames(vCoreDataClass);
     }
 
     @Override

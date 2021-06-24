@@ -41,6 +41,7 @@ public abstract class PlayerSessionManager<R extends VCorePlugin<?,?>> extends V
         loaded = true;
     }
 
+    @Override
     protected PlayerSession createSession(@Nonnull UUID uuid){
         //getPlugin().consoleMessage("&eCreating Local Player Session&7: &b"+uuid);
         if(exist(uuid))

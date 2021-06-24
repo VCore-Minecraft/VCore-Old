@@ -9,12 +9,12 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class HologramContent {
 
-    private final VHologram vHologram;
+    private final HologramInterface hologramInterface;
     private final Map<Integer, HologramLine> hologramLines = new ConcurrentHashMap<>();
     private final Set<Player> visibleTo = new HashSet<>();
 
-    HologramContent(VHologram vHologram){
-        this.vHologram = vHologram;
+    HologramContent(HologramInterface hologramInterface){
+        this.hologramInterface = hologramInterface;
     }
 
     public void setItemLine(int row, ItemStack stack){

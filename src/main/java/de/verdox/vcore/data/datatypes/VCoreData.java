@@ -12,9 +12,7 @@ import de.verdox.vcore.redisson.RedisManager;
 import de.verdox.vcore.redisson.VCorePersistentDatabaseData;
 import de.verdox.vcore.redisson.VCoreRedisData;
 import de.verdox.vcore.subsystem.VCoreSubsystem;
-import de.verdox.vcore.util.TypeUtil;
 import de.verdox.vcore.util.VCoreUtil;
-import org.bson.types.Binary;
 import org.redisson.api.RTopic;
 import org.redisson.api.listener.MessageListener;
 
@@ -26,7 +24,7 @@ public abstract class VCoreData implements VCoreRedisData, VCorePersistentDataba
 
     //TODO: Methode um alle ServerData UUIDs für eine Klasse aus Datenbank oder Cache zu laden
 
-    public static Set<String> getRedisDataKeys(Class<? extends VCoreData> vCoreDataClass){
+    public static Set<String> getPersistentDataFieldNames(Class<? extends VCoreData> vCoreDataClass){
         return Arrays.stream(vCoreDataClass.getDeclaredFields())
                 .filter(field -> field.getAnnotation(VCorePersistentData.class) != null)
                 .map(Field::getName)
@@ -110,7 +108,7 @@ public abstract class VCoreData implements VCoreRedisData, VCorePersistentDataba
         Map<String, Object> dataForRedis = new HashMap<>();
         updateLastUse();
 
-        getRedisDataKeys(getClass()).forEach(dataKey -> {
+        getPersistentDataFieldNames(getClass()).forEach(dataKey -> {
             try {
                 Field field = getClass().getDeclaredField(dataKey);
                 field.setAccessible(true);

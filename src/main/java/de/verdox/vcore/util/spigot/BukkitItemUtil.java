@@ -58,8 +58,10 @@ public class BukkitItemUtil {
 
         damageable.setDamage((damageable.getDamage()+damageDealt));
         stack.setItemMeta((ItemMeta) damageable);
-        if(damageable.getDamage() <= 0)
+        if(damageable.getDamage() <= 0) {
             stack.setType(Material.AIR);
+            stack.subtract();
+        }
         return damageDealt;
     }
 

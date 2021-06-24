@@ -7,10 +7,6 @@ package de.verdox.vcore.redisson;
 import de.verdox.vcore.redisson.events.RedisMessageEvent;
 import de.verdox.vcore.redisson.messages.RedisSimpleMessage;
 
-import java.util.Arrays;
-import java.util.UUID;
-import java.util.function.Consumer;
-
 /**
  * @version 1.0
  * @Author: Lukas Jonsson (Verdox)

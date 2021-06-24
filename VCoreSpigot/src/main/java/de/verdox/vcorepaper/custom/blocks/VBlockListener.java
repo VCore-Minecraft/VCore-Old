@@ -98,6 +98,7 @@ public class VBlockListener extends VCoreListener.VCoreBukkitListener {
         Block sourceBlock = e.getSourceBlock();
         VBlock vBlock = VCorePaper.getInstance().getCustomBlockManager().getVBlock(block.getLocation());
         VBlock sourceVBlock = VCorePaper.getInstance().getCustomBlockManager().getVBlock(sourceBlock.getLocation());
+
         if(vBlock != null) {
             vBlock.updateBlockData(block.getBlockData());
             e.setCancelled(!vBlock.isBlockPermissionAllowed(VBlockEventPermission.BLOCK_GRAVITY_EVENT));
