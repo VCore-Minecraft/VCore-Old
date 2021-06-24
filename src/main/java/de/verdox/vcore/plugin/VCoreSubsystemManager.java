@@ -2,7 +2,7 @@ package de.verdox.vcore.plugin;
 
 import de.verdox.vcore.data.datatypes.VCoreData;
 import de.verdox.vcore.data.datatypes.PlayerData;
-import de.verdox.vcore.data.annotations.RequiredSubsystemInfo;
+import de.verdox.vcore.pipeline.annotations.RequiredSubsystemInfo;
 import de.verdox.vcore.data.datatypes.ServerData;
 import de.verdox.vcore.subsystem.VCoreSubsystem;
 

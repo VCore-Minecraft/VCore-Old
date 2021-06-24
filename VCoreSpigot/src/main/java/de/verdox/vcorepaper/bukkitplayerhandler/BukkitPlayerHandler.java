@@ -12,7 +12,6 @@ import de.verdox.vcore.subsystem.VCoreSubsystem;
 import de.verdox.vcorepaper.bukkitplayerhandler.listener.PlayerListener;
 import de.verdox.vcorepaper.bukkitplayerhandler.playerdata.PlayerHandlerData;
 
-import java.util.List;
 import java.util.Set;
 
 /**

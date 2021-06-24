@@ -4,11 +4,9 @@
 
 package de.verdox.vcore.pipeline.parts.local;
 
-import de.verdox.vcore.data.datatypes.PlayerData;
-import de.verdox.vcore.data.datatypes.ServerData;
-import de.verdox.vcore.data.datatypes.VCoreData;
 import de.verdox.vcore.data.manager.PlayerSessionManager;
 import de.verdox.vcore.data.manager.ServerDataManager;
+import de.verdox.vcore.pipeline.datatypes.VCoreData;
 import de.verdox.vcore.plugin.VCorePlugin;
 import de.verdox.vcore.subsystem.VCoreSubsystem;
 import org.apache.commons.lang.NotImplementedException;
@@ -36,30 +34,30 @@ public class LocalCacheImpl implements LocalCache{
 
     @Override
     public <S extends VCoreData> S getData(@Nonnull Class<? extends S> dataClass, @Nonnull UUID objectUUID) {
-        if(!exist(dataClass, objectUUID))
+        if(!dataExist(dataClass, objectUUID))
             throw new NullPointerException("No data in local cache with type "+dataClass+" and uuid "+objectUUID);
         return dataClass.cast(dataObjects.get(dataClass).get(objectUUID));
     }
 
     @Override
     public <S extends VCoreData> void save(@Nonnull Class<? extends S> dataClass, @Nonnull S data) {
-        if(exist(dataClass,data.getUUID()))
+        if(dataExist(dataClass,data.getObjectUUID()))
             return;
         if(!dataObjects.containsKey(dataClass))
             dataObjects.put(dataClass,new ConcurrentHashMap<>());
-        dataObjects.get(dataClass).put(data.getUUID(),data);
+        dataObjects.get(dataClass).put(data.getObjectUUID(),data);
     }
 
     @Override
-    public <S extends VCoreData> boolean exist(@Nonnull Class<? extends S> dataClass, @Nonnull UUID objectUUID) {
+    public <S extends VCoreData> boolean dataExist(@Nonnull Class<? extends S> dataClass, @Nonnull UUID objectUUID) {
         if(!dataObjects.containsKey(dataClass))
             return false;
         return dataObjects.get(dataClass).containsKey(objectUUID);
     }
 
     @Override
-    public <S extends VCoreData> boolean delete(@Nonnull Class<? extends S> dataClass, @Nonnull UUID objectUUID) {
-        if(!exist(dataClass,objectUUID))
+    public <S extends VCoreData> boolean remove(@Nonnull Class<? extends S> dataClass, @Nonnull UUID objectUUID) {
+        if(!dataExist(dataClass,objectUUID))
             return false;
         dataObjects.get(dataClass).remove(objectUUID);
         if(dataObjects.get(dataClass).size() == 0)
@@ -83,19 +81,12 @@ public class LocalCacheImpl implements LocalCache{
             throw new NullPointerException("RequiredSubsystem can't be null");
         if(!subsystem.isActivated())
             throw new NullPointerException("Provided Subsystem is not activated");
-        if(exist(dataClass,objectUUID))
+        if(dataExist(dataClass,objectUUID))
             return getData(dataClass,objectUUID);
 
         try {
-            if(dataClass.isAssignableFrom(ServerData.class)){
-                S dataObject =  dataClass.getDeclaredConstructor(ServerDataManager.class,UUID.class).newInstance(plugin.getServerDataManager(),objectUUID);
-                return dataClass.cast(dataObject);
-            }
-            else if(dataClass.isAssignableFrom(PlayerData.class)){
-                S dataObject =  dataClass.getDeclaredConstructor(PlayerSessionManager.class,UUID.class).newInstance(plugin.getSessionManager(),objectUUID);
-                return dataClass.cast(dataObject);
-            }
-            throw new NotImplementedException("VCoreData was not integrated into data pipeline: "+dataClass.getName());
+            S dataObject =  dataClass.getDeclaredConstructor(VCorePlugin.class,UUID.class).newInstance(plugin,objectUUID);
+            return dataClass.cast(dataObject);
         } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
             e.printStackTrace();
             return null;

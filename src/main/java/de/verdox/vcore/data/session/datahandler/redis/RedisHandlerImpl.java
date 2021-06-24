@@ -4,7 +4,7 @@
 
 package de.verdox.vcore.data.session.datahandler.redis;
 
-import de.verdox.vcore.data.annotations.RequiredSubsystemInfo;
+import de.verdox.vcore.pipeline.annotations.RequiredSubsystemInfo;
 import de.verdox.vcore.data.datatypes.VCoreData;
 import de.verdox.vcore.data.session.DataSession;
 import org.redisson.api.RMap;

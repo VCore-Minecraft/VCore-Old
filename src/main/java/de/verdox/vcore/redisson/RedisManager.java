@@ -1,8 +1,8 @@
 package de.verdox.vcore.redisson;
 
-import de.verdox.vcore.data.annotations.DataContext;
-import de.verdox.vcore.data.annotations.PreloadStrategy;
-import de.verdox.vcore.data.annotations.VCoreDataContext;
+import de.verdox.vcore.pipeline.annotations.DataContext;
+import de.verdox.vcore.pipeline.annotations.PreloadStrategy;
+import de.verdox.vcore.pipeline.annotations.VCoreDataContext;
 import de.verdox.vcore.data.datatypes.VCoreData;
 import de.verdox.vcore.dataconnection.DataConnection;
 import de.verdox.vcore.plugin.VCorePlugin;
@@ -83,7 +83,7 @@ public class RedisManager<R extends VCorePlugin<?,?>> {
             throw new NullPointerException("DataClass is null");
         if(objectUUID == null)
             throw new NullPointerException("objectUUID is null");
-        String key = plugin.getPluginName()+"DataTopic:"+VCorePlugin.getMongoDBIdentifier(dataClass)+":"+objectUUID.toString();
+        String key = plugin.getPluginName()+"DataTopic:"+VCorePlugin.getMongoDBIdentifier(dataClass)+":"+objectUUID;
         return getRedissonClient().getTopic(key);
     }
 

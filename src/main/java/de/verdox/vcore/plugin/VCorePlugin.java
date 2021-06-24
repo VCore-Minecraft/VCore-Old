@@ -4,14 +4,14 @@ import com.google.common.eventbus.EventBus;
 import de.verdox.vcore.concurrent.CatchingRunnable;
 import de.verdox.vcore.concurrent.TaskBatch;
 import de.verdox.vcore.data.manager.ServerDataManager;
-import de.verdox.vcore.data.annotations.RequiredSubsystemInfo;
+import de.verdox.vcore.pipeline.annotations.RequiredSubsystemInfo;
 import de.verdox.vcore.dataconnection.DataConnection;
 import de.verdox.vcore.dataconnection.mongodb.annotation.MongoDBIdentifier;
 import de.verdox.vcore.data.manager.PlayerSessionManager;
+import de.verdox.vcore.pipeline.parts.Pipeline;
 import de.verdox.vcore.plugin.bukkit.BukkitPlugin;
 import de.verdox.vcore.plugin.bungeecord.BungeeCordPlugin;
 import de.verdox.vcore.subsystem.VCoreSubsystem;
-import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.plugin.Plugin;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
@@ -20,8 +20,6 @@ import org.bukkit.plugin.java.JavaPlugin;
 import javax.annotation.Nonnull;
 import java.io.File;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 public interface VCorePlugin <T, R extends VCoreSubsystem<?>> extends SystemLoadable {
 
@@ -51,6 +49,7 @@ public interface VCorePlugin <T, R extends VCoreSubsystem<?>> extends SystemLoad
     EventBus getEventBus();
     PlayerSessionManager<?> getSessionManager();
     ServerDataManager<?> getServerDataManager();
+    Pipeline getDataPipeline();
 
     @Override
     default boolean isLoaded(){

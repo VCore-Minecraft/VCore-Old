@@ -1,0 +1,15 @@
+/*
+ * Copyright (c) 2021. Lukas Jonsson
+ */
+
+package de.verdox.vcore.pipeline.annotations;
+
+import de.verdox.vcore.subsystem.VCoreSubsystem;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+
+@Retention(RetentionPolicy.RUNTIME)
+public @interface RequiredSubsystemInfo {
+    Class<? extends VCoreSubsystem<?>> parentSubSystem();
+}

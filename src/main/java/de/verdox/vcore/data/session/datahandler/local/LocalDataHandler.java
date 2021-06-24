@@ -4,7 +4,7 @@
 
 package de.verdox.vcore.data.session.datahandler.local;
 
-import de.verdox.vcore.data.annotations.DataContext;
+import de.verdox.vcore.pipeline.annotations.DataContext;
 import de.verdox.vcore.data.datatypes.VCoreData;
 import de.verdox.vcore.data.session.DataSession;
 import org.redisson.api.RMap;

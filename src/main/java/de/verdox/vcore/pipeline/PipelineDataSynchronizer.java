@@ -4,7 +4,7 @@
 
 package de.verdox.vcore.pipeline;
 
-import de.verdox.vcore.data.datatypes.VCoreData;
+import de.verdox.vcore.pipeline.datatypes.VCoreData;
 import de.verdox.vcore.pipeline.parts.DataSynchronizer;
 
 import javax.annotation.Nonnull;
@@ -24,15 +24,16 @@ public class PipelineDataSynchronizer implements DataSynchronizer {
     }
 
     @Override
-    public void synchronize(@Nonnull DataSourceType source, @Nonnull DataSourceType destination, @Nonnull Class<? extends VCoreData> dataClass, @Nonnull UUID objectUUID) {
+    public synchronized void synchronize(@Nonnull DataSourceType source, @Nonnull DataSourceType destination, @Nonnull Class<? extends VCoreData> dataClass, @Nonnull UUID objectUUID) {
         if(source.equals(destination))
             return;
 
         if(source.equals(DataSourceType.LOCAL)){
-            if(!pipelineManager.localCache.exist(dataClass, objectUUID))
+
+            if(!pipelineManager.localCache.dataExist(dataClass, objectUUID))
                 return;
             VCoreData data = pipelineManager.localCache.getData(dataClass, objectUUID);
-            Map<String, Object> dataToSave = data.dataForRedis();
+            Map<String, Object> dataToSave = data.serialize();
             // Local to Global Cache
             if(destination.equals(DataSourceType.GLOBAL_CACHE))
                 pipelineManager.globalCache.save(dataClass,objectUUID,dataToSave);
@@ -46,9 +47,9 @@ public class PipelineDataSynchronizer implements DataSynchronizer {
             Map<String, Object> globalCachedData = pipelineManager.globalCache.loadData(dataClass, objectUUID);
 
             if(destination.equals(DataSourceType.LOCAL)) {
-                if (!pipelineManager.localCache.exist(dataClass, objectUUID))
+                if (!pipelineManager.localCache.dataExist(dataClass, objectUUID))
                     pipelineManager.localCache.save(dataClass, pipelineManager.localCache.instantiateData(dataClass, objectUUID));
-                pipelineManager.localCache.getData(dataClass, objectUUID).restoreFromRedis(globalCachedData);
+                pipelineManager.localCache.getData(dataClass, objectUUID).deserialize(globalCachedData);
             }
             else if(destination.equals(DataSourceType.GLOBAL_STORAGE))
                 pipelineManager.globalStorage.save(dataClass, objectUUID, globalCachedData);
@@ -59,9 +60,9 @@ public class PipelineDataSynchronizer implements DataSynchronizer {
             Map<String, Object> globalSavedData = pipelineManager.globalStorage.loadData(dataClass, objectUUID);
 
             if(destination.equals(DataSourceType.LOCAL)) {
-                if (!pipelineManager.localCache.exist(dataClass, objectUUID))
+                if (!pipelineManager.localCache.dataExist(dataClass, objectUUID))
                     pipelineManager.localCache.save(dataClass, pipelineManager.localCache.instantiateData(dataClass, objectUUID));
-                pipelineManager.localCache.getData(dataClass, objectUUID).restoreFromDataBase(globalSavedData);
+                pipelineManager.localCache.getData(dataClass, objectUUID).deserialize(globalSavedData);
             }
             else if(destination.equals(DataSourceType.GLOBAL_CACHE))
                 pipelineManager.globalCache.save(dataClass,objectUUID,globalSavedData);

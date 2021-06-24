@@ -4,7 +4,7 @@
 
 package de.verdox.vcorepaper.bukkitplayerhandler.playerdata;
 
-import de.verdox.vcore.data.annotations.*;
+import de.verdox.vcore.pipeline.annotations.*;
 import de.verdox.vcore.data.datatypes.PlayerData;
 import de.verdox.vcore.data.manager.PlayerSessionManager;
 import de.verdox.vcore.dataconnection.mongodb.annotation.MongoDBIdentifier;
@@ -12,9 +12,8 @@ import de.verdox.vcore.player.VCorePlayer;
 import de.verdox.vcore.util.VCoreUtil;
 import de.verdox.vcorepaper.VCorePaper;
 import de.verdox.vcorepaper.bukkitplayerhandler.BukkitPlayerHandler;
-import de.verdox.vcorepaper.bukkitplayerhandler.model.SerializableInventory;
+import de.verdox.vcorepaper.bukkitplayerhandler.model.SerializableJsonInventory;
 import net.md_5.bungee.api.ChatMessageType;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
@@ -35,7 +34,7 @@ import java.util.function.Supplier;
 public class PlayerHandlerData extends PlayerData {
 
     @VCorePersistentData
-    private Map<String, SerializableInventory> inventoryCache = new ConcurrentHashMap<>();
+    private Map<String, SerializableJsonInventory> inventoryCache = new ConcurrentHashMap<>();
 
     @VCorePersistentData
     public boolean restoreVanillaInventory = true;
@@ -69,7 +68,7 @@ public class PlayerHandlerData extends PlayerData {
             return;
         ItemStack[] storageContents = player.getInventory().getStorageContents().clone();
         ItemStack[] armorContents = player.getInventory().getArmorContents().clone();
-        SerializableInventory serializableInventory = new SerializableInventory(inventoryID,storageContents,armorContents);
+        SerializableJsonInventory serializableInventory = new SerializableJsonInventory(inventoryID,storageContents,armorContents);
         inventoryCache.put(inventoryID,serializableInventory);
         VCorePaper.getInstance().consoleMessage("&eInventory &6"+inventoryID+" &eof player &b"+getUUID()+" &esaved&7!", true);
     }
@@ -82,7 +81,7 @@ public class PlayerHandlerData extends PlayerData {
     }
 
     public void createInventory(String inventoryID){
-        inventoryCache.put(inventoryID,new SerializableInventory(inventoryID,new ItemStack[0],new ItemStack[0]));
+        inventoryCache.put(inventoryID,new SerializableJsonInventory(inventoryID,new ItemStack[0],new ItemStack[0]));
     }
 
     public boolean hasInventory(String inventoryID){
@@ -98,7 +97,7 @@ public class PlayerHandlerData extends PlayerData {
         if(!inventoryCache.containsKey(inventoryID))
             return;
         this.activeInventoryID = inventoryID;
-        SerializableInventory serializableInventory = inventoryCache.get(inventoryID);
+        SerializableJsonInventory serializableInventory = inventoryCache.get(inventoryID);
         try{
             ItemStack[] armorContents = serializableInventory.deSerializeArmorContents();
             ItemStack[] storageContents = serializableInventory.deSerializeStorageContents();

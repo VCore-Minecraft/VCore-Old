@@ -4,10 +4,11 @@
 
 package de.verdox.vcore.pipeline.parts.cache;
 
-import de.verdox.vcore.data.annotations.DataContext;
-import de.verdox.vcore.data.annotations.PreloadStrategy;
-import de.verdox.vcore.data.annotations.VCoreDataContext;
-import de.verdox.vcore.data.datatypes.VCoreData;
+import de.verdox.vcore.pipeline.annotations.DataContext;
+import de.verdox.vcore.pipeline.annotations.PreloadStrategy;
+import de.verdox.vcore.pipeline.annotations.VCoreDataContext;
+import de.verdox.vcore.pipeline.datatypes.VCoreData;
+import de.verdox.vcore.pipeline.interfaces.DataManipulator;
 import de.verdox.vcore.pipeline.parts.DataProvider;
 
 import javax.annotation.Nonnull;
@@ -27,6 +28,20 @@ public interface GlobalCache extends DataProvider {
     Set<String> getKeys(Class<? extends VCoreData> dataClass);
 
     boolean dataExist(@Nonnull Class<? extends VCoreData> dataClass, @Nonnull UUID objectUUID);
+
+    default DataManipulator constructDataManipulator(VCoreData vCoreData){
+        return new DataManipulator() {
+            @Override
+            public void cleanUp() {
+
+            }
+
+            @Override
+            public void pushUpdate(VCoreData vCoreData, boolean async) {
+
+            }
+        };
+    }
 
     static DataContext getContext(Class<? extends VCoreData> dataClass){
         VCoreDataContext vCoreDataContext = dataClass.getAnnotation(VCoreDataContext.class);

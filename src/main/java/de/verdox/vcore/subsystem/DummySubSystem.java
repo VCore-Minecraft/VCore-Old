@@ -2,7 +2,6 @@ package de.verdox.vcore.subsystem;
 
 import de.verdox.vcore.data.datatypes.PlayerData;
 import de.verdox.vcore.data.datatypes.ServerData;
-import de.verdox.vcore.data.datatypes.VCoreData;
 import de.verdox.vcore.dataconnection.mongodb.annotation.MongoDBIdentifier;
 import de.verdox.vcore.plugin.VCorePlugin;
 

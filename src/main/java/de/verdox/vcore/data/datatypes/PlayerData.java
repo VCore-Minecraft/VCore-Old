@@ -6,7 +6,6 @@ package de.verdox.vcore.data.datatypes;
 
 import de.verdox.vcore.data.manager.PlayerSessionManager;
 import de.verdox.vcore.data.session.PlayerSession;
-import de.verdox.vcore.player.VCorePlayer;
 import de.verdox.vcore.plugin.VCorePlugin;
 
 import java.util.*;

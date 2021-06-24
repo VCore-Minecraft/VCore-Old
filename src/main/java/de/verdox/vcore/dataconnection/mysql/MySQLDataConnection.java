@@ -5,17 +5,11 @@
 package de.verdox.vcore.dataconnection.mysql;
 
 import com.j256.ormlite.dao.Dao;
-import com.j256.ormlite.dao.DaoManager;
-import com.j256.ormlite.db.DatabaseType;
-import com.j256.ormlite.field.DataType;
 import com.j256.ormlite.field.DatabaseFieldConfig;
-import com.j256.ormlite.table.DatabaseTableConfig;
 import de.verdox.vcore.data.datatypes.VCoreData;
 import de.verdox.vcore.dataconnection.DataConnection;
-import de.verdox.vcore.dataconnection.DataProvider;
 import de.verdox.vcore.plugin.VCorePlugin;
 
-import java.sql.SQLException;
 import java.util.List;
 import java.util.UUID;
 

@@ -4,8 +4,9 @@
 
 package de.verdox.vcore.data.datatypes;
 
-import de.verdox.vcore.data.annotations.DataContext;
-import de.verdox.vcore.data.annotations.VCorePersistentData;
+import de.verdox.vcore.pipeline.interfaces.VCoreSerializable;
+import de.verdox.vcore.pipeline.annotations.DataContext;
+import de.verdox.vcore.pipeline.annotations.VCorePersistentData;
 import de.verdox.vcore.data.session.DataSession;
 import de.verdox.vcore.plugin.VCorePlugin;
 import de.verdox.vcore.redisson.RedisManager;
@@ -20,7 +21,7 @@ import java.lang.reflect.Field;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public abstract class VCoreData implements VCoreRedisData, VCorePersistentDatabaseData {
+public abstract class VCoreData implements VCoreRedisData, VCorePersistentDatabaseData, VCoreSerializable {
 
     //TODO: Methode um alle ServerData UUIDs für eine Klasse aus Datenbank oder Cache zu laden
 

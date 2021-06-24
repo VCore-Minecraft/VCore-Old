@@ -4,7 +4,7 @@
 
 package de.verdox.vcore.pipeline.parts;
 
-import de.verdox.vcore.data.datatypes.VCoreData;
+import de.verdox.vcore.pipeline.datatypes.VCoreData;
 
 import javax.annotation.Nonnull;
 import java.util.Map;

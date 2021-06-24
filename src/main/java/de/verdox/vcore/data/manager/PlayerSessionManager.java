@@ -1,13 +1,12 @@
 package de.verdox.vcore.data.manager;
 
-import com.fasterxml.jackson.databind.util.JSONPObject;
 import de.verdox.vcore.data.datatypes.PlayerData;
 import de.verdox.vcore.data.events.PlayerPreSessionLoadEvent;
 import de.verdox.vcore.data.events.PlayerPreSessionUnloadEvent;
 import de.verdox.vcore.data.events.PlayerSessionLoadedEvent;
 import de.verdox.vcore.data.session.PlayerSession;
 import de.verdox.vcore.dataconnection.DataConnection;
-import de.verdox.vcore.data.annotations.RequiredSubsystemInfo;
+import de.verdox.vcore.pipeline.annotations.RequiredSubsystemInfo;
 import de.verdox.vcore.plugin.VCorePlugin;
 import de.verdox.vcore.redisson.messages.RedisSimpleMessage;
 import de.verdox.vcore.subsystem.VCoreSubsystem;

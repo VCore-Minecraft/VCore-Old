@@ -4,8 +4,6 @@ import de.verdox.vcore.data.datatypes.VCoreData;
 import de.verdox.vcore.dataconnection.mongodb.MongoDBDataConnection;
 import de.verdox.vcore.plugin.VCorePlugin;
 
-import java.util.Objects;
-
 /**
  * Type of DataStorage (e.g. MongoCollection)
  * @param <T>

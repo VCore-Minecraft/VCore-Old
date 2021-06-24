@@ -4,13 +4,15 @@
 
 package de.verdox.vcore.pipeline;
 
-import de.verdox.vcore.data.annotations.DataContext;
-import de.verdox.vcore.data.datatypes.VCoreData;
+import de.verdox.vcore.pipeline.annotations.DataContext;
 import de.verdox.vcore.data.manager.LoadingStrategy;
+import de.verdox.vcore.pipeline.datatypes.VCoreData;
 import de.verdox.vcore.pipeline.parts.DataSynchronizer;
+import de.verdox.vcore.pipeline.parts.Pipeline;
 import de.verdox.vcore.pipeline.parts.cache.GlobalCache;
 import de.verdox.vcore.pipeline.parts.local.LocalCache;
 import de.verdox.vcore.pipeline.parts.storage.GlobalStorage;
+import de.verdox.vcore.plugin.SystemLoadable;
 import de.verdox.vcore.plugin.VCorePlugin;
 import de.verdox.vcore.subsystem.VCoreSubsystem;
 
@@ -24,13 +26,14 @@ import java.util.function.Consumer;
  * @Author: Lukas Jonsson (Verdox)
  * @date 24.06.2021 15:22
  */
-public class PipelineManager {
+public class PipelineManager implements Pipeline, SystemLoadable {
 
     private final VCorePlugin<?, ?> plugin;
-    private final PipelineDataSynchronizer pipelineDataSynchronizer;
+    private final DataSynchronizer pipelineDataSynchronizer;
     final GlobalStorage globalStorage;
     final GlobalCache globalCache;
     final LocalCache localCache;
+    private boolean loaded;
 
     public PipelineManager(VCorePlugin<?,?> plugin, GlobalStorage globalStorage, GlobalCache globalCache, LocalCache localCache){
         this.plugin = plugin;
@@ -38,14 +41,18 @@ public class PipelineManager {
         this.globalCache = globalCache;
         this.localCache = localCache;
         this.pipelineDataSynchronizer = new PipelineDataSynchronizer(this);
+        this.loaded = true;
     }
 
-    public final  <T extends VCoreData> T load(@Nonnull Class<? extends T> type, @Nonnull UUID uuid, @Nonnull LoadingStrategy loadingStrategy, boolean createIfNotExist){
+    @Override
+    public final <T extends VCoreData> T load(@Nonnull Class<? extends T> type, @Nonnull UUID uuid, @Nonnull LoadingStrategy loadingStrategy, boolean createIfNotExist){
         return load(type, uuid, loadingStrategy, createIfNotExist, null);
     }
-    public final  <T extends VCoreData> T load(@Nonnull Class<? extends T> type, @Nonnull UUID uuid, @Nonnull LoadingStrategy loadingStrategy, @Nullable Consumer<T> callback){
+    @Override
+    public final <T extends VCoreData> T load(@Nonnull Class<? extends T> type, @Nonnull UUID uuid, @Nonnull LoadingStrategy loadingStrategy, @Nullable Consumer<T> callback){
         return load(type, uuid, loadingStrategy, false, callback);
     }
+    @Override
     public final <T extends VCoreData> T load(@Nonnull Class<? extends T> type, @Nonnull UUID uuid, @Nonnull LoadingStrategy loadingStrategy){
         return load(type, uuid, loadingStrategy, null);
     }
@@ -58,14 +65,15 @@ public class PipelineManager {
      * @param <T> Type of VCoreData
      * @return VCoreDataType
      */
+    @Override
     public final <T extends VCoreData> T load(@Nonnull Class<? extends T> type, @Nonnull UUID uuid, @Nonnull LoadingStrategy loadingStrategy, boolean createIfNotExist, @Nullable Consumer<T> callback){
         VCoreSubsystem<?> subsystem = plugin.findDependSubsystem(type);
         if(subsystem == null)
-            throw new NullPointerException("Subsystem "+subsystem.getClass()+" could not be found in plugin"+plugin.getPluginName());
+            throw new NullPointerException("Subsystem of "+type+" could not be found in plugin"+plugin.getPluginName());
         if(!loadingStrategy.equals(LoadingStrategy.LOAD_PIPELINE)) {
-            if(!localCache.exist(type, uuid)){
+            if(!localCache.dataExist(type, uuid)){
                 if(loadingStrategy.equals(LoadingStrategy.LOAD_LOCAL))
-                    throw new NullPointerException(type+" with uuid "+uuid+" does not exist in local cache of subsystem "+subsystem);
+                    throw new NullPointerException(type+" with uuid "+uuid+" does not exist in local!");
                 else{
                     plugin.async(() -> {
                         T data = loadFromPipeline(type, uuid, createIfNotExist);
@@ -74,15 +82,30 @@ public class PipelineManager {
                     });
                 }
             }
-            if(!localCache.exist(type, uuid))
+            if(!localCache.dataExist(type, uuid))
                 return null;
             return localCache.getData(type,uuid);
         }
         return loadFromPipeline(type, uuid, createIfNotExist);
     }
 
+    @Override
+    public LocalCache getLocalCache() {
+        return localCache;
+    }
+
+    @Override
+    public GlobalCache getGlobalCache() {
+        return globalCache;
+    }
+
+    @Override
+    public GlobalStorage getGlobalStorage() {
+        return globalStorage;
+    }
+
     private <T extends VCoreData> T loadFromPipeline(@Nonnull Class<? extends T> dataClass, @Nonnull UUID uuid, boolean createIfNotExist){
-        if(localCache.exist(dataClass,uuid)) {
+        if(localCache.dataExist(dataClass,uuid)) {
             plugin.consoleMessage("&eFound Data in Local Cache &8[&b"+dataClass.getSimpleName()+"&8]", 1,true);
         }
         else if(globalCache.dataExist(dataClass,uuid)) {
@@ -110,10 +133,14 @@ public class PipelineManager {
             pipelineDataSynchronizer.synchronize(DataSynchronizer.DataSourceType.LOCAL, DataSynchronizer.DataSourceType.GLOBAL_CACHE, dataClass, uuid);
         }
         plugin.consoleMessage("&eLoaded &a"+dataClass.getSimpleName()+" &ewith uuid&7: "+uuid, 1,true);
-        if(!localCache.exist(dataClass, uuid))
+        if(!localCache.dataExist(dataClass, uuid))
             throw new NullPointerException("Error in dataPipeline while loading "+dataClass+" with uuid "+uuid);
         return localCache.getData(dataClass,uuid);
     }
 
 
+    @Override
+    public boolean isLoaded() {
+        return loaded;
+    }
 }
