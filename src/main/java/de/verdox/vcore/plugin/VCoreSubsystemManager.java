@@ -1,10 +1,10 @@
 package de.verdox.vcore.plugin;
 
-import de.verdox.vcore.data.datatypes.VCoreData;
-import de.verdox.vcore.data.datatypes.PlayerData;
-import de.verdox.vcore.pipeline.annotations.RequiredSubsystemInfo;
-import de.verdox.vcore.data.datatypes.ServerData;
-import de.verdox.vcore.subsystem.VCoreSubsystem;
+import de.verdox.vcore.synchronization.pipeline.annotations.RequiredSubsystemInfo;
+import de.verdox.vcore.synchronization.pipeline.datatypes.PlayerData;
+import de.verdox.vcore.synchronization.pipeline.datatypes.ServerData;
+import de.verdox.vcore.synchronization.pipeline.datatypes.VCoreData;
+import de.verdox.vcore.plugin.subsystem.VCoreSubsystem;
 
 import java.util.*;
 import java.util.stream.Collectors;

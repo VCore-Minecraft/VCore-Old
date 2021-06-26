@@ -1,8 +1,7 @@
 package de.verdox.vcorepaper.custom.blocks;
 
-import de.verdox.vcore.event.listener.VCoreListener;
+import de.verdox.vcore.plugin.listener.VCoreListener;
 import de.verdox.vcore.plugin.VCorePlugin;
-import de.verdox.vcore.util.VCoreUtil;
 import de.verdox.vcorepaper.VCorePaper;
 import de.verdox.vcorepaper.custom.blocks.enums.VBlockEventPermission;
 import de.verdox.vcorepaper.custom.blocks.files.VBlockSaveFile;

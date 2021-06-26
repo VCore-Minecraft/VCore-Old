@@ -1,6 +1,6 @@
 package de.verdox.vcorepaper.files;
 
-import de.verdox.vcore.files.config.VCoreConfig;
+import de.verdox.vcore.plugin.files.config.VCoreConfig;
 import de.verdox.vcorepaper.VCorePaper;
 
 import java.util.Arrays;

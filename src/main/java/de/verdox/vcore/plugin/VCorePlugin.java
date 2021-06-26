@@ -1,17 +1,17 @@
 package de.verdox.vcore.plugin;
 
 import com.google.common.eventbus.EventBus;
-import de.verdox.vcore.concurrent.CatchingRunnable;
-import de.verdox.vcore.concurrent.TaskBatch;
-import de.verdox.vcore.data.manager.ServerDataManager;
-import de.verdox.vcore.pipeline.annotations.RequiredSubsystemInfo;
-import de.verdox.vcore.dataconnection.DataConnection;
-import de.verdox.vcore.dataconnection.mongodb.annotation.MongoDBIdentifier;
-import de.verdox.vcore.data.manager.PlayerSessionManager;
-import de.verdox.vcore.pipeline.parts.Pipeline;
+import de.verdox.vcore.performance.concurrent.CatchingRunnable;
+import de.verdox.vcore.performance.concurrent.TaskBatch;
+import de.verdox.vcore.performance.concurrent.VCoreScheduler;
+import de.verdox.vcore.synchronization.pipeline.PipelineManager;
+import de.verdox.vcore.synchronization.pipeline.PlayerDataManager;
+import de.verdox.vcore.synchronization.pipeline.VCorePipelineConfig;
+import de.verdox.vcore.synchronization.pipeline.annotations.RequiredSubsystemInfo;
+import de.verdox.vcore.synchronization.pipeline.parts.Pipeline;
 import de.verdox.vcore.plugin.bukkit.BukkitPlugin;
 import de.verdox.vcore.plugin.bungeecord.BungeeCordPlugin;
-import de.verdox.vcore.subsystem.VCoreSubsystem;
+import de.verdox.vcore.plugin.subsystem.VCoreSubsystem;
 import net.md_5.bungee.api.plugin.Plugin;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
@@ -42,18 +42,18 @@ public interface VCorePlugin <T, R extends VCoreSubsystem<?>> extends SystemLoad
     void async(Runnable runnable);
     void sync(Runnable runnable);
 
-    DataConnection.MongoDB mongoDB();
-
     VCoreSubsystemManager<? extends VCorePlugin<T,R>,?> getSubsystemManager();
 
     EventBus getEventBus();
-    PlayerSessionManager<?> getSessionManager();
-    ServerDataManager<?> getServerDataManager();
+    //PlayerSessionManager<?> getSessionManager();
+    //ServerDataManager<?> getServerDataManager();
     Pipeline getDataPipeline();
+    VCorePipelineConfig getVCorePipelineConfig();
 
     @Override
     default boolean isLoaded(){
-        return getServerDataManager().isLoaded() && getSessionManager().isLoaded() && getSubsystemManager().isLoaded();
+        //return getServerDataManager().isLoaded() && getSessionManager().isLoaded() && getSubsystemManager().isLoaded();
+        return getSubsystemManager().isLoaded();
     }
 
     default void registerVCoreEventListener(Object o){
@@ -62,13 +62,6 @@ public interface VCorePlugin <T, R extends VCoreSubsystem<?>> extends SystemLoad
 
     default void unregisterVCoreEventListener(Object o){
         getEventBus().unregister(o);
-    }
-
-    static String getMongoDBIdentifier(Class<?> customClass){
-        MongoDBIdentifier mongoDBIdentifier = customClass.getAnnotation(MongoDBIdentifier.class);
-        if(mongoDBIdentifier == null)
-            throw new NullPointerException("MongoDBIdentifier not set for class: "+customClass);
-        return mongoDBIdentifier.identifier();
     }
 
     static Class<? extends VCoreSubsystem<?>> findDependSubsystemClass(Class<?> classType){
@@ -89,27 +82,34 @@ public interface VCorePlugin <T, R extends VCoreSubsystem<?>> extends SystemLoad
 
         private final VCoreScheduler vCoreScheduler = new VCoreScheduler(this);
         private final EventBus eventBus = new EventBus();
-        private PlayerSessionManager.BukkitPlayerSessionManager sessionManager;
-        private ServerDataManager<BukkitPlugin> serverDataManager;
         private final VCoreSubsystemManager<Minecraft,VCoreSubsystem.Bukkit> subsystemManager = new VCoreSubsystemManager<>(this);
+        private final VCorePipelineConfig vCorePipelineConfig = new VCorePipelineConfig(getPluginDataFolder(), new File("VCorePipelineSettings.json"));
+        private final Pipeline pipeline = vCorePipelineConfig.constructPipeline(this);
+        private PlayerDataManager playerDataManager;
 
         @Override
         public final void onEnable() {
             consoleMessage("&ePlugin starting&7!",false);
             onPluginEnable();
             subsystemManager.enable();
-
-            getSessionManager();
-            getServerDataManager();
-
+            playerDataManager = new PlayerDataManager.Bukkit((PipelineManager) pipeline);
             consoleMessage("&aPlugin started&7!",false);
+        }
+
+        @Override
+        public VCorePipelineConfig getVCorePipelineConfig() {
+            return vCorePipelineConfig;
+        }
+
+        @Override
+        public Pipeline getDataPipeline() {
+            return pipeline;
         }
 
         @Override
         public final void onDisable() {
             consoleMessage("&ePlugin stopping&7!",false);
-            getSessionManager().shutDown();
-            getServerDataManager().shutDown();
+            getDataPipeline().saveAllData();
             onPluginDisable();
             Bukkit.getWorlds().forEach(World::save);
             vCoreScheduler.waitUntilShutdown();
@@ -153,20 +153,6 @@ public interface VCorePlugin <T, R extends VCoreSubsystem<?>> extends SystemLoad
         }
 
         @Override
-        public PlayerSessionManager<Minecraft> getSessionManager() {
-            if(sessionManager == null)
-                sessionManager = new PlayerSessionManager.BukkitPlayerSessionManager(this,useRedisCluster(),redisAddresses(), redisPassword(), mongoDB());
-            return sessionManager;
-        }
-
-        @Override
-        public ServerDataManager<BukkitPlugin> getServerDataManager() {
-            if(serverDataManager == null)
-                serverDataManager = new ServerDataManager<>(this,useRedisCluster(),redisAddresses(), redisPassword(), mongoDB());
-            return serverDataManager;
-        }
-
-        @Override
         public EventBus getEventBus() {
             return eventBus;
         }
@@ -180,25 +166,34 @@ public interface VCorePlugin <T, R extends VCoreSubsystem<?>> extends SystemLoad
 
         private final VCoreScheduler vCoreScheduler = new VCoreScheduler(this);
         private final EventBus eventBus = new EventBus();
-        private PlayerSessionManager.BungeePlayerSessionManager sessionManager;
-        private ServerDataManager<BungeeCordPlugin> serverDataManager;
         private final VCoreSubsystemManager<BungeeCord,VCoreSubsystem.BungeeCord> subsystemManager = new VCoreSubsystemManager<>(this);
+        private final VCorePipelineConfig vCorePipelineConfig = new VCorePipelineConfig(getPluginDataFolder(), new File("VCorePipelineSettings.json"));
+        private final Pipeline pipeline = vCorePipelineConfig.constructPipeline(this);
+        private PlayerDataManager playerDataManager;
 
         @Override
         public final void onEnable() {
+            consoleMessage("&aPlugin starting&7!",false);
             onPluginEnable();
             subsystemManager.enable();
-
-            getSessionManager();
-            getServerDataManager();
-
+            playerDataManager = new PlayerDataManager.BungeeCord((PipelineManager) pipeline);
             consoleMessage("&aPlugin started&7!",false);
         }
 
         @Override
+        public Pipeline getDataPipeline() {
+            return pipeline;
+        }
+
+        @Override
+        public VCorePipelineConfig getVCorePipelineConfig() {
+            return vCorePipelineConfig;
+        }
+
+        @Override
         public final void onDisable() {
-            getSessionManager().saveAllData();
-            getServerDataManager().saveAllData();
+            consoleMessage("&ePlugin stopping&7!",false);
+            getDataPipeline().saveAllData();
             onPluginDisable();
             subsystemManager.disable();
             vCoreScheduler.waitUntilShutdown();
@@ -223,20 +218,6 @@ public interface VCorePlugin <T, R extends VCoreSubsystem<?>> extends SystemLoad
         @Override
         public void sync(Runnable runnable) {
             runnable.run();
-        }
-
-        @Override
-        public PlayerSessionManager<BungeeCord> getSessionManager() {
-            if(sessionManager == null)
-                sessionManager = new PlayerSessionManager.BungeePlayerSessionManager(this,useRedisCluster(),redisAddresses(), redisPassword(),mongoDB());
-            return sessionManager;
-        }
-
-        @Override
-        public ServerDataManager<BungeeCordPlugin> getServerDataManager() {
-            if(serverDataManager == null)
-                serverDataManager = new ServerDataManager<>(this,useRedisCluster(),redisAddresses(), redisPassword(), mongoDB());
-            return serverDataManager;
         }
 
         @Override

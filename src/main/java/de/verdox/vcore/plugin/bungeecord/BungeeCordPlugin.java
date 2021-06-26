@@ -1,9 +1,7 @@
 package de.verdox.vcore.plugin.bungeecord;
 
 import de.verdox.vcore.plugin.VCorePlugin;
-import de.verdox.vcore.subsystem.VCoreSubsystem;
-import net.md_5.bungee.api.ChatColor;
-import net.md_5.bungee.api.chat.TextComponent;
+import de.verdox.vcore.plugin.subsystem.VCoreSubsystem;
 import net.md_5.bungee.api.plugin.Plugin;
 
 import java.io.File;

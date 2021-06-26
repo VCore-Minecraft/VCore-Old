@@ -4,11 +4,10 @@
 
 package de.verdox.vcorepaper.bukkitplayerhandler.playerdata;
 
-import de.verdox.vcore.pipeline.annotations.*;
-import de.verdox.vcore.data.datatypes.PlayerData;
-import de.verdox.vcore.data.manager.PlayerSessionManager;
-import de.verdox.vcore.dataconnection.mongodb.annotation.MongoDBIdentifier;
-import de.verdox.vcore.player.VCorePlayer;
+import de.verdox.vcore.synchronization.pipeline.annotations.*;
+import de.verdox.vcore.synchronization.pipeline.datatypes.PlayerData;
+import de.verdox.vcore.plugin.player.VCorePlayer;
+import de.verdox.vcore.plugin.VCorePlugin;
 import de.verdox.vcore.util.VCoreUtil;
 import de.verdox.vcorepaper.VCorePaper;
 import de.verdox.vcorepaper.bukkitplayerhandler.BukkitPlayerHandler;
@@ -28,7 +27,7 @@ import java.util.function.Supplier;
  * @Author: Lukas Jonsson (Verdox)
  * @date 20.06.2021 00:27
  */
-@MongoDBIdentifier(identifier = "BukkitPlayerHandlerPlayerData")
+@DataStorageIdentifier(identifier = "BukkitPlayerHandlerPlayerData")
 @RequiredSubsystemInfo(parentSubSystem = BukkitPlayerHandler.class)
 @VCoreDataContext(preloadStrategy = PreloadStrategy.LOAD_ON_NEED, dataContext = DataContext.GLOBAL)
 public class PlayerHandlerData extends PlayerData {
@@ -42,12 +41,12 @@ public class PlayerHandlerData extends PlayerData {
     @VCorePersistentData
     private String activeInventoryID = null;
 
-    public PlayerHandlerData(PlayerSessionManager<?> playerSessionManager, UUID playerUUID) {
-        super(playerSessionManager, playerUUID);
+    public PlayerHandlerData(VCorePlugin<?,?> plugin, UUID playerUUID) {
+        super(plugin, playerUUID);
     }
 
     public void saveInventory(){
-        VCorePlayer vCorePlayer = VCorePaper.getInstance().getVCorePlayerManager().getPlayer(getUUID());
+        VCorePlayer vCorePlayer = VCorePaper.getInstance().getVCorePlayerManager().getPlayer(getObjectUUID());
         if(vCorePlayer == null)
             return;
         if(!vCorePlayer.isOnThisServer())
@@ -70,7 +69,7 @@ public class PlayerHandlerData extends PlayerData {
         ItemStack[] armorContents = player.getInventory().getArmorContents().clone();
         SerializableJsonInventory serializableInventory = new SerializableJsonInventory(inventoryID,storageContents,armorContents);
         inventoryCache.put(inventoryID,serializableInventory);
-        VCorePaper.getInstance().consoleMessage("&eInventory &6"+inventoryID+" &eof player &b"+getUUID()+" &esaved&7!", true);
+        VCorePaper.getInstance().consoleMessage("&eInventory &6"+inventoryID+" &eof player &b"+getObjectUUID()+" &esaved&7!", true);
     }
 
     public void restoreInventory(){
@@ -89,7 +88,7 @@ public class PlayerHandlerData extends PlayerData {
     }
 
     public void restoreInventory(String inventoryID){
-        VCorePlayer vCorePlayer = VCorePaper.getInstance().getVCorePlayerManager().getPlayer(getUUID());
+        VCorePlayer vCorePlayer = VCorePaper.getInstance().getVCorePlayerManager().getPlayer(getObjectUUID());
         if(vCorePlayer == null)
             return;
         if(!vCorePlayer.isOnThisServer())
@@ -106,7 +105,7 @@ public class PlayerHandlerData extends PlayerData {
             if(storageContents != null)
                 vCorePlayer.toBukkitPlayer().getInventory().setStorageContents(storageContents);
             VCoreUtil.getBukkitPlayerUtil().sendPlayerMessage(vCorePlayer.toBukkitPlayer(), ChatMessageType.ACTION_BAR, "&eInventar wurde geladen");
-            VCorePaper.getInstance().consoleMessage("&eInventory &6"+inventoryID+" &eof player &b"+getUUID()+" &erestored&7!", true);
+            VCorePaper.getInstance().consoleMessage("&eInventory &6"+inventoryID+" &eof player &b"+getObjectUUID()+" &erestored&7!", true);
         }
         catch (IOException e){
             e.printStackTrace();

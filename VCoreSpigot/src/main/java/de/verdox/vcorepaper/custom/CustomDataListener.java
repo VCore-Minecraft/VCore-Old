@@ -1,8 +1,8 @@
 package de.verdox.vcorepaper.custom;
 
-import de.verdox.vcore.concurrent.CatchingRunnable;
-import de.verdox.vcore.concurrent.ThreadObjectManager;
-import de.verdox.vcore.event.listener.VCoreListener;
+import de.verdox.vcore.performance.concurrent.CatchingRunnable;
+import de.verdox.vcore.performance.concurrent.ThreadObjectManager;
+import de.verdox.vcore.plugin.listener.VCoreListener;
 import de.verdox.vcore.plugin.VCorePlugin;
 import de.verdox.vcore.util.keys.ChunkKey;
 import de.verdox.vcorepaper.VCorePaper;

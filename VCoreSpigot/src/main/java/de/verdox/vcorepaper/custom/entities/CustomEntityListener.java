@@ -1,6 +1,6 @@
 package de.verdox.vcorepaper.custom.entities;
 
-import de.verdox.vcore.event.listener.VCoreListener;
+import de.verdox.vcore.plugin.listener.VCoreListener;
 import de.verdox.vcore.plugin.VCorePlugin;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.entity.EntityDeathEvent;

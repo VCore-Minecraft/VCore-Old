@@ -1,8 +1,7 @@
 package de.verdox.vcorepaper.commands;
 
-import de.verdox.vcore.command.VCoreCommand;
-import de.verdox.vcore.command.callback.CommandCallback;
-import de.verdox.vcore.data.session.SSession;
+import de.verdox.vcore.plugin.command.VCoreCommand;
+import de.verdox.vcore.plugin.command.callback.CommandCallback;
 import de.verdox.vcore.plugin.VCorePlugin;
 import de.verdox.vcore.util.VCoreUtil;
 import de.verdox.vcorepaper.VCorePaper;
@@ -79,11 +78,13 @@ public class AdminCommands extends VCoreCommand.VCoreBukkitCommand {
                             return false;
                         }
 
-                        vCorePlugin.getSessionManager().getSession(player.getUniqueId()).debugToConsole();
+                        //TODO: NEU MACHEN
+                        //vCorePlugin.getSessionManager().getSession(player.getUniqueId()).debugToConsole();
                         return true;
                     }
                     else if(args[2].equalsIgnoreCase("subsystems")){
-                        vCorePlugin.getServerDataManager().getAllSessions().forEach(SSession::debugToConsole);
+                        //TODO: NEU MACHEN
+                        //vCorePlugin.getServerDataManager().getAllSessions().forEach(SSession::debugToConsole);
                         return true;
                     }
                 }

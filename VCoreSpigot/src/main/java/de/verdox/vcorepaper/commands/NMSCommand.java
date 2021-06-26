@@ -4,15 +4,14 @@
 
 package de.verdox.vcorepaper.commands;
 
-import de.verdox.vcore.command.VCoreCommand;
-import de.verdox.vcore.command.callback.CommandCallback;
+import de.verdox.vcore.plugin.command.VCoreCommand;
+import de.verdox.vcore.plugin.command.callback.CommandCallback;
 import de.verdox.vcore.plugin.VCorePlugin;
 import de.verdox.vcorepaper.VCorePaper;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.block.Biome;
-import org.bukkit.block.Block;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;

@@ -1,7 +1,7 @@
 package de.verdox.vcorepaper.custom.blocks;
 
-import de.verdox.vcore.concurrent.CatchingRunnable;
-import de.verdox.vcore.efficiency.Benchmark;
+import de.verdox.vcore.performance.concurrent.CatchingRunnable;
+import de.verdox.vcore.performance.efficiency.Benchmark;
 import de.verdox.vcore.util.keys.ChunkKey;
 import de.verdox.vcore.util.keys.LocationKey;
 import de.verdox.vcore.util.keys.SplitChunkKey;

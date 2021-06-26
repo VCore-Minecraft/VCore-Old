@@ -2,10 +2,17 @@ package de.verdox.vcorepaper;
 
 import com.comphenix.protocol.ProtocolLibrary;
 import com.comphenix.protocol.ProtocolManager;
-import de.verdox.vcore.dataconnection.DataConnection;
-import de.verdox.vcore.player.VCorePlayerManager;
+import de.verdox.vcore.synchronization.pipeline.PipelineManager;
+import de.verdox.vcore.synchronization.pipeline.parts.Pipeline;
+import de.verdox.vcore.synchronization.pipeline.parts.cache.GlobalCache;
+import de.verdox.vcore.synchronization.pipeline.parts.cache.redis.RedisCache;
+import de.verdox.vcore.synchronization.pipeline.parts.local.LocalCache;
+import de.verdox.vcore.synchronization.pipeline.parts.local.LocalCacheImpl;
+import de.verdox.vcore.synchronization.pipeline.parts.storage.GlobalStorage;
+import de.verdox.vcore.synchronization.pipeline.parts.storage.mongodb.MongoDBStorage;
+import de.verdox.vcore.plugin.player.VCorePlayerManager;
 import de.verdox.vcore.plugin.VCorePlugin;
-import de.verdox.vcore.subsystem.VCoreSubsystem;
+import de.verdox.vcore.plugin.subsystem.VCoreSubsystem;
 import de.verdox.vcorepaper.commands.AdminCommands;
 import de.verdox.vcorepaper.commands.NMSCommand;
 import de.verdox.vcorepaper.custom.blocks.CustomBlockManager;
@@ -25,8 +32,6 @@ import java.util.stream.Collectors;
 
 public class VCorePaper extends VCorePlugin.Minecraft {
     public static VCorePaper instance;
-
-    private DataConnection.MongoDB mongoDB;
 
     private VCorePlayerManager vCorePlayerManager;
 
@@ -60,9 +65,6 @@ public class VCorePaper extends VCorePlugin.Minecraft {
         new CustomEntityListener(this);
         new VBlockListener(this,customBlockManager);
         new AsyncEventWrapper(this);
-
-        getSessionManager();
-        getServerDataManager();
 
         new AdminCommands(this,"debug");
         new NMSCommand(this,"nms");
@@ -103,23 +105,6 @@ public class VCorePaper extends VCorePlugin.Minecraft {
     @Override
     public boolean debug() {
         return true;
-    }
-
-    @Override
-    public DataConnection.MongoDB mongoDB() {
-        if(mongoDB == null)
-            return new DataConnection.MongoDB(this
-                    ,vCorePaperSettings.getMongoDBHost()
-                    , vCorePaperSettings.getMongoDBDatabase()
-                    , vCorePaperSettings.getMongoDBPort()
-                    ,vCorePaperSettings.getMongoDBUsername()
-                    ,vCorePaperSettings.getMongoDBPassword()) {
-                @Override
-                public void onConnect() {
-                    consoleMessage("&eMongoDB successfully connected!",false);
-                }
-            };
-        return mongoDB;
     }
 
     public CustomEntityManager getCustomEntityManager() {

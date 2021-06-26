@@ -4,8 +4,8 @@
 
 package de.verdox.vcorepaper.bukkitplayerhandler.model;
 
-import de.verdox.vcore.data.datatypes.serializables.VCoreSerializableJson;
-import de.verdox.vcore.data.datatypes.serializables.references.objects.StringBsonReference;
+import de.verdox.vcore.synchronization.pipeline.datatypes.serializables.VCoreSerializableJson;
+import de.verdox.vcore.synchronization.pipeline.datatypes.serializables.reference.objects.StringBsonReference;
 import de.verdox.vcorepaper.custom.util.Serializer;
 import org.bukkit.inventory.ItemStack;
 
