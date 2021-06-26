@@ -11,6 +11,7 @@ import de.verdox.vcore.synchronization.pipeline.parts.storage.GlobalStorage;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.Set;
 import java.util.UUID;
 import java.util.function.Consumer;
 
@@ -28,6 +29,8 @@ public interface Pipeline {
     <T extends VCoreData> T load(@Nonnull Class<? extends T> type, @Nonnull UUID uuid, @Nonnull LoadingStrategy loadingStrategy, @Nullable Consumer<T> callback);
 
     <T extends VCoreData> T load(@Nonnull Class<? extends T> type, @Nonnull UUID uuid, @Nonnull LoadingStrategy loadingStrategy, boolean createIfNotExist, @Nullable Consumer<T> callback);
+
+    <T extends VCoreData> Set<T> loadAllData(@Nonnull Class<? extends T> type, @Nonnull LoadingStrategy loadingStrategy);
 
     LocalCache getLocalCache();
 

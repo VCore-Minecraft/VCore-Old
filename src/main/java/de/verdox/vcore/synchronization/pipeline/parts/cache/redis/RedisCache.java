@@ -38,8 +38,7 @@ public class RedisCache extends RedisConnection implements GlobalCache {
 
     @Override
     public void save(@Nonnull Class<? extends VCoreData> dataClass, @Nonnull UUID objectUUID, @Nonnull Map<String, Object> dataToSave) {
-        RMapCache<String, Object> objectCache = (RMapCache<String, Object>) getObjectCache(dataClass, objectUUID);
-        objectCache.putAll(dataToSave, 12, TimeUnit.HOURS);
+        getObjectCache(dataClass, objectUUID).putAll(dataToSave);
     }
 
     @Override

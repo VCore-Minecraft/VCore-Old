@@ -4,6 +4,8 @@ import com.google.common.eventbus.EventBus;
 import de.verdox.vcore.performance.concurrent.CatchingRunnable;
 import de.verdox.vcore.performance.concurrent.TaskBatch;
 import de.verdox.vcore.performance.concurrent.VCoreScheduler;
+import de.verdox.vcore.synchronization.messaging.MessagingService;
+import de.verdox.vcore.synchronization.messaging.redis.RedisMessaging;
 import de.verdox.vcore.synchronization.pipeline.PipelineManager;
 import de.verdox.vcore.synchronization.pipeline.PlayerDataManager;
 import de.verdox.vcore.synchronization.pipeline.VCorePipelineConfig;
@@ -48,6 +50,7 @@ public interface VCorePlugin <T, R extends VCoreSubsystem<?>> extends SystemLoad
     //PlayerSessionManager<?> getSessionManager();
     //ServerDataManager<?> getServerDataManager();
     Pipeline getDataPipeline();
+    MessagingService<?> getMessagingService();
     VCorePipelineConfig getVCorePipelineConfig();
 
     @Override
@@ -85,6 +88,7 @@ public interface VCorePlugin <T, R extends VCoreSubsystem<?>> extends SystemLoad
         private final VCoreSubsystemManager<Minecraft,VCoreSubsystem.Bukkit> subsystemManager = new VCoreSubsystemManager<>(this);
         private final VCorePipelineConfig vCorePipelineConfig = new VCorePipelineConfig(getPluginDataFolder(), new File("VCorePipelineSettings.json"));
         private final Pipeline pipeline = vCorePipelineConfig.constructPipeline(this);
+        private final RedisMessaging redisMessaging = new RedisMessaging(this, false, new String[]{"redis://127.0.0.1:6379"}, "");
         private PlayerDataManager playerDataManager;
 
         @Override
@@ -114,6 +118,11 @@ public interface VCorePlugin <T, R extends VCoreSubsystem<?>> extends SystemLoad
             Bukkit.getWorlds().forEach(World::save);
             vCoreScheduler.waitUntilShutdown();
             consoleMessage("&aPlugin stopped&7!",false);
+        }
+
+        @Override
+        public MessagingService<?> getMessagingService() {
+            return redisMessaging;
         }
 
         @Override
@@ -169,6 +178,7 @@ public interface VCorePlugin <T, R extends VCoreSubsystem<?>> extends SystemLoad
         private final VCoreSubsystemManager<BungeeCord,VCoreSubsystem.BungeeCord> subsystemManager = new VCoreSubsystemManager<>(this);
         private final VCorePipelineConfig vCorePipelineConfig = new VCorePipelineConfig(getPluginDataFolder(), new File("VCorePipelineSettings.json"));
         private final Pipeline pipeline = vCorePipelineConfig.constructPipeline(this);
+        private final RedisMessaging redisMessaging = new RedisMessaging(this, false, new String[]{"redis://127.0.0.1:6379"}, "");
         private PlayerDataManager playerDataManager;
 
         @Override
@@ -178,6 +188,11 @@ public interface VCorePlugin <T, R extends VCoreSubsystem<?>> extends SystemLoad
             subsystemManager.enable();
             playerDataManager = new PlayerDataManager.BungeeCord((PipelineManager) pipeline);
             consoleMessage("&aPlugin started&7!",false);
+        }
+
+        @Override
+        public MessagingService<?> getMessagingService() {
+            return redisMessaging;
         }
 
         @Override

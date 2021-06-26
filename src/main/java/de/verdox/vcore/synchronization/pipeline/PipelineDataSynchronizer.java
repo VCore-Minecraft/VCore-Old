@@ -54,7 +54,9 @@ public class PipelineDataSynchronizer implements DataSynchronizer {
             if(destination.equals(DataSourceType.LOCAL)) {
                 if (!pipelineManager.localCache.dataExist(dataClass, objectUUID))
                     pipelineManager.localCache.save(dataClass, pipelineManager.localCache.instantiateData(dataClass, objectUUID));
-                pipelineManager.localCache.getData(dataClass, objectUUID).deserialize(globalCachedData);
+                VCoreData data = pipelineManager.localCache.getData(dataClass, objectUUID);
+                data.deserialize(globalCachedData);
+                data.onLoad();
             }
             else if(destination.equals(DataSourceType.GLOBAL_STORAGE))
                 pipelineManager.globalStorage.save(dataClass, objectUUID, globalCachedData);
@@ -67,7 +69,9 @@ public class PipelineDataSynchronizer implements DataSynchronizer {
             if(destination.equals(DataSourceType.LOCAL)) {
                 if (!pipelineManager.localCache.dataExist(dataClass, objectUUID))
                     pipelineManager.localCache.save(dataClass, pipelineManager.localCache.instantiateData(dataClass, objectUUID));
-                pipelineManager.localCache.getData(dataClass, objectUUID).deserialize(globalSavedData);
+                VCoreData data = pipelineManager.localCache.getData(dataClass, objectUUID);
+                data.deserialize(globalSavedData);
+                data.onLoad();
             }
             else if(destination.equals(DataSourceType.GLOBAL_CACHE))
                 pipelineManager.globalCache.save(dataClass,objectUUID,globalSavedData);

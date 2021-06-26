@@ -18,6 +18,7 @@ import de.verdox.vcore.plugin.subsystem.VCoreSubsystem;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Consumer;
@@ -112,6 +113,30 @@ public class PipelineManager implements Pipeline, SystemLoadable {
             return data;
         }
         return loadFromPipeline(type, uuid, createIfNotExist);
+    }
+
+    @Override
+    public <T extends VCoreData> Set<T> loadAllData(@Nonnull Class<? extends T> type, @Nonnull LoadingStrategy loadingStrategy) {
+        Set<T> set = new HashSet<>();
+        if(loadingStrategy.equals(LoadingStrategy.LOAD_PIPELINE))
+            synchronizeData(type);
+        else if(loadingStrategy.equals(LoadingStrategy.LOAD_LOCAL_ELSE_LOAD))
+            plugin.async(() -> synchronizeData(type));
+        getLocalCache().getSavedUUIDs(type).forEach(uuid -> set.add(getLocalCache().getData(type, uuid)));
+        return set;
+    }
+
+    private <T extends VCoreData> void synchronizeData(@Nonnull Class<? extends T> type){
+        if(getGlobalStorage() != null)
+            getGlobalStorage().getSavedUUIDs(type).forEach(uuid -> {
+                if(!localCache.dataExist(type, uuid))
+                    pipelineDataSynchronizer.synchronize(DataSynchronizer.DataSourceType.GLOBAL_STORAGE, DataSynchronizer.DataSourceType.LOCAL, type, uuid);
+            });
+        if(getGlobalCache() != null)
+            getGlobalCache().getSavedUUIDs(type).forEach(uuid -> {
+                if(!localCache.dataExist(type, uuid))
+                    pipelineDataSynchronizer.synchronize(DataSynchronizer.DataSourceType.GLOBAL_CACHE, DataSynchronizer.DataSourceType.LOCAL, type, uuid);
+            });
     }
 
     @Override

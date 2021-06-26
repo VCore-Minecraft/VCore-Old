@@ -21,7 +21,7 @@ import java.util.UUID;
  * @Author: Lukas Jonsson (Verdox)
  * @date 25.06.2021 22:09
  */
-public class RedisMessaging extends RedisConnection implements MessagingService {
+public class RedisMessaging extends RedisConnection implements MessagingService<RedisMessageBuilder> {
     private final RTopic rTopic;
     private final MessageListener<Message> messageListener;
 
@@ -37,8 +37,8 @@ public class RedisMessaging extends RedisConnection implements MessagingService 
     }
 
     @Override
-    public Message constructMessage(UUID sender, String senderIdentifier, String[] parameters, Object... dataToSend) {
-        return new SimpleRedisMessage(sender, senderIdentifier, parameters, dataToSend);
+    public RedisMessageBuilder constructMessage() {
+        return new RedisMessageBuilder(getSessionUUID(), getSenderName());
     }
 
     @Override

@@ -29,7 +29,6 @@ public abstract class VCoreData implements VCoreSerializable {
         this.plugin = plugin;
         this.objectUUID = objectUUID;
         this.dataManipulator = this.plugin.getDataPipeline().getGlobalCache().constructDataManipulator(this);
-        onLoad();
     }
 
     public UUID getObjectUUID() {

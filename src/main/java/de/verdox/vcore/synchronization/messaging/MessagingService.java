@@ -6,6 +6,7 @@ package de.verdox.vcore.synchronization.messaging;
 
 
 import de.verdox.vcore.synchronization.messaging.messages.Message;
+import de.verdox.vcore.synchronization.messaging.messages.MessageBuilder;
 
 import java.util.UUID;
 
@@ -14,9 +15,9 @@ import java.util.UUID;
  * @Author: Lukas Jonsson (Verdox)
  * @date 25.06.2021 14:54
  */
-public interface MessagingService {
+public interface MessagingService<T extends MessageBuilder> {
 
-    Message constructMessage(UUID sender, String senderIdentifier, String[] parameters, Object... dataToSend);
+    T constructMessage();
     void publishMessage(Message message);
 
     default UUID getSessionUUID(){

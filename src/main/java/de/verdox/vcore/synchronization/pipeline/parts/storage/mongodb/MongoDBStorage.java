@@ -140,11 +140,11 @@ public class MongoDBStorage implements GlobalStorage, RemoteStorage {
     }
 
     private String getSuffix(Class<? extends VCoreData> dataClass){
-        if(dataClass.isAssignableFrom(PlayerData.class))
+        if(PlayerData.class.isAssignableFrom(dataClass))
             return "PlayerData";
-        else if(dataClass.isAssignableFrom(ServerData.class))
+        else if(ServerData.class.isAssignableFrom(dataClass))
             return "ServerData";
         else
-            return "Unknown";
+            return "UnknownData";
     }
 }
