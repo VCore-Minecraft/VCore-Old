@@ -37,12 +37,4 @@ public class PlayerListener extends VCoreListener.VCoreBukkitListener {
             playerHandlerData.restoreInventory();
         }
     }
-
-    @Subscribe
-    public void onSessionPreUnload(PlayerPreSessionUnloadEvent playerPreSessionUnloadEvent){
-        Player player = Bukkit.getPlayer(playerPreSessionUnloadEvent.getPlayerUUID());
-        PlayerHandlerData playerHandlerData = VCorePaper.getInstance().getDataPipeline().load(PlayerHandlerData.class, player.getUniqueId(), Pipeline.LoadingStrategy.LOAD_PIPELINE,true);
-        playerHandlerData.saveInventory(() -> player);
-    }
-
 }

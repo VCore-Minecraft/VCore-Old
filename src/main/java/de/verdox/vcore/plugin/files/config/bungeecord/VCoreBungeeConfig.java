@@ -14,13 +14,23 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-public abstract class VCoreBungeeConfig extends VCoreConfig<VCoreSubsystem.BungeeCord,Configuration> {
+public abstract class VCoreBungeeConfig extends VCoreConfig<Configuration> {
     public VCoreBungeeConfig(VCorePlugin.BungeeCord plugin, File file) {
         super(plugin,file);
     }
 
     public VCoreBungeeConfig(VCorePlugin.BungeeCord plugin, String fileName, String pluginDirectory) {
         super(plugin,fileName,pluginDirectory);
+    }
+
+    @Override
+    public Configuration create() {
+        try{
+            if(!file.exists())
+                if(!file.createNewFile())
+                    return null;
+            return ConfigurationProvider.getProvider(net.md_5.bungee.config.YamlConfiguration.class).load(file); }
+        catch (IOException e){return null;}
     }
 
     @Override

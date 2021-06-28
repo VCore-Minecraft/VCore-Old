@@ -108,6 +108,6 @@ public class RedisCache extends RedisConnection implements GlobalCache {
         if(objectUUID == null)
             throw new NullPointerException("objectUUID is null");
         String key = plugin.getPluginName()+"DataTopic:"+GlobalStorage.getDataStorageIdentifier(dataClass)+":"+objectUUID;
-        return redissonClient.getTopic(key);
+        return redissonClient.getTopic(key, new SerializationCodec());
     }
 }

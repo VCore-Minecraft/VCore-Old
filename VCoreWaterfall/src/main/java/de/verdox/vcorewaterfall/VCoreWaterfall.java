@@ -22,11 +22,6 @@ public class VCoreWaterfall extends VCorePlugin.BungeeCord {
     }
 
     @Override
-    public List<VCoreSubsystem.BungeeCord> provideSubsystems() {
-        return null;
-    }
-
-    @Override
     public boolean useRedisCluster() {
         return false;
     }

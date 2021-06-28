@@ -47,8 +47,10 @@ public class PlayerDataManager {
 
     protected final void logoutPipeline(UUID player){
         plugin.getEventBus().post(new PlayerPreSessionUnloadEvent(player));
-        plugin.createTaskBatch().doSync(() -> {
+        plugin.createTaskBatch().doAsync(() -> {
             plugin.getSubsystemManager().getActivePlayerDataClasses()
+                    .stream()
+                    .distinct()
                     .forEach(aClass -> {
                         if(!pipelineManager.getLocalCache().dataExist(aClass, player))
                             return;

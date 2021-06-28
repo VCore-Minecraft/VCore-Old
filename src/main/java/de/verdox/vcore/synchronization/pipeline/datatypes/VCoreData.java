@@ -28,7 +28,20 @@ public abstract class VCoreData implements VCoreSerializable {
     public VCoreData(VCorePlugin<?,?> plugin, UUID objectUUID){
         this.plugin = plugin;
         this.objectUUID = objectUUID;
-        this.dataManipulator = this.plugin.getDataPipeline().getGlobalCache().constructDataManipulator(this);
+        if(this.plugin.getDataPipeline().getGlobalCache() != null)
+            this.dataManipulator = this.plugin.getDataPipeline().getGlobalCache().constructDataManipulator(this);
+        else
+            this.dataManipulator = new DataManipulator() {
+                @Override
+                public void cleanUp() {
+
+                }
+
+                @Override
+                public void pushUpdate(VCoreData vCoreData, boolean async, Runnable callback) {
+
+                }
+            };
     }
 
     public UUID getObjectUUID() {
@@ -37,6 +50,8 @@ public abstract class VCoreData implements VCoreSerializable {
 
     public void save(boolean saveToGlobalStorage, boolean async){
         updateLastUse();
+        if(this.dataManipulator == null)
+            return;
         this.dataManipulator.pushUpdate(this, async, () -> {
             if(!saveToGlobalStorage)
                 return;
@@ -53,6 +68,7 @@ public abstract class VCoreData implements VCoreSerializable {
         return plugin;
     }
 
+    public abstract void onCreate();
     public abstract void onLoad();
     public abstract void onCleanUp();
     public void debugToConsole(){

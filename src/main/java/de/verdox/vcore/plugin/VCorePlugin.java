@@ -4,6 +4,7 @@ import com.google.common.eventbus.EventBus;
 import de.verdox.vcore.performance.concurrent.CatchingRunnable;
 import de.verdox.vcore.performance.concurrent.TaskBatch;
 import de.verdox.vcore.performance.concurrent.VCoreScheduler;
+import de.verdox.vcore.plugin.language.InGameMessageProvider;
 import de.verdox.vcore.synchronization.messaging.MessagingService;
 import de.verdox.vcore.synchronization.messaging.redis.RedisMessaging;
 import de.verdox.vcore.synchronization.pipeline.PipelineManager;
@@ -21,6 +22,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import javax.annotation.Nonnull;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 
 public interface VCorePlugin <T, R extends VCoreSubsystem<?>> extends SystemLoadable {
@@ -28,6 +30,7 @@ public interface VCorePlugin <T, R extends VCoreSubsystem<?>> extends SystemLoad
     void onPluginEnable();
     void onPluginDisable();
     List<R> provideSubsystems();
+    void registerSubsystem(R subsystem);
     boolean useRedisCluster();
     String[] redisAddresses();
     String redisPassword();
@@ -43,6 +46,8 @@ public interface VCorePlugin <T, R extends VCoreSubsystem<?>> extends SystemLoad
 
     void async(Runnable runnable);
     void sync(Runnable runnable);
+
+    InGameMessageProvider getMessageProvider();
 
     VCoreSubsystemManager<? extends VCorePlugin<T,R>,?> getSubsystemManager();
 
@@ -86,18 +91,38 @@ public interface VCorePlugin <T, R extends VCoreSubsystem<?>> extends SystemLoad
         private final VCoreScheduler vCoreScheduler = new VCoreScheduler(this);
         private final EventBus eventBus = new EventBus();
         private final VCoreSubsystemManager<Minecraft,VCoreSubsystem.Bukkit> subsystemManager = new VCoreSubsystemManager<>(this);
-        private final VCorePipelineConfig vCorePipelineConfig = new VCorePipelineConfig(getPluginDataFolder(), new File("VCorePipelineSettings.json"));
-        private final Pipeline pipeline = vCorePipelineConfig.constructPipeline(this);
+        private final VCorePipelineConfig vCorePipelineConfig = new VCorePipelineConfig(this, "","PipelineSettings.yml");
+        private Pipeline pipeline;
         private final RedisMessaging redisMessaging = new RedisMessaging(this, false, new String[]{"redis://127.0.0.1:6379"}, "");
+        private final InGameMessageProvider inGameMessageProvider = new InGameMessageProvider(this);
         private PlayerDataManager playerDataManager;
+        private List<VCoreSubsystem.Bukkit> subsystems = new ArrayList<>();
 
         @Override
         public final void onEnable() {
             consoleMessage("&ePlugin starting&7!",false);
+            vCorePipelineConfig.init();
             onPluginEnable();
             subsystemManager.enable();
+            pipeline = vCorePipelineConfig.constructPipeline(this);
+            pipeline.preloadAllData();
             playerDataManager = new PlayerDataManager.Bukkit((PipelineManager) pipeline);
             consoleMessage("&aPlugin started&7!",false);
+        }
+
+        @Override
+        public final void registerSubsystem(VCoreSubsystem.Bukkit subsystem) {
+            this.subsystems.add(subsystem);
+        }
+
+        @Override
+        public final List<VCoreSubsystem.Bukkit> provideSubsystems() {
+            return subsystems;
+        }
+
+        @Override
+        public InGameMessageProvider getMessageProvider() {
+            return inGameMessageProvider;
         }
 
         @Override
@@ -176,18 +201,38 @@ public interface VCorePlugin <T, R extends VCoreSubsystem<?>> extends SystemLoad
         private final VCoreScheduler vCoreScheduler = new VCoreScheduler(this);
         private final EventBus eventBus = new EventBus();
         private final VCoreSubsystemManager<BungeeCord,VCoreSubsystem.BungeeCord> subsystemManager = new VCoreSubsystemManager<>(this);
-        private final VCorePipelineConfig vCorePipelineConfig = new VCorePipelineConfig(getPluginDataFolder(), new File("VCorePipelineSettings.json"));
-        private final Pipeline pipeline = vCorePipelineConfig.constructPipeline(this);
+        private final VCorePipelineConfig vCorePipelineConfig = new VCorePipelineConfig(this, "","PipelineSettings.yml");
+        private Pipeline pipeline;
         private final RedisMessaging redisMessaging = new RedisMessaging(this, false, new String[]{"redis://127.0.0.1:6379"}, "");
+        private final InGameMessageProvider inGameMessageProvider = new InGameMessageProvider(this);
         private PlayerDataManager playerDataManager;
+        private final List<VCoreSubsystem.BungeeCord> subsystems = new ArrayList<>();
 
         @Override
         public final void onEnable() {
             consoleMessage("&aPlugin starting&7!",false);
+            vCorePipelineConfig.init();
             onPluginEnable();
             subsystemManager.enable();
+            pipeline = vCorePipelineConfig.constructPipeline(this);
+            pipeline.preloadAllData();
             playerDataManager = new PlayerDataManager.BungeeCord((PipelineManager) pipeline);
             consoleMessage("&aPlugin started&7!",false);
+        }
+
+        @Override
+        public final void registerSubsystem(VCoreSubsystem.BungeeCord subsystem) {
+            this.subsystems.add(subsystem);
+        }
+
+        @Override
+        public final List<VCoreSubsystem.BungeeCord> provideSubsystems() {
+            return subsystems;
+        }
+
+        @Override
+        public InGameMessageProvider getMessageProvider() {
+            return inGameMessageProvider;
         }
 
         @Override

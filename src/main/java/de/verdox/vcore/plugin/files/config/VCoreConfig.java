@@ -10,7 +10,7 @@ import org.apache.commons.io.FilenameUtils;
 
 import java.io.File;
 
-public abstract class VCoreConfig <R extends VCoreSubsystem<?>,T> {
+public abstract class VCoreConfig <T> {
     private final VCorePlugin<?,?> plugin;
     protected String fileName;
     protected String pluginDirectory;
@@ -23,8 +23,6 @@ public abstract class VCoreConfig <R extends VCoreSubsystem<?>,T> {
         this.fileName = FilenameUtils.removeExtension(file.getName());
         String[] split = file.getPath().split(plugin.getPluginDataFolder().getPath());
         this.pluginDirectory = split[split.length-1];
-
-        this.config = getConfig();
     }
 
     public VCoreConfig(VCorePlugin<?,?> plugin, String fileName, String pluginDirectory) {
@@ -32,8 +30,6 @@ public abstract class VCoreConfig <R extends VCoreSubsystem<?>,T> {
         this.file = new File(plugin.getPluginDataFolder() + pluginDirectory, fileName);
         this.fileName = fileName;
         this.pluginDirectory = pluginDirectory;
-
-        this.config = getConfig();
     }
 
     public File getFile() {
@@ -48,10 +44,12 @@ public abstract class VCoreConfig <R extends VCoreSubsystem<?>,T> {
     public abstract <S extends VCoreSerializable> S getSerializable(Class<S> serializableClass, String path, VCoreDeserializer<? extends S> vCoreDeserializer);
 
     public void init() {
+        this.config = create();
         setupConfig();
         save();
         onInit();
     }
+    public abstract T create();
     public abstract void onInit();
     public abstract void setupConfig();
 

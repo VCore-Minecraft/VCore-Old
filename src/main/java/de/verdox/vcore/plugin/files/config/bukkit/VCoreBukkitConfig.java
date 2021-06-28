@@ -14,7 +14,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-public abstract class VCoreBukkitConfig extends VCoreConfig<VCoreSubsystem.Bukkit,FileConfiguration> {
+public abstract class VCoreBukkitConfig extends VCoreConfig<FileConfiguration> {
     public VCoreBukkitConfig(VCorePlugin.Minecraft plugin, File file) {
         super(plugin,file);
     }
@@ -25,6 +25,11 @@ public abstract class VCoreBukkitConfig extends VCoreConfig<VCoreSubsystem.Bukki
 
     @Override
     public FileConfiguration getConfig() {
+        return YamlConfiguration.loadConfiguration(file);
+    }
+
+    @Override
+    public FileConfiguration create() {
         return YamlConfiguration.loadConfiguration(file);
     }
 

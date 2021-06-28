@@ -32,6 +32,8 @@ public interface Pipeline {
 
     <T extends VCoreData> Set<T> loadAllData(@Nonnull Class<? extends T> type, @Nonnull LoadingStrategy loadingStrategy);
 
+    <T extends VCoreData> boolean exist(@Nonnull Class<? extends T> type, @Nonnull UUID uuid, @Nonnull QueryStrategy... strategies);
+
     LocalCache getLocalCache();
 
     GlobalCache getGlobalCache();
@@ -50,5 +52,11 @@ public interface Pipeline {
         LOAD_LOCAL_ELSE_LOAD,
         // Loads data from PipeLine
         LOAD_PIPELINE;
+    }
+
+    enum QueryStrategy{
+        LOCAL,
+        GLOBAL_CACHE,
+        GLOBAL_STORAGE,
     }
 }

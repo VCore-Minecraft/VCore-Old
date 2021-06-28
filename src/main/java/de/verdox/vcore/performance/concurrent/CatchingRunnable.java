@@ -19,6 +19,7 @@ public class CatchingRunnable implements Runnable{
         try {
             delegate.run();
         } catch (Throwable e) {
+            System.err.println(e.getMessage());
             for (StackTraceElement stackTraceElement : e.getStackTrace()) {
                 System.err.println(stackTraceElement.toString());
             }

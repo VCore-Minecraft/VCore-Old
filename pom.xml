@@ -97,6 +97,12 @@
             <artifactId>bson</artifactId>
             <version>4.2.3</version>
         </dependency>
+        <!-- Simple-YAML -->
+        <dependency>
+            <groupId>me.carleslc.Simple-YAML</groupId>
+            <artifactId>Simple-Yaml</artifactId>
+            <version>1.7.2</version>
+        </dependency>
     </dependencies>
 
     <build>

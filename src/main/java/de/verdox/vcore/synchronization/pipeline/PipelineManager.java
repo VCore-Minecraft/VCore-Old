@@ -18,10 +18,12 @@ import de.verdox.vcore.plugin.subsystem.VCoreSubsystem;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 /**
  * @version 1.0
@@ -44,8 +46,11 @@ public class PipelineManager implements Pipeline, SystemLoadable {
         this.globalStorage = globalStorage;
         this.globalCache = globalCache;
         this.localCache = localCache;
+        plugin.consoleMessage("&6Starting Pipeline Manager", false);
+        plugin.consoleMessage("&eLocalCache: &b"+localCache, 1,false);
+        plugin.consoleMessage("&eGlobalCache: &b"+globalCache, 1,false);
+        plugin.consoleMessage("&eGlobalStorage: &b"+globalStorage, 1,false);
         this.pipelineDataSynchronizer = new PipelineDataSynchronizer(this);
-        this.loaded = true;
         plugin.getScheduler().asyncInterval(() -> {
 
             plugin.getSubsystemManager().getRegisteredPlayerDataClasses().forEach(aClass -> {
@@ -61,6 +66,7 @@ public class PipelineManager implements Pipeline, SystemLoadable {
                 });
             });
         }, 20L*10, 20L*500);
+        loaded = true;
     }
 
     @Override
@@ -124,6 +130,34 @@ public class PipelineManager implements Pipeline, SystemLoadable {
             plugin.async(() -> synchronizeData(type));
         getLocalCache().getSavedUUIDs(type).forEach(uuid -> set.add(getLocalCache().getData(type, uuid)));
         return set;
+    }
+
+    @Override
+    public <T extends VCoreData> boolean exist(@Nonnull Class<? extends T> type, @Nonnull UUID uuid, @Nonnull QueryStrategy... strategies) {
+        if(strategies.length == 0)
+            return false;
+        for (QueryStrategy queryStrategy : Arrays.stream(strategies).collect(Collectors.toSet())) {
+            if(queryStrategy.equals(QueryStrategy.LOCAL)){
+                boolean localExist = getLocalCache().dataExist(type, uuid);
+                if(localExist)
+                    return true;
+            }
+            else if(queryStrategy.equals(QueryStrategy.GLOBAL_CACHE)){
+                if(getGlobalCache() == null)
+                    continue;
+                boolean globalCacheExists = getGlobalCache().dataExist(type, uuid);
+                if(globalCacheExists)
+                    return true;
+            }
+            else if(queryStrategy.equals(QueryStrategy.GLOBAL_STORAGE)){
+                if(getGlobalStorage() == null)
+                    continue;
+                boolean globalStorageExists = getGlobalStorage().dataExist(type, uuid);
+                if(globalStorageExists)
+                    return true;
+            }
+        }
+        return false;
     }
 
     private <T extends VCoreData> void synchronizeData(@Nonnull Class<? extends T> type){
@@ -197,6 +231,7 @@ public class PipelineManager implements Pipeline, SystemLoadable {
                 return null;
             plugin.consoleMessage("&eNo Data was found. Creating new data! &8[&b"+dataClass.getSimpleName()+"&8]", 1,true);
             T vCoreData = localCache.instantiateData(dataClass,uuid);
+            vCoreData.onCreate();
             //TODO: Push Mechanik irgendwie einbauen
             localCache.save(dataClass, vCoreData);
             //getLocalDataHandler().localToRedis(vCoreData,dataClass,vCoreData.getUUID());

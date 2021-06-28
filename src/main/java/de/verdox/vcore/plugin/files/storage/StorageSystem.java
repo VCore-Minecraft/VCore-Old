@@ -11,7 +11,7 @@ import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public abstract class StorageSystem<S extends VCoreConfig<?,?>> {
+public abstract class StorageSystem<S extends VCoreConfig<?>> {
     protected String storageName;
     protected String pluginDirectory;
     protected File directory;

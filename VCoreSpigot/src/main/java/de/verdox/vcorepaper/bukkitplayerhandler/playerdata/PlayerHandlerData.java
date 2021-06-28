@@ -45,6 +45,11 @@ public class PlayerHandlerData extends PlayerData {
         super(plugin, playerUUID);
     }
 
+    @Override
+    public void onCreate() {
+
+    }
+
     public void saveInventory(){
         VCorePlayer vCorePlayer = VCorePaper.getInstance().getVCorePlayerManager().getPlayer(getObjectUUID());
         if(vCorePlayer == null)

@@ -16,6 +16,7 @@ import de.verdox.vcore.synchronization.pipeline.parts.storage.GlobalStorage;
 import de.verdox.vcore.synchronization.pipeline.parts.storage.RemoteStorage;
 import de.verdox.vcore.plugin.VCorePlugin;
 import de.verdox.vcore.plugin.subsystem.VCoreSubsystem;
+import org.apache.commons.lang.NotImplementedException;
 import org.bson.Document;
 
 import javax.annotation.Nonnull;
@@ -101,7 +102,14 @@ public class MongoDBStorage implements GlobalStorage, RemoteStorage {
 
     @Override
     public Set<UUID> getSavedUUIDs(@Nonnull Class<? extends VCoreData> dataClass) {
-        return null;
+        MongoCollection<Document> collection = getMongoStorage(dataClass,getSuffix(dataClass));
+        Set<UUID> uuids = new HashSet<>();
+        for (Document document : collection.find()) {
+            if(!document.containsKey("objectUUID"))
+                continue;
+            uuids.add(UUID.fromString((String) document.get("objectUUID")));
+        }
+        return uuids;
     }
 
     private MongoCollection<Document> getMongoStorage(Class<? extends VCoreData> dataClass, String suffix){

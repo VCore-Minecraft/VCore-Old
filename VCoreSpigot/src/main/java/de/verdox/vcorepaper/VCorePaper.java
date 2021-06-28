@@ -2,17 +2,8 @@ package de.verdox.vcorepaper;
 
 import com.comphenix.protocol.ProtocolLibrary;
 import com.comphenix.protocol.ProtocolManager;
-import de.verdox.vcore.synchronization.pipeline.PipelineManager;
-import de.verdox.vcore.synchronization.pipeline.parts.Pipeline;
-import de.verdox.vcore.synchronization.pipeline.parts.cache.GlobalCache;
-import de.verdox.vcore.synchronization.pipeline.parts.cache.redis.RedisCache;
-import de.verdox.vcore.synchronization.pipeline.parts.local.LocalCache;
-import de.verdox.vcore.synchronization.pipeline.parts.local.LocalCacheImpl;
-import de.verdox.vcore.synchronization.pipeline.parts.storage.GlobalStorage;
-import de.verdox.vcore.synchronization.pipeline.parts.storage.mongodb.MongoDBStorage;
 import de.verdox.vcore.plugin.player.VCorePlayerManager;
 import de.verdox.vcore.plugin.VCorePlugin;
-import de.verdox.vcore.plugin.subsystem.VCoreSubsystem;
 import de.verdox.vcorepaper.commands.AdminCommands;
 import de.verdox.vcorepaper.commands.NMSCommand;
 import de.verdox.vcorepaper.custom.blocks.CustomBlockManager;
@@ -27,7 +18,6 @@ import de.verdox.vcorepaper.nms.NMSManager;
 import de.verdox.vcorepaper.bukkitplayerhandler.BukkitPlayerHandler;
 import org.bukkit.Bukkit;
 
-import java.util.List;
 import java.util.stream.Collectors;
 
 public class VCorePaper extends VCorePlugin.Minecraft {
@@ -51,6 +41,7 @@ public class VCorePaper extends VCorePlugin.Minecraft {
     @Override
     public void onPluginEnable() {
         instance = this;
+        registerSubsystem(new BukkitPlayerHandler(this));
         this.nmsManager = new NMSManager(this);
         this.vCorePlayerManager = new VCorePlayerManager(this);
 
@@ -82,11 +73,6 @@ public class VCorePaper extends VCorePlugin.Minecraft {
     @Override
     public void onPluginDisable() {
 
-    }
-
-    @Override
-    public List<VCoreSubsystem.Bukkit> provideSubsystems() {
-        return List.of(new BukkitPlayerHandler(this));
     }
 
     @Override

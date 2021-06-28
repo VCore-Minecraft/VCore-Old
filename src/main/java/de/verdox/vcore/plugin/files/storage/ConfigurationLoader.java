@@ -5,6 +5,6 @@ import de.verdox.vcore.plugin.files.config.VCoreConfig;
 
 import java.io.File;
 
-public interface ConfigurationLoader<S extends VCoreConfig<?,?>>{
+public interface ConfigurationLoader<S extends VCoreConfig<?>>{
     S load(VCorePlugin<?,?> plugin, File file);
 }
