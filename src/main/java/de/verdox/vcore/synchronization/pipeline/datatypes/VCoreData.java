@@ -5,11 +5,18 @@
 package de.verdox.vcore.synchronization.pipeline.datatypes;
 
 import de.verdox.vcore.synchronization.pipeline.PipelineManager;
+import de.verdox.vcore.synchronization.pipeline.annotations.DataContext;
+import de.verdox.vcore.synchronization.pipeline.annotations.VCoreDataContext;
+import de.verdox.vcore.synchronization.pipeline.datatypes.serializables.reference.VCoreDataReference;
+import de.verdox.vcore.synchronization.pipeline.datatypes.serializables.reference.collections.ListBsonReference;
 import de.verdox.vcore.synchronization.pipeline.interfaces.DataManipulator;
 import de.verdox.vcore.synchronization.pipeline.interfaces.VCoreSerializable;
 import de.verdox.vcore.plugin.VCorePlugin;
 import de.verdox.vcore.synchronization.pipeline.parts.DataSynchronizer;
+import de.verdox.vcore.synchronization.pipeline.parts.cache.GlobalCache;
 
+import java.lang.reflect.InvocationTargetException;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -22,14 +29,18 @@ public abstract class VCoreData implements VCoreSerializable {
 
     private final VCorePlugin<?, ?> plugin;
     private final UUID objectUUID;
+    private final Map<String, Object> data;
     private final DataManipulator dataManipulator;
     private long lastUse = System.currentTimeMillis();
+    private final long cleanTime;
+    private final TimeUnit cleanTimeUnit;
 
-    public VCoreData(VCorePlugin<?,?> plugin, UUID objectUUID){
+    public VCoreData(VCorePlugin<?,?> plugin, UUID objectUUID, Map<String, Object> data){
         this.plugin = plugin;
         this.objectUUID = objectUUID;
-        if(this.plugin.getDataPipeline().getGlobalCache() != null)
-            this.dataManipulator = this.plugin.getDataPipeline().getGlobalCache().constructDataManipulator(this);
+        this.data = data;
+        if(this.plugin.getServices().getPipeline().getGlobalCache() != null)
+            this.dataManipulator = this.plugin.getServices().getPipeline().getGlobalCache().constructDataManipulator(this);
         else
             this.dataManipulator = new DataManipulator() {
                 @Override
@@ -38,30 +49,34 @@ public abstract class VCoreData implements VCoreSerializable {
                 }
 
                 @Override
-                public void pushUpdate(VCoreData vCoreData, boolean async, Runnable callback) {
+                public void pushUpdate(VCoreData vCoreData, Runnable callback) {
 
                 }
             };
+        VCoreDataContext dataContext = GlobalCache.getDataContext(getClass());
+        this.cleanTime = dataContext.time();
+        this.cleanTimeUnit = dataContext.timeUnit();
     }
 
     public UUID getObjectUUID() {
         return objectUUID;
     }
 
-    public void save(boolean saveToGlobalStorage, boolean async){
+    public void save(boolean saveToGlobalStorage){
         updateLastUse();
         if(this.dataManipulator == null)
             return;
-        this.dataManipulator.pushUpdate(this, async, () -> {
+        this.dataManipulator.pushUpdate(this, () -> {
             if(!saveToGlobalStorage)
                 return;
-            plugin.getDataPipeline().getSynchronizer().synchronize(DataSynchronizer.DataSourceType.LOCAL, DataSynchronizer.DataSourceType.GLOBAL_STORAGE, getClass(), getObjectUUID());
+            plugin.getServices().getPipeline().getSynchronizer().synchronize(DataSynchronizer.DataSourceType.LOCAL, DataSynchronizer.DataSourceType.GLOBAL_STORAGE, getClass(), getObjectUUID());
         });
     }
 
     public void cleanUp(){
         this.dataManipulator.cleanUp();
         onCleanUp();
+        plugin.async(dataManipulator::cleanUp);
     }
 
     public VCorePlugin<?, ?> getPlugin() {
@@ -78,10 +93,33 @@ public abstract class VCoreData implements VCoreSerializable {
     }
 
     public final boolean isExpired(){
-        return (System.currentTimeMillis() - lastUse) > TimeUnit.SECONDS.toMillis(PipelineManager.EXPIRY_TIME_SECONDS);
+        return (System.currentTimeMillis() - lastUse) > cleanTimeUnit.toMillis(cleanTime);
     }
 
     public void updateLastUse(){
         this.lastUse = System.currentTimeMillis();
+    }
+
+    public long getLastUse() {
+        return lastUse;
+    }
+
+    public <T extends VCoreDataReference<?>> T getField(Class<? extends T> type, String name){
+        try {
+            return type.getConstructor(Map.class,String.class).newInstance(data,name);
+        } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    @Override
+    public Map<String, Object> serialize() {
+        return data;
+    }
+
+    @Override
+    public void deserialize(Map<String, Object> serializedData) {
+        this.data.putAll(serializedData);
     }
 }

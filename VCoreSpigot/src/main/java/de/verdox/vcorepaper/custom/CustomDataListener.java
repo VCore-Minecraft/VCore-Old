@@ -1,10 +1,7 @@
 package de.verdox.vcorepaper.custom;
 
-import de.verdox.vcore.performance.concurrent.CatchingRunnable;
-import de.verdox.vcore.performance.concurrent.ThreadObjectManager;
 import de.verdox.vcore.plugin.listener.VCoreListener;
 import de.verdox.vcore.plugin.VCorePlugin;
-import de.verdox.vcore.util.keys.ChunkKey;
 import de.verdox.vcorepaper.VCorePaper;
 import de.verdox.vcorepaper.custom.blocks.VBlock;
 import de.verdox.vcorepaper.custom.blocks.enums.VBlockEventPermission;
@@ -13,6 +10,7 @@ import de.verdox.vcorepaper.custom.events.callbacks.BlockInteractCallback;
 import de.verdox.vcorepaper.custom.events.callbacks.BlockPlaceCallback;
 import de.verdox.vcorepaper.custom.events.callbacks.EventBlockCallback;
 import de.verdox.vcorepaper.custom.items.VCoreItem;
+import io.netty.util.concurrent.DefaultThreadFactory;
 import org.bukkit.Bukkit;
 import org.bukkit.block.Block;
 import org.bukkit.block.data.BlockData;
@@ -27,10 +25,12 @@ import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.Objects;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class CustomDataListener extends VCoreListener.VCoreBukkitListener {
 
-    private final ThreadObjectManager<ChunkKey> threadObjectManager = new ThreadObjectManager<>();
+    private final ExecutorService executorService = Executors.newCachedThreadPool(new DefaultThreadFactory("VCoreCustomDataListener"));
 
     public CustomDataListener(VCorePlugin.Minecraft plugin) {
         super(plugin);
@@ -51,9 +51,7 @@ public class CustomDataListener extends VCoreListener.VCoreBukkitListener {
             return;
         BlockData blockData = e.getClickedBlock().getBlockData();
 
-        Bukkit.getScheduler().runTaskAsynchronously(getPlugin(),() -> { });
-
-        threadObjectManager.submitTask(new ChunkKey(block.getChunk()),new CatchingRunnable(() -> {
+        executorService.submit(() -> {
             VBlock vBlock = VCorePaper.getInstance().getCustomBlockManager().wrap(VBlock.class, block.getLocation());
             vBlock.updateBlockData(blockData);
 
@@ -76,7 +74,8 @@ public class CustomDataListener extends VCoreListener.VCoreBukkitListener {
                     .filter(Objects::nonNull)
                     .filter(itemCustomData -> itemCustomData instanceof BlockInteractCallback)
                     .forEach(itemCustomData -> ((BlockInteractCallback) itemCustomData).blockCallback(player, action, finalVCoreItem, vBlock, EventBlockCallback.CallbackType.INTERACT_BLOCK));
-        }));
+
+        });
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
@@ -89,7 +88,7 @@ public class CustomDataListener extends VCoreListener.VCoreBukkitListener {
         Block block = e.getBlock();
         BlockData blockData = e.getBlock().getBlockData();
 
-        threadObjectManager.submitTask(new ChunkKey(block.getChunk()),new CatchingRunnable(() -> {
+        executorService.submit(() -> {
             VBlock vBlock = VCorePaper.getInstance().getCustomBlockManager().wrap(VBlock.class, block.getLocation());
             vBlock.updateBlockData(blockData);
 
@@ -112,9 +111,8 @@ public class CustomDataListener extends VCoreListener.VCoreBukkitListener {
                     .filter(Objects::nonNull)
                     .filter(vBlockCustomData -> vBlockCustomData instanceof BlockPlaceCallback)
                     .forEach(vBlockCustomData -> ((BlockPlaceCallback) vBlockCustomData).blockCallback(player, Action.RIGHT_CLICK_BLOCK,finalVCoreItem,vBlock,EventBlockCallback.CallbackType.PLACE_BLOCK));
-        }));
 
-        Bukkit.getScheduler().runTaskAsynchronously(getPlugin(),() -> { });
+        });
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
@@ -127,7 +125,7 @@ public class CustomDataListener extends VCoreListener.VCoreBukkitListener {
         Block block = e.getBlock();
         BlockData blockData = e.getBlock().getBlockData();
 
-        Bukkit.getScheduler().runTaskAsynchronously(getPlugin(),() -> {
+        executorService.submit(() -> {
             VBlock vBlock = VCorePaper.getInstance().getCustomBlockManager().wrap(VBlock.class, block.getLocation());
             vBlock.updateBlockData(blockData);
 

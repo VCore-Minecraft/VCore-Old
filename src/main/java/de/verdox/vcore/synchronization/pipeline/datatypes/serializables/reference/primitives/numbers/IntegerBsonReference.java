@@ -5,18 +5,19 @@
 package de.verdox.vcore.synchronization.pipeline.datatypes.serializables.reference.primitives.numbers;
 
 import de.verdox.vcore.synchronization.pipeline.datatypes.serializables.VCoreSerializableJson;
-import de.verdox.vcore.synchronization.pipeline.datatypes.serializables.reference.VCoreBsonReference;
+import de.verdox.vcore.synchronization.pipeline.datatypes.serializables.reference.VCoreDataReference;
 
 import javax.annotation.Nonnull;
+import java.util.Map;
 
 /**
  * @version 1.0
  * @Author: Lukas Jonsson (Verdox)
  * @date 25.06.2021 23:59
  */
-public class IntegerBsonReference extends VCoreBsonReference<Integer> {
-    public IntegerBsonReference(@Nonnull VCoreSerializableJson vCoreSerializableJson, @Nonnull String fieldName) {
-        super(vCoreSerializableJson, fieldName);
+public class IntegerBsonReference extends VCoreDataReference<Integer> {
+    public IntegerBsonReference(@Nonnull Map<String, Object> data, @Nonnull String fieldName) {
+        super(data, fieldName);
     }
 
     @Override

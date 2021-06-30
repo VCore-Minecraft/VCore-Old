@@ -141,4 +141,9 @@ public class VCoreSubsystemManager<T extends VCorePlugin<?,R>, R extends VCoreSu
     public boolean isLoaded() {
         return loaded;
     }
+
+    @Override
+    public void shutdown() {
+
+    }
 }

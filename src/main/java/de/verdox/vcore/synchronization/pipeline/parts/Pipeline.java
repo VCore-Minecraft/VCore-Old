@@ -4,6 +4,7 @@
 
 package de.verdox.vcore.synchronization.pipeline.parts;
 
+import de.verdox.vcore.plugin.SystemLoadable;
 import de.verdox.vcore.synchronization.pipeline.datatypes.VCoreData;
 import de.verdox.vcore.synchronization.pipeline.parts.cache.GlobalCache;
 import de.verdox.vcore.synchronization.pipeline.parts.local.LocalCache;
@@ -13,6 +14,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 
 /**
@@ -20,19 +22,37 @@ import java.util.function.Consumer;
  * @Author: Lukas Jonsson (Verdox)
  * @date 24.06.2021 17:47
  */
-public interface Pipeline {
+public interface Pipeline extends SystemLoadable {
 
-    <T extends VCoreData> T load(@Nonnull Class<? extends T> type, @Nonnull UUID uuid, @Nonnull LoadingStrategy loadingStrategy);
+    default <T extends VCoreData> T load(@Nonnull Class<? extends T> type, @Nonnull UUID uuid, @Nonnull LoadingStrategy loadingStrategy){
+        return load(type, uuid, loadingStrategy, false, null);
+    }
+    default <T extends VCoreData> CompletableFuture<T> loadAsync(@Nonnull Class<? extends T> type, @Nonnull UUID uuid, @Nonnull LoadingStrategy loadingStrategy){
+        return loadAsync(type, uuid, loadingStrategy, false, null);
+    }
 
-    <T extends VCoreData> T load(@Nonnull Class<? extends T> type, @Nonnull UUID uuid, @Nonnull LoadingStrategy loadingStrategy, boolean createIfNotExist);
+    default <T extends VCoreData> T load(@Nonnull Class<? extends T> type, @Nonnull UUID uuid, @Nonnull LoadingStrategy loadingStrategy, boolean createIfNotExist){
+        return load(type, uuid, loadingStrategy, createIfNotExist, null);
+    }
+    default <T extends VCoreData> CompletableFuture<T> loadAsync(@Nonnull Class<? extends T> type, @Nonnull UUID uuid, @Nonnull LoadingStrategy loadingStrategy, boolean createIfNotExist){
+        return loadAsync(type, uuid, loadingStrategy, createIfNotExist, null);
+    }
 
-    <T extends VCoreData> T load(@Nonnull Class<? extends T> type, @Nonnull UUID uuid, @Nonnull LoadingStrategy loadingStrategy, @Nullable Consumer<T> callback);
+    default <T extends VCoreData> T load(@Nonnull Class<? extends T> type, @Nonnull UUID uuid, @Nonnull LoadingStrategy loadingStrategy, @Nullable Consumer<T> callback){
+        return load(type, uuid, loadingStrategy, false, callback);
+    }
+    default <T extends VCoreData> CompletableFuture<T> loadAsync(@Nonnull Class<? extends T> type, @Nonnull UUID uuid, @Nonnull LoadingStrategy loadingStrategy, @Nullable Consumer<T> callback){
+        return loadAsync(type, uuid, loadingStrategy, false, callback);
+    }
 
     <T extends VCoreData> T load(@Nonnull Class<? extends T> type, @Nonnull UUID uuid, @Nonnull LoadingStrategy loadingStrategy, boolean createIfNotExist, @Nullable Consumer<T> callback);
+    <T extends VCoreData> CompletableFuture<T> loadAsync(@Nonnull Class<? extends T> type, @Nonnull UUID uuid, @Nonnull LoadingStrategy loadingStrategy, boolean createIfNotExist, @Nullable Consumer<T> callback);
 
     <T extends VCoreData> Set<T> loadAllData(@Nonnull Class<? extends T> type, @Nonnull LoadingStrategy loadingStrategy);
+    <T extends VCoreData> CompletableFuture<Set<T>> loadAllDataAsync(@Nonnull Class<? extends T> type, @Nonnull LoadingStrategy loadingStrategy);
 
     <T extends VCoreData> boolean exist(@Nonnull Class<? extends T> type, @Nonnull UUID uuid, @Nonnull QueryStrategy... strategies);
+    <T extends VCoreData> CompletableFuture<Boolean> existAsync(@Nonnull Class<? extends T> type, @Nonnull UUID uuid, @Nonnull QueryStrategy... strategies);
 
     LocalCache getLocalCache();
 

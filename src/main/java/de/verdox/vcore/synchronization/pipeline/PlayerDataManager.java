@@ -4,6 +4,7 @@
 
 package de.verdox.vcore.synchronization.pipeline;
 
+import de.verdox.vcore.plugin.SystemLoadable;
 import de.verdox.vcore.plugin.VCorePlugin;
 import de.verdox.vcore.synchronization.pipeline.datatypes.PlayerData;
 import de.verdox.vcore.synchronization.pipeline.player.events.PlayerPreSessionLoadEvent;
@@ -17,49 +18,55 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerKickEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
+import javax.annotation.Nonnull;
 import java.util.UUID;
+import java.util.function.Consumer;
 
 /**
  * @version 1.0
  * @Author: Lukas Jonsson (Verdox)
  * @date 26.06.2021 00:33
  */
-public class PlayerDataManager {
+public class PlayerDataManager implements SystemLoadable {
     private final PipelineManager pipelineManager;
     protected final VCorePlugin<?,?> plugin;
+    private boolean loaded;
 
     public PlayerDataManager(PipelineManager pipelineManager) {
         this.pipelineManager = pipelineManager;
         this.plugin = pipelineManager.getPlugin();
+        loaded = true;
     }
 
-    protected final void loginPipeline(UUID player){
-        plugin.getEventBus().post(new PlayerPreSessionLoadEvent(player));
+    protected final void loginPipeline(@Nonnull UUID player){
+        plugin.consoleMessage("&eHandling Player Join &b"+player,false);
+        plugin.getServices().eventBus.post(new PlayerPreSessionLoadEvent(player));
         plugin.createTaskBatch().doAsync(() -> {
-            plugin.getSubsystemManager().getActivePlayerDataClasses()
-                    .forEach(aClass -> {
-                        pipelineManager.loadFromPipeline(aClass, player, true);
-                    });
-        }).doSync(() -> {
-            plugin.getEventBus().post(new PlayerSessionLoadedEvent(player, System.currentTimeMillis()));
-        }).executeBatch();
+            plugin.getServices().getSubsystemManager().getActivePlayerDataClasses()
+                    .forEach(aClass -> pipelineManager.loadFromPipeline(aClass, player, true));
+        }).doSync(() -> plugin.getServices().eventBus.post(new PlayerSessionLoadedEvent(player, System.currentTimeMillis()))).executeBatch();
     }
 
-    protected final void logoutPipeline(UUID player){
-        plugin.getEventBus().post(new PlayerPreSessionUnloadEvent(player));
-        plugin.createTaskBatch().doAsync(() -> {
-            plugin.getSubsystemManager().getActivePlayerDataClasses()
-                    .stream()
-                    .distinct()
-                    .forEach(aClass -> {
-                        if(!pipelineManager.getLocalCache().dataExist(aClass, player))
-                            return;
-                        PlayerData playerData = plugin.getDataPipeline().getLocalCache().getData(aClass, player);
-                        playerData.save(true,false);
-                        playerData.cleanUp();
-                        pipelineManager.getLocalCache().remove(aClass, player);
-                    });
-        }).executeBatch();
+    protected final void logoutPipeline(@Nonnull UUID player){
+        plugin.getServices().eventBus.post(new PlayerPreSessionUnloadEvent(player));
+        plugin.createTaskBatch()
+                .doAsync(() -> {
+                    plugin.getServices().getSubsystemManager().getActivePlayerDataClasses()
+                            .forEach(aClass -> {
+                                PlayerData data = pipelineManager.getLocalCache().getData(aClass, player);
+                                data.save(true);
+                            });
+                }).executeBatch();
+    }
+
+    @Override
+    public boolean isLoaded() {
+        return loaded;
+    }
+
+    @Override
+    public void shutdown() {
+
     }
 
     public static class Bukkit extends PlayerDataManager implements Listener {
@@ -98,7 +105,7 @@ public class PlayerDataManager {
         }
 
         @net.md_5.bungee.event.EventHandler
-        public void onJoin(PlayerDisconnectEvent e){
+        public void onKick(PlayerDisconnectEvent e){
             logoutPipeline(e.getPlayer().getUniqueId());
         }
     }

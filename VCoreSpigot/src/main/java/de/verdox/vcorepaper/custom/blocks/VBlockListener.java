@@ -5,6 +5,7 @@ import de.verdox.vcore.plugin.VCorePlugin;
 import de.verdox.vcorepaper.VCorePaper;
 import de.verdox.vcorepaper.custom.blocks.enums.VBlockEventPermission;
 import de.verdox.vcorepaper.custom.blocks.files.VBlockSaveFile;
+import io.netty.util.concurrent.DefaultThreadFactory;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.block.Block;
@@ -19,7 +20,7 @@ import java.util.concurrent.Executors;
 
 public class VBlockListener extends VCoreListener.VCoreBukkitListener {
     private final CustomBlockManager vBlockManager;
-    private final ExecutorService threadPool = Executors.newSingleThreadExecutor();
+    private final ExecutorService threadPool = Executors.newFixedThreadPool(4, new DefaultThreadFactory("VBlockChunk-Thread"));
 
     public VBlockListener(VCorePlugin.Minecraft plugin, CustomBlockManager vBlockManager) {
         super(plugin);
@@ -33,17 +34,12 @@ public class VBlockListener extends VCoreListener.VCoreBukkitListener {
         Chunk chunk = e.getChunk();
         if(vBlockManager.isCached(chunk))
             return;
-        Bukkit.getScheduler().runTaskAsynchronously(plugin,() -> {
+        threadPool.submit(() -> {
             vBlockManager
                     .getVBlockStorage()
                     .findCustomBlockLocations(chunk)
                     .forEach(vBlockManager::loadSaveFile);
         });
-        //threadPool.submit(() -> {
-            //long time = System.currentTimeMillis();
-
-            //VCorePaper.getInstance().consoleMessage("&eChunkData loaded in&7: "+(System.currentTimeMillis() - time)+"ms",true);
-        //});
     }
 
     @EventHandler
@@ -51,20 +47,14 @@ public class VBlockListener extends VCoreListener.VCoreBukkitListener {
         Chunk chunk = e.getChunk();
         if(!vBlockManager.isCached(chunk))
             return;
-        Bukkit.getScheduler().runTaskAsynchronously(plugin,() -> {
-            //long time = System.currentTimeMillis();
+        threadPool.submit(() -> {
             vBlockManager.getDataOfChunk(chunk)
-                    //.filter(BlockPersistentData::readyToBeCleaned)
                     .forEach(vBlockSaveFile -> {
                         if(e.isSaveChunk())
                             vBlockSaveFile.save();
                         vBlockManager.unloadSaveFile(vBlockSaveFile);
                     });
-            //VCorePaper.getInstance().consoleMessage("&eChunkData unloaded in&7: "+(System.currentTimeMillis() - time)+"ms",true);
         });
-        //threadPool.submit(() -> {
-//
-        //});
     }
 
     @EventHandler
@@ -174,7 +164,7 @@ public class VBlockListener extends VCoreListener.VCoreBukkitListener {
 
     @EventHandler
     public void save(WorldSaveEvent e){
-        Bukkit.getScheduler().runTaskAsynchronously(plugin,() -> {
+        threadPool.submit(() -> {
             //long time = System.currentTimeMillis();
             for (Chunk chunk : e.getWorld().getLoadedChunks()) {
                 vBlockManager.getDataOfChunk(chunk)

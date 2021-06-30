@@ -6,6 +6,7 @@ package de.verdox.vcore.synchronization.pipeline.parts.cache.redis;
 
 import de.verdox.vcore.synchronization.pipeline.datatypes.VCoreData;
 import de.verdox.vcore.synchronization.pipeline.interfaces.DataManipulator;
+import de.verdox.vcore.synchronization.pipeline.parts.DataSynchronizer;
 import org.redisson.api.RTopic;
 import org.redisson.api.listener.MessageListener;
 
@@ -36,17 +37,13 @@ public class RedisDataManipulator implements DataManipulator {
     }
 
     @Override
-    public void pushUpdate(VCoreData vCoreData, boolean async, Runnable callback) {
-        if(async)
-            vCoreData.getPlugin().async(() -> doPush(vCoreData, callback));
-        else
-            doPush(vCoreData, callback);
+    public void pushUpdate(VCoreData vCoreData, Runnable callback) {
+        doPush(vCoreData, callback);
     }
 
     private void doPush(VCoreData vCoreData, Runnable callback){
-        Map<String, Object> serialized = vCoreData.serialize();
-        this.redisCache.save(vCoreData.getClass(),vCoreData.getObjectUUID(), serialized);
-        dataTopic.publish(serialized);
+        dataTopic.publish(vCoreData.serialize());
+        vCoreData.getPlugin().getServices().getPipeline().getSynchronizer().synchronize(DataSynchronizer.DataSourceType.LOCAL, DataSynchronizer.DataSourceType.GLOBAL_CACHE, vCoreData.getClass(), vCoreData.getObjectUUID());
         callback.run();
     }
 }

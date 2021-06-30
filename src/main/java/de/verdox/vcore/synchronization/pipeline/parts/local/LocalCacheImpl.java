@@ -10,10 +10,7 @@ import de.verdox.vcore.plugin.subsystem.VCoreSubsystem;
 
 import javax.annotation.Nonnull;
 import java.lang.reflect.InvocationTargetException;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -86,7 +83,7 @@ public class LocalCacheImpl implements LocalCache{
             return getData(dataClass,objectUUID);
 
         try {
-            S dataObject =  dataClass.getDeclaredConstructor(VCorePlugin.class,UUID.class).newInstance(plugin,objectUUID);
+            S dataObject =  dataClass.getDeclaredConstructor(VCorePlugin.class,UUID.class, Map.class).newInstance(plugin,objectUUID, new HashMap<>());
             return dataClass.cast(dataObject);
         } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
             e.printStackTrace();

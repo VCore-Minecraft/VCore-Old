@@ -13,6 +13,8 @@ import org.bukkit.ChatColor;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -23,6 +25,25 @@ public class BukkitPlayerUtil {
 
     public void sendPlayerMessage(Player player, ChatMessageType chatMessageType, String message){
         player.spigot().sendMessage(chatMessageType,new TextComponent(ChatColor.translateAlternateColorCodes('&',message)));
+    }
+
+    public String serializePotionEffect(PotionEffect potionEffect){
+        int amplifier = potionEffect.getAmplifier();
+        int duration = potionEffect.getDuration();
+        String type = potionEffect.getType().getName();
+        return type+";"+duration+";"+amplifier;
+    }
+
+    public PotionEffect deSerializePotionEffect(String serialized){
+        String[] split = serialized.split(";");
+        if(split.length != 3)
+            throw new IllegalArgumentException("Wrong format of: "+serialized);
+        PotionEffectType potionEffectType = PotionEffectType.getByName(split[0]);
+        if(potionEffectType == null)
+            throw new IllegalArgumentException("Unknown potion Effect Type: "+split[0]);
+        int duration = Integer.parseInt(split[1]);
+        int amplifier = Integer.parseInt(split[2]);
+        return new PotionEffect(potionEffectType, duration, amplifier);
     }
 
     public Set<ChunkKey> getChunksInServerViewDistance(Player player){

@@ -16,6 +16,8 @@ import de.verdox.vcorepaper.VCorePaper;
 import de.verdox.vcorepaper.bukkitplayerhandler.playerdata.PlayerHandlerData;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.player.PlayerQuitEvent;
 
 import java.util.UUID;
 
@@ -32,9 +34,20 @@ public class PlayerListener extends VCoreListener.VCoreBukkitListener {
     @Subscribe
     public void onSessionLoaded(PlayerSessionLoadedEvent e){
         UUID playerUUID = e.getPlayerUUID();
-        PlayerHandlerData playerHandlerData = VCorePaper.getInstance().getDataPipeline().load(PlayerHandlerData.class, playerUUID, Pipeline.LoadingStrategy.LOAD_PIPELINE,true);
+        PlayerHandlerData playerHandlerData = VCorePaper.getInstance().getServices().getPipeline().load(PlayerHandlerData.class, playerUUID, Pipeline.LoadingStrategy.LOAD_PIPELINE,true);
         if(playerHandlerData.restoreVanillaInventory){
-            playerHandlerData.restoreInventory();
+            playerHandlerData.restoreInventory(() -> Bukkit.getPlayer(e.getPlayerUUID()));
+            playerHandlerData.save(true);
         }
+    }
+
+    @EventHandler
+    public void playerLeave(PlayerQuitEvent e){
+        Player player = e.getPlayer();
+        getPlugin().async(() -> {
+            PlayerHandlerData playerHandlerData = VCorePaper.getInstance().getServices().getPipeline().load(PlayerHandlerData.class, player.getUniqueId(), Pipeline.LoadingStrategy.LOAD_PIPELINE,true);
+            playerHandlerData.saveInventory(() -> player );
+            playerHandlerData.save(true);
+        });
     }
 }

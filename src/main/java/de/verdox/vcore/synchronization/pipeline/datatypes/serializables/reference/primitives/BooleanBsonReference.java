@@ -5,22 +5,23 @@
 package de.verdox.vcore.synchronization.pipeline.datatypes.serializables.reference.primitives;
 
 import de.verdox.vcore.synchronization.pipeline.datatypes.serializables.VCoreSerializableJson;
-import de.verdox.vcore.synchronization.pipeline.datatypes.serializables.reference.VCoreBsonReference;
+import de.verdox.vcore.synchronization.pipeline.datatypes.serializables.reference.VCoreDataReference;
 
 import javax.annotation.Nonnull;
+import java.util.Map;
 
 /**
  * @version 1.0
  * @Author: Lukas Jonsson (Verdox)
  * @date 25.06.2021 23:59
  */
-public class BooleanBsonReference extends VCoreBsonReference<Boolean> {
-    public BooleanBsonReference(@Nonnull VCoreSerializableJson vCoreSerializableJson, @Nonnull String fieldName) {
-        super(vCoreSerializableJson, fieldName);
+public class BooleanBsonReference extends VCoreDataReference<Boolean> {
+    public BooleanBsonReference(@Nonnull Map<String, Object> data, @Nonnull String fieldName) {
+        super(data, fieldName);
     }
 
     @Override
     public Boolean defaultValue() {
-        return null;
+        return false;
     }
 }

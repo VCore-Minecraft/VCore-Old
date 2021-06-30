@@ -14,6 +14,7 @@ import de.verdox.vcore.plugin.VCorePlugin;
 import de.verdox.vcore.synchronization.redisson.RedisConnection;
 import org.redisson.api.*;
 import org.redisson.codec.SerializationCodec;
+import org.redisson.codec.TypedJsonJacksonCodec;
 
 import javax.annotation.Nonnull;
 import java.util.*;
@@ -49,7 +50,7 @@ public class RedisCache extends RedisConnection implements GlobalCache {
 
     @Override
     public Map<String, Object> getObjectCache(Class<? extends VCoreData> dataClass, UUID objectUUID) {
-        RMap<String, Object> objectCache = redissonClient.getMap(plugin.getPluginName()+"Cache:"+objectUUID+":"+ GlobalStorage.getDataStorageIdentifier(dataClass), new SerializationCodec());
+        RMap<String, Object> objectCache = redissonClient.getMap(plugin.getPluginName()+"Cache:"+objectUUID+":"+ GlobalStorage.getDataStorageIdentifier(dataClass), new TypedJsonJacksonCodec(dataClass));
         objectCache.expire(12, TimeUnit.HOURS);
         return objectCache;
     }

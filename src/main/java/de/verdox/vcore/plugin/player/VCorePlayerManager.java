@@ -26,7 +26,7 @@ public class VCorePlayerManager {
     private final Map<UUID, VCorePlayer> cache = new ConcurrentHashMap<>();
 
     public VCorePlayerManager(VCorePlugin<?,?> vCorePlugin){
-        vCorePlugin.getEventBus().register(new PlayerRedisListener());
+        vCorePlugin.getServices().eventBus.register(new PlayerRedisListener());
     }
 
     public VCorePlayer getPlayer(UUID playerUUID){

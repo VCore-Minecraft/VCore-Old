@@ -37,7 +37,7 @@ public interface GlobalCache extends DataProvider {
             }
 
             @Override
-            public void pushUpdate(VCoreData vCoreData, boolean async, Runnable callback) {
+            public void pushUpdate(VCoreData vCoreData, Runnable callback) {
 
             }
         };
@@ -48,6 +48,10 @@ public interface GlobalCache extends DataProvider {
         if(vCoreDataContext == null)
             return DataContext.GLOBAL;
         return vCoreDataContext.dataContext();
+    }
+
+    static VCoreDataContext getDataContext(Class<? extends VCoreData> dataClass){
+        return dataClass.getAnnotation(VCoreDataContext.class);
     }
 
     static PreloadStrategy getPreloadStrategy(Class<? extends VCoreData> dataClass){

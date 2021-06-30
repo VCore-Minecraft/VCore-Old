@@ -1,5 +1,6 @@
 package de.verdox.vcore.plugin.bukkit;
 
+import de.verdox.vcore.plugin.PluginServiceParts;
 import de.verdox.vcore.plugin.VCorePlugin;
 import de.verdox.vcore.plugin.subsystem.VCoreSubsystem;
 import org.bukkit.ChatColor;

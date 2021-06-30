@@ -24,6 +24,7 @@ import java.util.UUID;
 public class RedisMessaging extends RedisConnection implements MessagingService<RedisMessageBuilder> {
     private final RTopic rTopic;
     private final MessageListener<Message> messageListener;
+    private boolean loaded;
 
     public RedisMessaging(@Nonnull VCorePlugin<?, ?> plugin, boolean clusterMode, @Nonnull String[] addressArray, String redisPassword) {
         super(plugin, clusterMode, addressArray, redisPassword);
@@ -31,9 +32,10 @@ public class RedisMessaging extends RedisConnection implements MessagingService<
         this.messageListener = (channel, msg) -> {
             if(!(msg instanceof SimpleRedisMessage))
                 return;
-            plugin.getEventBus().post(new MessageEvent(msg));
+            plugin.getServices().eventBus.post(new MessageEvent(msg));
         };
         rTopic.addListener(Message.class, messageListener);
+        loaded = true;
     }
 
     @Override
@@ -49,5 +51,15 @@ public class RedisMessaging extends RedisConnection implements MessagingService<
     @Override
     public String getSenderName() {
         return plugin.getPluginName();
+    }
+
+    @Override
+    public boolean isLoaded() {
+        return loaded;
+    }
+
+    @Override
+    public void shutdown() {
+        rTopic.removeListener(messageListener);
     }
 }

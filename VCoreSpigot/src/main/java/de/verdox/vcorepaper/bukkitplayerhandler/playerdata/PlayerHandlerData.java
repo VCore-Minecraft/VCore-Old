@@ -8,6 +8,7 @@ import de.verdox.vcore.synchronization.pipeline.annotations.*;
 import de.verdox.vcore.synchronization.pipeline.datatypes.PlayerData;
 import de.verdox.vcore.plugin.player.VCorePlayer;
 import de.verdox.vcore.plugin.VCorePlugin;
+import de.verdox.vcore.util.TypeUtil;
 import de.verdox.vcore.util.VCoreUtil;
 import de.verdox.vcorepaper.VCorePaper;
 import de.verdox.vcorepaper.bukkitplayerhandler.BukkitPlayerHandler;
@@ -16,10 +17,13 @@ import net.md_5.bungee.api.ChatMessageType;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
+import javax.annotation.Nonnull;
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
 /**
@@ -29,7 +33,7 @@ import java.util.function.Supplier;
  */
 @DataStorageIdentifier(identifier = "BukkitPlayerHandlerPlayerData")
 @RequiredSubsystemInfo(parentSubSystem = BukkitPlayerHandler.class)
-@VCoreDataContext(preloadStrategy = PreloadStrategy.LOAD_ON_NEED, dataContext = DataContext.GLOBAL)
+@VCoreDataContext(preloadStrategy = PreloadStrategy.LOAD_ON_NEED, dataContext = DataContext.GLOBAL, cleanOnNoUse = false, time = 30, timeUnit = TimeUnit.MINUTES)
 public class PlayerHandlerData extends PlayerData {
 
     @VCorePersistentData
@@ -72,49 +76,34 @@ public class PlayerHandlerData extends PlayerData {
             return;
         ItemStack[] storageContents = player.getInventory().getStorageContents().clone();
         ItemStack[] armorContents = player.getInventory().getArmorContents().clone();
-        SerializableJsonInventory serializableInventory = new SerializableJsonInventory(inventoryID,storageContents,armorContents);
+        ItemStack[] enderChest = player.getEnderChest().getStorageContents();
+        ItemStack[] extraContents = player.getInventory().getExtraContents();
+        SerializableJsonInventory serializableInventory = new SerializableJsonInventory(inventoryID,storageContents,armorContents, extraContents, enderChest, player.getHealth(), player.getFoodLevel(), player.getExp(), new HashSet<>(player.getActivePotionEffects()));
         inventoryCache.put(inventoryID,serializableInventory);
         VCorePaper.getInstance().consoleMessage("&eInventory &6"+inventoryID+" &eof player &b"+getObjectUUID()+" &esaved&7!", true);
+        save(true);
     }
 
-    public void restoreInventory(){
+    public void restoreInventory(@Nonnull Supplier<Player> supplier){
         if(this.activeInventoryID == null)
-            restoreInventory("vanilla");
+            restoreInventory("vanilla", supplier);
         else
-            restoreInventory(activeInventoryID);
+            restoreInventory(activeInventoryID, supplier);
     }
 
-    public void createInventory(String inventoryID){
-        inventoryCache.put(inventoryID,new SerializableJsonInventory(inventoryID,new ItemStack[0],new ItemStack[0]));
-    }
-
-    public boolean hasInventory(String inventoryID){
+    public boolean hasInventory(@Nonnull String inventoryID){
         return inventoryCache.containsKey(inventoryID);
     }
 
-    public void restoreInventory(String inventoryID){
-        VCorePlayer vCorePlayer = VCorePaper.getInstance().getVCorePlayerManager().getPlayer(getObjectUUID());
-        if(vCorePlayer == null)
-            return;
-        if(!vCorePlayer.isOnThisServer())
+    public void restoreInventory(@Nonnull String inventoryID, @Nonnull Supplier<Player> supplier){
+        Player player = supplier.get();
+        if(player == null)
             return;
         if(!inventoryCache.containsKey(inventoryID))
             return;
         this.activeInventoryID = inventoryID;
         SerializableJsonInventory serializableInventory = inventoryCache.get(inventoryID);
-        try{
-            ItemStack[] armorContents = serializableInventory.deSerializeArmorContents();
-            ItemStack[] storageContents = serializableInventory.deSerializeStorageContents();
-            if(armorContents != null)
-                vCorePlayer.toBukkitPlayer().getInventory().setArmorContents(armorContents);
-            if(storageContents != null)
-                vCorePlayer.toBukkitPlayer().getInventory().setStorageContents(storageContents);
-            VCoreUtil.getBukkitPlayerUtil().sendPlayerMessage(vCorePlayer.toBukkitPlayer(), ChatMessageType.ACTION_BAR, "&eInventar wurde geladen");
-            VCorePaper.getInstance().consoleMessage("&eInventory &6"+inventoryID+" &eof player &b"+getObjectUUID()+" &erestored&7!", true);
-        }
-        catch (IOException e){
-            e.printStackTrace();
-        }
+        serializableInventory.restoreInventory(player, null);
     }
 
     @Override
@@ -123,6 +112,6 @@ public class PlayerHandlerData extends PlayerData {
 
     @Override
     public void onCleanUp() {
-        saveInventory();
+
     }
 }

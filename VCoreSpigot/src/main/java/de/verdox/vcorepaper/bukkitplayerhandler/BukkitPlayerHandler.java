@@ -32,7 +32,7 @@ public class BukkitPlayerHandler extends VCoreSubsystem.Bukkit {
 
     @Override
     public void onSubsystemEnable() {
-        getVCorePlugin().getEventBus().register(new PlayerListener(this));
+        getVCorePlugin().getServices().eventBus.register(new PlayerListener(this));
     }
 
     @Override

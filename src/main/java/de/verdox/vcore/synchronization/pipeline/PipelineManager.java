@@ -4,17 +4,21 @@
 
 package de.verdox.vcore.synchronization.pipeline;
 
+import de.verdox.vcore.performance.concurrent.CatchingRunnable;
 import de.verdox.vcore.synchronization.pipeline.annotations.DataContext;
 import de.verdox.vcore.synchronization.pipeline.annotations.PreloadStrategy;
+import de.verdox.vcore.synchronization.pipeline.annotations.VCoreDataContext;
 import de.verdox.vcore.synchronization.pipeline.datatypes.VCoreData;
 import de.verdox.vcore.synchronization.pipeline.parts.DataSynchronizer;
 import de.verdox.vcore.synchronization.pipeline.parts.Pipeline;
 import de.verdox.vcore.synchronization.pipeline.parts.cache.GlobalCache;
 import de.verdox.vcore.synchronization.pipeline.parts.local.LocalCache;
 import de.verdox.vcore.synchronization.pipeline.parts.storage.GlobalStorage;
-import de.verdox.vcore.plugin.SystemLoadable;
 import de.verdox.vcore.plugin.VCorePlugin;
 import de.verdox.vcore.plugin.subsystem.VCoreSubsystem;
+import de.verdox.vcore.synchronization.pipeline.parts.storage.PipelineTaskScheduler;
+import io.netty.util.concurrent.DefaultThreadFactory;
+import org.bukkit.Bukkit;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -22,6 +26,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.*;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -30,19 +35,20 @@ import java.util.stream.Collectors;
  * @Author: Lukas Jonsson (Verdox)
  * @date 24.06.2021 15:22
  */
-public class PipelineManager implements Pipeline, SystemLoadable {
-
-    public static final long EXPIRY_TIME_SECONDS = 60L * 1800;
+public class PipelineManager implements Pipeline {
 
     private final VCorePlugin<?, ?> plugin;
-    private final DataSynchronizer pipelineDataSynchronizer;
+    private final PipelineDataSynchronizer pipelineDataSynchronizer;
     final GlobalStorage globalStorage;
     final GlobalCache globalCache;
     final LocalCache localCache;
+    private ExecutorService executorService;
     private boolean loaded;
+    private final PipelineTaskScheduler pipelineTaskScheduler;
 
     public PipelineManager(VCorePlugin<?,?> plugin, @Nonnull LocalCache localCache, @Nullable GlobalCache globalCache, @Nullable GlobalStorage globalStorage){
         this.plugin = plugin;
+        this.executorService  = Executors.newCachedThreadPool(new DefaultThreadFactory(plugin.getPluginName()+"Pipeline"));
         this.globalStorage = globalStorage;
         this.globalCache = globalCache;
         this.localCache = localCache;
@@ -50,36 +56,50 @@ public class PipelineManager implements Pipeline, SystemLoadable {
         plugin.consoleMessage("&eLocalCache: &b"+localCache, 1,false);
         plugin.consoleMessage("&eGlobalCache: &b"+globalCache, 1,false);
         plugin.consoleMessage("&eGlobalStorage: &b"+globalStorage, 1,false);
+        this.pipelineTaskScheduler = new PipelineTaskSchedulerImpl(this);
         this.pipelineDataSynchronizer = new PipelineDataSynchronizer(this);
-        plugin.getScheduler().asyncInterval(() -> {
-
-            plugin.getSubsystemManager().getRegisteredPlayerDataClasses().forEach(aClass -> {
+        plugin.getServices().getVCoreScheduler().asyncInterval(() -> {
+            plugin.getServices().getSubsystemManager().getRegisteredPlayerDataClasses().forEach(aClass -> {
+                VCoreDataContext vCoreDataContext = GlobalCache.getDataContext(aClass);
+                if(vCoreDataContext == null)
+                    return;
+                if(!vCoreDataContext.cleanOnNoUse())
+                    return;
                 Set<UUID> cachedUUIDs = localCache.getSavedUUIDs(aClass);
                 if(cachedUUIDs.isEmpty())
                     return;
                 cachedUUIDs.forEach(uuid -> {
                     VCoreData data = localCache.getData(aClass, uuid);
+                    data.save(true);
+                    // If Player is online don't unload
+                    if(Bukkit.getPlayer(data.getObjectUUID()) != null)
+                        return;
                     if(!data.isExpired())
                         return;
-                    data.save(true, false);
+                    data.cleanUp();
                     localCache.remove(aClass, uuid);
                 });
             });
-        }, 20L*10, 20L*500);
+            plugin.getServices().getSubsystemManager().getRegisteredServerDataClasses().forEach(aClass -> {
+                VCoreDataContext vCoreDataContext = GlobalCache.getDataContext(aClass);
+                if(vCoreDataContext == null)
+                    return;
+                if(!vCoreDataContext.cleanOnNoUse())
+                    return;
+                Set<UUID> cachedUUIDs = localCache.getSavedUUIDs(aClass);
+                if(cachedUUIDs.isEmpty())
+                    return;
+                cachedUUIDs.forEach(uuid -> {
+                    VCoreData data = localCache.getData(aClass, uuid);
+                    data.save(true);
+                    if(!data.isExpired())
+                        return;
+                    data.cleanUp();
+                    localCache.remove(aClass, uuid);
+                });
+            });
+        }, 20L*10, 20L*300);
         loaded = true;
-    }
-
-    @Override
-    public final <T extends VCoreData> T load(@Nonnull Class<? extends T> type, @Nonnull UUID uuid, @Nonnull LoadingStrategy loadingStrategy, boolean createIfNotExist){
-        return load(type, uuid, loadingStrategy, createIfNotExist, null);
-    }
-    @Override
-    public final <T extends VCoreData> T load(@Nonnull Class<? extends T> type, @Nonnull UUID uuid, @Nonnull LoadingStrategy loadingStrategy, @Nullable Consumer<T> callback){
-        return load(type, uuid, loadingStrategy, false, callback);
-    }
-    @Override
-    public final <T extends VCoreData> T load(@Nonnull Class<? extends T> type, @Nonnull UUID uuid, @Nonnull LoadingStrategy loadingStrategy){
-        return load(type, uuid, loadingStrategy, null);
     }
 
     /**
@@ -92,6 +112,17 @@ public class PipelineManager implements Pipeline, SystemLoadable {
      */
     @Override
     public final <T extends VCoreData> T load(@Nonnull Class<? extends T> type, @Nonnull UUID uuid, @Nonnull LoadingStrategy loadingStrategy, boolean createIfNotExist, @Nullable Consumer<T> callback){
+        if(!Bukkit.isPrimaryThread()){
+            PipelineTaskScheduler.PipelineTask<T> existingTask = pipelineTaskScheduler.getExistingPipelineTask(type, uuid);
+            if(existingTask != null){
+                try {
+                    return existingTask.getCompletableFuture().get(); } catch (InterruptedException | ExecutionException e) { e.printStackTrace();
+                }
+            }
+        }
+        pipelineTaskScheduler.removePipelineTask(uuid);
+        PipelineTaskScheduler.PipelineTask<T> pipelineTask = pipelineTaskScheduler.schedulePipelineTask(PipelineTaskScheduler.PipelineAction.LOAD, loadingStrategy, type, uuid);
+
         VCoreSubsystem<?> subsystem = plugin.findDependSubsystem(type);
         if(subsystem == null)
             throw new NullPointerException("Subsystem of "+type+" could not be found in plugin"+plugin.getPluginName());
@@ -100,25 +131,43 @@ public class PipelineManager implements Pipeline, SystemLoadable {
                 if(loadingStrategy.equals(LoadingStrategy.LOAD_LOCAL))
                     throw new NullPointerException(type+" with uuid "+uuid+" does not exist in local!");
                 else{
-                    plugin.async(() -> {
+                    executorService.submit(new CatchingRunnable(() -> {
                         T data = loadFromPipeline(type, uuid, createIfNotExist);
+                        pipelineTask.getCompletableFuture().complete(data);
                         if(callback != null)
                             callback.accept(data);
-                    });
+                    }));
                 }
             }
-            if(!localCache.dataExist(type, uuid))
+            if(!localCache.dataExist(type, uuid)){
+                pipelineTask.getCompletableFuture().complete(null);
                 return null;
+            }
             T data = localCache.getData(type, uuid);
+            if(callback != null)
+                callback.accept(data);
             data.updateLastUse();
+            pipelineTask.getCompletableFuture().complete(data);
             return data;
         }
         if(localCache.dataExist(type, uuid)) {
             T data = localCache.getData(type, uuid);
             data.updateLastUse();
+            pipelineTask.getCompletableFuture().complete(data);
+            if(callback != null)
+                callback.accept(data);
             return data;
         }
-        return loadFromPipeline(type, uuid, createIfNotExist);
+        T data = loadFromPipeline(type, uuid, createIfNotExist);
+        pipelineTask.getCompletableFuture().complete(data);
+        return data;
+    }
+
+    @Override
+    public <T extends VCoreData> CompletableFuture<T> loadAsync(@Nonnull Class<? extends T> type, @Nonnull UUID uuid, @Nonnull LoadingStrategy loadingStrategy, boolean createIfNotExist, @org.jetbrains.annotations.Nullable Consumer<T> callback) {
+        CompletableFuture<T> completableFuture = new CompletableFuture<>();
+        executorService.submit(new CatchingRunnable(() -> completableFuture.complete(load(type, uuid, loadingStrategy, createIfNotExist, callback))));
+        return completableFuture;
     }
 
     @Override
@@ -127,9 +176,16 @@ public class PipelineManager implements Pipeline, SystemLoadable {
         if(loadingStrategy.equals(LoadingStrategy.LOAD_PIPELINE))
             synchronizeData(type);
         else if(loadingStrategy.equals(LoadingStrategy.LOAD_LOCAL_ELSE_LOAD))
-            plugin.async(() -> synchronizeData(type));
+            executorService.submit(new CatchingRunnable(() -> synchronizeData(type)));
         getLocalCache().getSavedUUIDs(type).forEach(uuid -> set.add(getLocalCache().getData(type, uuid)));
         return set;
+    }
+
+    @Override
+    public <T extends VCoreData> CompletableFuture<Set<T>> loadAllDataAsync(@Nonnull Class<? extends T> type, @Nonnull LoadingStrategy loadingStrategy) {
+        CompletableFuture<Set<T>> completableFuture = new CompletableFuture<>();
+        executorService.submit(new CatchingRunnable(() -> completableFuture.complete(loadAllData(type,loadingStrategy))));
+        return completableFuture;
     }
 
     @Override
@@ -158,6 +214,13 @@ public class PipelineManager implements Pipeline, SystemLoadable {
             }
         }
         return false;
+    }
+
+    @Override
+    public <T extends VCoreData> CompletableFuture<Boolean> existAsync(@Nonnull Class<? extends T> type, @Nonnull UUID uuid, @Nonnull QueryStrategy... strategies) {
+        CompletableFuture<Boolean> completableFuture = new CompletableFuture<>();
+        executorService.submit(new CatchingRunnable(() -> completableFuture.complete(exist(type, uuid, strategies))));
+        return completableFuture;
     }
 
     private <T extends VCoreData> void synchronizeData(@Nonnull Class<? extends T> type){
@@ -191,16 +254,16 @@ public class PipelineManager implements Pipeline, SystemLoadable {
     @Override
     public void saveAllData() {
         // getLocalCache().getSavedUUIDs()
-        plugin.getSubsystemManager().getActiveServerDataClasses()
-                .forEach(aClass -> getLocalCache().getSavedUUIDs(aClass).forEach(uuid -> getLocalCache().getData(aClass, uuid).save(true,false)));
-        plugin.getSubsystemManager().getActivePlayerDataClasses()
-                .forEach(aClass -> getLocalCache().getSavedUUIDs(aClass).forEach(uuid -> getLocalCache().getData(aClass, uuid).save(true, false)));
+        plugin.getServices().getSubsystemManager().getActiveServerDataClasses()
+                .forEach(aClass -> getLocalCache().getSavedUUIDs(aClass).forEach(uuid -> getLocalCache().getData(aClass, uuid).save(true)));
+        plugin.getServices().getSubsystemManager().getActivePlayerDataClasses()
+                .forEach(aClass -> getLocalCache().getSavedUUIDs(aClass).forEach(uuid -> getLocalCache().getData(aClass, uuid).save(true)));
     }
 
     @Override
     public void preloadAllData(){
-        plugin.getSubsystemManager().getActiveServerDataClasses().forEach(this::preloadData);
-        plugin.getSubsystemManager().getActivePlayerDataClasses().forEach(this::preloadData);
+        plugin.getServices().getSubsystemManager().getActiveServerDataClasses().forEach(this::preloadData);
+        plugin.getServices().getSubsystemManager().getActivePlayerDataClasses().forEach(this::preloadData);
     }
 
     @Override
@@ -214,17 +277,17 @@ public class PipelineManager implements Pipeline, SystemLoadable {
         }
         else if(globalCache != null && globalCache.dataExist(dataClass,uuid)) {
             plugin.consoleMessage("&eFound Data in Redis Cache &8[&b"+dataClass.getSimpleName()+"&8]", 1,true);
-            pipelineDataSynchronizer.synchronize(DataSynchronizer.DataSourceType.GLOBAL_CACHE, DataSynchronizer.DataSourceType.LOCAL, dataClass, uuid);
+            pipelineDataSynchronizer.doSynchronisation(DataSynchronizer.DataSourceType.GLOBAL_CACHE, DataSynchronizer.DataSourceType.LOCAL, dataClass, uuid, null);
             //getRedisHandler().redisToLocal(dataClass, uuid);
         }
         else if(globalStorage != null && globalStorage.dataExist(dataClass,uuid)) {
             plugin.consoleMessage("&eFound Data in Database &8[&b"+dataClass.getSimpleName()+"&8]", 1,true);
             //getDatabaseHandler().databaseToLocal(dataClass,uuid);
-            pipelineDataSynchronizer.synchronize(DataSynchronizer.DataSourceType.GLOBAL_STORAGE, DataSynchronizer.DataSourceType.LOCAL, dataClass, uuid);
+            pipelineDataSynchronizer.doSynchronisation(DataSynchronizer.DataSourceType.GLOBAL_STORAGE, DataSynchronizer.DataSourceType.LOCAL, dataClass, uuid, null);
 
             if(GlobalCache.getContext(dataClass).equals(DataContext.GLOBAL))
                 //globalStorage.dataBaseToRedis(dataClass, uuid);
-                pipelineDataSynchronizer.synchronize(DataSynchronizer.DataSourceType.GLOBAL_STORAGE, DataSynchronizer.DataSourceType.GLOBAL_CACHE, dataClass, uuid);
+                pipelineDataSynchronizer.doSynchronisation(DataSynchronizer.DataSourceType.GLOBAL_STORAGE, DataSynchronizer.DataSourceType.GLOBAL_CACHE, dataClass, uuid, null);
         }
         else {
             if(!createIfNotExist)
@@ -250,15 +313,27 @@ public class PipelineManager implements Pipeline, SystemLoadable {
         if(!preloadStrategy.equals(PreloadStrategy.LOAD_BEFORE))
             return;
         if(globalCache != null)
-            globalCache.getSavedUUIDs(type).forEach(uuid -> loadFromPipeline(type, uuid, false));
+            globalCache.getSavedUUIDs(type).forEach(uuid -> pipelineDataSynchronizer.doSynchronisation(DataSynchronizer.DataSourceType.GLOBAL_CACHE, DataSynchronizer.DataSourceType.LOCAL, type, uuid, null));
         if(globalStorage != null)
-            globalStorage.getSavedUUIDs(type).forEach(uuid -> loadFromPipeline(type, uuid, false));
+            globalStorage.getSavedUUIDs(type).forEach(uuid -> pipelineDataSynchronizer.doSynchronisation(DataSynchronizer.DataSourceType.GLOBAL_STORAGE, DataSynchronizer.DataSourceType.LOCAL, type, uuid, null));
     }
 
 
     @Override
     public boolean isLoaded() {
         return loaded;
+    }
+
+    @Override
+    public void shutdown() {
+        pipelineDataSynchronizer.shutdown();
+        executorService.shutdown();
+        pipelineTaskScheduler.shutdown();
+        try { executorService.awaitTermination(5, TimeUnit.SECONDS); } catch (InterruptedException e) { e.printStackTrace(); }
+    }
+
+    public ExecutorService getExecutorService() {
+        return executorService;
     }
 
     public VCorePlugin<?, ?> getPlugin() {

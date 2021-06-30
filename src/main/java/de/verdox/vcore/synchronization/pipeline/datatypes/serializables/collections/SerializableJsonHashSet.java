@@ -6,6 +6,7 @@ package de.verdox.vcore.synchronization.pipeline.datatypes.serializables.collect
 
 import de.verdox.vcore.synchronization.pipeline.datatypes.serializables.VCoreSerializableJson;
 import de.verdox.vcore.synchronization.pipeline.datatypes.serializables.reference.collections.SetBsonReference;
+import org.bson.Document;
 
 /**
  * @version 1.0

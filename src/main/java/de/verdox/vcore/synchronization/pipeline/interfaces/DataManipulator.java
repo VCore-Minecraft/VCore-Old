@@ -4,6 +4,7 @@
 
 package de.verdox.vcore.synchronization.pipeline.interfaces;
 
+import de.verdox.vcore.plugin.SystemLoadable;
 import de.verdox.vcore.synchronization.pipeline.datatypes.VCoreData;
 
 /**
@@ -14,6 +15,6 @@ import de.verdox.vcore.synchronization.pipeline.datatypes.VCoreData;
 public interface DataManipulator {
 
     void cleanUp();
-    void pushUpdate(VCoreData vCoreData, boolean async, Runnable callback);
+    void pushUpdate(VCoreData vCoreData, Runnable callback);
 
 }

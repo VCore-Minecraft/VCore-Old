@@ -13,37 +13,22 @@ public class VCoreWaterfall extends VCorePlugin.BungeeCord {
 
     @Override
     public void onPluginEnable() {
-
-    }
-
-    @Override
-    public void onPluginDisable() {
         this.vCorePlayerManager = new VCorePlayerManager(this);
     }
 
     @Override
-    public boolean useRedisCluster() {
-        return false;
+    public void onPluginDisable() {
+
     }
 
     @Override
-    public String[] redisAddresses() {
-        return new String[0];
-    }
-
-    @Override
-    public String redisPassword() {
+    public List<VCoreSubsystem.BungeeCord> provideSubsystems() {
         return null;
     }
 
     @Override
     public boolean debug() {
         return false;
-    }
-
-    @Override
-    public Pipeline getDataPipeline() {
-        return null;
     }
 
     public VCorePlayerManager getVCorePlayerManager() {

@@ -22,9 +22,9 @@ import java.util.List;
  * @Author: Lukas Jonsson (Verdox)
  * @date 25.06.2021 23:00
  */
-public class VCorePipelineConfig extends VCoreYAMLConfig {
+public class PipelineConfig extends VCoreYAMLConfig {
 
-    public VCorePipelineConfig(VCorePlugin<?, ?> plugin, String fileName, String pluginDirectory) {
+    public PipelineConfig(VCorePlugin<?, ?> plugin, String fileName, String pluginDirectory) {
         super(plugin, fileName, pluginDirectory);
     }
 
@@ -59,7 +59,7 @@ public class VCorePipelineConfig extends VCoreYAMLConfig {
 
     @Override
     public void onInit() {
-
+        getPlugin().consoleMessage("&6Initializing PipelineConfig "+config.getFilePath(),true);
     }
 
     @Override

@@ -5,6 +5,7 @@
 package de.verdox.vcore.performance.concurrent;
 
 import de.verdox.vcore.plugin.VCorePlugin;
+import io.netty.util.concurrent.DefaultThreadFactory;
 import reactor.util.annotation.Nullable;
 
 import javax.annotation.Nonnull;
@@ -24,7 +25,7 @@ public abstract class TaskBatch<V extends VCorePlugin<?,?>> {
 
     private final List<TaskInfo> tasks = new ArrayList<>();
     private final V plugin;
-    private final ExecutorService executor = Executors.newSingleThreadExecutor();
+    private final ExecutorService executor = Executors.newSingleThreadExecutor(new DefaultThreadFactory("TaskBatch"));
     private final AtomicBoolean locked = new AtomicBoolean(false);
     private Runnable callback;
 

@@ -10,6 +10,7 @@ import de.verdox.vcorepaper.custom.CustomDataManager;
 import de.verdox.vcorepaper.custom.blocks.data.VBlockCustomData;
 import de.verdox.vcorepaper.custom.blocks.files.VBlockSaveFile;
 import de.verdox.vcorepaper.custom.blocks.files.VBlockStorage;
+import io.netty.util.concurrent.DefaultThreadFactory;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
@@ -30,7 +31,7 @@ public class CustomBlockManager extends CustomDataManager<Location, VBlockCustom
 
     private final VBlockStorage vBlockStorage;
     private final Map<SplitChunkKey, Map<LocationKey,VBlockSaveFile>> cache = new ConcurrentHashMap<>();
-    private final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
+    private final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor(new DefaultThreadFactory("CustomBlockManager"));
 
     public CustomBlockManager(VCorePaper vCorePaper) {
         super(vCorePaper);
@@ -98,7 +99,7 @@ public class CustomBlockManager extends CustomDataManager<Location, VBlockCustom
      * @param callback
      */
     public void VBlockCallback(Location location, Consumer<VBlock> callback){
-        Bukkit.getScheduler().runTaskAsynchronously(getVCorePaper().getPlugin(), () -> {
+        getVCorePaper().async(() -> {
             VBlock vBlock = wrap(VBlock.class,location);
             if(vBlock == null)
                 return;

@@ -43,6 +43,8 @@ public abstract class RedisConnection {
             else
                 config.useSingleServer().setAddress(addressArray[0]);
         }
+        config.setNettyThreads(4);
+        config.setThreads(8);
         this.redissonClient = Redisson.create(config);
     }
 }

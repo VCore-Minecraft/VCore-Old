@@ -32,6 +32,7 @@ public class MongoDBStorage implements GlobalStorage, RemoteStorage {
 
     private MongoClient mongoClient;
     private MongoDatabase mongoDatabase;
+    private VCorePlugin<?, ?> vCorePlugin;
     private String host;
     private String database;
     private int port;
@@ -40,12 +41,14 @@ public class MongoDBStorage implements GlobalStorage, RemoteStorage {
     //private final CodecRegistry codecRegistry;
 
     public MongoDBStorage(VCorePlugin<?,?> vCorePlugin, String host, String database, int port, String user, String password) {
+        this.vCorePlugin = vCorePlugin;
         this.host = host;
         this.database = database;
         this.port = port;
         this.user = user;
         this.password = password;
         //this.codecRegistry = fromRegistries(MongoClient.getDefaultCodecRegistry(),CodecRegistries.fromProviders(new UuidCodecProvider(UuidRepresentation.JAVA_LEGACY)));
+
         connect();
         vCorePlugin.consoleMessage("&eMongoDB Global Storage started",true);
     }
@@ -135,16 +138,17 @@ public class MongoDBStorage implements GlobalStorage, RemoteStorage {
 
     @Override
     public void connect() {
+        vCorePlugin.consoleMessage("&6Trying to connect to MongoDB&7: &b"+host+"&7:&b"+port,false);
         if(user.isEmpty() && password.isEmpty())
             this.mongoClient = new MongoClient(host,port);
         else
-            this.mongoClient = new MongoClient(new ServerAddress(host,port), List.of(MongoCredential.createCredential(user,database,password.toCharArray())));
+            this.mongoClient = new MongoClient(new ServerAddress(host, port), List.of(MongoCredential.createCredential(user,database,password.toCharArray())));
         this.mongoDatabase = mongoClient.getDatabase(database);
     }
 
     @Override
     public void disconnect() {
-
+        this.mongoClient.close();
     }
 
     private String getSuffix(Class<? extends VCoreData> dataClass){

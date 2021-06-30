@@ -5,7 +5,9 @@
 package de.verdox.vcore.synchronization.pipeline.datatypes;
 
 import de.verdox.vcore.plugin.VCorePlugin;
+import org.bukkit.entity.Player;
 
+import javax.annotation.Nonnull;
 import java.util.UUID;
 
 /**

@@ -4,12 +4,18 @@
 
 package de.verdox.vcore.synchronization.pipeline;
 
+import de.verdox.vcore.performance.concurrent.CatchingRunnable;
+import de.verdox.vcore.plugin.SystemLoadable;
 import de.verdox.vcore.synchronization.pipeline.datatypes.VCoreData;
 import de.verdox.vcore.synchronization.pipeline.parts.DataSynchronizer;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @version 1.0
@@ -24,10 +30,18 @@ public class PipelineDataSynchronizer implements DataSynchronizer {
     }
 
     @Override
-    public synchronized void synchronize(@Nonnull DataSourceType source, @Nonnull DataSourceType destination, @Nonnull Class<? extends VCoreData> dataClass, @Nonnull UUID objectUUID) {
+    public void synchronize(@Nonnull DataSourceType source, @Nonnull DataSourceType destination, @Nonnull Class<? extends VCoreData> dataClass, @Nonnull UUID objectUUID) {
+        synchronize(source, destination, dataClass, objectUUID, null);
+    }
+
+    @Override
+    public synchronized void synchronize(@Nonnull DataSourceType source, @Nonnull DataSourceType destination, @Nonnull Class<? extends VCoreData> dataClass, @Nonnull UUID objectUUID, @Nullable Runnable callback) {
+        pipelineManager.getExecutorService().submit(new CatchingRunnable(() -> doSynchronisation(source, destination, dataClass, objectUUID,callback)));
+    }
+
+    public void doSynchronisation(@Nonnull DataSourceType source, @Nonnull DataSourceType destination, @Nonnull Class<? extends VCoreData> dataClass, @Nonnull UUID objectUUID, @Nullable Runnable callback){
         if(source.equals(destination))
             return;
-
         if(pipelineManager.globalCache == null && (source.equals(DataSourceType.GLOBAL_CACHE) || destination.equals(DataSourceType.GLOBAL_CACHE)))
             return;
         if(pipelineManager.globalStorage == null && (source.equals(DataSourceType.GLOBAL_STORAGE) || destination.equals(DataSourceType.GLOBAL_STORAGE)))
@@ -42,7 +56,7 @@ public class PipelineDataSynchronizer implements DataSynchronizer {
             // Local to Global Cache
             if(destination.equals(DataSourceType.GLOBAL_CACHE))
                 pipelineManager.globalCache.save(dataClass,objectUUID,dataToSave);
-            // Local to Global Storage
+                // Local to Global Storage
             else if(destination.equals(DataSourceType.GLOBAL_STORAGE))
                 pipelineManager.globalStorage.save(dataClass, objectUUID, dataToSave);
         }
@@ -75,6 +89,23 @@ public class PipelineDataSynchronizer implements DataSynchronizer {
             }
             else if(destination.equals(DataSourceType.GLOBAL_CACHE))
                 pipelineManager.globalCache.save(dataClass,objectUUID,globalSavedData);
+        }
+        if(callback != null)
+            callback.run();
+    }
+
+    @Override
+    public boolean isLoaded() {
+        return true;
+    }
+
+    @Override
+    public void shutdown() {
+        try {
+            pipelineManager.getExecutorService().shutdown();
+            pipelineManager.getExecutorService().awaitTermination(5, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
     }
 }
