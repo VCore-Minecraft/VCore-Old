@@ -53,6 +53,7 @@ public class PipelineDataSynchronizer implements DataSynchronizer {
                 return;
             VCoreData data = pipelineManager.localCache.getData(dataClass, objectUUID);
             Map<String, Object> dataToSave = data.serialize();
+            dataToSave.remove("_id");
             // Local to Global Cache
             if(destination.equals(DataSourceType.GLOBAL_CACHE))
                 pipelineManager.globalCache.save(dataClass,objectUUID,dataToSave);
@@ -64,6 +65,13 @@ public class PipelineDataSynchronizer implements DataSynchronizer {
             if(!pipelineManager.globalCache.dataExist(dataClass, objectUUID))
                 return;
             Map<String, Object> globalCachedData = pipelineManager.globalCache.loadData(dataClass, objectUUID);
+            // Error while loading from redis
+            if(globalCachedData == null){
+                pipelineManager.globalCache.remove(dataClass, objectUUID);
+                doSynchronisation(DataSourceType.GLOBAL_STORAGE, DataSourceType.LOCAL,dataClass,objectUUID,callback);
+                return;
+            }
+            globalCachedData.remove("_id");
 
             if(destination.equals(DataSourceType.LOCAL)) {
                 if (!pipelineManager.localCache.dataExist(dataClass, objectUUID))
@@ -79,6 +87,7 @@ public class PipelineDataSynchronizer implements DataSynchronizer {
             if(!pipelineManager.globalStorage.dataExist(dataClass, objectUUID))
                 return;
             Map<String, Object> globalSavedData = pipelineManager.globalStorage.loadData(dataClass, objectUUID);
+            globalSavedData.remove("_id");
 
             if(destination.equals(DataSourceType.LOCAL)) {
                 if (!pipelineManager.localCache.dataExist(dataClass, objectUUID))

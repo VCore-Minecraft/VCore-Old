@@ -16,6 +16,7 @@ import java.util.Map;
  * @date 25.06.2021 23:59
  */
 public class DoubleBsonReference extends VCoreDataReference<Double> {
+
     public DoubleBsonReference(@Nonnull Map<String, Object> data, @Nonnull String fieldName) {
         super(data, fieldName);
     }

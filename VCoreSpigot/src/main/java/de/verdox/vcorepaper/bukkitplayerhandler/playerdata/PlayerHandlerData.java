@@ -37,7 +37,7 @@ import java.util.function.Supplier;
 public class PlayerHandlerData extends PlayerData {
 
     @VCorePersistentData
-    private Map<String, SerializableJsonInventory> inventoryCache = new ConcurrentHashMap<>();
+    private Map<String, Map<String, Object>> inventoryCache = new ConcurrentHashMap<>();
 
     @VCorePersistentData
     public boolean restoreVanillaInventory = true;
@@ -77,9 +77,11 @@ public class PlayerHandlerData extends PlayerData {
         ItemStack[] storageContents = player.getInventory().getStorageContents().clone();
         ItemStack[] armorContents = player.getInventory().getArmorContents().clone();
         ItemStack[] enderChest = player.getEnderChest().getStorageContents();
-        ItemStack[] extraContents = player.getInventory().getExtraContents();
-        SerializableJsonInventory serializableInventory = new SerializableJsonInventory(inventoryID,storageContents,armorContents, extraContents, enderChest, player.getHealth(), player.getFoodLevel(), player.getExp(), new HashSet<>(player.getActivePotionEffects()));
-        inventoryCache.put(inventoryID,serializableInventory);
+
+        ItemStack offHand = player.getInventory().getItemInOffHand();
+        SerializableJsonInventory serializableInventory = new SerializableJsonInventory(inventoryID,storageContents,armorContents, enderChest, offHand, player.getHealth(), player.getFoodLevel(), player.getExp(), new HashSet<>(player.getActivePotionEffects()));
+
+        inventoryCache.put(inventoryID,serializableInventory.getData());
         VCorePaper.getInstance().consoleMessage("&eInventory &6"+inventoryID+" &eof player &b"+getObjectUUID()+" &esaved&7!", true);
         save(true);
     }
@@ -102,7 +104,7 @@ public class PlayerHandlerData extends PlayerData {
         if(!inventoryCache.containsKey(inventoryID))
             return;
         this.activeInventoryID = inventoryID;
-        SerializableJsonInventory serializableInventory = inventoryCache.get(inventoryID);
+        SerializableJsonInventory serializableInventory = new SerializableJsonInventory(inventoryCache.get(inventoryID));
         serializableInventory.restoreInventory(player, null);
     }
 

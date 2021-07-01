@@ -13,6 +13,7 @@ import de.verdox.vcore.synchronization.pipeline.parts.storage.GlobalStorage;
 import de.verdox.vcore.plugin.VCorePlugin;
 import de.verdox.vcore.synchronization.redisson.RedisConnection;
 import org.redisson.api.*;
+import org.redisson.codec.MarshallingCodec;
 import org.redisson.codec.SerializationCodec;
 import org.redisson.codec.TypedJsonJacksonCodec;
 
@@ -34,7 +35,13 @@ public class RedisCache extends RedisConnection implements GlobalCache {
 
     @Override
     public Map<String, Object> loadData(@Nonnull Class<? extends VCoreData> dataClass, @Nonnull UUID objectUUID) {
-        return new HashMap<>(getObjectCache(dataClass,objectUUID));
+        try{
+            return new HashMap<>(getObjectCache(dataClass,objectUUID));
+        }
+        catch (Exception e){
+            plugin.consoleMessage("&cError while loading &b"+dataClass+" &cwith uuid &e"+objectUUID,false);
+            return null;
+        }
     }
 
     @Override
@@ -50,7 +57,7 @@ public class RedisCache extends RedisConnection implements GlobalCache {
 
     @Override
     public Map<String, Object> getObjectCache(Class<? extends VCoreData> dataClass, UUID objectUUID) {
-        RMap<String, Object> objectCache = redissonClient.getMap(plugin.getPluginName()+"Cache:"+objectUUID+":"+ GlobalStorage.getDataStorageIdentifier(dataClass), new TypedJsonJacksonCodec(dataClass));
+        RMap<String, Object> objectCache = redissonClient.getMap(plugin.getPluginName()+"Cache:"+objectUUID+":"+ GlobalStorage.getDataStorageIdentifier(dataClass));
         objectCache.expire(12, TimeUnit.HOURS);
         return objectCache;
     }

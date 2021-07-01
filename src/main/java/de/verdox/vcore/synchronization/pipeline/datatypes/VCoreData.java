@@ -29,16 +29,14 @@ public abstract class VCoreData implements VCoreSerializable {
 
     private final VCorePlugin<?, ?> plugin;
     private final UUID objectUUID;
-    private final Map<String, Object> data;
     private final DataManipulator dataManipulator;
     private long lastUse = System.currentTimeMillis();
     private final long cleanTime;
     private final TimeUnit cleanTimeUnit;
 
-    public VCoreData(VCorePlugin<?,?> plugin, UUID objectUUID, Map<String, Object> data){
+    public VCoreData(VCorePlugin<?,?> plugin, UUID objectUUID){
         this.plugin = plugin;
         this.objectUUID = objectUUID;
-        this.data = data;
         if(this.plugin.getServices().getPipeline().getGlobalCache() != null)
             this.dataManipulator = this.plugin.getServices().getPipeline().getGlobalCache().constructDataManipulator(this);
         else
@@ -102,24 +100,5 @@ public abstract class VCoreData implements VCoreSerializable {
 
     public long getLastUse() {
         return lastUse;
-    }
-
-    public <T extends VCoreDataReference<?>> T getField(Class<? extends T> type, String name){
-        try {
-            return type.getConstructor(Map.class,String.class).newInstance(data,name);
-        } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
-    @Override
-    public Map<String, Object> serialize() {
-        return data;
-    }
-
-    @Override
-    public void deserialize(Map<String, Object> serializedData) {
-        this.data.putAll(serializedData);
     }
 }

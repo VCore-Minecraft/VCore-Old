@@ -83,7 +83,7 @@ public class LocalCacheImpl implements LocalCache{
             return getData(dataClass,objectUUID);
 
         try {
-            S dataObject =  dataClass.getDeclaredConstructor(VCorePlugin.class,UUID.class, Map.class).newInstance(plugin,objectUUID, new HashMap<>());
+            S dataObject =  dataClass.getDeclaredConstructor(VCorePlugin.class,UUID.class).newInstance(plugin,objectUUID);
             return dataClass.cast(dataObject);
         } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
             e.printStackTrace();

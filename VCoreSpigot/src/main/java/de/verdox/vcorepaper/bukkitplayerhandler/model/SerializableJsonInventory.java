@@ -21,7 +21,9 @@ import org.bukkit.potion.PotionEffectType;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -30,18 +32,30 @@ import java.util.stream.Collectors;
  * @Author: Lukas Jonsson (Verdox)
  * @date 20.06.2021 00:19
  */
-public class SerializableJsonInventory extends VCoreSerializableJson {
-    public SerializableJsonInventory(String id, ItemStack[] storageContents, ItemStack[] armorContents, ItemStack[] enderChest, ItemStack[]extraContents, double health, int foodLevel, float exp, Set<PotionEffect> potionEffects){
-        new StringBsonReference(this, "id").setValue(id);
-        new StringBsonReference(this, "armorContents").setValue(Serializer.itemStackArrayToBase64(armorContents));
-        new StringBsonReference(this, "storageContents").setValue(Serializer.itemStackArrayToBase64(storageContents));
-        new StringBsonReference(this, "enderChest").setValue(Serializer.itemStackArrayToBase64(enderChest));
-        new StringBsonReference(this, "extraContents").setValue(Serializer.itemStackArrayToBase64(extraContents));
-        new DoubleBsonReference(this, "health").setValue(health);
-        new DoubleBsonReference(this, "exp").setValue((double) exp);
-        new IntegerBsonReference(this, "food").setValue(foodLevel);
+public class SerializableJsonInventory {
+
+    private final Map<String, Object> data = new HashMap<>();
+
+    public SerializableJsonInventory(String id, ItemStack[] storageContents, ItemStack[] armorContents, ItemStack[] enderChest, ItemStack offHand, double health, int foodLevel, float exp, Set<PotionEffect> potionEffects){
+        new StringBsonReference(data, "id").setValue(id);
+        new StringBsonReference(data, "armorContents").setValue(Serializer.itemStackArrayToBase64(armorContents));
+        new StringBsonReference(data, "storageContents").setValue(Serializer.itemStackArrayToBase64(storageContents));
+        new StringBsonReference(data, "enderChest").setValue(Serializer.itemStackArrayToBase64(enderChest));
+        if(!offHand.getType().isEmpty())
+            new StringBsonReference(data, "offHand").setValue(Serializer.itemStackArrayToBase64(new ItemStack[]{offHand}));
+        new DoubleBsonReference(data, "health").setValue(health);
+        new DoubleBsonReference(data, "exp").setValue((double) exp);
+        new IntegerBsonReference(data, "food").setValue(foodLevel);
         Set<String> serializedPotionEffects = potionEffects.stream().map(potionEffect -> VCoreUtil.getBukkitPlayerUtil().serializePotionEffect(potionEffect)).collect(Collectors.toSet());
-        new SetBsonReference<String>(this,"potionEffects").setValue(serializedPotionEffects);
+        new SetBsonReference<String>(data,"potionEffects").setValue(serializedPotionEffects);
+    }
+
+    public SerializableJsonInventory(Map<String, Object> data){
+        this.data.putAll(data);
+    }
+
+    public Map<String, Object> getData() {
+        return data;
     }
 
     public boolean restoreInventory(@Nonnull Player player, @Nullable Runnable callback){
@@ -81,23 +95,19 @@ public class SerializableJsonInventory extends VCoreSerializableJson {
                     player.getEnderChest().setContents(enderChest);
             }
 
-            VCoreUtil.getBukkitPlayerUtil().sendPlayerMessage(player, ChatMessageType.ACTION_BAR,"&eLade ExtraContents&7...");
-            ItemStack[] extraContents = deSerializeExtraContents();
-            if(extraContents == null){
-                VCoreUtil.getBukkitPlayerUtil().sendPlayerMessage(player, ChatMessageType.CHAT,"&cKonnte ExtraContents nicht wiederherstellen");
-            }
-            else{
-                VCoreUtil.getBukkitPlayerUtil().sendPlayerMessage(player, ChatMessageType.ACTION_BAR,"&eExtraContents wurden geladen");
-                if(extraContents.length != 0)
-                    player.getInventory().setExtraContents(extraContents);
+            VCoreUtil.getBukkitPlayerUtil().sendPlayerMessage(player, ChatMessageType.ACTION_BAR,"&eLade Offhand&7...");
+            ItemStack offHand = deSerializeOffHand();
+            if(offHand != null){
+                VCoreUtil.getBukkitPlayerUtil().sendPlayerMessage(player, ChatMessageType.ACTION_BAR,"&eOffhand wurden geladen");
+                player.getInventory().setItemInOffHand(offHand);
             }
 
             player.setHealth(getHealth());
             player.setExp((float) getExp());
             player.setFoodLevel(getFoodLevel());
-            Set<String> serializedEffects = new SetBsonReference<String>(this,"potionEffects").getValue();
+            Set<String> serializedEffects = new SetBsonReference<String>(data,"potionEffects").getValue();
             if(!serializedEffects.isEmpty()){
-                new SetBsonReference<String>(this,"potionEffects").getValue().stream()
+                new SetBsonReference<String>(data,"potionEffects").getValue().stream()
                         .map(serializedEffect -> VCoreUtil.getBukkitPlayerUtil().deSerializePotionEffect(serializedEffect))
                         .forEach(potionEffect -> {
                             player.removePotionEffect(potionEffect.getType());
@@ -115,34 +125,37 @@ public class SerializableJsonInventory extends VCoreSerializableJson {
     }
 
     public ItemStack[] deSerializeStorageContents() throws IOException {
-        return Serializer.itemStackArrayFromBase64(new StringBsonReference(this, "storageContents").orElse(null));
+        return Serializer.itemStackArrayFromBase64(new StringBsonReference(data, "storageContents").orElse(null));
     }
 
     public ItemStack[] deSerializeArmorContents() throws IOException {
-        return Serializer.itemStackArrayFromBase64(new StringBsonReference(this, "armorContents").orElse(null));
+        return Serializer.itemStackArrayFromBase64(new StringBsonReference(data, "armorContents").orElse(null));
     }
 
     public ItemStack[] deSerializeEnderChest() throws IOException {
-        return Serializer.itemStackArrayFromBase64(new StringBsonReference(this, "enderChest").orElse(null));
+        return Serializer.itemStackArrayFromBase64(new StringBsonReference(data, "enderChest").orElse(null));
     }
 
-    public ItemStack[] deSerializeExtraContents() throws IOException {
-        return Serializer.itemStackArrayFromBase64(new StringBsonReference(this, "extraContents").orElse(null));
+    public ItemStack deSerializeOffHand() throws IOException {
+        ItemStack[] offHandArray = Serializer.itemStackArrayFromBase64(new StringBsonReference(data, "offHand").orElse(null));
+        if(offHandArray == null)
+            return null;
+        return offHandArray[0];
     }
 
     public double getHealth(){
-        return new DoubleBsonReference(this, "health").orElse(20d);
+        return new DoubleBsonReference(data, "health").orElse(20d);
     }
 
     public double getExp(){
-        return new DoubleBsonReference(this, "exp").orElse(0d);
+        return new DoubleBsonReference(data, "exp").orElse(0d);
     }
 
     public int getFoodLevel(){
-        return new IntegerBsonReference(this, "food").orElse(20);
+        return new IntegerBsonReference(data, "food").orElse(20);
     }
 
     public String getID(){
-        return new StringBsonReference(this, "storageContents").getValue();
+        return new StringBsonReference(data, "storageContents").getValue();
     }
 }

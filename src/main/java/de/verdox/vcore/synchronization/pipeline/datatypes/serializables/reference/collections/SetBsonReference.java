@@ -18,6 +18,7 @@ import java.util.Set;
  * @date 25.06.2021 23:57
  */
 public class SetBsonReference<T> extends VCoreDataReference<Set<T>> {
+
     public SetBsonReference(@Nonnull Map<String, Object> data, @Nonnull String fieldName) {
         super(data, fieldName);
         if(!isFieldSet())
