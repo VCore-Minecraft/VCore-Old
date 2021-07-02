@@ -4,6 +4,8 @@
 
 package de.verdox.vcore.synchronization.pipeline.parts.storage.mongodb;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoCredential;
 import com.mongodb.ServerAddress;
@@ -16,7 +18,6 @@ import de.verdox.vcore.synchronization.pipeline.parts.storage.GlobalStorage;
 import de.verdox.vcore.synchronization.pipeline.parts.storage.RemoteStorage;
 import de.verdox.vcore.plugin.VCorePlugin;
 import de.verdox.vcore.plugin.subsystem.VCoreSubsystem;
-import org.apache.commons.lang.NotImplementedException;
 import org.bson.Document;
 
 import javax.annotation.Nonnull;
@@ -66,9 +67,22 @@ public class MongoDBStorage implements GlobalStorage, RemoteStorage {
 
         if(mongoDBData == null)
             mongoDBData = filter;
-        Map<String, Object> dataFromDatabase = new HashMap<>();
-        mongoDBData.forEach(dataFromDatabase::put);
-        return dataFromDatabase;
+        return convertDocumentToHashMap(mongoDBData);
+    }
+
+    private Map<String, Object> convertDocumentToHashMap(Object object){
+        if(!(object instanceof Document))
+            return null;
+        Document document = (Document) object;
+        LinkedHashMap<String, Object> map = new LinkedHashMap<>(document);
+        map.remove("_id");
+        document.forEach((s, o) -> {
+            Map<String, Object> possibleFoundDocument = convertDocumentToHashMap(o);
+            if(possibleFoundDocument == null)
+                return;
+            map.put(s,possibleFoundDocument);
+        });
+        return map;
     }
 
     @Override

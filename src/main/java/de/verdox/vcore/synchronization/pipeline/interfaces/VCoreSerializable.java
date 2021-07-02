@@ -44,6 +44,7 @@ public interface VCoreSerializable {
                 serializedData.put(field.getName(), field.get(this));
             } catch (NoSuchFieldException | IllegalAccessException e) { e.printStackTrace(); }
         });
+        serializedData.remove("_id");
         return serializedData;
     }
 

@@ -11,10 +11,9 @@ import de.verdox.vcore.synchronization.messaging.MessagingConfig;
 import de.verdox.vcore.synchronization.messaging.MessagingService;
 import de.verdox.vcore.synchronization.pipeline.PipelineConfig;
 import de.verdox.vcore.synchronization.pipeline.PipelineManager;
-import de.verdox.vcore.synchronization.pipeline.PlayerDataManager;
+import de.verdox.vcore.synchronization.pipeline.player.PlayerDataManager;
 import de.verdox.vcore.synchronization.pipeline.parts.Pipeline;
-
-import java.util.Set;
+import de.verdox.vcore.synchronization.pipeline.player.VCorePlayerCache;
 
 /**
  * @version 1.0

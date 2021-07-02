@@ -39,7 +39,8 @@ public class RedisCache extends RedisConnection implements GlobalCache {
             return new HashMap<>(getObjectCache(dataClass,objectUUID));
         }
         catch (Exception e){
-            plugin.consoleMessage("&cError while loading &b"+dataClass+" &cwith uuid &e"+objectUUID,false);
+            plugin.consoleMessage("&cError while loading &b"+dataClass+" &cwith uuid &e"+objectUUID +" &7-> &4removing &7...",false);
+            remove(dataClass, objectUUID);
             return null;
         }
     }

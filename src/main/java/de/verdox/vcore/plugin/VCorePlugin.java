@@ -6,6 +6,7 @@ import de.verdox.vcore.synchronization.pipeline.annotations.RequiredSubsystemInf
 import de.verdox.vcore.plugin.bukkit.BukkitPlugin;
 import de.verdox.vcore.plugin.bungeecord.BungeeCordPlugin;
 import de.verdox.vcore.plugin.subsystem.VCoreSubsystem;
+import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.plugin.Plugin;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
@@ -158,7 +159,22 @@ public interface VCorePlugin <T, R extends VCoreSubsystem<?>> extends SystemLoad
 
         @Override
         public TaskBatch<VCorePlugin<Plugin, VCoreSubsystem.BungeeCord>> createTaskBatch() {
-            return null;
+            return new TaskBatch<>(this) {
+                @Override
+                public void runSync(@Nonnull Runnable runnable) {
+                    runnable.run();
+                }
+
+                @Override
+                public void runAsync(@Nonnull Runnable runnable) {
+                    serviceParts.vCoreScheduler.async(new CatchingRunnable(runnable));
+                }
+
+                @Override
+                public void onFinishBatch() {
+
+                }
+            };
         }
 
         @Override

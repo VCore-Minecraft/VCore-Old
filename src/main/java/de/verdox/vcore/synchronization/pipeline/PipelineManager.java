@@ -19,6 +19,7 @@ import de.verdox.vcore.plugin.subsystem.VCoreSubsystem;
 import de.verdox.vcore.synchronization.pipeline.parts.storage.PipelineTaskScheduler;
 import io.netty.util.concurrent.DefaultThreadFactory;
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -273,15 +274,15 @@ public class PipelineManager implements Pipeline {
 
     <T extends VCoreData> T loadFromPipeline(@Nonnull Class<? extends T> dataClass, @Nonnull UUID uuid, boolean createIfNotExist){
         if(localCache.dataExist(dataClass,uuid)) {
-            plugin.consoleMessage("&eFound Data in Local Cache &8[&b"+dataClass.getSimpleName()+"&8]", 1,true);
+            //plugin.consoleMessage("&eFound Data in Local Cache &8[&b"+dataClass.getSimpleName()+"&8]", 1,true);
         }
         else if(globalCache != null && globalCache.dataExist(dataClass,uuid)) {
-            plugin.consoleMessage("&eFound Data in Redis Cache &8[&b"+dataClass.getSimpleName()+"&8]", 1,true);
+           // plugin.consoleMessage("&eFound Data in Redis Cache &8[&b"+dataClass.getSimpleName()+"&8]", 1,true);
             pipelineDataSynchronizer.doSynchronisation(DataSynchronizer.DataSourceType.GLOBAL_CACHE, DataSynchronizer.DataSourceType.LOCAL, dataClass, uuid, null);
             //getRedisHandler().redisToLocal(dataClass, uuid);
         }
         else if(globalStorage != null && globalStorage.dataExist(dataClass,uuid)) {
-            plugin.consoleMessage("&eFound Data in Database &8[&b"+dataClass.getSimpleName()+"&8]", 1,true);
+            //plugin.consoleMessage("&eFound Data in Database &8[&b"+dataClass.getSimpleName()+"&8]", 1,true);
             //getDatabaseHandler().databaseToLocal(dataClass,uuid);
             pipelineDataSynchronizer.doSynchronisation(DataSynchronizer.DataSourceType.GLOBAL_STORAGE, DataSynchronizer.DataSourceType.LOCAL, dataClass, uuid, null);
 
@@ -300,7 +301,7 @@ public class PipelineManager implements Pipeline {
             //getLocalDataHandler().localToRedis(vCoreData,dataClass,vCoreData.getUUID());
             pipelineDataSynchronizer.synchronize(DataSynchronizer.DataSourceType.LOCAL, DataSynchronizer.DataSourceType.GLOBAL_CACHE, dataClass, uuid);
         }
-        plugin.consoleMessage("&eLoaded &a"+dataClass.getSimpleName()+" &ewith uuid&7: "+uuid, 1,true);
+        //plugin.consoleMessage("&eLoaded &a"+dataClass.getSimpleName()+" &ewith uuid&7: "+uuid, 1,true);
         if(!localCache.dataExist(dataClass, uuid))
             throw new NullPointerException("Error in dataPipeline while loading "+dataClass+" with uuid "+uuid);
         T data = localCache.getData(dataClass, uuid);

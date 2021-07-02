@@ -7,7 +7,6 @@ package de.verdox.vcore.synchronization.messaging;
 import de.verdox.vcore.plugin.VCorePlugin;
 import de.verdox.vcore.plugin.files.config.VCoreYAMLConfig;
 import de.verdox.vcore.synchronization.messaging.redis.RedisMessaging;
-import org.apache.commons.lang.NotImplementedException;
 
 import java.util.List;
 
@@ -30,7 +29,7 @@ public class MessagingConfig extends VCoreYAMLConfig {
             String password = config.getString("MessagingService.redis.password");
             return new RedisMessaging(getPlugin(), useCluster, addresses, password);
         }
-        throw new NotImplementedException("MessagingType "+messagingType+" not implemented yet");
+        throw new IllegalStateException("MessagingType "+messagingType+" not implemented yet");
     }
 
     @Override

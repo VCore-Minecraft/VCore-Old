@@ -1,9 +1,6 @@
 package de.verdox.vcore.util;
 
-import de.verdox.vcore.synchronization.pipeline.datatypes.serializables.VCoreSerializableJson;
 import org.apache.commons.codec.binary.Base64;
-import org.bson.Document;
-import org.bukkit.inventory.ItemStack;
 
 import java.nio.ByteBuffer;
 import java.util.*;

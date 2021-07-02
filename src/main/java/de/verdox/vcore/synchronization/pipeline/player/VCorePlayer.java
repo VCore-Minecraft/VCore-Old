@@ -2,7 +2,7 @@
  * Copyright (c) 2021. Lukas Jonsson
  */
 
-package de.verdox.vcore.plugin.player;
+package de.verdox.vcore.synchronization.pipeline.player;
 
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
@@ -12,6 +12,7 @@ import org.bukkit.entity.Player;
 import javax.annotation.Nonnull;
 import java.io.Serializable;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * @version 1.0
@@ -22,7 +23,7 @@ public class VCorePlayer implements Serializable {
 
     private final UUID playerUUID;
     private final String displayName;
-    private boolean clearable;
+    private final AtomicBoolean clearable = new AtomicBoolean(false);
 
     VCorePlayer(@Nonnull UUID playerUUID,@Nonnull String displayName){
         this.playerUUID = playerUUID;
@@ -30,11 +31,11 @@ public class VCorePlayer implements Serializable {
     }
 
     public boolean isClearable() {
-        return clearable;
+        return clearable.get();
     }
 
     public void setClearable(boolean clearable) {
-        this.clearable = clearable;
+        this.clearable.set(clearable);
     }
 
     public boolean isOnThisServer(){

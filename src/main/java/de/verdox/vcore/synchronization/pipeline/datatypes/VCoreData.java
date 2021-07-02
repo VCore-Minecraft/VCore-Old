@@ -4,19 +4,12 @@
 
 package de.verdox.vcore.synchronization.pipeline.datatypes;
 
-import de.verdox.vcore.synchronization.pipeline.PipelineManager;
-import de.verdox.vcore.synchronization.pipeline.annotations.DataContext;
 import de.verdox.vcore.synchronization.pipeline.annotations.VCoreDataContext;
-import de.verdox.vcore.synchronization.pipeline.datatypes.serializables.reference.VCoreDataReference;
-import de.verdox.vcore.synchronization.pipeline.datatypes.serializables.reference.collections.ListBsonReference;
 import de.verdox.vcore.synchronization.pipeline.interfaces.DataManipulator;
 import de.verdox.vcore.synchronization.pipeline.interfaces.VCoreSerializable;
 import de.verdox.vcore.plugin.VCorePlugin;
 import de.verdox.vcore.synchronization.pipeline.parts.DataSynchronizer;
 import de.verdox.vcore.synchronization.pipeline.parts.cache.GlobalCache;
-
-import java.lang.reflect.InvocationTargetException;
-import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 

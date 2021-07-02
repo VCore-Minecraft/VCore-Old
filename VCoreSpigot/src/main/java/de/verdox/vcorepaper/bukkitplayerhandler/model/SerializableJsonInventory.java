@@ -4,25 +4,22 @@
 
 package de.verdox.vcorepaper.bukkitplayerhandler.model;
 
-import de.verdox.vcore.synchronization.pipeline.datatypes.serializables.VCoreSerializableJson;
-import de.verdox.vcore.synchronization.pipeline.datatypes.serializables.reference.collections.SetBsonReference;
+import de.verdox.vcore.synchronization.pipeline.datatypes.serializables.reference.collections.ListBsonReference;
 import de.verdox.vcore.synchronization.pipeline.datatypes.serializables.reference.objects.StringBsonReference;
 import de.verdox.vcore.synchronization.pipeline.datatypes.serializables.reference.primitives.numbers.DoubleBsonReference;
 import de.verdox.vcore.synchronization.pipeline.datatypes.serializables.reference.primitives.numbers.IntegerBsonReference;
 import de.verdox.vcore.util.VCoreUtil;
 import de.verdox.vcorepaper.custom.util.Serializer;
 import net.md_5.bungee.api.ChatMessageType;
-import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
-import org.bukkit.potion.PotionEffectType;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -46,8 +43,8 @@ public class SerializableJsonInventory {
         new DoubleBsonReference(data, "health").setValue(health);
         new DoubleBsonReference(data, "exp").setValue((double) exp);
         new IntegerBsonReference(data, "food").setValue(foodLevel);
-        Set<String> serializedPotionEffects = potionEffects.stream().map(potionEffect -> VCoreUtil.getBukkitPlayerUtil().serializePotionEffect(potionEffect)).collect(Collectors.toSet());
-        new SetBsonReference<String>(data,"potionEffects").setValue(serializedPotionEffects);
+        List<String> serializedPotionEffects = potionEffects.stream().map(potionEffect -> VCoreUtil.getBukkitPlayerUtil().serializePotionEffect(potionEffect)).collect(Collectors.toList());
+        new ListBsonReference<String>(data,"potionEffects").setValue(serializedPotionEffects);
     }
 
     public SerializableJsonInventory(Map<String, Object> data){
@@ -105,9 +102,9 @@ public class SerializableJsonInventory {
             player.setHealth(getHealth());
             player.setExp((float) getExp());
             player.setFoodLevel(getFoodLevel());
-            Set<String> serializedEffects = new SetBsonReference<String>(data,"potionEffects").getValue();
+            List<String> serializedEffects = new ListBsonReference<String>(data,"potionEffects").getValue();
             if(!serializedEffects.isEmpty()){
-                new SetBsonReference<String>(data,"potionEffects").getValue().stream()
+                new ListBsonReference<String>(data,"potionEffects").getValue().stream()
                         .map(serializedEffect -> VCoreUtil.getBukkitPlayerUtil().deSerializePotionEffect(serializedEffect))
                         .forEach(potionEffect -> {
                             player.removePotionEffect(potionEffect.getType());

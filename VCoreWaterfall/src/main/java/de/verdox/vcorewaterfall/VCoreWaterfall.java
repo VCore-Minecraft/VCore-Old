@@ -1,19 +1,20 @@
 package de.verdox.vcorewaterfall;
 
-import de.verdox.vcore.plugin.player.VCorePlayerManager;
 import de.verdox.vcore.plugin.VCorePlugin;
 import de.verdox.vcore.plugin.subsystem.VCoreSubsystem;
-import de.verdox.vcore.synchronization.pipeline.parts.Pipeline;
+import de.verdox.vcore.synchronization.pipeline.player.VCorePlayerCache;
+import de.verdox.vcorewaterfall.playercache.BungeePlayerCacheListener;
 
 import java.util.List;
 
 public class VCoreWaterfall extends VCorePlugin.BungeeCord {
 
-    private VCorePlayerManager vCorePlayerManager;
+    private VCorePlayerCache vCorePlayerCache;
 
     @Override
     public void onPluginEnable() {
-        this.vCorePlayerManager = new VCorePlayerManager(this);
+        vCorePlayerCache = new VCorePlayerCache(this);
+        new BungeePlayerCacheListener(this);
     }
 
     @Override
@@ -31,7 +32,7 @@ public class VCoreWaterfall extends VCorePlugin.BungeeCord {
         return false;
     }
 
-    public VCorePlayerManager getVCorePlayerManager() {
-        return vCorePlayerManager;
+    public VCorePlayerCache getVCorePlayerCache() {
+        return vCorePlayerCache;
     }
 }

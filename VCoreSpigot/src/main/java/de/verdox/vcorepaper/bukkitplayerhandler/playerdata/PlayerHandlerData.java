@@ -6,19 +6,16 @@ package de.verdox.vcorepaper.bukkitplayerhandler.playerdata;
 
 import de.verdox.vcore.synchronization.pipeline.annotations.*;
 import de.verdox.vcore.synchronization.pipeline.datatypes.PlayerData;
-import de.verdox.vcore.plugin.player.VCorePlayer;
+import de.verdox.vcore.synchronization.pipeline.player.VCorePlayer;
 import de.verdox.vcore.plugin.VCorePlugin;
-import de.verdox.vcore.util.TypeUtil;
-import de.verdox.vcore.util.VCoreUtil;
 import de.verdox.vcorepaper.VCorePaper;
 import de.verdox.vcorepaper.bukkitplayerhandler.BukkitPlayerHandler;
 import de.verdox.vcorepaper.bukkitplayerhandler.model.SerializableJsonInventory;
-import net.md_5.bungee.api.ChatMessageType;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 import javax.annotation.Nonnull;
-import java.io.IOException;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.UUID;
@@ -55,12 +52,10 @@ public class PlayerHandlerData extends PlayerData {
     }
 
     public void saveInventory(){
-        VCorePlayer vCorePlayer = VCorePaper.getInstance().getVCorePlayerManager().getPlayer(getObjectUUID());
-        if(vCorePlayer == null)
+        Player player = Bukkit.getPlayer(getObjectUUID());
+        if(player == null)
             return;
-        if(!vCorePlayer.isOnThisServer())
-            return;
-        saveInventory(vCorePlayer::toBukkitPlayer);
+        saveInventory(() -> player);
     }
 
     public void saveInventory(Supplier<Player> supplier){
@@ -83,7 +78,6 @@ public class PlayerHandlerData extends PlayerData {
 
         inventoryCache.put(inventoryID,serializableInventory.getData());
         VCorePaper.getInstance().consoleMessage("&eInventory &6"+inventoryID+" &eof player &b"+getObjectUUID()+" &esaved&7!", true);
-        save(true);
     }
 
     public void restoreInventory(@Nonnull Supplier<Player> supplier){

@@ -2,16 +2,21 @@
  * Copyright (c) 2021. Lukas Jonsson
  */
 
-package de.verdox.vcore.synchronization.pipeline;
+package de.verdox.vcore.synchronization.pipeline.player;
 
 import de.verdox.vcore.plugin.SystemLoadable;
 import de.verdox.vcore.plugin.VCorePlugin;
+import de.verdox.vcore.synchronization.messaging.messages.Message;
+import de.verdox.vcore.synchronization.pipeline.PipelineManager;
 import de.verdox.vcore.synchronization.pipeline.datatypes.PlayerData;
+import de.verdox.vcore.synchronization.pipeline.parts.Pipeline;
 import de.verdox.vcore.synchronization.pipeline.player.events.PlayerPreSessionLoadEvent;
 import de.verdox.vcore.synchronization.pipeline.player.events.PlayerPreSessionUnloadEvent;
 import de.verdox.vcore.synchronization.pipeline.player.events.PlayerSessionLoadedEvent;
+import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.event.PlayerDisconnectEvent;
 import net.md_5.bungee.api.event.PostLoginEvent;
+import net.md_5.bungee.api.plugin.Plugin;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
@@ -20,7 +25,6 @@ import org.bukkit.event.player.PlayerQuitEvent;
 
 import javax.annotation.Nonnull;
 import java.util.UUID;
-import java.util.function.Consumer;
 
 /**
  * @version 1.0
@@ -43,7 +47,7 @@ public class PlayerDataManager implements SystemLoadable {
         plugin.getServices().eventBus.post(new PlayerPreSessionLoadEvent(player));
         plugin.createTaskBatch().doAsync(() -> {
             plugin.getServices().getSubsystemManager().getActivePlayerDataClasses()
-                    .forEach(aClass -> pipelineManager.loadFromPipeline(aClass, player, true));
+                    .forEach(aClass -> pipelineManager.load(aClass, player, Pipeline.LoadingStrategy.LOAD_PIPELINE,true));
         }).doSync(() -> plugin.getServices().eventBus.post(new PlayerSessionLoadedEvent(player, System.currentTimeMillis()))).executeBatch();
     }
 
@@ -97,6 +101,7 @@ public class PlayerDataManager implements SystemLoadable {
     public static class BungeeCord extends PlayerDataManager implements net.md_5.bungee.api.plugin.Listener {
         public BungeeCord(PipelineManager pipelineManager) {
             super(pipelineManager);
+            ProxyServer.getInstance().getPluginManager().registerListener((Plugin) pipelineManager.getPlugin(), this);
         }
 
         @net.md_5.bungee.event.EventHandler
@@ -105,7 +110,7 @@ public class PlayerDataManager implements SystemLoadable {
         }
 
         @net.md_5.bungee.event.EventHandler
-        public void onKick(PlayerDisconnectEvent e){
+        public void onPlayerLeave(PlayerDisconnectEvent e){
             logoutPipeline(e.getPlayer().getUniqueId());
         }
     }

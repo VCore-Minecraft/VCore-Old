@@ -2,8 +2,9 @@
  * Copyright (c) 2021. Lukas Jonsson
  */
 
-package de.verdox.vcore.plugin.player;
+package de.verdox.vcore.synchronization.pipeline.player;
 
+import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 import de.verdox.vcore.plugin.VCorePlugin;
 import de.verdox.vcore.synchronization.messaging.event.MessageEvent;
@@ -19,13 +20,15 @@ import java.util.concurrent.ConcurrentHashMap;
  * @Author: Lukas Jonsson (Verdox)
  * @date 15.06.2021 01:48
  */
-public class VCorePlayerManager {
+public class VCorePlayerCache {
 
     //TODO: Nicht direkt löschen, sondern als löschbar markieren und nach 5 Minuten clearen oder sowas
 
     private final Map<UUID, VCorePlayer> cache = new ConcurrentHashMap<>();
+    private final VCorePlugin<?, ?> vCorePlugin;
 
-    public VCorePlayerManager(VCorePlugin<?,?> vCorePlugin){
+    public VCorePlayerCache(VCorePlugin<?,?> vCorePlugin){
+        this.vCorePlugin = vCorePlugin;
         vCorePlugin.getServices().eventBus.register(new PlayerRedisListener());
     }
 
@@ -51,14 +54,29 @@ public class VCorePlayerManager {
 
             if(messageWrapper.parameterContains("connection", "minecraft", "join")
                     || messageWrapper.parameterContains("connection", "bungee", "join")){
+
+                if(messageWrapper.parameterContains("connection", "bungee", "join")){
+                    vCorePlugin.consoleMessage("&eReceived Player Proxy Login&7: &b"+playerUUID+" &8[&a"+displayName+"&8]",false);
+                }
                 VCorePlayer vCorePlayer = new VCorePlayer(playerUUID, displayName);
-                if(!cache.containsKey(vCorePlayer.getPlayerUUID()))
-                    cache.put(vCorePlayer.getPlayerUUID(),vCorePlayer);
+                if(!cache.containsKey(vCorePlayer.getPlayerUUID())) {
+                    cache.put(vCorePlayer.getPlayerUUID(), vCorePlayer);
+                }
+                else {
+                    cache.get(playerUUID).setClearable(false);
+                }
             }
             else if(messageWrapper.parameterContains("connection", "minecraft", "leave")
                     || messageWrapper.parameterContains("connection", "minecraft", "kick")
                     || messageWrapper.parameterContains("connection", "bungee", "leave")){
-                cache.remove(playerUUID);
+
+                if(messageWrapper.parameterContains("connection", "bungee", "leave")){
+                    vCorePlugin.consoleMessage("&eReceived Player Proxy Logout&7: &b"+playerUUID+" &8[&a"+displayName+"&8]",false);
+                    cache.remove(playerUUID);
+                }
+                else
+                    if(cache.containsKey(playerUUID))
+                        cache.get(playerUUID).setClearable(true);
             }
         }
     }

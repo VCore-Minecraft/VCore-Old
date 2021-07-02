@@ -47,6 +47,8 @@ public class PipelineDataSynchronizer implements DataSynchronizer {
         if(pipelineManager.globalStorage == null && (source.equals(DataSourceType.GLOBAL_STORAGE) || destination.equals(DataSourceType.GLOBAL_STORAGE)))
             return;
 
+        pipelineManager.getPlugin().consoleMessage("&eSyncing &b"+dataClass.getSimpleName()+" &ewith uuid &6"+objectUUID+" &8[&a"+source+" &7-> &b"+destination+"&8]",false);
+
         if(source.equals(DataSourceType.LOCAL)){
 
             if(!pipelineManager.localCache.dataExist(dataClass, objectUUID))
@@ -67,7 +69,7 @@ public class PipelineDataSynchronizer implements DataSynchronizer {
             Map<String, Object> globalCachedData = pipelineManager.globalCache.loadData(dataClass, objectUUID);
             // Error while loading from redis
             if(globalCachedData == null){
-                pipelineManager.globalCache.remove(dataClass, objectUUID);
+                pipelineManager.getPlugin().consoleMessage("&eTrying to load from storage...",false);
                 doSynchronisation(DataSourceType.GLOBAL_STORAGE, DataSourceType.LOCAL,dataClass,objectUUID,callback);
                 return;
             }
@@ -82,6 +84,7 @@ public class PipelineDataSynchronizer implements DataSynchronizer {
             }
             else if(destination.equals(DataSourceType.GLOBAL_STORAGE))
                 pipelineManager.globalStorage.save(dataClass, objectUUID, globalCachedData);
+
         }
         else if(source.equals(DataSourceType.GLOBAL_STORAGE)){
             if(!pipelineManager.globalStorage.dataExist(dataClass, objectUUID))

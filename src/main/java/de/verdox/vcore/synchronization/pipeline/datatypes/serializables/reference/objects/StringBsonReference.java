@@ -4,7 +4,6 @@
 
 package de.verdox.vcore.synchronization.pipeline.datatypes.serializables.reference.objects;
 
-import de.verdox.vcore.synchronization.pipeline.datatypes.serializables.VCoreSerializableJson;
 import de.verdox.vcore.synchronization.pipeline.datatypes.serializables.reference.VCoreDataReference;
 
 import javax.annotation.Nonnull;

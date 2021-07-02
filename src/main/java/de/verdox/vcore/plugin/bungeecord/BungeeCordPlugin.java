@@ -2,6 +2,7 @@ package de.verdox.vcore.plugin.bungeecord;
 
 import de.verdox.vcore.plugin.VCorePlugin;
 import de.verdox.vcore.plugin.subsystem.VCoreSubsystem;
+import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.plugin.Plugin;
 
 import java.io.File;
@@ -40,7 +41,7 @@ public abstract class BungeeCordPlugin extends Plugin implements VCorePlugin<Plu
         if(tabSize >= 1)
             newMessageBuilder.append("&7>> &f");
         newMessageBuilder.append(message);
-        getPlugin().getProxy().getConsole().sendMessage(org.bukkit.ChatColor.translateAlternateColorCodes('&',"&8[&c"+getPluginName()+"&8] "+newMessageBuilder.toString()));
+        getPlugin().getProxy().getConsole().sendMessage(ChatColor.translateAlternateColorCodes('&',"&8[&c"+getPluginName()+"&8] "+newMessageBuilder));
 
     }
 }
