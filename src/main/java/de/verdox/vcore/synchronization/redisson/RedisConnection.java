@@ -7,7 +7,9 @@ package de.verdox.vcore.synchronization.redisson;
 import de.verdox.vcore.plugin.VCorePlugin;
 import org.redisson.Redisson;
 import org.redisson.api.RedissonClient;
+import org.redisson.config.ClusterServersConfig;
 import org.redisson.config.Config;
+import org.redisson.config.SingleServerConfig;
 
 import javax.annotation.Nonnull;
 
@@ -26,22 +28,25 @@ public abstract class RedisConnection {
             throw new IllegalArgumentException("Address Array empty");
         Config config = new Config();
         if(clusterMode){
-            config.useClusterServers().addNodeAddress(addressArray);
+            ClusterServersConfig clusterServersConfig = config.useClusterServers();
+            clusterServersConfig.addNodeAddress(addressArray);
 
             if(redisPassword != null && !redisPassword.isEmpty())
-                config.useClusterServers().addNodeAddress(addressArray).setPassword(redisPassword);
+                clusterServersConfig.addNodeAddress(addressArray).setPassword(redisPassword);
             else
-                config.useClusterServers().addNodeAddress(addressArray);
+                clusterServersConfig.addNodeAddress(addressArray);
         }
         else {
             String address = addressArray[0];
             if(address == null)
                 throw new IllegalArgumentException("Single Server Adress can't be null!");
+            SingleServerConfig singleServerConfig = config.useSingleServer();
+            singleServerConfig.setSubscriptionsPerConnection(30);
 
             if(redisPassword != null && !redisPassword.isEmpty())
-                config.useSingleServer().setAddress(addressArray[0]).setPassword(redisPassword);
+                singleServerConfig.setAddress(addressArray[0]).setPassword(redisPassword);
             else
-                config.useSingleServer().setAddress(addressArray[0]);
+                singleServerConfig.setAddress(addressArray[0]);
         }
         config.setNettyThreads(4);
         config.setThreads(8);

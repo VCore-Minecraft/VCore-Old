@@ -21,21 +21,21 @@ public class VCoreScheduler implements SystemLoadable {
     }
 
     public void asyncInterval(Runnable task, long delay, long interval){
-        scheduledExecutorService.scheduleAtFixedRate(task,delay*50,interval*50, TimeUnit.MILLISECONDS);
+        scheduledExecutorService.scheduleAtFixedRate(new CatchingRunnable(task),delay*50,interval*50, TimeUnit.MILLISECONDS);
     }
 
     public void asyncSchedule(Runnable task, long delay, long interval){
-        scheduledExecutorService.scheduleAtFixedRate(task,delay*50,interval*50, TimeUnit.MILLISECONDS);
+        scheduledExecutorService.scheduleAtFixedRate(new CatchingRunnable(task),delay*50,interval*50, TimeUnit.MILLISECONDS);
     }
 
     public void async(Runnable task){
-        scheduledExecutorService.execute(task);
+        scheduledExecutorService.execute(new CatchingRunnable(task));
     }
 
     public void waitUntilShutdown(){
         shutdown();
         vCorePlugin.consoleMessage("&6Awaiting Scheduler to shut down&7!",true);
-        try { scheduledExecutorService.awaitTermination(10,TimeUnit.SECONDS);
+        try { scheduledExecutorService.awaitTermination(5,TimeUnit.SECONDS);
         } catch (InterruptedException e) {
             vCorePlugin.consoleMessage("&cScheduler was interrupted&7!",true);
         }

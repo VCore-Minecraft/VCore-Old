@@ -2,6 +2,8 @@ package de.verdox.vcore.plugin;
 
 import de.verdox.vcore.performance.concurrent.CatchingRunnable;
 import de.verdox.vcore.performance.concurrent.TaskBatch;
+import de.verdox.vcore.plugin.files.DebugConfig;
+import de.verdox.vcore.plugin.files.config.VCoreYAMLConfig;
 import de.verdox.vcore.synchronization.pipeline.annotations.RequiredSubsystemInfo;
 import de.verdox.vcore.plugin.bukkit.BukkitPlugin;
 import de.verdox.vcore.plugin.bungeecord.BungeeCordPlugin;
@@ -31,6 +33,7 @@ public interface VCorePlugin <T, R extends VCoreSubsystem<?>> extends SystemLoad
     void consoleMessage(String message, int tabSize, boolean debug);
 
     boolean debug();
+    void setDebugMode(boolean value);
 
     TaskBatch<VCorePlugin<T,R>> createTaskBatch();
     void async(Runnable runnable);
@@ -56,9 +59,21 @@ public interface VCorePlugin <T, R extends VCoreSubsystem<?>> extends SystemLoad
 
         private PluginServiceParts<VCorePlugin.Minecraft,VCoreSubsystem.Bukkit> serviceParts;
         private boolean loaded;
+        private final DebugConfig debugConfig = new DebugConfig(this);
+
+        @Override
+        public void setDebugMode(boolean value){
+            debugConfig.setDebugMode(value);
+        }
+
+        @Override
+        public boolean debug() {
+            return debugConfig.debugMode();
+        }
 
         @Override
         public final void onEnable() {
+            debugConfig.init();
             consoleMessage("&ePlugin starting&7!",false);
             serviceParts = new PluginServiceParts.Bukkit(this);
             serviceParts.enableBefore();
@@ -127,6 +142,17 @@ public interface VCorePlugin <T, R extends VCoreSubsystem<?>> extends SystemLoad
 
         private PluginServiceParts<VCorePlugin.BungeeCord,VCoreSubsystem.BungeeCord> serviceParts;
         private boolean loaded;
+        private final DebugConfig debugConfig = new DebugConfig(this);
+
+        @Override
+        public void setDebugMode(boolean value){
+            debugConfig.setDebugMode(value);
+        }
+
+        @Override
+        public boolean debug() {
+            return debugConfig.debugMode();
+        }
 
         @Override
         public final void onEnable() {

@@ -64,6 +64,8 @@ public abstract class VCoreData implements VCoreSerializable {
         });
     }
 
+    public abstract void onSync();
+
     public void cleanUp(){
         this.dataManipulator.cleanUp();
         onCleanUp();

@@ -13,6 +13,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -30,29 +31,33 @@ public class PipelineDataSynchronizer implements DataSynchronizer {
     }
 
     @Override
-    public void synchronize(@Nonnull DataSourceType source, @Nonnull DataSourceType destination, @Nonnull Class<? extends VCoreData> dataClass, @Nonnull UUID objectUUID) {
-        synchronize(source, destination, dataClass, objectUUID, null);
+    public CompletableFuture<Boolean> synchronize(@Nonnull DataSourceType source, @Nonnull DataSourceType destination, @Nonnull Class<? extends VCoreData> dataClass, @Nonnull UUID objectUUID) {
+        return synchronize(source, destination, dataClass, objectUUID, null);
     }
 
     @Override
-    public synchronized void synchronize(@Nonnull DataSourceType source, @Nonnull DataSourceType destination, @Nonnull Class<? extends VCoreData> dataClass, @Nonnull UUID objectUUID, @Nullable Runnable callback) {
-        pipelineManager.getExecutorService().submit(new CatchingRunnable(() -> doSynchronisation(source, destination, dataClass, objectUUID,callback)));
+    public synchronized CompletableFuture<Boolean> synchronize(@Nonnull DataSourceType source, @Nonnull DataSourceType destination, @Nonnull Class<? extends VCoreData> dataClass, @Nonnull UUID objectUUID, @Nullable Runnable callback) {
+        CompletableFuture<Boolean> future = new CompletableFuture<>();
+        pipelineManager.getExecutorService().submit(new CatchingRunnable(() -> {
+            future.complete(doSynchronisation(source, destination, dataClass, objectUUID,callback));
+        }));
+        return future;
     }
 
-    public void doSynchronisation(@Nonnull DataSourceType source, @Nonnull DataSourceType destination, @Nonnull Class<? extends VCoreData> dataClass, @Nonnull UUID objectUUID, @Nullable Runnable callback){
+    public boolean doSynchronisation(@Nonnull DataSourceType source, @Nonnull DataSourceType destination, @Nonnull Class<? extends VCoreData> dataClass, @Nonnull UUID objectUUID, @Nullable Runnable callback){
         if(source.equals(destination))
-            return;
+            return false;
         if(pipelineManager.globalCache == null && (source.equals(DataSourceType.GLOBAL_CACHE) || destination.equals(DataSourceType.GLOBAL_CACHE)))
-            return;
+            return false;
         if(pipelineManager.globalStorage == null && (source.equals(DataSourceType.GLOBAL_STORAGE) || destination.equals(DataSourceType.GLOBAL_STORAGE)))
-            return;
+            return false;
 
-        pipelineManager.getPlugin().consoleMessage("&eSyncing &b"+dataClass.getSimpleName()+" &ewith uuid &6"+objectUUID+" &8[&a"+source+" &7-> &b"+destination+"&8]",false);
+        pipelineManager.getPlugin().consoleMessage("&eSyncing &b"+dataClass.getSimpleName()+" &ewith uuid &6"+objectUUID+" &8[&a"+source+" &7-> &b"+destination+"&8] &b"+System.currentTimeMillis(),true);
 
         if(source.equals(DataSourceType.LOCAL)){
 
             if(!pipelineManager.localCache.dataExist(dataClass, objectUUID))
-                return;
+                return false;
             VCoreData data = pipelineManager.localCache.getData(dataClass, objectUUID);
             Map<String, Object> dataToSave = data.serialize();
             dataToSave.remove("_id");
@@ -65,13 +70,13 @@ public class PipelineDataSynchronizer implements DataSynchronizer {
         }
         else if(source.equals(DataSourceType.GLOBAL_CACHE)){
             if(!pipelineManager.globalCache.dataExist(dataClass, objectUUID))
-                return;
+                return false;
             Map<String, Object> globalCachedData = pipelineManager.globalCache.loadData(dataClass, objectUUID);
             // Error while loading from redis
             if(globalCachedData == null){
                 pipelineManager.getPlugin().consoleMessage("&eTrying to load from storage...",false);
                 doSynchronisation(DataSourceType.GLOBAL_STORAGE, DataSourceType.LOCAL,dataClass,objectUUID,callback);
-                return;
+                return false;
             }
             globalCachedData.remove("_id");
 
@@ -88,7 +93,7 @@ public class PipelineDataSynchronizer implements DataSynchronizer {
         }
         else if(source.equals(DataSourceType.GLOBAL_STORAGE)){
             if(!pipelineManager.globalStorage.dataExist(dataClass, objectUUID))
-                return;
+                return false;
             Map<String, Object> globalSavedData = pipelineManager.globalStorage.loadData(dataClass, objectUUID);
             globalSavedData.remove("_id");
 
@@ -102,8 +107,10 @@ public class PipelineDataSynchronizer implements DataSynchronizer {
             else if(destination.equals(DataSourceType.GLOBAL_CACHE))
                 pipelineManager.globalCache.save(dataClass,objectUUID,globalSavedData);
         }
+        pipelineManager.getPlugin().consoleMessage("&eDone syncing &b"+System.currentTimeMillis(),true);
         if(callback != null)
             callback.run();
+        return true;
     }
 
     @Override
@@ -114,8 +121,10 @@ public class PipelineDataSynchronizer implements DataSynchronizer {
     @Override
     public void shutdown() {
         try {
+            pipelineManager.getPlugin().consoleMessage("&eShutting down Data Synchronizer",false);
             pipelineManager.getExecutorService().shutdown();
             pipelineManager.getExecutorService().awaitTermination(5, TimeUnit.SECONDS);
+            pipelineManager.getPlugin().consoleMessage("&aData Synchronizer shut down successfully",false);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }

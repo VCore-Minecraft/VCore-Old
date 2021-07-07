@@ -25,6 +25,7 @@ import org.bukkit.event.player.PlayerQuitEvent;
 
 import javax.annotation.Nonnull;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @version 1.0
@@ -45,9 +46,12 @@ public class PlayerDataManager implements SystemLoadable {
     protected final void loginPipeline(@Nonnull UUID player){
         plugin.consoleMessage("&eHandling Player Join &b"+player,false);
         plugin.getServices().eventBus.post(new PlayerPreSessionLoadEvent(player));
-        plugin.createTaskBatch().doAsync(() -> {
+        plugin.createTaskBatch().wait(400,TimeUnit.MILLISECONDS).doAsync(() -> {
             plugin.getServices().getSubsystemManager().getActivePlayerDataClasses()
-                    .forEach(aClass -> pipelineManager.load(aClass, player, Pipeline.LoadingStrategy.LOAD_PIPELINE,true));
+                    .forEach(aClass -> {
+                        PlayerData playerData = pipelineManager.load(aClass, player, Pipeline.LoadingStrategy.LOAD_PIPELINE, true);
+                        playerData.onConnect(player);
+                    });
         }).doSync(() -> plugin.getServices().eventBus.post(new PlayerSessionLoadedEvent(player, System.currentTimeMillis()))).executeBatch();
     }
 
@@ -58,6 +62,7 @@ public class PlayerDataManager implements SystemLoadable {
                     plugin.getServices().getSubsystemManager().getActivePlayerDataClasses()
                             .forEach(aClass -> {
                                 PlayerData data = pipelineManager.getLocalCache().getData(aClass, player);
+                                data.onDisconnect(player);
                                 data.save(true);
                             });
                 }).executeBatch();

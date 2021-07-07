@@ -7,7 +7,6 @@ package de.verdox.vcorepaper.playercache;
 import de.verdox.vcore.plugin.VCorePlugin;
 import de.verdox.vcore.plugin.listener.VCoreListener;
 import de.verdox.vcore.synchronization.messaging.messages.Message;
-import de.verdox.vcore.synchronization.pipeline.player.VCorePlayerCache;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerKickEvent;

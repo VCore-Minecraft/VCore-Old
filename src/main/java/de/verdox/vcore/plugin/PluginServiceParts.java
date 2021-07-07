@@ -14,6 +14,11 @@ import de.verdox.vcore.synchronization.pipeline.PipelineManager;
 import de.verdox.vcore.synchronization.pipeline.player.PlayerDataManager;
 import de.verdox.vcore.synchronization.pipeline.parts.Pipeline;
 import de.verdox.vcore.synchronization.pipeline.player.VCorePlayerCache;
+import net.md_5.bungee.api.ProxyServer;
+import net.md_5.bungee.api.chat.TextComponent;
+import net.md_5.bungee.api.connection.Connection;
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 
 /**
  * @version 1.0
@@ -60,9 +65,10 @@ public abstract class PluginServiceParts <T extends VCorePlugin<?,S>, S extends 
     public void shutdown() {
         plugin.consoleMessage("&6Shutting down VCore Parts",false);
         pipeline.saveAllData();
-        vCoreScheduler.waitUntilShutdown();
+
         pipeline.shutdown();
         messagingService.shutdown();
+        vCoreScheduler.waitUntilShutdown();
         getSubsystemManager().shutdown();
         getPlayerDataManager().shutdown();
     }
@@ -139,6 +145,7 @@ public abstract class PluginServiceParts <T extends VCorePlugin<?,S>, S extends 
 
         @Override
         public final void shutdown() {
+            ProxyServer.getInstance().getPlayers().forEach(Connection::disconnect);
             super.shutdown();
             subsystemManager.shutdown();
         }

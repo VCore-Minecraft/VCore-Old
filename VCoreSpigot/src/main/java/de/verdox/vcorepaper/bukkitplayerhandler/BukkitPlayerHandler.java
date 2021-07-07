@@ -9,8 +9,11 @@ import de.verdox.vcore.synchronization.pipeline.datatypes.PlayerData;
 import de.verdox.vcore.synchronization.pipeline.datatypes.ServerData;
 import de.verdox.vcore.plugin.VCorePlugin;
 import de.verdox.vcore.plugin.subsystem.VCoreSubsystem;
+import de.verdox.vcorepaper.bukkitplayerhandler.command.PlayerHandlerAdminCommands;
 import de.verdox.vcorepaper.bukkitplayerhandler.listener.PlayerListener;
+import de.verdox.vcorepaper.bukkitplayerhandler.papi.BukkitPlayerHandlerExpansion;
 import de.verdox.vcorepaper.bukkitplayerhandler.playerdata.PlayerHandlerData;
+import org.bukkit.Bukkit;
 
 import java.util.Set;
 
@@ -33,6 +36,9 @@ public class BukkitPlayerHandler extends VCoreSubsystem.Bukkit {
     @Override
     public void onSubsystemEnable() {
         getVCorePlugin().getServices().eventBus.register(new PlayerListener(this));
+        if(org.bukkit.Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null)
+            new BukkitPlayerHandlerExpansion().register();
+        new PlayerHandlerAdminCommands(this,"playerhandler");
     }
 
     @Override

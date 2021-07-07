@@ -11,6 +11,8 @@ import com.mongodb.MongoCredential;
 import com.mongodb.ServerAddress;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.model.IndexOptions;
+import com.mongodb.client.model.Indexes;
 import de.verdox.vcore.synchronization.pipeline.datatypes.PlayerData;
 import de.verdox.vcore.synchronization.pipeline.datatypes.ServerData;
 import de.verdox.vcore.synchronization.pipeline.datatypes.VCoreData;
@@ -141,6 +143,18 @@ public class MongoDBStorage implements GlobalStorage, RemoteStorage {
 
     private final com.mongodb.client.MongoCollection<Document> getCollection(String name){
         try {
+            com.mongodb.client.MongoCollection<Document> collection = mongoDatabase.getCollection(name);
+            //String indexName = "vcore_objectUUID_index";
+            //boolean contains = false;
+            //for (Document document : collection.listIndexes()) {
+            //    if(!document.containsKey("name"))
+            //        continue;
+            //    String foundIndexName = document.getString("name");
+            //    if(foundIndexName.equals(indexName))
+            //        contains = true;
+            //}
+            //if(!contains)
+            //    collection.createIndex(Indexes.hashed("objectUUID"), new IndexOptions().unique(true).background(true).name("vcore_objectUUID_index"));
             return mongoDatabase.getCollection(name);
         }
         // Collection does not exist

@@ -9,6 +9,7 @@ import de.verdox.vcore.synchronization.pipeline.datatypes.VCoreData;
 
 import javax.annotation.Nonnull;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * @version 1.0
@@ -17,8 +18,8 @@ import java.util.UUID;
  */
 public interface DataSynchronizer extends SystemLoadable {
 
-    void synchronize(@Nonnull DataSourceType source, @Nonnull DataSourceType destination, @Nonnull Class<? extends VCoreData> dataClass, @Nonnull UUID objectUUID);
-    void synchronize(@Nonnull DataSourceType source, @Nonnull DataSourceType destination, @Nonnull Class<? extends VCoreData> dataClass, @Nonnull UUID objectUUID, Runnable callback);
+    CompletableFuture<Boolean> synchronize(@Nonnull DataSourceType source, @Nonnull DataSourceType destination, @Nonnull Class<? extends VCoreData> dataClass, @Nonnull UUID objectUUID);
+    CompletableFuture<Boolean> synchronize(@Nonnull DataSourceType source, @Nonnull DataSourceType destination, @Nonnull Class<? extends VCoreData> dataClass, @Nonnull UUID objectUUID, Runnable callback);
 
     enum DataSourceType {
         LOCAL,

@@ -74,11 +74,6 @@ public class VCorePaper extends VCorePlugin.Minecraft {
         return List.of(new BukkitPlayerHandler(this));
     }
 
-    @Override
-    public boolean debug() {
-        return true;
-    }
-
     public CustomEntityManager getCustomEntityManager() {
         return customEntityManager;
     }

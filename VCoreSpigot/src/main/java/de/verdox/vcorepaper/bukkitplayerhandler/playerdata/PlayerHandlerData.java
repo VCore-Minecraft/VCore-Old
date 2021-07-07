@@ -6,8 +6,8 @@ package de.verdox.vcorepaper.bukkitplayerhandler.playerdata;
 
 import de.verdox.vcore.synchronization.pipeline.annotations.*;
 import de.verdox.vcore.synchronization.pipeline.datatypes.PlayerData;
-import de.verdox.vcore.synchronization.pipeline.player.VCorePlayer;
 import de.verdox.vcore.plugin.VCorePlugin;
+import de.verdox.vcore.util.TimeUtil;
 import de.verdox.vcorepaper.VCorePaper;
 import de.verdox.vcorepaper.bukkitplayerhandler.BukkitPlayerHandler;
 import de.verdox.vcorepaper.bukkitplayerhandler.model.SerializableJsonInventory;
@@ -16,6 +16,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 import javax.annotation.Nonnull;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.UUID;
@@ -37,6 +38,15 @@ public class PlayerHandlerData extends PlayerData {
     private Map<String, Map<String, Object>> inventoryCache = new ConcurrentHashMap<>();
 
     @VCorePersistentData
+    private long firstLogin = 0L;
+
+    @VCorePersistentData
+    private long playTime = 0L;
+
+    @VCorePersistentData
+    private long lastLogin = 0L;
+
+    @VCorePersistentData
     public boolean restoreVanillaInventory = true;
 
     @VCorePersistentData
@@ -44,6 +54,22 @@ public class PlayerHandlerData extends PlayerData {
 
     public PlayerHandlerData(VCorePlugin<?,?> plugin, UUID playerUUID) {
         super(plugin, playerUUID);
+    }
+
+    @Override
+    public void onDisconnect(UUID playerUUID) {
+        updatePlayTime();
+        saveInventory();
+    }
+
+    @Override
+    public void onConnect(UUID playerUUID) {
+        lastLogin = System.currentTimeMillis();
+        updatePlayTime();
+    }
+
+    @Override
+    public void onSync() {
     }
 
     @Override
@@ -71,13 +97,16 @@ public class PlayerHandlerData extends PlayerData {
             return;
         ItemStack[] storageContents = player.getInventory().getStorageContents().clone();
         ItemStack[] armorContents = player.getInventory().getArmorContents().clone();
-        ItemStack[] enderChest = player.getEnderChest().getStorageContents();
+        ItemStack[] enderChest = player.getEnderChest().getStorageContents().clone();
 
-        ItemStack offHand = player.getInventory().getItemInOffHand();
-        SerializableJsonInventory serializableInventory = new SerializableJsonInventory(inventoryID,storageContents,armorContents, enderChest, offHand, player.getHealth(), player.getFoodLevel(), player.getExp(), new HashSet<>(player.getActivePotionEffects()));
+        ItemStack offHand = player.getInventory().getItemInOffHand().clone();
+        SerializableJsonInventory serializableInventory = new SerializableJsonInventory(inventoryID,player.getGameMode(),storageContents,armorContents, enderChest, offHand, player.getHealth(), player.getFoodLevel(), player.getLevel(), player.getTotalExperience(), new HashSet<>(player.getActivePotionEffects()));
 
         inventoryCache.put(inventoryID,serializableInventory.getData());
-        VCorePaper.getInstance().consoleMessage("&eInventory &6"+inventoryID+" &eof player &b"+getObjectUUID()+" &esaved&7!", true);
+        VCorePaper.getInstance().consoleMessage("&eInventory &6"+inventoryID+" &eof player &b"+getObjectUUID()+" &esaved&7! &b"+System.currentTimeMillis(), true);
+        VCorePaper.getInstance().consoleMessage(Arrays.toString(storageContents),2,true);
+        VCorePaper.getInstance().consoleMessage(Arrays.toString(armorContents),2,true);
+        VCorePaper.getInstance().consoleMessage(Arrays.toString(enderChest),2,true);
     }
 
     public void restoreInventory(@Nonnull Supplier<Player> supplier){
@@ -100,14 +129,49 @@ public class PlayerHandlerData extends PlayerData {
         this.activeInventoryID = inventoryID;
         SerializableJsonInventory serializableInventory = new SerializableJsonInventory(inventoryCache.get(inventoryID));
         serializableInventory.restoreInventory(player, null);
+
+        ItemStack[] storageContents = player.getInventory().getStorageContents().clone();
+        ItemStack[] armorContents = player.getInventory().getArmorContents().clone();
+        ItemStack[] enderChest = player.getEnderChest().getStorageContents().clone();
+
+        VCorePaper.getInstance().consoleMessage("&eInventory &6"+inventoryID+" &eof player &b"+getObjectUUID()+" &erestored&7! &b"+System.currentTimeMillis(), true);
+        VCorePaper.getInstance().consoleMessage(Arrays.toString(storageContents),2,true);
+        VCorePaper.getInstance().consoleMessage(Arrays.toString(armorContents),2,true);
+        VCorePaper.getInstance().consoleMessage(Arrays.toString(enderChest),2,true);
     }
 
     @Override
     public void onLoad() {
+        if(firstLogin == 0)
+            firstLogin = System.currentTimeMillis();
+        lastLogin = System.currentTimeMillis();
+    }
+
+    public void resetPlayTime(){
+        playTime = 0;
+        save(true);
     }
 
     @Override
     public void onCleanUp() {
+        Player player = Bukkit.getPlayer(getObjectUUID());
+        if(player != null)
+            saveInventory(() -> player);
+        else
+            getPlugin().consoleMessage("&cCould not save Inventory &7-> &ePlayer already offline",false);
+        updatePlayTime();
+    }
 
+    private void updatePlayTime(){
+        long plus = (System.currentTimeMillis() - lastLogin);
+        playTime += plus;
+    }
+
+    public long getPlayTimeMillis(){
+        return playTime + (System.currentTimeMillis() - lastLogin);
+    }
+
+    public int getPlayTimeSeconds(){
+        return (int) TimeUnit.MILLISECONDS.toSeconds(getPlayTimeMillis());
     }
 }

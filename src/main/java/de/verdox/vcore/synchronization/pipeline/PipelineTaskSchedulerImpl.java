@@ -41,10 +41,10 @@ public class PipelineTaskSchedulerImpl implements PipelineTaskScheduler {
                 }
             }
         PipelineTask<T> pipelineTask = new PipelineTask<>(pipelineManager.getPlugin(), this, pipelineAction, type, uuid, () -> tasks.remove(uuid));
-            if(!Bukkit.isPrimaryThread())
-                pipelineManager.getPlugin().consoleMessage("&6Scheduling "+loadingStrategy+" PipelineTask &a"+type.getSimpleName()+" &7: "+pipelineTask.getObjectUUID(),true);
-            else
-                pipelineManager.getPlugin().consoleMessage("&6Scheduling "+loadingStrategy+" PipelineTask on Main Thread &a"+type.getSimpleName()+" &7: "+pipelineTask.getObjectUUID(),true);
+            //if(!Bukkit.isPrimaryThread())
+            //    pipelineManager.getPlugin().consoleMessage("&6Scheduling "+loadingStrategy+" PipelineTask &a"+type.getSimpleName()+" &7: "+pipelineTask.getObjectUUID(),true);
+            //else
+            //    pipelineManager.getPlugin().consoleMessage("&6Scheduling "+loadingStrategy+" PipelineTask on Main Thread &a"+type.getSimpleName()+" &7: "+pipelineTask.getObjectUUID(),true);
         tasks.put(uuid, pipelineTask);
         return pipelineTask;
     }
@@ -72,6 +72,7 @@ public class PipelineTaskSchedulerImpl implements PipelineTaskScheduler {
 
     @Override
     public void shutdown() {
+        pipelineManager.getPlugin().consoleMessage("&eShutting down Pipeline Task Scheduler",false);
         tasks.forEach((uuid, pipelineTask) -> {
             try {
                 pipelineTask.getCompletableFuture().get(1,TimeUnit.SECONDS);
@@ -79,5 +80,6 @@ public class PipelineTaskSchedulerImpl implements PipelineTaskScheduler {
                 e.printStackTrace();
             }
         });
+        pipelineManager.getPlugin().consoleMessage("&aPipeline Task Scheduler shut down successfully",false);
     }
 }

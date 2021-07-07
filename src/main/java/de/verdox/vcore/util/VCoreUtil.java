@@ -16,6 +16,7 @@ public class VCoreUtil {
     private static final MySQLUtil mySQLUtil = new MySQLUtil();
     private static final BukkitItemUtil bukkitItemUtil = new BukkitItemUtil();
     private static final VanillaUtil vanillaUtil = new VanillaUtil();
+    private static final TimeUtil timeUtil = new TimeUtil();
 
     public static GeometryUtil getGeometryUtil() {
         return geometryUtil;
@@ -41,5 +42,8 @@ public class VCoreUtil {
     }
     public static VanillaUtil getVanillaUtil() {
         return vanillaUtil;
+    }
+    public static TimeUtil getTimeUtil() {
+        return timeUtil;
     }
 }

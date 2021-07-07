@@ -60,6 +60,8 @@ public class RedisMessaging extends RedisConnection implements MessagingService<
 
     @Override
     public void shutdown() {
+        plugin.consoleMessage("&eShutting down Redis Messenger",false);
         rTopic.removeListener(messageListener);
+        plugin.consoleMessage("&eRedis Messenger shut down successfully",false);
     }
 }

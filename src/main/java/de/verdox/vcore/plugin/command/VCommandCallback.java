@@ -168,6 +168,16 @@ public class VCommandCallback {
                         return new CallbackResponse(CallbackResponse.ResponseType.FAILURE,true);
                     }
                 }
+                else if(commandAskParameter.getCommandAskType().equals(CommandAskType.BOOLEAN)){
+                    if(!argument.equalsIgnoreCase("true") && !argument.equalsIgnoreCase("false")){
+                        sender.sendMessage(ChatColor.translateAlternateColorCodes('&',commandAskParameter.errorMessage));
+                        return new CallbackResponse(CallbackResponse.ResponseType.FAILURE,true);
+                    }
+                    providedArguments.add(Boolean.parseBoolean(argument));
+                }
+                else if(commandAskParameter.getCommandAskType().equals(CommandAskType.STRING)){
+                    providedArguments.add(argument);
+                }
             }
         }
         if(commandExecutorType != null){
@@ -222,6 +232,14 @@ public class VCommandCallback {
 
         public <T> T getObject(@NonNegative int index, @Nonnull Class<? extends T> type){
             return type.cast(parameters.get(index));
+        }
+
+        public Class<?> getType(@NonNegative int index){
+            return parameters.get(index).getClass();
+        }
+
+        public int size(){
+            return parameters.size();
         }
     }
     
@@ -287,6 +305,8 @@ public class VCommandCallback {
         public List<String> suggest() {
             if(commandAskType.equals(CommandAskType.PLAYER_ONLINE) && suggested.isEmpty())
                 return Bukkit.getOnlinePlayers().stream().map(HumanEntity::getName).collect(Collectors.toList());
+            if(commandAskType.equals(CommandAskType.BOOLEAN))
+                return List.of("true","false");
             return suggested;
         }
 
@@ -313,6 +333,7 @@ public class VCommandCallback {
         NEGATIVE_NUMBER,
         NEGATIVE_NUMBER_AND_ZERO,
         PLAYER_ONLINE,
+        BOOLEAN,
     }
 
     public enum CommandExecutorType{

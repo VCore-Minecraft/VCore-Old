@@ -78,6 +78,7 @@ public class PipelineManager implements Pipeline {
                     if(!data.isExpired())
                         return;
                     data.cleanUp();
+                    data.save(true);
                     localCache.remove(aClass, uuid);
                 });
             });
@@ -96,6 +97,7 @@ public class PipelineManager implements Pipeline {
                     if(!data.isExpired())
                         return;
                     data.cleanUp();
+                    data.save(true);
                     localCache.remove(aClass, uuid);
                 });
             });
@@ -256,9 +258,25 @@ public class PipelineManager implements Pipeline {
     public void saveAllData() {
         // getLocalCache().getSavedUUIDs()
         plugin.getServices().getSubsystemManager().getActiveServerDataClasses()
-                .forEach(aClass -> getLocalCache().getSavedUUIDs(aClass).forEach(uuid -> getLocalCache().getData(aClass, uuid).save(true)));
+                .forEach(aClass -> getLocalCache().getSavedUUIDs(aClass).forEach(uuid -> {
+                    VCoreData vCoreData = getLocalCache().getData(aClass,uuid);
+                    vCoreData.cleanUp();
+                    pipelineDataSynchronizer.doSynchronisation(DataSynchronizer.DataSourceType.LOCAL, DataSynchronizer.DataSourceType.GLOBAL_CACHE,aClass,uuid,null);
+                    pipelineDataSynchronizer.doSynchronisation(DataSynchronizer.DataSourceType.LOCAL, DataSynchronizer.DataSourceType.GLOBAL_STORAGE,aClass,uuid,null);
+                    vCoreData.save(false);
+                    getLocalCache().remove(aClass,uuid);
+                    plugin.consoleMessage("&aSaved &b"+uuid+" &8[&e"+aClass+"&8]",false);
+                }));
         plugin.getServices().getSubsystemManager().getActivePlayerDataClasses()
-                .forEach(aClass -> getLocalCache().getSavedUUIDs(aClass).forEach(uuid -> getLocalCache().getData(aClass, uuid).save(true)));
+                .forEach(aClass -> getLocalCache().getSavedUUIDs(aClass).forEach(uuid -> {
+                    VCoreData vCoreData = getLocalCache().getData(aClass,uuid);
+                    vCoreData.cleanUp();
+                    pipelineDataSynchronizer.doSynchronisation(DataSynchronizer.DataSourceType.LOCAL, DataSynchronizer.DataSourceType.GLOBAL_CACHE,aClass,uuid,null);
+                    pipelineDataSynchronizer.doSynchronisation(DataSynchronizer.DataSourceType.LOCAL, DataSynchronizer.DataSourceType.GLOBAL_STORAGE,aClass,uuid,null);
+                    vCoreData.save(false);
+                    plugin.consoleMessage("&aSaved &b"+uuid+" &8[&e"+aClass+"&8]",false);
+                    getLocalCache().remove(aClass,uuid);
+                }));
     }
 
     @Override
@@ -274,15 +292,15 @@ public class PipelineManager implements Pipeline {
 
     <T extends VCoreData> T loadFromPipeline(@Nonnull Class<? extends T> dataClass, @Nonnull UUID uuid, boolean createIfNotExist){
         if(localCache.dataExist(dataClass,uuid)) {
-            //plugin.consoleMessage("&eFound Data in Local Cache &8[&b"+dataClass.getSimpleName()+"&8]", 1,true);
+            plugin.consoleMessage("&eFound Data in Local Cache &8[&b"+dataClass.getSimpleName()+"&8]", 1,true);
         }
         else if(globalCache != null && globalCache.dataExist(dataClass,uuid)) {
-           // plugin.consoleMessage("&eFound Data in Redis Cache &8[&b"+dataClass.getSimpleName()+"&8]", 1,true);
+            plugin.consoleMessage("&eFound Data in Redis Cache &8[&b"+dataClass.getSimpleName()+"&8]", 1,true);
             pipelineDataSynchronizer.doSynchronisation(DataSynchronizer.DataSourceType.GLOBAL_CACHE, DataSynchronizer.DataSourceType.LOCAL, dataClass, uuid, null);
             //getRedisHandler().redisToLocal(dataClass, uuid);
         }
         else if(globalStorage != null && globalStorage.dataExist(dataClass,uuid)) {
-            //plugin.consoleMessage("&eFound Data in Database &8[&b"+dataClass.getSimpleName()+"&8]", 1,true);
+            plugin.consoleMessage("&eFound Data in Database &8[&b"+dataClass.getSimpleName()+"&8]", 1,true);
             //getDatabaseHandler().databaseToLocal(dataClass,uuid);
             pipelineDataSynchronizer.doSynchronisation(DataSynchronizer.DataSourceType.GLOBAL_STORAGE, DataSynchronizer.DataSourceType.LOCAL, dataClass, uuid, null);
 
@@ -301,7 +319,7 @@ public class PipelineManager implements Pipeline {
             //getLocalDataHandler().localToRedis(vCoreData,dataClass,vCoreData.getUUID());
             pipelineDataSynchronizer.synchronize(DataSynchronizer.DataSourceType.LOCAL, DataSynchronizer.DataSourceType.GLOBAL_CACHE, dataClass, uuid);
         }
-        //plugin.consoleMessage("&eLoaded &a"+dataClass.getSimpleName()+" &ewith uuid&7: "+uuid, 1,true);
+        plugin.consoleMessage("&eLoaded &a"+dataClass.getSimpleName()+" &ewith uuid&7: "+uuid, 1,true);
         if(!localCache.dataExist(dataClass, uuid))
             throw new NullPointerException("Error in dataPipeline while loading "+dataClass+" with uuid "+uuid);
         T data = localCache.getData(dataClass, uuid);

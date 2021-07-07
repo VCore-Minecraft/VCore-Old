@@ -9,8 +9,10 @@ import de.verdox.vcore.synchronization.pipeline.datatypes.serializables.referenc
 import de.verdox.vcore.synchronization.pipeline.datatypes.serializables.reference.primitives.numbers.DoubleBsonReference;
 import de.verdox.vcore.synchronization.pipeline.datatypes.serializables.reference.primitives.numbers.IntegerBsonReference;
 import de.verdox.vcore.util.VCoreUtil;
+import de.verdox.vcorepaper.VCorePaper;
 import de.verdox.vcorepaper.custom.util.Serializer;
 import net.md_5.bungee.api.ChatMessageType;
+import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
@@ -33,7 +35,7 @@ public class SerializableJsonInventory {
 
     private final Map<String, Object> data = new HashMap<>();
 
-    public SerializableJsonInventory(String id, ItemStack[] storageContents, ItemStack[] armorContents, ItemStack[] enderChest, ItemStack offHand, double health, int foodLevel, float exp, Set<PotionEffect> potionEffects){
+    public SerializableJsonInventory(String id, GameMode gameMode, ItemStack[] storageContents, ItemStack[] armorContents, ItemStack[] enderChest, ItemStack offHand, double health, int foodLevel, int level, float exp, Set<PotionEffect> potionEffects){
         new StringBsonReference(data, "id").setValue(id);
         new StringBsonReference(data, "armorContents").setValue(Serializer.itemStackArrayToBase64(armorContents));
         new StringBsonReference(data, "storageContents").setValue(Serializer.itemStackArrayToBase64(storageContents));
@@ -43,6 +45,8 @@ public class SerializableJsonInventory {
         new DoubleBsonReference(data, "health").setValue(health);
         new DoubleBsonReference(data, "exp").setValue((double) exp);
         new IntegerBsonReference(data, "food").setValue(foodLevel);
+        new IntegerBsonReference(data, "level").setValue(level);
+        new StringBsonReference(data,"gameMode").setValue(gameMode.name());
         List<String> serializedPotionEffects = potionEffects.stream().map(potionEffect -> VCoreUtil.getBukkitPlayerUtil().serializePotionEffect(potionEffect)).collect(Collectors.toList());
         new ListBsonReference<String>(data,"potionEffects").setValue(serializedPotionEffects);
     }
@@ -65,8 +69,7 @@ public class SerializableJsonInventory {
             }
             else{
                 VCoreUtil.getBukkitPlayerUtil().sendPlayerMessage(player, ChatMessageType.ACTION_BAR,"&eRüstung wurde geladen");
-                if(armorContents.length != 0)
-                    player.getInventory().setArmorContents(armorContents);
+                player.getInventory().setArmorContents(armorContents);
             }
 
             VCoreUtil.getBukkitPlayerUtil().sendPlayerMessage(player, ChatMessageType.ACTION_BAR,"&eLade Items&7...");
@@ -77,8 +80,7 @@ public class SerializableJsonInventory {
             }
             else{
                 VCoreUtil.getBukkitPlayerUtil().sendPlayerMessage(player, ChatMessageType.ACTION_BAR,"&eItems wurden geladen");
-                if(storageContents.length != 0)
-                    player.getInventory().setStorageContents(storageContents);
+                player.getInventory().setStorageContents(storageContents);
             }
 
             VCoreUtil.getBukkitPlayerUtil().sendPlayerMessage(player, ChatMessageType.ACTION_BAR,"&eLade EnderChest&7...");
@@ -88,27 +90,29 @@ public class SerializableJsonInventory {
             }
             else{
                 VCoreUtil.getBukkitPlayerUtil().sendPlayerMessage(player, ChatMessageType.ACTION_BAR,"&eEnderChest wurde geladen");
-                if(enderChest.length != 0)
-                    player.getEnderChest().setContents(enderChest);
+                player.getEnderChest().setContents(enderChest);
             }
 
             VCoreUtil.getBukkitPlayerUtil().sendPlayerMessage(player, ChatMessageType.ACTION_BAR,"&eLade Offhand&7...");
-            ItemStack offHand = deSerializeOffHand();
-            if(offHand != null){
-                VCoreUtil.getBukkitPlayerUtil().sendPlayerMessage(player, ChatMessageType.ACTION_BAR,"&eOffhand wurden geladen");
-                player.getInventory().setItemInOffHand(offHand);
-            }
+            VCoreUtil.getBukkitPlayerUtil().sendPlayerMessage(player, ChatMessageType.ACTION_BAR,"&eOffhand wurden geladen");
+            player.getInventory().setItemInOffHand(deSerializeOffHand());
 
             player.setHealth(getHealth());
-            player.setExp((float) getExp());
+            player.setTotalExperience((int) getExp());
             player.setFoodLevel(getFoodLevel());
+            VCorePaper.getInstance().sync(() -> player.setGameMode(getGameMode()));
+            int level = getLevel();
+            if(level > 0)
+                player.setLevel(level);
             List<String> serializedEffects = new ListBsonReference<String>(data,"potionEffects").getValue();
             if(!serializedEffects.isEmpty()){
                 new ListBsonReference<String>(data,"potionEffects").getValue().stream()
                         .map(serializedEffect -> VCoreUtil.getBukkitPlayerUtil().deSerializePotionEffect(serializedEffect))
                         .forEach(potionEffect -> {
-                            player.removePotionEffect(potionEffect.getType());
-                            player.addPotionEffect(potionEffect);
+                            VCorePaper.getInstance().sync(() -> {
+                                player.removePotionEffect(potionEffect.getType());
+                                player.addPotionEffect(potionEffect);
+                            });
                         });
             }
             VCoreUtil.getBukkitPlayerUtil().sendPlayerMessage(player, ChatMessageType.ACTION_BAR,"&aSpielerdaten wurden geladen");
@@ -139,6 +143,10 @@ public class SerializableJsonInventory {
             return null;
         return offHandArray[0];
     }
+
+    public GameMode getGameMode(){return GameMode.valueOf(new StringBsonReference(data,"gameMode").orElse(GameMode.SURVIVAL.name())); }
+
+    public int getLevel(){return new IntegerBsonReference(data, "level").orElse(-1);}
 
     public double getHealth(){
         return new DoubleBsonReference(data, "health").orElse(20d);

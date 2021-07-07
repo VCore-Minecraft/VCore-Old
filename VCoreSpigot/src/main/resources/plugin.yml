@@ -6,6 +6,7 @@ authors: [ Verdox ]
 softdepend:
   - HolographicDisplays
   - ProtocolLib
+  - PlaceholderAPI
 
 commands:
   debug:
@@ -14,3 +15,6 @@ commands:
   nms:
     description: "Main Debug for NMS Testing"
     permission: "VCore.nms"
+  playerhandler:
+    description: "Admin Command for PlayerHandler"
+    permission: "vcore.admin"

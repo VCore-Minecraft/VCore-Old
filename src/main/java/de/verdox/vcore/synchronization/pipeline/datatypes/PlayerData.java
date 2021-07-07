@@ -19,4 +19,7 @@ public abstract class PlayerData extends VCoreData{
     public PlayerData(VCorePlugin<?, ?> plugin, UUID objectUUID) {
         super(plugin, objectUUID);
     }
+
+    public abstract void onDisconnect(UUID playerUUID);
+    public abstract void onConnect(UUID playerUUID);
 }

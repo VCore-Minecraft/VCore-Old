@@ -69,7 +69,11 @@ public interface VCoreSerializable {
                 }
                 else
                     field.set(this, value);
-            } catch (IllegalAccessException | NoSuchFieldException e) { e.printStackTrace(); }
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
+            } catch (NoSuchFieldException e) {
+                System.err.println("Field e not found. Cleanup Task for missing fields will be implemented in a future release");
+            }
         });
     }
 }

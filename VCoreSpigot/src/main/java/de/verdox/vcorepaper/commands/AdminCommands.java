@@ -1,5 +1,6 @@
 package de.verdox.vcorepaper.commands;
 
+import de.verdox.vcore.plugin.command.VCommandCallback;
 import de.verdox.vcore.plugin.command.VCoreCommand;
 import de.verdox.vcore.plugin.command.callback.CommandCallback;
 import de.verdox.vcore.plugin.VCorePlugin;
@@ -24,6 +25,41 @@ import java.util.stream.Collectors;
 public class AdminCommands extends VCoreCommand.VCoreBukkitCommand {
     public AdminCommands(VCorePlugin.Minecraft vCorePlugin, String commandName) {
         super(vCorePlugin, commandName);
+
+        addCommandCallback(new VCommandCallback("listPlugins")
+                .withPermission("vcore.debug")
+                .commandCallback((commandSender, commandParameters) -> {
+                    for (Plugin plugin : Bukkit.getPluginManager().getPlugins()) {
+                        if(!(plugin instanceof VCorePlugin.Minecraft))
+                            continue;
+                        commandSender.sendMessage(ChatColor.translateAlternateColorCodes('&',"&a"+plugin.getName()));
+                    }
+                })
+        );
+        addCommandCallback(new VCommandCallback("debugMode")
+                .withPermission("vcore.debug")
+                .askFor("pluginName", VCommandCallback.CommandAskType.STRING, "&cVCore-Plugin not found",
+                        Arrays.stream(Bukkit.getPluginManager().getPlugins())
+                                .filter(plugin -> plugin instanceof VCorePlugin.Minecraft).map(Plugin::getName).toArray(String[]::new))
+                .askFor("boolean", VCommandCallback.CommandAskType.BOOLEAN,"&cWrong Input")
+                .commandCallback((commandSender, commandParameters) -> {
+                    String pluginName = commandParameters.getObject(0,String.class);
+                    boolean debug = commandParameters.getObject(1,Boolean.class);
+                    Plugin plugin = Bukkit.getPluginManager().getPlugin(pluginName);
+                    if(!(plugin instanceof VCorePlugin.Minecraft)) {
+                        commandSender.sendMessage(ChatColor.translateAlternateColorCodes('&',"&cVCore-Plugin not found"));
+                        return;
+                    }
+                    VCorePlugin.Minecraft foundVCorePlugin = (VCorePlugin.Minecraft) plugin;
+                    foundVCorePlugin.setDebugMode(debug);
+                    if(debug)
+                        commandSender.sendMessage(ChatColor.translateAlternateColorCodes('&',"&b"+pluginName+" &edebugMode&7: &a"+true));
+                    else
+                        commandSender.sendMessage(ChatColor.translateAlternateColorCodes('&',"&b"+pluginName+" &edebugMode&7: &c"+false));
+                })
+        );
+
+
         addCommandSuggestions(0,(commandSender, args) -> List.of("listPlugins","plugin","block","item","entity","chunk"));
         addCommandSuggestions(1,(commandSender, args) -> {
             if(args[0].equalsIgnoreCase("block"))
