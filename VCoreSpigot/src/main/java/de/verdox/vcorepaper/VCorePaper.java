@@ -3,6 +3,7 @@ package de.verdox.vcorepaper;
 import com.comphenix.protocol.ProtocolLibrary;
 import com.comphenix.protocol.ProtocolManager;
 import de.verdox.vcore.plugin.VCorePlugin;
+import de.verdox.vcore.plugin.pingservice.ServerPingManager;
 import de.verdox.vcore.plugin.subsystem.VCoreSubsystem;
 import de.verdox.vcore.synchronization.pipeline.player.VCorePlayerCache;
 import de.verdox.vcorepaper.commands.AdminCommands;
@@ -30,6 +31,8 @@ public class VCorePaper extends VCorePlugin.Minecraft {
     private CustomBlockManager customBlockManager;
     private ProtocolManager protocolManager;
 
+    private ServerPingManager.Bukkit serverPingManager;
+
     private VCorePlayerCache vCorePlayerCache;
 
     public static VCorePaper getInstance() {
@@ -56,6 +59,8 @@ public class VCorePaper extends VCorePlugin.Minecraft {
             protocolManager = ProtocolLibrary.getProtocolManager();
         new SpigotPlayerCacheListener(this);
         vCorePlayerCache = new VCorePlayerCache(this);
+        serverPingManager = new ServerPingManager.Bukkit(this);
+        serverPingManager.sendOnlinePing();
     }
 
     public ProtocolManager getProtocolManager() {
@@ -66,7 +71,7 @@ public class VCorePaper extends VCorePlugin.Minecraft {
 
     @Override
     public void onPluginDisable() {
-
+        serverPingManager.sendOfflinePing();
     }
 
     @Override

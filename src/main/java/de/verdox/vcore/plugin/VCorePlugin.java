@@ -59,21 +59,23 @@ public interface VCorePlugin <T, R extends VCoreSubsystem<?>> extends SystemLoad
 
         private PluginServiceParts<VCorePlugin.Minecraft,VCoreSubsystem.Bukkit> serviceParts;
         private boolean loaded;
-        private final DebugConfig debugConfig = new DebugConfig(this);
 
         @Override
         public void setDebugMode(boolean value){
-            debugConfig.setDebugMode(value);
+            getServices().getDebugConfig().setDebugMode(value);
         }
 
         @Override
         public boolean debug() {
-            return debugConfig.debugMode();
+            if(getServices() == null)
+                return true;
+            if(getServices().getDebugConfig() == null)
+                return true;
+            return getServices().getDebugConfig().debugMode();
         }
 
         @Override
         public final void onEnable() {
-            debugConfig.init();
             consoleMessage("&ePlugin starting&7!",false);
             serviceParts = new PluginServiceParts.Bukkit(this);
             serviceParts.enableBefore();
@@ -151,6 +153,10 @@ public interface VCorePlugin <T, R extends VCoreSubsystem<?>> extends SystemLoad
 
         @Override
         public boolean debug() {
+            if(getServices() == null)
+                return true;
+            if(getServices().getDebugConfig() == null)
+                return true;
             return debugConfig.debugMode();
         }
 

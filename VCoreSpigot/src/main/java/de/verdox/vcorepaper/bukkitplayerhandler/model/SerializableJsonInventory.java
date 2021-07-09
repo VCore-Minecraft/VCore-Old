@@ -16,6 +16,7 @@ import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -114,6 +115,11 @@ public class SerializableJsonInventory {
                                 player.addPotionEffect(potionEffect);
                             });
                         });
+            }
+            else {
+                for (PotionEffect activePotionEffect : player.getActivePotionEffects()) {
+                    VCorePaper.getInstance().sync(() -> player.removePotionEffect(activePotionEffect.getType()));
+                }
             }
             VCoreUtil.getBukkitPlayerUtil().sendPlayerMessage(player, ChatMessageType.ACTION_BAR,"&aSpielerdaten wurden geladen");
             if(callback != null)

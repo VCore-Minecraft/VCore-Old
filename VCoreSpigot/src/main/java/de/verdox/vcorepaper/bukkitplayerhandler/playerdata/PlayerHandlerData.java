@@ -7,7 +7,6 @@ package de.verdox.vcorepaper.bukkitplayerhandler.playerdata;
 import de.verdox.vcore.synchronization.pipeline.annotations.*;
 import de.verdox.vcore.synchronization.pipeline.datatypes.PlayerData;
 import de.verdox.vcore.plugin.VCorePlugin;
-import de.verdox.vcore.util.TimeUtil;
 import de.verdox.vcorepaper.VCorePaper;
 import de.verdox.vcorepaper.bukkitplayerhandler.BukkitPlayerHandler;
 import de.verdox.vcorepaper.bukkitplayerhandler.model.SerializableJsonInventory;
@@ -16,7 +15,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 import javax.annotation.Nonnull;
-import java.util.Arrays;
+import java.util.Arrays;        
 import java.util.HashSet;
 import java.util.Map;
 import java.util.UUID;
@@ -44,7 +43,7 @@ public class PlayerHandlerData extends PlayerData {
     private long playTime = 0L;
 
     @VCorePersistentData
-    private long lastLogin = 0L;
+    private long lastSave = 0L;
 
     @VCorePersistentData
     public boolean restoreVanillaInventory = true;
@@ -64,12 +63,13 @@ public class PlayerHandlerData extends PlayerData {
 
     @Override
     public void onConnect(UUID playerUUID) {
-        lastLogin = System.currentTimeMillis();
+        lastSave = System.currentTimeMillis();
         updatePlayTime();
     }
 
     @Override
     public void onSync() {
+
     }
 
     @Override
@@ -144,11 +144,11 @@ public class PlayerHandlerData extends PlayerData {
     public void onLoad() {
         if(firstLogin == 0)
             firstLogin = System.currentTimeMillis();
-        lastLogin = System.currentTimeMillis();
     }
 
     public void resetPlayTime(){
         playTime = 0;
+        lastSave = System.currentTimeMillis();
         save(true);
     }
 
@@ -163,12 +163,13 @@ public class PlayerHandlerData extends PlayerData {
     }
 
     private void updatePlayTime(){
-        long plus = (System.currentTimeMillis() - lastLogin);
+        long plus = (System.currentTimeMillis() - lastSave);
+        lastSave = System.currentTimeMillis();
         playTime += plus;
     }
 
     public long getPlayTimeMillis(){
-        return playTime + (System.currentTimeMillis() - lastLogin);
+        return playTime + (System.currentTimeMillis() - lastSave);
     }
 
     public int getPlayTimeSeconds(){

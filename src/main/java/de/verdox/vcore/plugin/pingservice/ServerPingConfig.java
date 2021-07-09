@@ -1,0 +1,50 @@
+/*
+ * Copyright (c) 2021. Lukas Jonsson
+ */
+
+package de.verdox.vcore.plugin.pingservice;
+
+import de.verdox.vcore.plugin.VCorePlugin;
+import de.verdox.vcore.plugin.files.config.VCoreYAMLConfig;
+
+/**
+ * @version 1.0
+ * @Author: Lukas Jonsson (Verdox)
+ * @date 09.07.2021 01:27
+ */
+public class ServerPingConfig extends VCoreYAMLConfig {
+    public ServerPingConfig(VCorePlugin<?, ?> plugin, String fileName, String pluginDirectory) {
+        super(plugin, fileName, pluginDirectory);
+    }
+
+    @Override
+    public void onInit() {
+
+    }
+
+    @Override
+    public void setupConfig() {
+        config.addDefault("ServerInfos.serverName","serverName");
+        config.addDefault("ServerInfos.serverAddress","serverName");
+        config.addDefault("ServerInfos.serverPort",25565);
+        config.addDefault("bungee.enable",true);
+        config.options().copyDefaults(true);
+        save();
+    }
+
+    public String getServerName(){
+        return config.getString("ServerInfos.serverName");
+    }
+
+    public String getServerAddress(){
+        return config.getString("ServerInfos.serverAddress");
+    }
+
+    public int getServerPort(){
+        return config.getInt("ServerInfos.serverPort");
+    }
+
+    public boolean isBungeeMode(){
+        return config.getBoolean("bungee.enable");
+    }
+}

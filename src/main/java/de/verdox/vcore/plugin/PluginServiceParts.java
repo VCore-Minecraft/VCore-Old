@@ -6,6 +6,7 @@ package de.verdox.vcore.plugin;
 
 import com.google.common.eventbus.EventBus;
 import de.verdox.vcore.performance.concurrent.VCoreScheduler;
+import de.verdox.vcore.plugin.files.DebugConfig;
 import de.verdox.vcore.plugin.subsystem.VCoreSubsystem;
 import de.verdox.vcore.synchronization.messaging.MessagingConfig;
 import de.verdox.vcore.synchronization.messaging.MessagingService;
@@ -13,12 +14,8 @@ import de.verdox.vcore.synchronization.pipeline.PipelineConfig;
 import de.verdox.vcore.synchronization.pipeline.PipelineManager;
 import de.verdox.vcore.synchronization.pipeline.player.PlayerDataManager;
 import de.verdox.vcore.synchronization.pipeline.parts.Pipeline;
-import de.verdox.vcore.synchronization.pipeline.player.VCorePlayerCache;
 import net.md_5.bungee.api.ProxyServer;
-import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.connection.Connection;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 
 /**
  * @version 1.0
@@ -29,6 +26,7 @@ public abstract class PluginServiceParts <T extends VCorePlugin<?,S>, S extends 
     protected final T plugin;
     protected final PipelineConfig pipelineConfig;
     protected final MessagingConfig messagingConfig;
+    private final DebugConfig debugConfig;
 
     protected VCoreScheduler vCoreScheduler;
     public final EventBus eventBus;
@@ -39,6 +37,8 @@ public abstract class PluginServiceParts <T extends VCorePlugin<?,S>, S extends 
 
     PluginServiceParts(T plugin){
         this.plugin = plugin;
+        debugConfig = new DebugConfig(plugin);
+        debugConfig.init();
         this.eventBus = new EventBus();
         this.pipelineConfig = new PipelineConfig(plugin, "PipelineSettings.yml","//pipeline");
         this.pipelineConfig.init();
@@ -46,10 +46,15 @@ public abstract class PluginServiceParts <T extends VCorePlugin<?,S>, S extends 
         this.messagingConfig.init();
     }
 
+    public final DebugConfig getDebugConfig() {
+        return debugConfig;
+    }
+
     public void enableBefore(){
         this.vCoreScheduler = new VCoreScheduler(plugin);
         this.pipeline = pipelineConfig.constructPipeline(plugin);
         this.messagingService = messagingConfig.constructMessagingService();
+
     }
 
     public void enableAfter(){
@@ -65,10 +70,10 @@ public abstract class PluginServiceParts <T extends VCorePlugin<?,S>, S extends 
     public void shutdown() {
         plugin.consoleMessage("&6Shutting down VCore Parts",false);
         pipeline.saveAllData();
+        vCoreScheduler.waitUntilShutdown();
 
         pipeline.shutdown();
         messagingService.shutdown();
-        vCoreScheduler.waitUntilShutdown();
         getSubsystemManager().shutdown();
         getPlayerDataManager().shutdown();
     }
@@ -112,10 +117,13 @@ public abstract class PluginServiceParts <T extends VCorePlugin<?,S>, S extends 
             subsystemManager = new VCoreSubsystemManager<>(plugin);
             subsystemManager.enable();
             playerDataManager = new PlayerDataManager.Bukkit((PipelineManager) pipeline);
+
+            loaded = true;
         }
 
         @Override
         public final void shutdown() {
+
             super.shutdown();
             subsystemManager.shutdown();
         }
@@ -141,10 +149,12 @@ public abstract class PluginServiceParts <T extends VCorePlugin<?,S>, S extends 
             subsystemManager.enable();
             playerDataManager = new PlayerDataManager.BungeeCord((PipelineManager) pipeline);
             loaded = true;
+
         }
 
         @Override
         public final void shutdown() {
+
             ProxyServer.getInstance().getPlayers().forEach(Connection::disconnect);
             super.shutdown();
             subsystemManager.shutdown();

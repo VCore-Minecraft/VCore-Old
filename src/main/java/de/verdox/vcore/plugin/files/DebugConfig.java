@@ -7,6 +7,10 @@ package de.verdox.vcore.plugin.files;
 import de.verdox.vcore.plugin.VCorePlugin;
 import de.verdox.vcore.plugin.files.config.VCoreYAMLConfig;
 
+import java.nio.charset.StandardCharsets;
+import java.util.Locale;
+import java.util.UUID;
+
 /**
  * @version 1.0
  * @Author: Lukas Jonsson (Verdox)
