@@ -78,6 +78,7 @@ public abstract class TaskBatch<V extends VCorePlugin<?,?>> {
         if(callback != null)
             callback.run();
         onFinishBatch();
+        executor.shutdown();
     }
 
     protected abstract void runSync(@Nonnull Runnable runnable);

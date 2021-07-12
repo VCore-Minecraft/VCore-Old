@@ -51,4 +51,10 @@ public class VCoreScheduler implements SystemLoadable {
         vCorePlugin.consoleMessage("&6Shutting down Scheduler&7!",true);
         scheduledExecutorService.shutdown();
     }
+
+    public static ExecutorService newThreadPool(String name) {
+        return new ThreadPoolExecutor(0, Integer.MAX_VALUE,
+                10L, TimeUnit.SECONDS,
+                new SynchronousQueue<>(), new DefaultThreadFactory(name));
+    }
 }

@@ -49,7 +49,7 @@ public class PipelineManager implements Pipeline {
 
     public PipelineManager(VCorePlugin<?,?> plugin, @Nonnull LocalCache localCache, @Nullable GlobalCache globalCache, @Nullable GlobalStorage globalStorage){
         this.plugin = plugin;
-        this.executorService  = Executors.newCachedThreadPool(new DefaultThreadFactory(plugin.getPluginName()+"Pipeline"));
+        this.executorService  = Executors.newFixedThreadPool(2,new DefaultThreadFactory(plugin.getPluginName()+"Pipeline"));
         this.globalStorage = globalStorage;
         this.globalCache = globalCache;
         this.localCache = localCache;

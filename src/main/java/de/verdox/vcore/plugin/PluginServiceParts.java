@@ -23,6 +23,7 @@ import net.md_5.bungee.api.connection.Connection;
  * @date 29.06.2021 23:21
  */
 public abstract class PluginServiceParts <T extends VCorePlugin<?,S>, S extends VCoreSubsystem<T>> implements SystemLoadable {
+
     protected final T plugin;
     protected final PipelineConfig pipelineConfig;
     protected final MessagingConfig messagingConfig;
@@ -54,7 +55,6 @@ public abstract class PluginServiceParts <T extends VCorePlugin<?,S>, S extends 
         this.vCoreScheduler = new VCoreScheduler(plugin);
         this.pipeline = pipelineConfig.constructPipeline(plugin);
         this.messagingService = messagingConfig.constructMessagingService();
-
     }
 
     public void enableAfter(){

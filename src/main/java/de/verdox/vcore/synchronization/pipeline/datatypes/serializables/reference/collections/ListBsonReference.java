@@ -23,6 +23,20 @@ public class ListBsonReference<T> extends VCoreDataReference<List<T>> {
             setValue(new ArrayList<>());
     }
 
+    public void addData(T object, boolean allowDuplicates){
+        if(allowDuplicates && getValue().contains(object))
+            return;
+        getValue().add(object);
+    }
+
+    public boolean exist(T object){
+        return getValue().contains(object);
+    }
+
+    public void remove(T object){
+        getValue().remove(object);
+    }
+
     @Override
     public ArrayList<T> defaultValue() {
         return new ArrayList<>();

@@ -19,6 +19,8 @@ import java.io.File;
 import java.util.List;
 
 public interface VCorePlugin <T, R extends VCoreSubsystem<?>> extends SystemLoadable {
+    String vCorePaperName = "VCorePaper";
+    String vCoreWaterfallName = "VCoreWaterfall";
 
     void onPluginEnable();
     void onPluginDisable();
@@ -38,6 +40,8 @@ public interface VCorePlugin <T, R extends VCoreSubsystem<?>> extends SystemLoad
     TaskBatch<VCorePlugin<T,R>> createTaskBatch();
     void async(Runnable runnable);
     void sync(Runnable runnable);
+
+    <V extends VCorePlugin<T,R>> V getCoreInstance();
 
     PluginServiceParts<?,R> getServices();
 
@@ -59,6 +63,11 @@ public interface VCorePlugin <T, R extends VCoreSubsystem<?>> extends SystemLoad
 
         private PluginServiceParts<VCorePlugin.Minecraft,VCoreSubsystem.Bukkit> serviceParts;
         private boolean loaded;
+
+        @Override
+        public <V extends VCorePlugin<JavaPlugin, VCoreSubsystem.Bukkit>> V getCoreInstance() {
+            return (V) Bukkit.getPluginManager().getPlugin(vCorePaperName);
+        }
 
         @Override
         public void setDebugMode(boolean value){
@@ -145,6 +154,11 @@ public interface VCorePlugin <T, R extends VCoreSubsystem<?>> extends SystemLoad
         private PluginServiceParts<VCorePlugin.BungeeCord,VCoreSubsystem.BungeeCord> serviceParts;
         private boolean loaded;
         private final DebugConfig debugConfig = new DebugConfig(this);
+
+        @Override
+        public <V extends VCorePlugin<Plugin, VCoreSubsystem.BungeeCord>> V getCoreInstance() {
+            return (V) Bukkit.getPluginManager().getPlugin(vCoreWaterfallName);
+        }
 
         @Override
         public void setDebugMode(boolean value){

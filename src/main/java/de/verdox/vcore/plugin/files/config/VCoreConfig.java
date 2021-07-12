@@ -11,7 +11,7 @@ import org.apache.commons.io.FilenameUtils;
 import java.io.File;
 
 public abstract class VCoreConfig <T> {
-    private final VCorePlugin<?,?> plugin;
+    protected final VCorePlugin<?,?> plugin;
     protected String fileName;
     protected String pluginDirectory;
     protected File file;

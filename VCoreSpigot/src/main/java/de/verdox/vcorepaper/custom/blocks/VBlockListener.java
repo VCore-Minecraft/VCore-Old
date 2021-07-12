@@ -5,8 +5,6 @@ import de.verdox.vcore.plugin.VCorePlugin;
 import de.verdox.vcorepaper.VCorePaper;
 import de.verdox.vcorepaper.custom.blocks.enums.VBlockEventPermission;
 import de.verdox.vcorepaper.custom.blocks.files.VBlockSaveFile;
-import io.netty.util.concurrent.DefaultThreadFactory;
-import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.block.Block;
 import org.bukkit.event.EventHandler;
@@ -20,7 +18,7 @@ import java.util.concurrent.Executors;
 
 public class VBlockListener extends VCoreListener.VCoreBukkitListener {
     private final CustomBlockManager vBlockManager;
-    private final ExecutorService threadPool = Executors.newFixedThreadPool(4, new DefaultThreadFactory("VBlockChunk-Thread"));
+    private final ExecutorService threadPool = Executors.newFixedThreadPool(4);
 
     public VBlockListener(VCorePlugin.Minecraft plugin, CustomBlockManager vBlockManager) {
         super(plugin);

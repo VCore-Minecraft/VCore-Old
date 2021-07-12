@@ -115,7 +115,7 @@ public class WorldHandler_V1_16_R3 implements NMSWorldHandler {
         })).doAsync(() -> {
             EnumGamemode enumGamemode = EnumGamemode.getById(player.getGameMode().getValue());
             craftPlayer.getHandle().playerConnection.sendPacket(new PacketPlayOutRespawn(dimensionManager, world, seed, enumGamemode, enumGamemode, false, false, flag));
-            craftPlayer.getHandle().playerConnection.sendPacket(new PacketPlayOutViewDistance(worldServer.getChunkProvider().playerChunkMap.getLoadViewDistance()));
+            craftPlayer.getHandle().playerConnection.sendPacket(new PacketPlayOutViewDistance(craftPlayer.getWorld().getViewDistance()));
         }).doSync(() -> {
             entityPlayer.spawnIn(worldServer);
             entityPlayer.dead = false;

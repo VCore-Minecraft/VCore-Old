@@ -49,7 +49,7 @@ public abstract class RedisConnection {
                 singleServerConfig.setAddress(addressArray[0]);
         }
         config.setNettyThreads(4);
-        config.setThreads(8);
+        config.setThreads(4);
         this.redissonClient = Redisson.create(config);
     }
 }

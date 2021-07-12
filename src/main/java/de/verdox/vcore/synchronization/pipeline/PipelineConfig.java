@@ -40,7 +40,15 @@ public class PipelineConfig extends VCoreYAMLConfig {
             boolean useCluster = config.getBoolean("GlobalCache.redis.useCluster");
             String[] addresses = config.getStringList("GlobalCache.redis.addresses").toArray(new String[0]);
             String password = config.getString("GlobalCache.redis.password");
-            globalCache = new RedisCache(plugin,useCluster,addresses,password);
+
+            boolean useCoreInstance = useCoreGlobalCache();
+
+            if(useCoreInstance) {
+                globalCache = plugin.getCoreInstance().getServices().getPipeline().getGlobalCache();
+                plugin.consoleMessage("&eSelecting Core GlobalCache",false);
+            }
+            else
+                globalCache = new RedisCache(plugin,useCluster,addresses,password);
         }
         String globalStorageType = config.getString("GlobalStorage.type");
         plugin.consoleMessage("&eGlobalStorageType&7: &b"+globalStorageType,false);
@@ -52,9 +60,30 @@ public class PipelineConfig extends VCoreYAMLConfig {
             String user = config.getString("GlobalStorage.mongodb.user");
             String password = config.getString("GlobalStorage.mongodb.password");
 
-            globalStorage = new MongoDBStorage(plugin, host, database, port, user, password);
+            boolean useCoreInstance = useCoreGlobalStorage();
+
+            if(useCoreInstance) {
+                globalStorage = plugin.getCoreInstance().getServices().getPipeline().getGlobalStorage();
+                plugin.consoleMessage("&eSelecting Core GlobalStorage",false);
+            }
+            else
+                globalStorage = new MongoDBStorage(plugin, host, database, port, user, password);
         }
         return new PipelineManager(plugin, localCache, globalCache, globalStorage);
+    }
+
+    public boolean useCoreGlobalCache(){
+        boolean useCoreInstance = config.getBoolean("GlobalStorage.useCoreInstance");
+        if(plugin.equals(plugin.getCoreInstance()))
+            useCoreInstance = false;
+        return useCoreInstance;
+    }
+
+    public boolean useCoreGlobalStorage(){
+        boolean useCoreInstance = config.getBoolean("GlobalStorage.useCoreInstance");
+        if(plugin.equals(plugin.getCoreInstance()))
+            useCoreInstance = false;
+        return useCoreInstance;
     }
 
     @Override
@@ -65,11 +94,13 @@ public class PipelineConfig extends VCoreYAMLConfig {
     @Override
     public void setupConfig() {
         config.addDefault("GlobalCache.type","redis");
+        config.addDefault("GlobalCache.useCoreInstance",true);
         config.addDefault("GlobalCache.redis.useCluster", false);
         config.addDefault("GlobalCache.redis.addresses", List.of("redis://localhost:6379"));
         config.addDefault("GlobalCache.redis.password", "");
 
         config.addDefault("GlobalStorage.type","mongodb");
+        config.addDefault("GlobalStorage.useCoreInstance",true);
         config.addDefault("GlobalStorage.mongodb.host","127.0.0.1");
         config.addDefault("GlobalStorage.mongodb.port",27017);
         config.addDefault("GlobalStorage.mongodb.database","vcore");

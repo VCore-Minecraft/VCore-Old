@@ -14,6 +14,8 @@ import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -59,7 +61,9 @@ public class VBossBar {
     }
 
     public void clear(){
-        bossBar.getPlayers().clear();
+        List<Player> list = new ArrayList<>(bossBar.getPlayers());
+        for (Player player : list)
+            bossBar.removePlayer(player);
         bossBar.setVisible(false);
         hideTasks.forEach((uuid, bukkitTask) -> {
             if(!bukkitTask.isCancelled())
