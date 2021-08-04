@@ -24,8 +24,7 @@ import org.bukkit.entity.Player;
 public class PlayerHandlerAdminCommands extends VCoreCommand.VCoreBukkitCommand {
     public PlayerHandlerAdminCommands(VCoreSubsystem.Bukkit subsystem, String commandName) {
         super(subsystem, commandName);
-        addCommandCallback(new VCommandCallback("resetPlaytime")
-        .withPermission("vcore.admin")
+        addCommandCallback("resetPlaytime").withPermission("vcore.admin")
                 .askFor("player", VCommandCallback.CommandAskType.PLAYER_ONLINE,"&cPlayer nicht online")
                 .commandCallback((commandSender, commandParameters) -> {
                     Player player = commandParameters.getObject(0, Player.class);
@@ -34,8 +33,7 @@ public class PlayerHandlerAdminCommands extends VCoreCommand.VCoreBukkitCommand 
                         return;
                     playerHandlerData.resetPlayTime();
                     commandSender.sendMessage(ChatColor.translateAlternateColorCodes('&',"&eDie Spielzeit des Spielers &e"+player.getName()+" &ewurde zurückgesetzt"));
-                })
-        );
+                });
     }
 
     @Override

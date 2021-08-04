@@ -117,7 +117,7 @@ public abstract class PluginServiceParts <T extends VCorePlugin<?,S>, S extends 
             subsystemManager = new VCoreSubsystemManager<>(plugin);
             subsystemManager.enable();
             playerDataManager = new PlayerDataManager.Bukkit((PipelineManager) pipeline);
-
+            this.pipeline.preloadAllData();
             loaded = true;
         }
 
@@ -148,6 +148,7 @@ public abstract class PluginServiceParts <T extends VCorePlugin<?,S>, S extends 
             subsystemManager = new VCoreSubsystemManager<>(plugin);
             subsystemManager.enable();
             playerDataManager = new PlayerDataManager.BungeeCord((PipelineManager) pipeline);
+            this.pipeline.preloadAllData();
             loaded = true;
 
         }

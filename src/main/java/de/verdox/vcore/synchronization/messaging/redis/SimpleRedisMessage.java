@@ -7,6 +7,7 @@ package de.verdox.vcore.synchronization.messaging.redis;
 import de.verdox.vcore.synchronization.messaging.messages.Message;
 
 import javax.annotation.Nonnull;
+import java.util.Arrays;
 import java.util.UUID;
 
 /**
@@ -46,5 +47,15 @@ public class SimpleRedisMessage implements Message {
     @Override
     public Object[] dataToSend() {
         return dataToSend;
+    }
+
+    @Override
+    public String toString() {
+        return "SimpleRedisMessage{" +
+                "sender=" + sender +
+                ", senderIdentifier='" + senderIdentifier + '\'' +
+                ", parameters=" + Arrays.toString(parameters) +
+                ", dataToSend=" + Arrays.toString(dataToSend) +
+                '}';
     }
 }

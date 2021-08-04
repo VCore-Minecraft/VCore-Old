@@ -4,6 +4,8 @@ import de.verdox.vcore.plugin.command.VCommandCallback;
 import de.verdox.vcore.plugin.command.VCoreCommand;
 import de.verdox.vcore.plugin.command.callback.CommandCallback;
 import de.verdox.vcore.plugin.VCorePlugin;
+import de.verdox.vcore.synchronization.networkmanager.player.VCorePlayer;
+import de.verdox.vcore.synchronization.networkmanager.player.api.querytypes.ServerLocation;
 import de.verdox.vcore.util.VCoreUtil;
 import de.verdox.vcorepaper.VCorePaper;
 import de.verdox.vcorepaper.custom.blocks.VBlock;
@@ -13,6 +15,7 @@ import net.md_5.bungee.api.ChatMessageType;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
@@ -20,24 +23,56 @@ import org.bukkit.util.RayTraceResult;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 public class AdminCommands extends VCoreCommand.VCoreBukkitCommand {
-    public AdminCommands(VCorePlugin.Minecraft vCorePlugin, String commandName) {
-        super(vCorePlugin, commandName);
+    private VCorePaper vCorePaper;
 
-        addCommandCallback(new VCommandCallback("listPlugins")
+    public AdminCommands(VCorePaper vCorePlugin, String commandName) {
+        super(vCorePlugin, commandName);
+        this.vCorePaper = vCorePlugin;
+
+        addCommandCallback("debugNetworkInfo")
                 .withPermission("vcore.debug")
+                .setExecutor(VCommandCallback.CommandExecutorType.CONSOLE)
+                .commandCallback((commandSender, commandParameters) -> {
+                    vCorePaper.async(() -> {
+                        vCorePaper.consoleMessage("",false);
+                        vCorePaper.consoleMessage("&eDebugging Network",false);
+                        vCorePaper.consoleMessage("",false);
+
+
+                        vCorePaper.consoleMessage("&eProxy Server",false);
+                        vCorePaper.consoleMessage("",false);
+                        vCorePaper.getNetworkManager().getProxyPlayers().forEach((serverName, vCorePlayers) -> {
+                            vCorePaper.consoleMessage("&8[&a"+serverName+"&8]",1,false);
+                            vCorePlayers.forEach(vCorePlayer -> {
+                                vCorePaper.consoleMessage("&a"+vCorePlayer.getDisplayName(),2,false);
+                            });
+                        });
+
+                        vCorePaper.consoleMessage("&eGame Server",false);
+                        vCorePaper.consoleMessage("",false);
+                        vCorePaper.getNetworkManager().getGameServerPlayers().forEach((serverName, vCorePlayers) -> {
+                            vCorePaper.consoleMessage("&8[&a"+serverName+"&8]",1,false);
+                            vCorePlayers.forEach(vCorePlayer -> {
+                                vCorePaper.consoleMessage("&a"+vCorePlayer.getDisplayName(),2,false);
+                            });
+                        });
+                    });
+                });
+
+        addCommandCallback("listPlugins").withPermission("vcore.debug")
                 .commandCallback((commandSender, commandParameters) -> {
                     for (Plugin plugin : Bukkit.getPluginManager().getPlugins()) {
                         if(!(plugin instanceof VCorePlugin.Minecraft))
                             continue;
                         commandSender.sendMessage(ChatColor.translateAlternateColorCodes('&',"&a"+plugin.getName()));
                     }
-                })
-        );
-        addCommandCallback(new VCommandCallback("debugMode")
-                .withPermission("vcore.debug")
+                });
+        addCommandCallback("debugMode").withPermission("vcore.debug")
                 .askFor("pluginName", VCommandCallback.CommandAskType.STRING, "&cVCore-Plugin not found",
                         Arrays.stream(Bukkit.getPluginManager().getPlugins())
                                 .filter(plugin -> plugin instanceof VCorePlugin.Minecraft).map(Plugin::getName).toArray(String[]::new))
@@ -56,8 +91,7 @@ public class AdminCommands extends VCoreCommand.VCoreBukkitCommand {
                         commandSender.sendMessage(ChatColor.translateAlternateColorCodes('&',"&b"+pluginName+" &edebugMode&7: &a"+true));
                     else
                         commandSender.sendMessage(ChatColor.translateAlternateColorCodes('&',"&b"+pluginName+" &edebugMode&7: &c"+false));
-                })
-        );
+                });
 
 
         addCommandSuggestions(0,(commandSender, args) -> List.of("listPlugins","plugin","block","item","entity","chunk"));
@@ -135,22 +169,22 @@ public class AdminCommands extends VCoreCommand.VCoreBukkitCommand {
 
                     RayTraceResult rayTraceResult = player.rayTraceBlocks(20);
                     if(rayTraceResult == null) {
-                        VCoreUtil.getBukkitPlayerUtil().sendPlayerMessage(player, ChatMessageType.CHAT, "&cLook at a block&7!");
+                        VCoreUtil.BukkitUtil.getBukkitPlayerUtil().sendPlayerMessage(player, ChatMessageType.CHAT, "&cLook at a block&7!");
                         return false;
                     }
                     if(rayTraceResult.getHitBlock() == null) {
-                        VCoreUtil.getBukkitPlayerUtil().sendPlayerMessage(player, ChatMessageType.CHAT, "&cLook at a block&7!");
+                        VCoreUtil.BukkitUtil.getBukkitPlayerUtil().sendPlayerMessage(player, ChatMessageType.CHAT, "&cLook at a block&7!");
                         return false;
                     }
                     Block block = rayTraceResult.getHitBlock();
                     if(args.length == 1){
-                        VCoreUtil.getBukkitPlayerUtil().sendPlayerMessage(player,ChatMessageType.CHAT,"");
-                        VCoreUtil.getBukkitPlayerUtil().sendPlayerMessage(player,ChatMessageType.CHAT,"&6Block Debug&7");
+                        VCoreUtil.BukkitUtil.getBukkitPlayerUtil().sendPlayerMessage(player,ChatMessageType.CHAT,"");
+                        VCoreUtil.BukkitUtil.getBukkitPlayerUtil().sendPlayerMessage(player,ChatMessageType.CHAT,"&6Block Debug&7");
                         VCorePaper.getInstance().getCustomBlockManager().VBlockCallback(block.getLocation(),vBlock -> {
                             vBlock.getCustomDataKeys().forEach(key -> {
-                                VCoreUtil.getBukkitPlayerUtil().sendPlayerMessage(player,ChatMessageType.CHAT,"  &7>> &6"+key+"&7: &b"+vBlock.getNBTCompound().getObject(key,Object.class));
+                                VCoreUtil.BukkitUtil.getBukkitPlayerUtil().sendPlayerMessage(player,ChatMessageType.CHAT,"  &7>> &6"+key+"&7: &b"+vBlock.getNBTCompound().getObject(key,Object.class));
                             });
-                            VCoreUtil.getBukkitPlayerUtil().sendPlayerMessage(player,ChatMessageType.CHAT,"");
+                            VCoreUtil.BukkitUtil.getBukkitPlayerUtil().sendPlayerMessage(player,ChatMessageType.CHAT,"");
                         });
                         return true;
                     }
@@ -158,7 +192,7 @@ public class AdminCommands extends VCoreCommand.VCoreBukkitCommand {
                         if(args[1].equalsIgnoreCase("isCached")){
                             VBlock vBlock = VCorePaper.getInstance().getCustomBlockManager().getVBlock(block.getLocation());
                             boolean cached = vBlock != null;
-                            VCoreUtil.getBukkitPlayerUtil().sendPlayerMessage(player,ChatMessageType.CHAT,"&eCached&7: &b"+cached+"&7!");
+                            VCoreUtil.BukkitUtil.getBukkitPlayerUtil().sendPlayerMessage(player,ChatMessageType.CHAT,"&eCached&7: &b"+cached+"&7!");
                             return true;
                         }
                     }
@@ -171,11 +205,11 @@ public class AdminCommands extends VCoreCommand.VCoreBukkitCommand {
                                     boolean allow = args[1].equalsIgnoreCase("allow");
                                     vBlock.allowBlockPermission(vBlockEventPermission,allow);
                                 });
-                                VCoreUtil.getBukkitPlayerUtil().sendPlayerMessage(player,ChatMessageType.CHAT,"&eRule &6"+vBlockEventPermission.name()+" &e applied to Block");
+                                VCoreUtil.BukkitUtil.getBukkitPlayerUtil().sendPlayerMessage(player,ChatMessageType.CHAT,"&eRule &6"+vBlockEventPermission.name()+" &e applied to Block");
                                 return true;
                             }
                             catch (Exception e){
-                                VCoreUtil.getBukkitPlayerUtil().sendPlayerMessage(player,ChatMessageType.CHAT,"&cPermission konnte nicht gefunden werden&7!");
+                                VCoreUtil.BukkitUtil.getBukkitPlayerUtil().sendPlayerMessage(player,ChatMessageType.CHAT,"&cPermission konnte nicht gefunden werden&7!");
                                 return false;
                             }
                         }
@@ -185,29 +219,29 @@ public class AdminCommands extends VCoreCommand.VCoreBukkitCommand {
                     ItemStack itemInHand = player.getInventory().getItemInMainHand();
                     if(args.length == 1){
                         if(itemInHand.getType().equals(Material.AIR)){
-                            VCoreUtil.getBukkitPlayerUtil().sendPlayerMessage(player, ChatMessageType.CHAT, "&cHold an item in your main hand&7!");
+                            VCoreUtil.BukkitUtil.getBukkitPlayerUtil().sendPlayerMessage(player, ChatMessageType.CHAT, "&cHold an item in your main hand&7!");
                             return false;
                         }
-                        VCoreUtil.getBukkitPlayerUtil().sendPlayerMessage(player,ChatMessageType.CHAT,"");
-                        VCoreUtil.getBukkitPlayerUtil().sendPlayerMessage(player,ChatMessageType.CHAT,"&6Item Debug&7");
+                        VCoreUtil.BukkitUtil.getBukkitPlayerUtil().sendPlayerMessage(player,ChatMessageType.CHAT,"");
+                        VCoreUtil.BukkitUtil.getBukkitPlayerUtil().sendPlayerMessage(player,ChatMessageType.CHAT,"&6Item Debug&7");
                         VCoreItem vCoreItem = VCorePaper.getInstance().getCustomItemManager().wrap(VCoreItem.class,itemInHand);
                         vCoreItem.getCustomDataKeys().forEach(key -> {
-                            VCoreUtil.getBukkitPlayerUtil().sendPlayerMessage(player,ChatMessageType.CHAT,"  &7>> &6"+key+"&7: &b"+vCoreItem.getNBTCompound().getObject(key,Object.class));
+                            VCoreUtil.BukkitUtil.getBukkitPlayerUtil().sendPlayerMessage(player,ChatMessageType.CHAT,"  &7>> &6"+key+"&7: &b"+vCoreItem.getNBTCompound().getObject(key,Object.class));
                         });
-                        VCoreUtil.getBukkitPlayerUtil().sendPlayerMessage(player,ChatMessageType.CHAT,"");
+                        VCoreUtil.BukkitUtil.getBukkitPlayerUtil().sendPlayerMessage(player,ChatMessageType.CHAT,"");
                         return true;
                     }
                 }
                 else if(args[0].equalsIgnoreCase("entity")){
-                    VCoreUtil.getBukkitPlayerUtil().sendPlayerMessage(player,ChatMessageType.CHAT,"&cNot implemented yet&7!");
+                    VCoreUtil.BukkitUtil.getBukkitPlayerUtil().sendPlayerMessage(player,ChatMessageType.CHAT,"&cNot implemented yet&7!");
                     return false;
                 }
                 else if(args[0].equalsIgnoreCase("chunk")){
                     Chunk chunk = player.getChunk();
-                    VCoreUtil.getBukkitPlayerUtil().sendPlayerMessage(player,ChatMessageType.CHAT,"");
-                    VCoreUtil.getBukkitPlayerUtil().sendPlayerMessage(player,ChatMessageType.CHAT,"&6Chunk Debug&7");
-                    VCoreUtil.getBukkitPlayerUtil().sendPlayerMessage(player,ChatMessageType.CHAT,"&7> &eCached Chunks&7: &b"+VCorePaper.getInstance().getCustomBlockManager().getCachedChunkCount());
-                    VCoreUtil.getBukkitPlayerUtil().sendPlayerMessage(player,ChatMessageType.CHAT,"&7> &eIs Chunk cached&7: &b"+VCorePaper.getInstance().getCustomBlockManager().isCached(chunk));
+                    VCoreUtil.BukkitUtil.getBukkitPlayerUtil().sendPlayerMessage(player,ChatMessageType.CHAT,"");
+                    VCoreUtil.BukkitUtil.getBukkitPlayerUtil().sendPlayerMessage(player,ChatMessageType.CHAT,"&6Chunk Debug&7");
+                    VCoreUtil.BukkitUtil.getBukkitPlayerUtil().sendPlayerMessage(player,ChatMessageType.CHAT,"&7> &eCached Chunks&7: &b"+VCorePaper.getInstance().getCustomBlockManager().getCachedChunkCount());
+                    VCoreUtil.BukkitUtil.getBukkitPlayerUtil().sendPlayerMessage(player,ChatMessageType.CHAT,"&7> &eIs Chunk cached&7: &b"+VCorePaper.getInstance().getCustomBlockManager().isCached(chunk));
                     return true;
                 }
             }

@@ -21,8 +21,6 @@ public class VBlock extends CustomDataHolder<Location, NBTBlockHolder, CustomBlo
     private final BlockPersistentData blockPersistentData;
     private String blockDataAsString;
 
-    //TODO: BLOCKSTATE IN BLOCKDATA UMWANDELN
-
     public VBlock(Location blockLocation, CustomBlockManager customBlockManager, BlockPersistentData blockPersistentData) {
         super(blockLocation, customBlockManager);
         this.blockPersistentData = blockPersistentData;

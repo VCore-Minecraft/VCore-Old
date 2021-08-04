@@ -1,0 +1,33 @@
+/*
+ * Copyright (c) 2021. Lukas Jonsson
+ */
+
+package de.verdox.vcorepaper.custom.events;
+
+
+import org.bukkit.Bukkit;
+import org.bukkit.event.Event;
+import org.bukkit.event.HandlerList;
+
+/**
+ * @version 1.0
+ * @Author: Lukas Jonsson (Verdox)
+ * @date 13.07.2021 00:31
+ */
+public abstract class VCoreHybridEvent extends Event {
+
+    private static final HandlerList handlers = new HandlerList();
+
+    public VCoreHybridEvent(){
+        super(!Bukkit.isPrimaryThread());
+    }
+
+    @Override
+    public HandlerList getHandlers() {
+        return handlers;
+    }
+
+    public static HandlerList getHandlerList() {
+        return handlers;
+    }
+}

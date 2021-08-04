@@ -1,6 +1,6 @@
 package de.verdox.vcorepaper.custom.blocks;
 
-import de.verdox.vcore.util.keys.LocationKey;
+import de.verdox.vcore.util.bukkit.keys.LocationKey;
 import de.verdox.vcorepaper.VCorePaper;
 import de.verdox.vcorepaper.custom.blocks.events.LoadVBlockDataEvent;
 import de.verdox.vcorepaper.custom.blocks.events.UnloadVBlockDataEvent;

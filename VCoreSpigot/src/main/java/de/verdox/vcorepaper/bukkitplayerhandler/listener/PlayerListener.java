@@ -18,11 +18,10 @@ import net.md_5.bungee.api.ChatMessageType;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.player.*;
 
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
@@ -52,14 +51,22 @@ public class PlayerListener extends VCoreListener.VCoreBukkitListener {
         plugin.async(() -> {
             UUID playerUUID = e.getPlayerUUID();
             PlayerHandlerData playerHandlerData = VCorePaper.getInstance().getServices().getPipeline().load(PlayerHandlerData.class, playerUUID, Pipeline.LoadingStrategy.LOAD_PIPELINE,true);
-            if(playerHandlerData.restoreVanillaInventory){
-                Player player = Bukkit.getPlayer(e.getPlayerUUID());
-                if(player != null){
+            Player player = Bukkit.getPlayer(e.getPlayerUUID());
+            if(player != null){
+                if(playerHandlerData.restoreVanillaInventory)
+                    playerHandlerData.restoreInventory("vanilla",() -> player);
+                else
                     playerHandlerData.restoreInventory(() -> player);
-                    freezedPlayers.remove(player);
-                }
+                freezedPlayers.remove(player);
             }
         });
+    }
+
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void playerQuitEvent(PlayerQuitEvent e){
+        PlayerHandlerData playerHandlerData = VCorePaper.getInstance().getServices().getPipeline().load(PlayerHandlerData.class, e.getPlayer().getUniqueId(), Pipeline.LoadingStrategy.LOAD_LOCAL,true);
+        if(playerHandlerData.restoreVanillaInventory)
+            playerHandlerData.setActiveInventoryID("vanilla");
     }
 
     @EventHandler
@@ -71,7 +78,7 @@ public class PlayerListener extends VCoreListener.VCoreBukkitListener {
                     return;
             }
             lastSync.put(e.getPlayer().getUniqueId(), System.currentTimeMillis());
-            VCoreUtil.getBukkitPlayerUtil().sendPlayerMessage(e.getPlayer(), ChatMessageType.ACTION_BAR,"&eInventar synchronisiert");
+            VCoreUtil.BukkitUtil.getBukkitPlayerUtil().sendPlayerMessage(e.getPlayer(), ChatMessageType.ACTION_BAR,"&eInventar synchronisiert");
             PlayerHandlerData playerHandlerData = VCorePaper.getInstance().getServices().getPipeline().load(PlayerHandlerData.class, e.getPlayer().getUniqueId(), Pipeline.LoadingStrategy.LOAD_PIPELINE,true);
             playerHandlerData.save(true);
         });
@@ -86,7 +93,7 @@ public class PlayerListener extends VCoreListener.VCoreBukkitListener {
                     return;
             }
             lastSync.put(e.getPlayer().getUniqueId(), System.currentTimeMillis());
-            VCoreUtil.getBukkitPlayerUtil().sendPlayerMessage(e.getPlayer(), ChatMessageType.ACTION_BAR,"&eInventar synchronisiert");
+            VCoreUtil.BukkitUtil.getBukkitPlayerUtil().sendPlayerMessage(e.getPlayer(), ChatMessageType.ACTION_BAR,"&eInventar synchronisiert");
             PlayerHandlerData playerHandlerData = VCorePaper.getInstance().getServices().getPipeline().load(PlayerHandlerData.class, e.getPlayer().getUniqueId(), Pipeline.LoadingStrategy.LOAD_PIPELINE,true);
             playerHandlerData.save(true);
         });

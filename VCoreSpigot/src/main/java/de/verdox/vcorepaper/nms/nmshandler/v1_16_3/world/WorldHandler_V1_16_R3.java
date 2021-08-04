@@ -4,6 +4,8 @@
 
 package de.verdox.vcorepaper.nms.nmshandler.v1_16_3.world;
 
+import com.comphenix.protocol.ProtocolLibrary;
+import com.comphenix.protocol.events.PacketContainer;
 import de.verdox.vcore.performance.concurrent.CatchingRunnable;
 import de.verdox.vcore.util.VCoreUtil;
 import de.verdox.vcorepaper.VCorePaper;
@@ -22,9 +24,8 @@ import org.bukkit.entity.Player;
 import org.checkerframework.checker.index.qual.NonNegative;
 
 import javax.annotation.Nonnull;
+import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
-import java.util.Map;
-import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -47,7 +48,7 @@ public class WorldHandler_V1_16_R3 implements NMSWorldHandler {
     @Override
     public void refreshChunks(Player player, Runnable callback) {
         VCorePaper.getInstance().createTaskBatch().doAsync(() -> {
-            VCoreUtil.getBukkitPlayerUtil().getChunksInServerViewDistance(player).forEach(chunkKey -> {
+            VCoreUtil.BukkitUtil.getBukkitPlayerUtil().getChunksInServerViewDistance(player).forEach(chunkKey -> {
                 org.bukkit.World world = player.getWorld();
                 refreshChunk(player,chunkKey.getChunkIn(world));
             });
@@ -68,7 +69,7 @@ public class WorldHandler_V1_16_R3 implements NMSWorldHandler {
         VCorePaper.getInstance().createTaskBatch().doAsync(() -> {
             ChunkPacketWrapper.V_1_16_R3 chunkPacketWrapper = new ChunkPacketWrapper.V_1_16_R3(chunk, 65535,true);
             int[] biomeArray = chunkPacketWrapper.biomes.readField();
-            Arrays.fill(biomeArray, VCoreUtil.getVanillaUtil().getBiomeID_1_16(biome));
+            Arrays.fill(biomeArray, VCoreUtil.BukkitUtil.getVanillaUtil().getBiomeID_1_16(biome));
             chunkPacketWrapper.biomes.setField(biomeArray);
             chunkPacketWrapper.sendPlayer(player);
         }).executeBatch(callback);
@@ -84,56 +85,103 @@ public class WorldHandler_V1_16_R3 implements NMSWorldHandler {
         WorldServer worldServer = entityPlayer.getWorldServer();
         WorldData worldData = worldServer.getWorldData();
         DedicatedServer dedicatedServer = craftServer.getServer();
+
         long seed = craftPlayer.getWorld().getSeed();
 
+
+
         ResourceKey<World> world;
+        ResourceKey<World> fakeWorld;
         DimensionManager dimensionManager;
+        DimensionManager fakeDimensionManager;
         switch (environment){
             case NORMAL: {
                 world = World.OVERWORLD;
                 dimensionManager = FieldReflection.getField(DimensionManager.class,"OVERWORLD_IMPL",DimensionManager.class).readField();
+
+                fakeWorld = World.THE_NETHER;
+                fakeDimensionManager = FieldReflection.getField(DimensionManager.class,"THE_NETHER_IMPL",DimensionManager.class).readField();
                 break;
             }
             case NETHER: {
                 world = World.THE_NETHER;
                 dimensionManager = FieldReflection.getField(DimensionManager.class,"THE_NETHER_IMPL",DimensionManager.class).readField();
+
+                fakeWorld = World.THE_END;
+                fakeDimensionManager = FieldReflection.getField(DimensionManager.class,"THE_END_IMPL",DimensionManager.class).readField();
                 break;
             }
             case THE_END: {
                 world = World.THE_END;
                 dimensionManager = FieldReflection.getField(DimensionManager.class,"THE_END_IMPL",DimensionManager.class).readField();
+
+                fakeWorld = World.OVERWORLD;
+                fakeDimensionManager = FieldReflection.getField(DimensionManager.class,"OVERWORLD_IMPL",DimensionManager.class).readField();
                 break;
+
             }
             default:throw new IllegalStateException("Unknwon Environment: "+environment);
         }
 
         if(world == null)
             return;
-
+        EnumGamemode enumGamemode = EnumGamemode.getById(player.getGameMode().getValue());
         VCorePaper.getInstance().createTaskBatch().doSync(new CatchingRunnable(() -> {
-            worldServer.removePlayer(entityPlayer);
+            //worldServer.removePlayer(entityPlayer);
         })).doAsync(() -> {
-            EnumGamemode enumGamemode = EnumGamemode.getById(player.getGameMode().getValue());
+            //craftPlayer.getHandle().playerConnection.sendPacket(new PacketPlayOutRespawn(fakeDimensionManager, world, seed, enumGamemode, enumGamemode, false, false, flag));
+        }).wait(50,TimeUnit.MILLISECONDS).doAsync(() -> {
+            //craftPlayer.getHandle().playerConnection.sendPacket(new PacketPlayOutRespawn(fakeDimensionManager, fakeWorld, seed, enumGamemode, enumGamemode, false, false, flag));
             craftPlayer.getHandle().playerConnection.sendPacket(new PacketPlayOutRespawn(dimensionManager, world, seed, enumGamemode, enumGamemode, false, false, flag));
-            craftPlayer.getHandle().playerConnection.sendPacket(new PacketPlayOutViewDistance(craftPlayer.getWorld().getViewDistance()));
+            //craftPlayer.getHandle().playerConnection.sendPacket(new PacketPlayOutViewDistance(craftPlayer.getWorld().getViewDistance()));
         }).doSync(() -> {
+            //entityPlayer.spawnIn(worldServer);
+            //entityPlayer.dead = false;
+            //entityPlayer.playerConnection.teleport(new Location(worldServer.getWorld(), entityPlayer.locX(), entityPlayer.locY(), entityPlayer.locZ(), entityPlayer.yaw, entityPlayer.pitch));
+        }).wait(200,TimeUnit.MILLISECONDS).doAsync(new CatchingRunnable(() -> {
+            //entityPlayer.playerConnection.sendPacket(new PacketPlayOutSpawnPosition(worldServer.getSpawn(), worldServer.v()));
+            //entityPlayer.playerConnection.sendPacket(new PacketPlayOutServerDifficulty(worldServer.getDifficulty(), worldData.isDifficultyLocked()));
+            //entityPlayer.playerConnection.sendPacket(new PacketPlayOutExperience(entityPlayer.exp, entityPlayer.expTotal, entityPlayer.expLevel));
+            WorldBorder worldborder = entityPlayer.world.getWorldBorder();
+            //entityPlayer.playerConnection.sendPacket(new PacketPlayOutWorldBorder(worldborder, PacketPlayOutWorldBorder.EnumWorldBorderAction.INITIALIZE));
+            //dedicatedServer.getPlayerList().updateClient(entityPlayer);
+            //entityPlayer.updateAbilities();
+
+        })).doSync(() -> {
             entityPlayer.spawnIn(worldServer);
             entityPlayer.dead = false;
-            entityPlayer.playerConnection.teleport(new Location(worldServer.getWorld(), entityPlayer.locX(), entityPlayer.locY(), entityPlayer.locZ(), entityPlayer.yaw, entityPlayer.pitch));
-        }).doAsync(new CatchingRunnable(() -> {
+            entityPlayer.playerConnection.teleport(location);
+        });//.executeBatch(callback);
+
+        try {
+            PacketContainer respawnPacket = PacketContainer.fromPacket(new PacketPlayOutRespawn(dimensionManager, world, seed, enumGamemode, enumGamemode, false, false, flag));
+
+            int viewDistance = player.getWorld().getViewDistance();
+
             entityPlayer.playerConnection.sendPacket(new PacketPlayOutSpawnPosition(worldServer.getSpawn(), worldServer.v()));
-            entityPlayer.playerConnection.sendPacket(new PacketPlayOutServerDifficulty(worldServer.getDifficulty(), worldData.isDifficultyLocked()));
-            entityPlayer.playerConnection.sendPacket(new PacketPlayOutExperience(entityPlayer.exp, entityPlayer.expTotal, entityPlayer.expLevel));
-            WorldBorder worldborder = entityPlayer.world.getWorldBorder();
-            entityPlayer.playerConnection.sendPacket(new PacketPlayOutWorldBorder(worldborder, PacketPlayOutWorldBorder.EnumWorldBorderAction.INITIALIZE));
+            craftPlayer.getHandle().playerConnection.sendPacket(new PacketPlayOutViewDistance(500));
+
+            ProtocolLibrary.getProtocolManager().sendServerPacket(player,respawnPacket, true);
+
+            worldServer.getChunkProvider().addTicket(TicketType.POST_TELEPORT, new ChunkCoordIntPair(location.getBlockX() >> 4, location.getBlockZ() >> 4), 1, entityPlayer.getId());
+
+            //for (Chunk chunk : VCoreUtil.getBukkitPlayerUtil().getChunksAroundPlayer(player)) {
+            //    PacketContainer chunkPacket = PacketContainer.fromPacket(new PacketPlayOutMapChunk(((CraftChunk) chunk).getHandle(), viewDistance,false));
+            //    ProtocolLibrary.getProtocolManager().sendServerPacket(player,chunkPacket, true);
+            //}
+
+
+
             dedicatedServer.getPlayerList().updateClient(entityPlayer);
             entityPlayer.updateAbilities();
-        })).doSync(() -> {
-            FieldReflection.ReferenceField<Map> entitiesByUUID  = FieldReflection.getField(WorldServer.class, "entitiesByUUID", Map.class).of(worldServer);
-            Map<UUID, Entity> map = entitiesByUUID.readField();
-            if(!map.containsKey(entityPlayer.getUniqueID()))
-                worldServer.addPlayerRespawn(entityPlayer);
-        }).executeBatch(callback);
+
+
+            //entityPlayer.spawnIn(worldServer);
+            //entityPlayer.dead = false;
+            entityPlayer.playerConnection.teleport(location);
+        } catch (InvocationTargetException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override

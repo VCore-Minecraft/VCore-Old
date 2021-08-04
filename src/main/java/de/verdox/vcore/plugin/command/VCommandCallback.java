@@ -4,6 +4,12 @@
 
 package de.verdox.vcore.plugin.command;
 
+import de.verdox.vcore.plugin.VCorePlugin;
+import de.verdox.vcore.synchronization.networkmanager.player.VCorePlayer;
+import de.verdox.vcore.synchronization.networkmanager.server.ServerInstance;
+import de.verdox.vcore.synchronization.networkmanager.server.ServerType;
+import de.verdox.vcore.synchronization.pipeline.parts.Pipeline;
+import de.verdox.vcore.util.VCoreUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
@@ -14,9 +20,9 @@ import org.bukkit.entity.Player;
 import org.checkerframework.checker.index.qual.NonNegative;
 
 import javax.annotation.Nonnull;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
+import java.util.concurrent.ExecutionException;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
@@ -26,13 +32,15 @@ import java.util.stream.Collectors;
  * @date 27.06.2021 00:59
  */
 public class VCommandCallback {
+    private final VCorePlugin<?, ?> plugin;
     private String[] commandPath;
     private String neededPermission;
     private CommandExecutorType commandExecutorType;
     private List<CommandCallbackInfo> callbackInfos = new ArrayList<>();
     private BiConsumer<CommandSender, CommandParameters> providedArguments;
 
-    public VCommandCallback(String... commandPath){
+    public VCommandCallback(@Nonnull VCorePlugin<?,?> plugin, @Nonnull String... commandPath){
+        this.plugin = plugin;
         this.commandPath = commandPath;
         for (String s : commandPath)
             addCommandPath(s);
@@ -42,13 +50,13 @@ public class VCommandCallback {
         if(commandPath.isEmpty())
             return this;
         int index = callbackInfos.size();
-        callbackInfos.add(new CommandPath(index,commandPath));
+        callbackInfos.add(new CommandPath(plugin, index,commandPath));
         return this;
     }
 
     public VCommandCallback askFor(@Nonnull String name, @Nonnull CommandAskType commandAskType, @Nonnull String errorMessage, @Nonnull String... suggested){
         int index = callbackInfos.size();
-        callbackInfos.add(new CommandAskParameter(index, name, commandAskType, errorMessage, Arrays.asList(suggested)));
+        callbackInfos.add(new CommandAskParameter(plugin, index, name, commandAskType, errorMessage, Arrays.asList(suggested)));
         return this;
     }
 
@@ -82,7 +90,7 @@ public class VCommandCallback {
         return callbackInfos.get(index);
     }
 
-    List<String> suggest(CommandSender sender, Command command, String label, String[] args){
+    List<String> suggest(CommandSender sender, String label, String[] args){
         List<String> suggested = new ArrayList<>();
         // First check if command path is right
         for (int i = 0; i < args.length-1; i++) {
@@ -130,6 +138,16 @@ public class VCommandCallback {
                         }
                         providedArguments.add(player);
                     }
+                    else if(commandAskParameter.getCommandAskType().equals(CommandAskType.VCORE_PLAYER)){
+                        try {
+                            VCorePlayer vCorePlayer = plugin.getCoreInstance().getPlayerAPI().getVCorePlayer(argument).get();
+                            if(vCorePlayer == null)
+                                return new CallbackResponse(CallbackResponse.ResponseType.FAILURE,true);
+                            providedArguments.add(vCorePlayer);
+                        } catch (InterruptedException | ExecutionException e) {
+                            e.printStackTrace();
+                        }
+                    }
                 }
                 else if(commandAskParameter.getCommandAskType().name().contains("NUMBER")){
 
@@ -174,6 +192,15 @@ public class VCommandCallback {
                         return new CallbackResponse(CallbackResponse.ResponseType.FAILURE,true);
                     }
                     providedArguments.add(Boolean.parseBoolean(argument));
+                }
+                else if(commandAskParameter.getCommandAskType().equals(CommandAskType.VCORE_GAMESERVER)){
+                    UUID serverUUID = UUID.nameUUIDFromBytes(argument.getBytes(StandardCharsets.UTF_8));
+                    ServerInstance serverInstance = plugin.getServices().getPipeline().load(ServerInstance.class,serverUUID, Pipeline.LoadingStrategy.LOAD_PIPELINE);
+                    if(serverInstance == null){
+                        sender.sendMessage(ChatColor.translateAlternateColorCodes('&',commandAskParameter.errorMessage));
+                        return new CallbackResponse(CallbackResponse.ResponseType.FAILURE,true);
+                    }
+                    providedArguments.add(serverInstance);
                 }
                 else if(commandAskParameter.getCommandAskType().equals(CommandAskType.STRING)){
                     providedArguments.add(argument);
@@ -244,8 +271,10 @@ public class VCommandCallback {
     }
     
     public static abstract class CommandCallbackInfo{
+        protected final VCorePlugin<?, ?> plugin;
         protected final int index;
-        CommandCallbackInfo(int index){
+        CommandCallbackInfo(VCorePlugin<?,?> plugin, int index){
+            this.plugin = plugin;
             this.index = index;
         }
         public abstract List<String> suggest();
@@ -254,8 +283,8 @@ public class VCommandCallback {
     
     public static class CommandPath extends CommandCallbackInfo{
         protected final String commandPath;
-        CommandPath(int index, String commandPath) {
-            super(index);
+        CommandPath(VCorePlugin<?,?> plugin, int index, String commandPath) {
+            super(plugin, index);
             this.commandPath = commandPath;
         }
 
@@ -285,8 +314,8 @@ public class VCommandCallback {
         private String errorMessage;
         private List<String> suggested;
 
-        CommandAskParameter(int index, @Nonnull String name, @Nonnull CommandAskType commandAskType, @Nonnull String errorMessage, @Nonnull List<String> suggested) {
-            super(index);
+        CommandAskParameter(VCorePlugin<?,?> plugin, int index, @Nonnull String name, @Nonnull CommandAskType commandAskType, @Nonnull String errorMessage, @Nonnull List<String> suggested) {
+            super(plugin, index);
             this.name = name;
             this.commandAskType = commandAskType;
             this.errorMessage = errorMessage;
@@ -307,6 +336,29 @@ public class VCommandCallback {
                 return Bukkit.getOnlinePlayers().stream().map(HumanEntity::getName).collect(Collectors.toList());
             if(commandAskType.equals(CommandAskType.BOOLEAN))
                 return List.of("true","false");
+            if(commandAskType.equals(CommandAskType.VCORE_PLAYER)) {
+                try {
+                    List<VCorePlayer> players = plugin.getCoreInstance().getPlayerAPI().getAllOnlinePlayers().get();
+                    return players.stream().filter(Objects::nonNull).map(VCorePlayer::getDisplayName).collect(Collectors.toList());
+                } catch (InterruptedException | ExecutionException e) {
+                    e.printStackTrace();
+                }
+            }
+            if(commandAskType.name().contains("NUMBER")){
+                if(commandAskType.equals(CommandAskType.NEGATIVE_NUMBER))
+                    return List.of(-VCoreUtil.getRandomUtil().randomInt(1, 100)+"");
+                else if(commandAskType.equals(CommandAskType.NEGATIVE_NUMBER_AND_ZERO))
+                    return List.of(-VCoreUtil.getRandomUtil().randomInt(1, 100)+"");
+                else if(commandAskType.equals(CommandAskType.NUMBER))
+                    return List.of("0");
+                else if(commandAskType.equals(CommandAskType.POSITIVE_NUMBER_AND_ZERO))
+                    return List.of(VCoreUtil.getRandomUtil().randomInt(1, 100)+"");
+                else if(commandAskType.equals(CommandAskType.POSITIVE_NUMBER))
+                    return List.of(VCoreUtil.getRandomUtil().randomInt(1, 100)+"");
+            }
+            if(commandAskType.equals(CommandAskType.VCORE_GAMESERVER)){
+                return plugin.getServices().getPipeline().loadAllData(ServerInstance.class, Pipeline.LoadingStrategy.LOAD_PIPELINE).stream().filter(serverInstance -> serverInstance.getServerType().equals(ServerType.GAME_SERVER)).map(serverInstance -> serverInstance.serverName).collect(Collectors.toList());
+            }
             return suggested;
         }
 
@@ -334,6 +386,8 @@ public class VCommandCallback {
         NEGATIVE_NUMBER_AND_ZERO,
         PLAYER_ONLINE,
         BOOLEAN,
+        VCORE_PLAYER,
+        VCORE_GAMESERVER,
     }
 
     public enum CommandExecutorType{

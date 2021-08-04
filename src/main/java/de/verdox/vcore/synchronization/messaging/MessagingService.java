@@ -8,7 +8,9 @@ package de.verdox.vcore.synchronization.messaging;
 import de.verdox.vcore.plugin.SystemLoadable;
 import de.verdox.vcore.synchronization.messaging.messages.Message;
 import de.verdox.vcore.synchronization.messaging.messages.MessageBuilder;
+import de.verdox.vcore.synchronization.messaging.query.QueryService;
 
+import javax.annotation.Nonnull;
 import java.util.UUID;
 
 /**
@@ -21,9 +23,11 @@ public interface MessagingService<T extends MessageBuilder> extends SystemLoadab
     T constructMessage();
     void publishMessage(Message message);
 
+    boolean isOwnMessage(Message message);
     default UUID getSessionUUID(){
         return UUID.randomUUID();
     }
     String getSenderName();
 
+    QueryService getQueryService();
 }

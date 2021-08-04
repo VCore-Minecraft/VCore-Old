@@ -8,6 +8,7 @@ import de.verdox.vcore.performance.concurrent.CatchingRunnable;
 import de.verdox.vcore.synchronization.pipeline.annotations.DataContext;
 import de.verdox.vcore.synchronization.pipeline.annotations.PreloadStrategy;
 import de.verdox.vcore.synchronization.pipeline.annotations.VCoreDataContext;
+import de.verdox.vcore.synchronization.pipeline.datatypes.NetworkData;
 import de.verdox.vcore.synchronization.pipeline.datatypes.VCoreData;
 import de.verdox.vcore.synchronization.pipeline.parts.DataSynchronizer;
 import de.verdox.vcore.synchronization.pipeline.parts.Pipeline;
@@ -18,8 +19,6 @@ import de.verdox.vcore.plugin.VCorePlugin;
 import de.verdox.vcore.plugin.subsystem.VCoreSubsystem;
 import de.verdox.vcore.synchronization.pipeline.parts.storage.PipelineTaskScheduler;
 import io.netty.util.concurrent.DefaultThreadFactory;
-import org.bukkit.Bukkit;
-import org.bukkit.Material;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -73,7 +72,7 @@ public class PipelineManager implements Pipeline {
                     VCoreData data = localCache.getData(aClass, uuid);
                     data.save(true);
                     // If Player is online don't unload
-                    if(Bukkit.getPlayer(data.getObjectUUID()) != null)
+                    if(plugin.getPlatformWrapper().isPlayerOnline(data.getObjectUUID()))
                         return;
                     if(!data.isExpired())
                         return;
@@ -115,7 +114,7 @@ public class PipelineManager implements Pipeline {
      */
     @Override
     public final <T extends VCoreData> T load(@Nonnull Class<? extends T> type, @Nonnull UUID uuid, @Nonnull LoadingStrategy loadingStrategy, boolean createIfNotExist, @Nullable Consumer<T> callback){
-        if(!Bukkit.isPrimaryThread()){
+        if(!plugin.getPlatformWrapper().isPrimaryThread()){
             PipelineTaskScheduler.PipelineTask<T> existingTask = pipelineTaskScheduler.getExistingPipelineTask(type, uuid);
             if(existingTask != null){
                 try {
@@ -126,9 +125,11 @@ public class PipelineManager implements Pipeline {
         pipelineTaskScheduler.removePipelineTask(uuid);
         PipelineTaskScheduler.PipelineTask<T> pipelineTask = pipelineTaskScheduler.schedulePipelineTask(PipelineTaskScheduler.PipelineAction.LOAD, loadingStrategy, type, uuid);
 
-        VCoreSubsystem<?> subsystem = plugin.findDependSubsystem(type);
-        if(subsystem == null)
-            throw new NullPointerException("Subsystem of "+type+" could not be found in plugin"+plugin.getPluginName());
+        if(!NetworkData.class.isAssignableFrom(type)){
+            VCoreSubsystem<?> subsystem = plugin.findDependSubsystem(type);
+            if(subsystem == null)
+                throw new NullPointerException("Subsystem of "+type+" could not be found in plugin"+plugin.getPluginName());
+        }
         if(!loadingStrategy.equals(LoadingStrategy.LOAD_PIPELINE)) {
             if(!localCache.dataExist(type, uuid)){
                 if(loadingStrategy.equals(LoadingStrategy.LOAD_LOCAL))
@@ -226,6 +227,28 @@ public class PipelineManager implements Pipeline {
         return completableFuture;
     }
 
+    @Override
+    public <T extends VCoreData> boolean delete(@Nonnull Class<? extends T> type, @Nonnull UUID uuid) {
+        if(getLocalCache() != null) {
+            if(getLocalCache().remove(type, uuid))
+                System.out.println("Deleted from Local Cache");
+        }
+        if(getGlobalCache() != null)
+            if(getGlobalCache().remove(type,uuid))
+                System.out.println("Deleted from Global Cache");
+        if(getGlobalStorage() != null)
+            if(getGlobalStorage().remove(type,uuid))
+                System.out.println("Deleted from Global Storage");
+        return true;
+    }
+
+    @Override
+    public <T extends VCoreData> CompletableFuture<Boolean> deleteAsync(@Nonnull Class<? extends T> type, @Nonnull UUID uuid) {
+        CompletableFuture<Boolean> completableFuture = new CompletableFuture<>();
+        executorService.submit(new CatchingRunnable(() -> completableFuture.complete(delete(type, uuid))));
+        return completableFuture;
+    }
+
     private <T extends VCoreData> void synchronizeData(@Nonnull Class<? extends T> type){
         if(getGlobalStorage() != null)
             getGlobalStorage().getSavedUUIDs(type).forEach(uuid -> {
@@ -314,7 +337,6 @@ public class PipelineManager implements Pipeline {
             plugin.consoleMessage("&eNo Data was found. Creating new data! &8[&b"+dataClass.getSimpleName()+"&8]", 1,true);
             T vCoreData = localCache.instantiateData(dataClass,uuid);
             vCoreData.onCreate();
-            //TODO: Push Mechanik irgendwie einbauen
             localCache.save(dataClass, vCoreData);
             //getLocalDataHandler().localToRedis(vCoreData,dataClass,vCoreData.getUUID());
             pipelineDataSynchronizer.synchronize(DataSynchronizer.DataSourceType.LOCAL, DataSynchronizer.DataSourceType.GLOBAL_CACHE, dataClass, uuid);

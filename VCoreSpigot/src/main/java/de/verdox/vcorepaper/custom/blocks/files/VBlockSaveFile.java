@@ -1,7 +1,7 @@
 package de.verdox.vcorepaper.custom.blocks.files;
 
-import de.verdox.vcore.util.keys.LocationKey;
-import de.verdox.vcore.util.keys.SplitChunkKey;
+import de.verdox.vcore.util.bukkit.keys.LocationKey;
+import de.verdox.vcore.util.bukkit.keys.SplitChunkKey;
 import de.verdox.vcorepaper.custom.blocks.BlockPersistentData;
 import org.bukkit.Location;
 import org.json.simple.JSONObject;

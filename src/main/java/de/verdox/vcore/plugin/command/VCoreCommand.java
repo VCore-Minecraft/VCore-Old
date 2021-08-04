@@ -4,18 +4,23 @@
 
 package de.verdox.vcore.plugin.command;
 
+import com.destroystokyo.paper.event.server.AsyncTabCompleteEvent;
 import de.verdox.vcore.plugin.command.callback.CommandCallback;
 import de.verdox.vcore.plugin.command.callback.CommandSuggestionCallback;
 import de.verdox.vcore.plugin.VCorePlugin;
 import de.verdox.vcore.plugin.subsystem.VCoreSubsystem;
 import de.verdox.vcore.util.VCoreUtil;
 import net.md_5.bungee.api.ChatMessageType;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabExecutor;
 import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
 
+import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -35,13 +40,13 @@ public abstract class VCoreCommand <T extends VCorePlugin<?,?>, R> {
     protected final Map<Integer, CommandSuggestionCallback<R>> suggestionCallbackCache = new ConcurrentHashMap<>();
     protected final List<VCommandCallback> vCommandCallbacks = new ArrayList<>();
 
-    public VCoreCommand(T vCorePlugin, String commandName){
+    public VCoreCommand(@Nonnull T vCorePlugin, String commandName){
         this.vCorePlugin = vCorePlugin;
         this.commandName = commandName;
         registerCommand();
     }
 
-    public VCoreCommand(VCoreSubsystem<T> vCoreSubsystem, String commandName){
+    public VCoreCommand(@Nonnull VCoreSubsystem<T> vCoreSubsystem, String commandName){
         this.vCorePlugin = vCoreSubsystem.getVCorePlugin();
         this.vCoreSubsystem = vCoreSubsystem;
         this.commandName = commandName;
@@ -50,8 +55,10 @@ public abstract class VCoreCommand <T extends VCorePlugin<?,?>, R> {
             registerCommand();
     }
 
-    public void addCommandCallback(VCommandCallback vCommandCallback){
+    public VCommandCallback addCommandCallback(String... commandPath){
+        VCommandCallback vCommandCallback = new VCommandCallback(vCorePlugin,commandPath);
         vCommandCallbacks.add(vCommandCallback);
+        return vCommandCallback;
     }
 
     public VCoreCommand<T,R> addCommandSuggestions(int argNumber, CommandSuggestionCallback<R> commandSuggestionCallback){
@@ -69,36 +76,54 @@ public abstract class VCoreCommand <T extends VCorePlugin<?,?>, R> {
 
     protected abstract CommandCallback<R> commandCallback();
 
-    public abstract static class VCoreBukkitCommand extends VCoreCommand<VCorePlugin.Minecraft, CommandSender> implements TabExecutor {
+    public abstract static class VCoreBukkitCommand extends VCoreCommand<VCorePlugin.Minecraft, CommandSender> implements TabExecutor, Listener {
+
         public VCoreBukkitCommand(VCorePlugin.Minecraft vCorePlugin, String commandName) {
             super(vCorePlugin, commandName);
+            vCorePlugin.getServer().getPluginManager().registerEvents(this,vCorePlugin);
         }
 
         public VCoreBukkitCommand(VCoreSubsystem.Bukkit vCoreSubsystem, String commandName) {
             super(vCoreSubsystem, commandName);
+            vCorePlugin.getServer().getPluginManager().registerEvents(this,vCorePlugin);
         }
 
         public void sendPlayerMessage(Player player, String message){
-            VCoreUtil.getBukkitPlayerUtil().sendPlayerMessage(player, ChatMessageType.CHAT,message);
+            VCoreUtil.BukkitUtil.getBukkitPlayerUtil().sendPlayerMessage(player, ChatMessageType.CHAT,message);
+        }
+
+        @EventHandler
+        public void asyncTabComplete(AsyncTabCompleteEvent e){
+            List<String> suggest = new ArrayList<>();
+            String[] cmdArgs = e.getBuffer().replace("/","").split("");
+            String[] args = Arrays.copyOfRange(cmdArgs,1,cmdArgs.length);
+            for (VCommandCallback vCommandCallback : vCommandCallbacks) {
+                List<String> suggested = vCommandCallback.suggest(e.getSender(), cmdArgs[0], args);
+                if(!suggested.isEmpty())
+                    suggest.addAll(suggested);
+            }
+            e.setCompletions(suggest);
         }
 
         @Override
         public final boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-            boolean errorMessageSent = false;
-            for (VCommandCallback vCommandCallback : vCommandCallbacks) {
-                VCommandCallback.CallbackResponse response = vCommandCallback.onCommand(sender, command, label, args);
-                if(response.errorMessageSent)
-                    errorMessageSent = true;
-                if(response.responseType.equals(VCommandCallback.CallbackResponse.ResponseType.SUCCESS))
-                    return true;
-            }
-            if(!errorMessageSent) {
-                sender.sendMessage("");
-                sender.sendMessage(ChatColor.translateAlternateColorCodes('&',"&8<=========== &6"+commandName+" &8===========>"));
-                for (VCommandCallback vCommandCallback : vCommandCallbacks)
-                    sender.sendMessage(ChatColor.translateAlternateColorCodes('&', vCommandCallback.getSuggested(this)));
-                sender.sendMessage("");
-            }
+            vCorePlugin.async(() -> {
+                boolean errorMessageSent = false;
+                for (VCommandCallback vCommandCallback : vCommandCallbacks) {
+                    VCommandCallback.CallbackResponse response = vCommandCallback.onCommand(sender, command, label, args);
+                    if(response.errorMessageSent)
+                        errorMessageSent = true;
+                    if(response.responseType.equals(VCommandCallback.CallbackResponse.ResponseType.SUCCESS))
+                        return;
+                }
+                if(!errorMessageSent) {
+                    sender.sendMessage("");
+                    sender.sendMessage(ChatColor.translateAlternateColorCodes('&',"&8<=========== &6"+commandName+" &8===========>"));
+                    for (VCommandCallback vCommandCallback : vCommandCallbacks)
+                        sender.sendMessage(ChatColor.translateAlternateColorCodes('&', vCommandCallback.getSuggested(this)));
+                    sender.sendMessage("");
+                }
+            });
             return false;
         }
 
@@ -106,7 +131,7 @@ public abstract class VCoreCommand <T extends VCorePlugin<?,?>, R> {
         public final List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
             List<String> suggest = new ArrayList<>();
             for (VCommandCallback vCommandCallback : vCommandCallbacks) {
-                List<String> suggested = vCommandCallback.suggest(sender, command, alias, args);
+                List<String> suggested = vCommandCallback.suggest(sender, alias, args);
                 if(!suggested.isEmpty())
                     suggest.addAll(suggested);
             }

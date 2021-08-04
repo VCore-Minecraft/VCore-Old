@@ -28,6 +28,8 @@ public class PipelineConfig extends VCoreYAMLConfig {
         super(plugin, fileName, pluginDirectory);
     }
 
+    //TODO: Wenn Verbindungen nicht hergestellt werden können, SpielerConnect mit geeigneter Nachricht abbrechen
+
     public Pipeline constructPipeline(VCorePlugin<?,?> plugin){
         plugin.consoleMessage("&eConstructing Pipeline",false);
         LocalCache localCache = new LocalCacheImpl(plugin);

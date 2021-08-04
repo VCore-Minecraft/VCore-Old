@@ -5,9 +5,9 @@
 package de.verdox.vcorewaterfall.pings;
 
 import com.google.common.eventbus.Subscribe;
-import de.verdox.vcore.plugin.pingservice.ServerType;
-import de.verdox.vcore.plugin.pingservice.events.ServerPingOfflineEvent;
-import de.verdox.vcore.plugin.pingservice.events.ServerPingOnlineEvent;
+import de.verdox.vcore.synchronization.networkmanager.server.ServerType;
+import de.verdox.vcore.synchronization.networkmanager.serverping.events.ServerPingOfflineEvent;
+import de.verdox.vcore.synchronization.networkmanager.serverping.events.ServerPingOnlineEvent;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.config.ServerInfo;
@@ -26,7 +26,7 @@ public class ServerPingListener {
     public void pingOnlineEvent(ServerPingOnlineEvent e){
         if(!e.isFirstReceivedPing())
             return;
-        if(!ProxyServer.getInstance().getServersCopy().containsKey(e.getServerName())){
+        if(!ProxyServer.getInstance().getServersCopy().containsKey(e.getServerName()) && e.getServerType().equals(ServerType.GAME_SERVER)){
             ServerInfo serverInfo = ProxyServer.getInstance().constructServerInfo(e.getServerName(), new InetSocketAddress(e.getServerAddress(),e.getServerPort()),e.getServerName(),false);
             ProxyServer.getInstance().getServers().put(serverInfo.getName(),serverInfo);
         }
@@ -34,7 +34,7 @@ public class ServerPingListener {
             if(player.hasPermission("vCore.notifyServers"))
                 player.sendMessage(ChatColor.translateAlternateColorCodes('&',"&8[&6VCore&8] &e"+e.getServerName()+" &aONLINE"));
         }
-        if(e.getServerType().equals(ServerType.BUKKIT))
+        if(e.getServerType().equals(ServerType.GAME_SERVER))
             ProxyServer.getInstance().getConsole().sendMessage(ChatColor.translateAlternateColorCodes('&',"&8[&6VCore&8] &e"+e.getServerName()+" &aONLINE"));
     }
 

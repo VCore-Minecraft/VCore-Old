@@ -4,6 +4,7 @@
 
 package de.verdox.vcore.synchronization.pipeline.parts.cache;
 
+import com.j256.ormlite.field.DataPersister;
 import de.verdox.vcore.synchronization.pipeline.annotations.DataContext;
 import de.verdox.vcore.synchronization.pipeline.annotations.PreloadStrategy;
 import de.verdox.vcore.synchronization.pipeline.annotations.VCoreDataContext;
@@ -26,6 +27,7 @@ public interface GlobalCache extends DataProvider {
     Map<String, Object> getObjectCache(Class<? extends VCoreData> dataClass, UUID objectUUID);
     Set<Map<String, Object>> getCacheList(Class<? extends VCoreData> dataClass);
     Set<String> getKeys(Class<? extends VCoreData> dataClass);
+    Map<String, Object> getGlobalCacheMap(String name);
 
     boolean dataExist(@Nonnull Class<? extends VCoreData> dataClass, @Nonnull UUID objectUUID);
 

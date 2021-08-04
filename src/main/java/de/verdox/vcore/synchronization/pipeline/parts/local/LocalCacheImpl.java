@@ -4,6 +4,7 @@
 
 package de.verdox.vcore.synchronization.pipeline.parts.local;
 
+import de.verdox.vcore.synchronization.pipeline.datatypes.NetworkData;
 import de.verdox.vcore.synchronization.pipeline.datatypes.VCoreData;
 import de.verdox.vcore.plugin.VCorePlugin;
 import de.verdox.vcore.plugin.subsystem.VCoreSubsystem;
@@ -12,6 +13,7 @@ import javax.annotation.Nonnull;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 /**
  * @version 1.0
@@ -34,6 +36,11 @@ public class LocalCacheImpl implements LocalCache{
         S data = dataClass.cast(dataObjects.get(dataClass).get(objectUUID));
         data.updateLastUse();
         return data;
+    }
+
+    @Override
+    public <S extends VCoreData> Set<S> getAllData(@Nonnull Class<? extends S> dataClass) {
+        return getSavedUUIDs(dataClass).stream().map(uuid -> getData(dataClass,uuid)).collect(Collectors.toSet());
     }
 
     @Override
@@ -72,13 +79,16 @@ public class LocalCacheImpl implements LocalCache{
 
     @Override
     public <S extends VCoreData> S instantiateData(@Nonnull Class<? extends S> dataClass, @Nonnull UUID objectUUID) {
-        if(VCorePlugin.findDependSubsystemClass(dataClass) == null)
-            throw new NullPointerException(dataClass+" does not have RequiredSubsystem Annotation set.");
-        VCoreSubsystem<?> subsystem = plugin.findDependSubsystem(dataClass);
-        if(subsystem == null)
-            throw new NullPointerException("RequiredSubsystem can't be null");
-        if(!subsystem.isActivated())
-            throw new NullPointerException("Provided Subsystem is not activated");
+        // Network Data is not subsystem dependent
+        if(!NetworkData.class.isAssignableFrom(dataClass)){
+            if(VCorePlugin.findDependSubsystemClass(dataClass) == null)
+                throw new NullPointerException(dataClass+" does not have RequiredSubsystem Annotation set.");
+            VCoreSubsystem<?> subsystem = plugin.findDependSubsystem(dataClass);
+            if(subsystem == null)
+                throw new NullPointerException("RequiredSubsystem can't be null");
+            if(!subsystem.isActivated())
+                throw new NullPointerException("Provided Subsystem is not activated");
+        }
         if(dataExist(dataClass,objectUUID))
             return getData(dataClass,objectUUID);
 

@@ -2,12 +2,16 @@ package de.verdox.vcorepaper;
 
 import com.comphenix.protocol.ProtocolLibrary;
 import com.comphenix.protocol.ProtocolManager;
-import de.verdox.vcore.plugin.VCorePlugin;
-import de.verdox.vcore.plugin.pingservice.ServerPingManager;
+import de.verdox.vcore.plugin.VCoreCoreInstance;
+import de.verdox.vcore.synchronization.networkmanager.NetworkManager;
+import de.verdox.vcore.synchronization.networkmanager.player.api.VCorePlayerAPI;
+import de.verdox.vcore.synchronization.networkmanager.player.api.bukkit.VCorePlayerAPIBukkitImpl;
+import de.verdox.vcore.synchronization.networkmanager.server.ServerType;
 import de.verdox.vcore.plugin.subsystem.VCoreSubsystem;
-import de.verdox.vcore.synchronization.pipeline.player.VCorePlayerCache;
+import de.verdox.vcore.synchronization.networkmanager.player.listener.PlayerBukkitListener;
 import de.verdox.vcorepaper.commands.AdminCommands;
 import de.verdox.vcorepaper.commands.NMSCommand;
+import de.verdox.vcorepaper.commands.PlayerAPICommands;
 import de.verdox.vcorepaper.custom.blocks.CustomBlockManager;
 import de.verdox.vcorepaper.custom.blocks.VBlockListener;
 import de.verdox.vcorepaper.custom.entities.CustomEntityListener;
@@ -16,24 +20,22 @@ import de.verdox.vcorepaper.custom.CustomDataListener;
 import de.verdox.vcorepaper.custom.items.CustomItemManager;
 import de.verdox.vcorepaper.nms.NMSManager;
 import de.verdox.vcorepaper.bukkitplayerhandler.BukkitPlayerHandler;
-import de.verdox.vcorepaper.playercache.SpigotPlayerCacheListener;
 import org.bukkit.Bukkit;
 
 import java.util.List;
 
-public class VCorePaper extends VCorePlugin.Minecraft {
+public class VCorePaper extends VCoreCoreInstance.Minecraft {
     public static VCorePaper instance;
 
     private NMSManager nmsManager;
+
+    private NetworkManager<VCorePaper> networkManager;
 
     private CustomEntityManager customEntityManager;
     private CustomItemManager customItemManager;
     private CustomBlockManager customBlockManager;
     private ProtocolManager protocolManager;
-
-    private ServerPingManager.Bukkit serverPingManager;
-
-    private VCorePlayerCache vCorePlayerCache;
+    private VCorePlayerAPI vCorePlayerAPI;
 
     public static VCorePaper getInstance() {
         return instance;
@@ -42,6 +44,7 @@ public class VCorePaper extends VCorePlugin.Minecraft {
     @Override
     public void onPluginEnable() {
         instance = this;
+        this.vCorePlayerAPI = new VCorePlayerAPIBukkitImpl(this);
         this.nmsManager = new NMSManager(this);
 
         this.customEntityManager = new CustomEntityManager(this);
@@ -54,13 +57,14 @@ public class VCorePaper extends VCorePlugin.Minecraft {
 
         new AdminCommands(this,"debug");
         new NMSCommand(this,"nms");
+        new PlayerAPICommands(this,"playerapi");
 
         if(Bukkit.getPluginManager().getPlugin("ProtocolLib") != null)
             protocolManager = ProtocolLibrary.getProtocolManager();
-        new SpigotPlayerCacheListener(this);
-        vCorePlayerCache = new VCorePlayerCache(this);
-        serverPingManager = new ServerPingManager.Bukkit(this);
-        serverPingManager.sendOnlinePing();
+
+        networkManager = new NetworkManager<>(ServerType.GAME_SERVER,this);
+        new PlayerBukkitListener(networkManager);
+        networkManager.getServerPingManager().sendOnlinePing();
     }
 
     public ProtocolManager getProtocolManager() {
@@ -71,7 +75,7 @@ public class VCorePaper extends VCorePlugin.Minecraft {
 
     @Override
     public void onPluginDisable() {
-        serverPingManager.sendOfflinePing();
+        networkManager.getServerPingManager().sendOfflinePing();
     }
 
     @Override
@@ -114,7 +118,17 @@ public class VCorePaper extends VCorePlugin.Minecraft {
 
     }
 
-    public VCorePlayerCache getVCorePlayerCache() {
-        return vCorePlayerCache;
+    public NetworkManager<VCorePaper> getNetworkManager() {
+        return networkManager;
+    }
+
+    @Override
+    public VCorePlayerAPI getPlayerAPI() {
+        return vCorePlayerAPI;
+    }
+
+    @Override
+    public String getServerName() {
+        return getNetworkManager().getServerPingManager().getServerName();
     }
 }

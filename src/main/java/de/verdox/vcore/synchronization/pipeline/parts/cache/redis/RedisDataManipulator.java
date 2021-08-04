@@ -34,8 +34,7 @@ public class RedisDataManipulator implements DataManipulator {
             if(updateDataBlock.senderUUID.equals(senderUUID))
                 return;
             vCoreData.getPlugin().consoleMessage("&eReceived Redis Sync &b"+vCoreData.getObjectUUID()+" &8[&e"+vCoreData.getClass().getSimpleName()+"&8] &b"+System.currentTimeMillis(),true);
-            vCoreData.deserialize(updateDataBlock.dataToUpdate);
-            vCoreData.onSync();
+            vCoreData.onSync(vCoreData.deserialize(updateDataBlock.dataToUpdate));
             vCoreData.getPlugin().consoleMessage("&eRedis Sync complete &b"+System.currentTimeMillis(),true);
         };
         dataTopic.addListener(UpdateDataBlock.class,messageListener);

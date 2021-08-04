@@ -3,7 +3,9 @@ package de.verdox.vcore.plugin;
 import de.verdox.vcore.performance.concurrent.CatchingRunnable;
 import de.verdox.vcore.performance.concurrent.TaskBatch;
 import de.verdox.vcore.plugin.files.DebugConfig;
-import de.verdox.vcore.plugin.files.config.VCoreYAMLConfig;
+import de.verdox.vcore.plugin.wrapper.BukkitPlatformWrapperImpl;
+import de.verdox.vcore.plugin.wrapper.BungeePlatformWrapperImpl;
+import de.verdox.vcore.plugin.wrapper.PlatformWrapper;
 import de.verdox.vcore.synchronization.pipeline.annotations.RequiredSubsystemInfo;
 import de.verdox.vcore.plugin.bukkit.BukkitPlugin;
 import de.verdox.vcore.plugin.bungeecord.BungeeCordPlugin;
@@ -19,8 +21,8 @@ import java.io.File;
 import java.util.List;
 
 public interface VCorePlugin <T, R extends VCoreSubsystem<?>> extends SystemLoadable {
-    String vCorePaperName = "VCorePaper";
-    String vCoreWaterfallName = "VCoreWaterfall";
+    static String vCorePaperName = "VCorePaper";
+    static String vCoreWaterfallName = "VCoreWaterfall";
 
     void onPluginEnable();
     void onPluginDisable();
@@ -33,6 +35,7 @@ public interface VCorePlugin <T, R extends VCoreSubsystem<?>> extends SystemLoad
 
     void consoleMessage(String message, boolean debug);
     void consoleMessage(String message, int tabSize, boolean debug);
+    PlatformWrapper<?> getPlatformWrapper();
 
     boolean debug();
     void setDebugMode(boolean value);
@@ -41,7 +44,7 @@ public interface VCorePlugin <T, R extends VCoreSubsystem<?>> extends SystemLoad
     void async(Runnable runnable);
     void sync(Runnable runnable);
 
-    <V extends VCorePlugin<T,R>> V getCoreInstance();
+    <V extends VCoreCoreInstance<T,R>> V getCoreInstance();
 
     PluginServiceParts<?,R> getServices();
 
@@ -59,14 +62,19 @@ public interface VCorePlugin <T, R extends VCoreSubsystem<?>> extends SystemLoad
         return getServices().getSubsystemManager().findSubsystemByClass(requiredSubsystemInfo.parentSubSystem());
     }
 
-    abstract class Minecraft extends BukkitPlugin{
+    abstract class Minecraft extends BukkitPlugin {
 
         private PluginServiceParts<VCorePlugin.Minecraft,VCoreSubsystem.Bukkit> serviceParts;
         private boolean loaded;
 
         @Override
-        public <V extends VCorePlugin<JavaPlugin, VCoreSubsystem.Bukkit>> V getCoreInstance() {
+        public <V extends VCoreCoreInstance<JavaPlugin, VCoreSubsystem.Bukkit>> V getCoreInstance() {
             return (V) Bukkit.getPluginManager().getPlugin(vCorePaperName);
+        }
+
+        @Override
+        public PlatformWrapper<?> getPlatformWrapper() {
+            return new BukkitPlatformWrapperImpl();
         }
 
         @Override
@@ -96,6 +104,7 @@ public interface VCorePlugin <T, R extends VCoreSubsystem<?>> extends SystemLoad
 
         @Override
         public final void onDisable() {
+            //TODO: Wenn Server schließt werden VCorePlayer nicht rausgelöscht
             consoleMessage("&ePlugin stopping&7!",false);
             onPluginDisable();
             Bukkit.getWorlds().forEach(World::save);
@@ -153,16 +162,20 @@ public interface VCorePlugin <T, R extends VCoreSubsystem<?>> extends SystemLoad
 
         private PluginServiceParts<VCorePlugin.BungeeCord,VCoreSubsystem.BungeeCord> serviceParts;
         private boolean loaded;
-        private final DebugConfig debugConfig = new DebugConfig(this);
 
         @Override
-        public <V extends VCorePlugin<Plugin, VCoreSubsystem.BungeeCord>> V getCoreInstance() {
-            return (V) Bukkit.getPluginManager().getPlugin(vCoreWaterfallName);
+        public <V extends VCoreCoreInstance<Plugin, VCoreSubsystem.BungeeCord>> V getCoreInstance() {
+            return (V) ProxyServer.getInstance().getPluginManager().getPlugin(vCoreWaterfallName);
+        }
+
+        @Override
+        public PlatformWrapper<?> getPlatformWrapper() {
+            return new BungeePlatformWrapperImpl();
         }
 
         @Override
         public void setDebugMode(boolean value){
-            debugConfig.setDebugMode(value);
+            getServices().getDebugConfig().setDebugMode(value);
         }
 
         @Override
@@ -171,7 +184,7 @@ public interface VCorePlugin <T, R extends VCoreSubsystem<?>> extends SystemLoad
                 return true;
             if(getServices().getDebugConfig() == null)
                 return true;
-            return debugConfig.debugMode();
+            return getServices().getDebugConfig().debugMode();
         }
 
         @Override

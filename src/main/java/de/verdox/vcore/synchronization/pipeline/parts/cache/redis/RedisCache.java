@@ -4,7 +4,7 @@
 
 package de.verdox.vcore.synchronization.pipeline.parts.cache.redis;
 
-import de.verdox.vcore.synchronization.pipeline.annotations.RequiredSubsystemInfo;
+import de.verdox.vcore.synchronization.pipeline.datatypes.NetworkData;
 import de.verdox.vcore.synchronization.pipeline.datatypes.VCoreData;
 import de.verdox.vcore.synchronization.pipeline.interfaces.DataManipulator;
 import de.verdox.vcore.synchronization.pipeline.interfaces.VCoreSerializable;
@@ -13,9 +13,7 @@ import de.verdox.vcore.synchronization.pipeline.parts.storage.GlobalStorage;
 import de.verdox.vcore.plugin.VCorePlugin;
 import de.verdox.vcore.synchronization.redisson.RedisConnection;
 import org.redisson.api.*;
-import org.redisson.codec.MarshallingCodec;
 import org.redisson.codec.SerializationCodec;
-import org.redisson.codec.TypedJsonJacksonCodec;
 
 import javax.annotation.Nonnull;
 import java.util.*;
@@ -58,8 +56,13 @@ public class RedisCache extends RedisConnection implements GlobalCache {
 
     @Override
     public Map<String, Object> getObjectCache(Class<? extends VCoreData> dataClass, UUID objectUUID) {
-        RMap<String, Object> objectCache = redissonClient.getMap(plugin.getPluginName()+"Cache:"+objectUUID+":"+ GlobalStorage.getDataStorageIdentifier(dataClass));
-        objectCache.expire(12, TimeUnit.HOURS);
+        RMap<String, Object> objectCache;
+        if(NetworkData.class.isAssignableFrom(dataClass))
+            objectCache = redissonClient.getMap("VCoreCache:"+objectUUID+":"+ GlobalStorage.getDataStorageIdentifier(dataClass));
+        else {
+            objectCache = redissonClient.getMap(plugin.getPluginName() + "Cache:" + objectUUID + ":" + GlobalStorage.getDataStorageIdentifier(dataClass));
+            objectCache.expire(12, TimeUnit.HOURS);
+        }
         return objectCache;
     }
 
@@ -82,6 +85,13 @@ public class RedisCache extends RedisConnection implements GlobalCache {
     }
 
     @Override
+    public Map<String, Object> getGlobalCacheMap(String name) {
+        RMap<String, Object> objectCache = redissonClient.getMap("InternalVCoreData:"+name);
+        objectCache.expire(1,TimeUnit.HOURS);
+        return objectCache;
+    }
+
+    @Override
     public Set<UUID> getSavedUUIDs(@Nonnull Class<? extends VCoreData> dataClass) {
         return getKeys(dataClass).stream().map(s -> UUID.fromString(s.split(":")[1])).collect(Collectors.toSet());
     }
@@ -101,9 +111,6 @@ public class RedisCache extends RedisConnection implements GlobalCache {
     }
 
     private Set<String> getObjectDataKeys(Class<? extends VCoreData> vCoreDataClass, UUID uuid) {
-        RequiredSubsystemInfo requiredSubsystemInfo = vCoreDataClass.getAnnotation(RequiredSubsystemInfo.class);
-        if(requiredSubsystemInfo == null)
-            throw new RuntimeException(getClass().getSimpleName()+" does not have RequiredSubsystemInfo Annotation set");
         if(uuid == null)
             return new HashSet<>();
         if(VCoreSerializable.getPersistentDataFieldNames(vCoreDataClass) == null)

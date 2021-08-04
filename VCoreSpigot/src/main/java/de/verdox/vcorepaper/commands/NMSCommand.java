@@ -4,6 +4,7 @@
 
 package de.verdox.vcorepaper.commands;
 
+import de.verdox.vcore.plugin.command.VCommandCallback;
 import de.verdox.vcore.plugin.command.VCoreCommand;
 import de.verdox.vcore.plugin.command.callback.CommandCallback;
 import de.verdox.vcore.plugin.VCorePlugin;
@@ -31,6 +32,24 @@ import java.util.stream.Collectors;
 public class NMSCommand extends VCoreCommand.VCoreBukkitCommand{
     public NMSCommand(VCorePlugin.Minecraft vCorePlugin, String commandName) {
         super(vCorePlugin, commandName);
+
+        addCommandCallback("world")
+                .setExecutor(VCommandCallback.CommandExecutorType.PLAYER)
+                .addCommandPath("sendFakeDimension")
+                .askFor("DimensionName", VCommandCallback.CommandAskType.STRING,"&cDimension not found", "NORMAL","NETHER","THE_END")
+                .commandCallback((commandSender, commandParameters) -> {
+                    String env = commandParameters.getObject(0,String.class);
+                    Player player = (Player) commandSender;
+                    try{
+                        VCorePaper.getInstance().getNmsManager().getNmsWorldHandler().sendFakeDimension((Player) commandSender,World.Environment.valueOf(env));
+                        commandSender.sendMessage(ChatColor.translateAlternateColorCodes('&',"&aDimension successfully changed!"));
+                    }
+                    catch (IllegalArgumentException e){
+                        commandSender.sendMessage(ChatColor.translateAlternateColorCodes('&',"&cDimension not found"));
+                    }
+                })
+        ;
+
         addCommandSuggestions(0, (commandSender, args) -> List.of("entity","world","server"));
         addCommandSuggestions(1,(commandSender, args) -> {
             if(args[0].equalsIgnoreCase("world"))

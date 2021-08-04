@@ -2,9 +2,9 @@ package de.verdox.vcorepaper.custom.blocks;
 
 import de.verdox.vcore.performance.concurrent.CatchingRunnable;
 import de.verdox.vcore.performance.efficiency.Benchmark;
-import de.verdox.vcore.util.keys.ChunkKey;
-import de.verdox.vcore.util.keys.LocationKey;
-import de.verdox.vcore.util.keys.SplitChunkKey;
+import de.verdox.vcore.util.bukkit.keys.ChunkKey;
+import de.verdox.vcore.util.bukkit.keys.LocationKey;
+import de.verdox.vcore.util.bukkit.keys.SplitChunkKey;
 import de.verdox.vcorepaper.VCorePaper;
 import de.verdox.vcorepaper.custom.CustomDataManager;
 import de.verdox.vcorepaper.custom.blocks.data.VBlockCustomData;

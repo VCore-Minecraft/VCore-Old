@@ -48,7 +48,13 @@ public interface VCoreSerializable {
         return serializedData;
     }
 
-    default void deserialize(Map<String, Object> serializedData){
+    /**
+     *
+     * @param serializedData Data to update
+     * @return Map containing data that was changed with values before the change
+     */
+    default Map<String, Object> deserialize(Map<String, Object> serializedData){
+        Map<String, Object> dataBeforeDeserialization = new HashMap<>();
         serializedData.forEach((key, value) -> {
             if(key.equals("objectUUID"))
                 return;
@@ -56,9 +62,11 @@ public interface VCoreSerializable {
                 return;
             if(value == null)
                 return;
+
             try {
                 Field field = getClass().getDeclaredField(key);
                 field.setAccessible(true);
+                dataBeforeDeserialization.put(key,field.get(this));
                 if(!field.getType().isPrimitive()){
                     try{
                         field.set(this, VCoreUtil.getTypeUtil().castData(value,field.getType()));
@@ -75,5 +83,6 @@ public interface VCoreSerializable {
                 System.err.println("Field e not found. Cleanup Task for missing fields will be implemented in a future release");
             }
         });
+        return dataBeforeDeserialization;
     }
 }

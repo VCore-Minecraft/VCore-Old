@@ -10,6 +10,9 @@ import de.verdox.vcore.synchronization.pipeline.interfaces.VCoreSerializable;
 import de.verdox.vcore.plugin.VCorePlugin;
 import de.verdox.vcore.synchronization.pipeline.parts.DataSynchronizer;
 import de.verdox.vcore.synchronization.pipeline.parts.cache.GlobalCache;
+
+import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -49,6 +52,20 @@ public abstract class VCoreData implements VCoreSerializable {
         this.cleanTimeUnit = dataContext.timeUnit();
     }
 
+    //TODO: Potenziell Fehleranfällig
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof VCoreData)) return false;
+        VCoreData vCoreData = (VCoreData) o;
+        return Objects.equals(getObjectUUID(), vCoreData.getObjectUUID());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getObjectUUID());
+    }
+
     public UUID getObjectUUID() {
         return objectUUID;
     }
@@ -64,7 +81,7 @@ public abstract class VCoreData implements VCoreSerializable {
         });
     }
 
-    public abstract void onSync();
+    public abstract void onSync(Map<String, Object> dataBeforeSync);
 
     public void cleanUp(){
         this.dataManipulator.cleanUp();

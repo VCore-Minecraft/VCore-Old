@@ -17,4 +17,7 @@ commands:
     permission: "VCore.nms"
   playerhandler:
     description: "Admin Command for PlayerHandler"
-    permission: "vcore.admin"
+    permission: "vcore.playerhandler"
+  playerapi:
+    description: "Admin Command for PlayerAPI"
+    permission: "vcore.playerapi"

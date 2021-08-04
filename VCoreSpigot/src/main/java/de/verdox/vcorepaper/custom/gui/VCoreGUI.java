@@ -30,9 +30,6 @@ import java.util.stream.Collectors;
 
 public class VCoreGUI<T> {
 
-    //TODO: Pagination System hinzufügen?
-    //TODO: .pagniation(PaginationItemCreator) // -> .setNextPageItem .setPreviousPageItem (Eventuell bei Content Page integer hinzufügen?)
-
     private final BukkitPlugin plugin;
     private final Player player;
 
@@ -96,7 +93,6 @@ public class VCoreGUI<T> {
             this.inventory = Bukkit.createInventory(player,size,inventoryTitle);
         }
 
-        //TODO: Inventory Items setzen
         itemCache.forEach((slot, inventoryContent) -> {
             if(inventory.getSize() <= inventoryContent.slot)
                 return;

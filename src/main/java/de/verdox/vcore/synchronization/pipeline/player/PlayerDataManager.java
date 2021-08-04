@@ -18,6 +18,7 @@ import net.md_5.bungee.api.event.PlayerDisconnectEvent;
 import net.md_5.bungee.api.event.PostLoginEvent;
 import net.md_5.bungee.api.plugin.Plugin;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerKickEvent;
@@ -86,17 +87,17 @@ public class PlayerDataManager implements SystemLoadable {
             bukkitPlugin.getPlugin().getServer().getPluginManager().registerEvents(this,bukkitPlugin);
         }
 
-        @EventHandler
+        @EventHandler(priority = EventPriority.HIGHEST)
         public void onJoin(PlayerJoinEvent e){
             loginPipeline(e.getPlayer().getUniqueId());
         }
 
-        @EventHandler
+        @EventHandler(priority = EventPriority.HIGHEST)
         public void onLeave(PlayerQuitEvent e){
             logoutPipeline(e.getPlayer().getUniqueId());
         }
 
-        @EventHandler
+        @EventHandler(priority = EventPriority.HIGHEST)
         public void onKick(PlayerKickEvent e){
             logoutPipeline(e.getPlayer().getUniqueId());
         }
@@ -109,12 +110,12 @@ public class PlayerDataManager implements SystemLoadable {
             ProxyServer.getInstance().getPluginManager().registerListener((Plugin) pipelineManager.getPlugin(), this);
         }
 
-        @net.md_5.bungee.event.EventHandler
+        @net.md_5.bungee.event.EventHandler(priority = 5)
         public void onJoin(PostLoginEvent e){
             loginPipeline(e.getPlayer().getUniqueId());
         }
 
-        @net.md_5.bungee.event.EventHandler
+        @net.md_5.bungee.event.EventHandler(priority = 5)
         public void onPlayerLeave(PlayerDisconnectEvent e){
             logoutPipeline(e.getPlayer().getUniqueId());
         }
