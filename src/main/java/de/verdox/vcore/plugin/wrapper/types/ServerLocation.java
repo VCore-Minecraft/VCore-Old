@@ -2,26 +2,24 @@
  * Copyright (c) 2021. Lukas Jonsson
  */
 
-package de.verdox.vcore.synchronization.networkmanager.player.api.querytypes;
+package de.verdox.vcore.plugin.wrapper.types;
 
 /**
  * @version 1.0
  * @Author: Lukas Jonsson (Verdox)
  * @date 03.08.2021 19:57
  */
-public class GameLocation {
-    public String worldName;
-    public double x;
-    public double y;
-    public double z;
+public class ServerLocation extends GameLocation {
+    public String serverName;
 
     @Override
     public String toString() {
-        return "GameLocation{" +
+        return "ServerLocation{" +
                 "worldName='" + worldName + '\'' +
                 ", x=" + x +
                 ", y=" + y +
                 ", z=" + z +
+                ", serverName='" + serverName + '\'' +
                 '}';
     }
 }

@@ -7,8 +7,8 @@ package de.verdox.vcore.synchronization.networkmanager.player.api.bukkit;
 import de.verdox.vcore.plugin.VCorePlugin;
 import de.verdox.vcore.synchronization.networkmanager.player.VCorePlayer;
 import de.verdox.vcore.synchronization.networkmanager.player.api.VCorePlayerAPIImpl;
-import de.verdox.vcore.synchronization.networkmanager.player.api.querytypes.GameLocation;
-import de.verdox.vcore.synchronization.networkmanager.player.api.querytypes.ServerLocation;
+import de.verdox.vcore.plugin.wrapper.types.GameLocation;
+import de.verdox.vcore.plugin.wrapper.types.ServerLocation;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -18,10 +18,8 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 
 import javax.annotation.Nonnull;
-import java.util.Map;
-import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.Set;
+import java.util.concurrent.*;
 
 /**
  * @version 1.0
@@ -29,9 +27,6 @@ import java.util.concurrent.ConcurrentHashMap;
  * @date 03.08.2021 20:17
  */
 public class VCorePlayerAPIBukkitImpl extends VCorePlayerAPIImpl implements Listener {
-
-    private Map<UUID,ServerLocation> teleportCache = new ConcurrentHashMap<>();
-
     public VCorePlayerAPIBukkitImpl(VCorePlugin.Minecraft plugin) {
         super(plugin);
         plugin.getServer().getPluginManager().registerEvents(this,plugin);
@@ -51,72 +46,19 @@ public class VCorePlayerAPIBukkitImpl extends VCorePlayerAPIImpl implements List
 
     @EventHandler
     public void onJoin(PlayerJoinEvent e){
-        if(!teleportCache.containsKey(e.getPlayer().getUniqueId()))
-            return;
-        Location location = convertToLocation(teleportCache.get(e.getPlayer().getUniqueId()));
-        e.getPlayer().teleportAsync(location);
-    }
-
-    @Override
-    public Object[] respondToQuery(UUID queryUUID, String[] parameters, Object[] queryData) {
-        if(locationQueryCache.containsKey(queryUUID))
-            return null;
-        if(parameters.length != 2)
-            return null;
-
-        if(!parameters[0].equals(APIParameters.QUERY.getParameter()))
-            return null;
-
-        if(parameters[1].equals(APIParameters.PLAYER_LOCATION_QUERY.getParameter())){
-            UUID playerUUID = (UUID) queryData[0];
-            Player player = Bukkit.getPlayer(playerUUID);
-            if(player == null)
-                return null;
-            return new Object[]{plugin.getCoreInstance().getServerName(),player.getLocation().getWorld().getName(),player.getLocation().getX(),player.getLocation().getY(),player.getLocation().getZ()};
-        }
-        else if(parameters[1].equals(APIParameters.PLAYER_TELEPORT.getParameter())){
-            UUID playerUUID = (UUID) queryData[0];
-
-            ServerLocation serverLocation = new ServerLocation();
-            serverLocation.serverName = (String) queryData[1];
-            serverLocation.worldName = (String) queryData[2];
-            serverLocation.x = (double) queryData[3];
-            serverLocation.y = (double) queryData[4];
-            serverLocation.z = (double) queryData[5];
-
-            if(!serverLocation.serverName.equals(plugin.getCoreInstance().getServerName()))
-                return null;
-
-            Player player = Bukkit.getPlayer(playerUUID);
-            if(player == null) {
-                teleportCache.put(playerUUID,serverLocation);
-                return null;
+        CompletableFuture<Set<Runnable>> future = vCorePlayerTaskScheduler.getAllTasks(e.getPlayer().getUniqueId());
+        plugin.async(() -> {
+            try {
+                Set<Runnable> tasks = future.get(5, TimeUnit.SECONDS);
+                plugin.consoleMessage("&eFound Tasks for &e"+e.getPlayer().getName()+" &b"+tasks.size(),false);
+                if(tasks.size() == 0)
+                    return;
+                plugin.consoleMessage("&eExecuting pending tasks for player &e"+e.getPlayer().getName(),false);
+                tasks.forEach(plugin::sync);
+            } catch (InterruptedException | ExecutionException | TimeoutException interruptedException) {
+                interruptedException.printStackTrace();
             }
-            else {
-                plugin.sync(() -> player.teleportAsync(convertToLocation(serverLocation)));
-            }
-
-        }
-        return null;
-    }
-
-    @Override
-    public void onResponse(UUID queryUUID, String[] parameters, Object[] queryData, Object[] responseData) {
-        if(!parameters[0].equals(APIParameters.QUERY.getParameter()))
-            return;
-        if(parameters[1].equals(APIParameters.PLAYER_LOCATION_QUERY.getParameter())){
-            if(locationQueryCache.containsKey(queryUUID)){
-                if(responseData.length != 5)
-                    throw new IllegalStateException("ResponseData does not contain all data needed!");
-                ServerLocation serverLocation = new ServerLocation();
-                serverLocation.serverName = (String) responseData[0];
-                serverLocation.worldName = (String) responseData[1];
-                serverLocation.x = (double) responseData[2];
-                serverLocation.y = (double) responseData[3];
-                serverLocation.z = (double) responseData[4];
-                locationQueryCache.get(queryUUID).complete(serverLocation);
-            }
-        }
+        });
     }
 
     private ServerLocation convertToServerLocation(Location location){

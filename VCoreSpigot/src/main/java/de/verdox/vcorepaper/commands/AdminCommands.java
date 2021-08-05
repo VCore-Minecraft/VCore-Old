@@ -4,8 +4,6 @@ import de.verdox.vcore.plugin.command.VCommandCallback;
 import de.verdox.vcore.plugin.command.VCoreCommand;
 import de.verdox.vcore.plugin.command.callback.CommandCallback;
 import de.verdox.vcore.plugin.VCorePlugin;
-import de.verdox.vcore.synchronization.networkmanager.player.VCorePlayer;
-import de.verdox.vcore.synchronization.networkmanager.player.api.querytypes.ServerLocation;
 import de.verdox.vcore.util.VCoreUtil;
 import de.verdox.vcorepaper.VCorePaper;
 import de.verdox.vcorepaper.custom.blocks.VBlock;
@@ -15,7 +13,6 @@ import net.md_5.bungee.api.ChatMessageType;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.command.CommandSender;
-import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
@@ -23,8 +20,6 @@ import org.bukkit.util.RayTraceResult;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 public class AdminCommands extends VCoreCommand.VCoreBukkitCommand {

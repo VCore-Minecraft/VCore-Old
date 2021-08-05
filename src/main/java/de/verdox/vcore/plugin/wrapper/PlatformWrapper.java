@@ -4,8 +4,12 @@
 
 package de.verdox.vcore.plugin.wrapper;
 
-import de.verdox.vcore.plugin.VCorePlugin;
+import de.verdox.vcore.plugin.wrapper.spigot.SpigotPlatform;
+import de.verdox.vcore.plugin.wrapper.bungeecord.BungeePlatform;
+import de.verdox.vcore.synchronization.networkmanager.player.VCorePlayer;
 
+import javax.annotation.Nonnull;
+import java.net.InetSocketAddress;
 import java.util.UUID;
 
 /**
@@ -13,9 +17,10 @@ import java.util.UUID;
  * @Author: Lukas Jonsson (Verdox)
  * @date 01.08.2021 20:00
  */
-public interface PlatformWrapper <T extends VCorePlugin<?,?>> {
-
-    boolean isPlayerOnline(UUID playerUUID);
+public interface PlatformWrapper {
+    boolean isPlayerOnline(@Nonnull UUID playerUUID);
     boolean isPrimaryThread();
-
+    InetSocketAddress getPlayerAddress(@Nonnull UUID playerUUID);
+    SpigotPlatform getSpigotPlatform();
+    BungeePlatform getBungeePlatform();
 }

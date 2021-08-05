@@ -4,6 +4,7 @@
 
 package de.verdox.vcore.util.bukkit;
 
+import de.verdox.vcore.plugin.wrapper.types.enums.PlayerMessageType;
 import de.verdox.vcore.util.global.DirectionEnum;
 import de.verdox.vcore.util.bukkit.keys.ChunkKey;
 import net.md_5.bungee.api.ChatMessageType;
@@ -23,6 +24,10 @@ public class BukkitPlayerUtil {
 
     public void sendPlayerMessage(Player player, ChatMessageType chatMessageType, String message){
         player.spigot().sendMessage(chatMessageType,new TextComponent(ChatColor.translateAlternateColorCodes('&',message)));
+    }
+
+    public void sendPlayerMessage(Player player, PlayerMessageType playerMessageType, String message){
+        player.spigot().sendMessage(ChatMessageType.valueOf(playerMessageType.name()),new TextComponent(ChatColor.translateAlternateColorCodes('&',message)));
     }
 
     public String serializePotionEffect(PotionEffect potionEffect){

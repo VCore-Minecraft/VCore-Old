@@ -6,11 +6,10 @@ package de.verdox.vcore.synchronization.messaging;
 
 
 import de.verdox.vcore.plugin.SystemLoadable;
+import de.verdox.vcore.synchronization.messaging.instructions.InstructionService;
 import de.verdox.vcore.synchronization.messaging.messages.Message;
 import de.verdox.vcore.synchronization.messaging.messages.MessageBuilder;
-import de.verdox.vcore.synchronization.messaging.query.QueryService;
 
-import javax.annotation.Nonnull;
 import java.util.UUID;
 
 /**
@@ -19,6 +18,11 @@ import java.util.UUID;
  * @date 25.06.2021 14:54
  */
 public interface MessagingService<T extends MessageBuilder> extends SystemLoadable {
+
+    //TODO: Jeder Messaging Channel bekommt für diese eine Session einen direkten Nachrichtenkanal, an welchen er genauso Nachrichten empfangen kann
+    // Das Message Event soll auch da gecalled werden
+    // Beim InstructionService wo querys und updates versendet werden soll die Möglichkeit gegeben werden ServerNamen (String... serverNames) anzugeben, als
+    // direkte Ziele für die Instruktion
 
     T constructMessage();
     void publishMessage(Message message);
@@ -29,5 +33,5 @@ public interface MessagingService<T extends MessageBuilder> extends SystemLoadab
     }
     String getSenderName();
 
-    QueryService getQueryService();
+    InstructionService getInstructionService();
 }

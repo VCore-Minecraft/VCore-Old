@@ -2,7 +2,6 @@ package de.verdox.vcore.plugin;
 
 import de.verdox.vcore.performance.concurrent.CatchingRunnable;
 import de.verdox.vcore.performance.concurrent.TaskBatch;
-import de.verdox.vcore.plugin.files.DebugConfig;
 import de.verdox.vcore.plugin.wrapper.BukkitPlatformWrapperImpl;
 import de.verdox.vcore.plugin.wrapper.BungeePlatformWrapperImpl;
 import de.verdox.vcore.plugin.wrapper.PlatformWrapper;
@@ -21,8 +20,8 @@ import java.io.File;
 import java.util.List;
 
 public interface VCorePlugin <T, R extends VCoreSubsystem<?>> extends SystemLoadable {
-    static String vCorePaperName = "VCorePaper";
-    static String vCoreWaterfallName = "VCoreWaterfall";
+    String vCorePaperName = "VCorePaper";
+    String vCoreWaterfallName = "VCoreWaterfall";
 
     void onPluginEnable();
     void onPluginDisable();
@@ -35,7 +34,7 @@ public interface VCorePlugin <T, R extends VCoreSubsystem<?>> extends SystemLoad
 
     void consoleMessage(String message, boolean debug);
     void consoleMessage(String message, int tabSize, boolean debug);
-    PlatformWrapper<?> getPlatformWrapper();
+    PlatformWrapper getPlatformWrapper();
 
     boolean debug();
     void setDebugMode(boolean value);
@@ -73,7 +72,7 @@ public interface VCorePlugin <T, R extends VCoreSubsystem<?>> extends SystemLoad
         }
 
         @Override
-        public PlatformWrapper<?> getPlatformWrapper() {
+        public PlatformWrapper getPlatformWrapper() {
             return new BukkitPlatformWrapperImpl();
         }
 
@@ -169,7 +168,7 @@ public interface VCorePlugin <T, R extends VCoreSubsystem<?>> extends SystemLoad
         }
 
         @Override
-        public PlatformWrapper<?> getPlatformWrapper() {
+        public PlatformWrapper getPlatformWrapper() {
             return new BungeePlatformWrapperImpl();
         }
 

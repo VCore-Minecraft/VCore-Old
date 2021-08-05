@@ -83,10 +83,6 @@ public class VCorePlayerCache {
                         vCorePlugin.getServices().getPipeline().delete(VCorePlayer.class,playerUUID);
                     }
                 }
-                else if(serverType.equals(ServerType.GAME_SERVER.name())){
-                    vCorePlayer.currentGameServer = "";
-                    vCorePlayer.save(false);
-                }
 
                 ServerInstance serverInstance = networkManager.getPlugin().getServices().getPipeline().load(ServerInstance.class,serverUUID, Pipeline.LoadingStrategy.LOAD_PIPELINE,false);
                 if(serverInstance == null) {

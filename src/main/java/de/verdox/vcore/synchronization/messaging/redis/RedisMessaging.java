@@ -6,18 +6,15 @@ package de.verdox.vcore.synchronization.messaging.redis;
 
 import de.verdox.vcore.synchronization.messaging.MessagingService;
 import de.verdox.vcore.synchronization.messaging.event.MessageEvent;
+import de.verdox.vcore.synchronization.messaging.instructions.InstructionService;
 import de.verdox.vcore.synchronization.messaging.messages.Message;
 import de.verdox.vcore.plugin.VCorePlugin;
-import de.verdox.vcore.synchronization.messaging.query.QueryHandler;
-import de.verdox.vcore.synchronization.messaging.query.QueryService;
 import de.verdox.vcore.synchronization.redisson.RedisConnection;
 import org.redisson.api.RTopic;
 import org.redisson.api.listener.MessageListener;
 import org.redisson.codec.SerializationCodec;
 
 import javax.annotation.Nonnull;
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * @version 1.0
@@ -27,7 +24,7 @@ import java.util.Set;
 public class RedisMessaging extends RedisConnection implements MessagingService<RedisMessageBuilder> {
     private final RTopic rTopic;
     private final MessageListener<Message> messageListener;
-    private final QueryService queryService;
+    private final InstructionService instructionService;
     private boolean loaded;
 
     public RedisMessaging(@Nonnull VCorePlugin<?, ?> plugin, boolean clusterMode, @Nonnull String[] addressArray, String redisPassword) {
@@ -43,7 +40,7 @@ public class RedisMessaging extends RedisConnection implements MessagingService<
         };
         rTopic.addListener(Message.class, messageListener);
         loaded = true;
-        queryService = new QueryService(plugin);
+        instructionService = new InstructionService(plugin);
     }
 
     @Override
@@ -67,8 +64,8 @@ public class RedisMessaging extends RedisConnection implements MessagingService<
     }
 
     @Override
-    public QueryService getQueryService() {
-        return queryService;
+    public InstructionService getInstructionService() {
+        return instructionService;
     }
 
     @Override

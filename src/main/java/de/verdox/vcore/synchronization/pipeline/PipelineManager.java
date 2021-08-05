@@ -229,16 +229,12 @@ public class PipelineManager implements Pipeline {
 
     @Override
     public <T extends VCoreData> boolean delete(@Nonnull Class<? extends T> type, @Nonnull UUID uuid) {
-        if(getLocalCache() != null) {
-            if(getLocalCache().remove(type, uuid))
-                System.out.println("Deleted from Local Cache");
-        }
+        if(getLocalCache() != null)
+            getLocalCache().remove(type, uuid);
         if(getGlobalCache() != null)
-            if(getGlobalCache().remove(type,uuid))
-                System.out.println("Deleted from Global Cache");
+            getGlobalCache().remove(type,uuid);
         if(getGlobalStorage() != null)
-            if(getGlobalStorage().remove(type,uuid))
-                System.out.println("Deleted from Global Storage");
+            getGlobalStorage().remove(type,uuid);
         return true;
     }
 
@@ -253,12 +249,12 @@ public class PipelineManager implements Pipeline {
         if(getGlobalStorage() != null)
             getGlobalStorage().getSavedUUIDs(type).forEach(uuid -> {
                 if(!localCache.dataExist(type, uuid))
-                    pipelineDataSynchronizer.synchronize(DataSynchronizer.DataSourceType.GLOBAL_STORAGE, DataSynchronizer.DataSourceType.LOCAL, type, uuid);
+                    pipelineDataSynchronizer.doSynchronisation(DataSynchronizer.DataSourceType.GLOBAL_STORAGE, DataSynchronizer.DataSourceType.LOCAL, type, uuid, null);
             });
         if(getGlobalCache() != null)
             getGlobalCache().getSavedUUIDs(type).forEach(uuid -> {
                 if(!localCache.dataExist(type, uuid))
-                    pipelineDataSynchronizer.synchronize(DataSynchronizer.DataSourceType.GLOBAL_CACHE, DataSynchronizer.DataSourceType.LOCAL, type, uuid);
+                    pipelineDataSynchronizer.doSynchronisation(DataSynchronizer.DataSourceType.GLOBAL_CACHE, DataSynchronizer.DataSourceType.LOCAL, type, uuid, null);
             });
     }
 

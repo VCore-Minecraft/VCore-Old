@@ -4,9 +4,19 @@
 
 package de.verdox.vcore.plugin.wrapper;
 
-import de.verdox.vcore.plugin.VCorePlugin;
+import de.verdox.vcore.plugin.wrapper.spigot.SpigotPlatform;
+import de.verdox.vcore.plugin.wrapper.bungeecord.BungeePlatform;
+import de.verdox.vcore.synchronization.networkmanager.player.VCorePlayer;
+import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.ProxyServer;
+import net.md_5.bungee.api.chat.TextComponent;
+import net.md_5.bungee.api.connection.ProxiedPlayer;
+import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
 
+import javax.annotation.Nonnull;
+import java.net.InetSocketAddress;
+import java.net.SocketAddress;
 import java.util.UUID;
 
 /**
@@ -14,14 +24,54 @@ import java.util.UUID;
  * @Author: Lukas Jonsson (Verdox)
  * @date 01.08.2021 20:01
  */
-public class BungeePlatformWrapperImpl implements PlatformWrapper<VCorePlugin.BungeeCord>{
+public class BungeePlatformWrapperImpl implements PlatformWrapper{
+    private ProxiedPlayer getPlayer(@Nonnull VCorePlayer vCorePlayer){
+        return ProxyServer.getInstance().getPlayer(vCorePlayer.getObjectUUID());
+    }
+
     @Override
-    public boolean isPlayerOnline(UUID playerUUID) {
+    public boolean isPlayerOnline(@Nonnull UUID playerUUID) {
         return ProxyServer.getInstance().getPlayer(playerUUID) != null;
     }
 
     @Override
     public boolean isPrimaryThread() {
         return false;
+    }
+
+    @Override
+    public InetSocketAddress getPlayerAddress(@Nonnull UUID playerUUID) {
+        ProxiedPlayer proxiedPlayer = ProxyServer.getInstance().getPlayer(playerUUID);
+        if(proxiedPlayer == null)
+            return null;
+        return proxiedPlayer.getAddress();
+    }
+
+    @Override
+    public SpigotPlatform getSpigotPlatform() {
+        return null;
+    }
+
+    @Override
+    public BungeePlatform getBungeePlatform() {
+        return new BungeePlatform() {
+            @Override
+            public void sendToServer(@Nonnull UUID playerUUID, @Nonnull String serverName) {
+                ProxiedPlayer proxiedPlayer = ProxyServer.getInstance().getPlayer(playerUUID);
+                if(proxiedPlayer == null)
+                    return;
+                if(serverName.equals(proxiedPlayer.getServer().getInfo().getName()))
+                    return;
+                proxiedPlayer.connect(ProxyServer.getInstance().getServerInfo(serverName));
+            }
+
+            @Override
+            public void kickPlayer(@Nonnull UUID playerUUID, @Nonnull String kickMessage) {
+                ProxiedPlayer proxiedPlayer = ProxyServer.getInstance().getPlayer(playerUUID);
+                if(proxiedPlayer == null)
+                    return;
+                proxiedPlayer.disconnect(new TextComponent(ChatColor.translateAlternateColorCodes('&',kickMessage)));
+            }
+        };
     }
 }

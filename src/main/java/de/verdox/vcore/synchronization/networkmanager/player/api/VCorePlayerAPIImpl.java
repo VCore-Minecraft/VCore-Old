@@ -4,39 +4,64 @@
 
 package de.verdox.vcore.synchronization.networkmanager.player.api;
 
+import de.verdox.vcore.plugin.SystemLoadable;
 import de.verdox.vcore.plugin.VCorePlugin;
+import de.verdox.vcore.plugin.wrapper.types.enums.PlayerMessageType;
 import de.verdox.vcore.synchronization.messaging.MessagingService;
-import de.verdox.vcore.synchronization.messaging.query.QueryHandler;
-import de.verdox.vcore.synchronization.messaging.query.QueryService;
+import de.verdox.vcore.synchronization.messaging.instructions.InstructionService;
+import de.verdox.vcore.synchronization.networkmanager.enums.GlobalProperty;
+import de.verdox.vcore.plugin.wrapper.types.enums.PlayerGameMode;
 import de.verdox.vcore.synchronization.networkmanager.player.VCorePlayer;
-import de.verdox.vcore.synchronization.networkmanager.player.api.querytypes.ServerLocation;
+import de.verdox.vcore.synchronization.networkmanager.player.api.instructions.queries.QueryPlayerPosition;
+import de.verdox.vcore.synchronization.networkmanager.player.api.instructions.updates.*;
+import de.verdox.vcore.plugin.wrapper.types.ServerLocation;
+import de.verdox.vcore.synchronization.networkmanager.player.scheduling.VCorePlayerTaskScheduler;
 import de.verdox.vcore.synchronization.pipeline.parts.Pipeline;
 
 import javax.annotation.Nonnull;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.*;
-import java.util.stream.Collectors;
 
 /**
  * @version 1.0
  * @Author: Lukas Jonsson (Verdox)
  * @date 03.08.2021 20:12
  */
-public abstract class VCorePlayerAPIImpl implements VCorePlayerAPI, QueryHandler {
+public abstract class VCorePlayerAPIImpl implements VCorePlayerAPI, SystemLoadable {
 
     protected final VCorePlugin<?, ?> plugin;
     private final MessagingService<?> messagingService;
-    private final QueryService queryService;
-    protected final Map<UUID,CompletableFuture<ServerLocation>> locationQueryCache = new ConcurrentHashMap<>();
+    private final InstructionService instructionService;
+    protected VCorePlayerTaskScheduler vCorePlayerTaskScheduler;
 
     public VCorePlayerAPIImpl(VCorePlugin<?,?> plugin){
         this.plugin = plugin;
         this.messagingService = plugin.getServices().getMessagingService();
-        this.queryService = messagingService.getQueryService();
-        this.queryService.registerHandler(this);
+        this.instructionService = messagingService.getInstructionService();
+        this.vCorePlayerTaskScheduler = new VCorePlayerTaskScheduler(plugin);
+        registerStandardInstructions();
+    }
+
+    private void registerStandardInstructions(){
+        plugin.getServices().getMessagingService().getInstructionService().registerInstructionType(0, QueryPlayerPosition.class);
+        plugin.getServices().getMessagingService().getInstructionService().registerInstructionType(1, UpdatePlayerPosition.class);
+        plugin.getServices().getMessagingService().getInstructionService().registerInstructionType(2, UpdatePlayerKick.class);
+        plugin.getServices().getMessagingService().getInstructionService().registerInstructionType(3, UpdatePlayerServer.class);
+        plugin.getServices().getMessagingService().getInstructionService().registerInstructionType(4, UpdatePlayerSendMessage.class);
+        plugin.getServices().getMessagingService().getInstructionService().registerInstructionType(5, UpdatePlayerHealth.class);
+        plugin.getServices().getMessagingService().getInstructionService().registerInstructionType(6, UpdatePlayerFood.class);
+        //plugin.getServices().getMessagingService().getInstructionService().registerInstructionType(7, UpdatePlayerGameMode.class);
+        //plugin.getServices().getMessagingService().getInstructionService().registerInstructionType(8, UpdateBroadcastMessage.class);
+    }
+
+    @Override
+    public boolean isLoaded() {
+        return true;
+    }
+
+    @Override
+    public void shutdown() {
+        this.vCorePlayerTaskScheduler.shutdown();
     }
 
     // PlayerAPI Part
@@ -49,19 +74,8 @@ public abstract class VCorePlayerAPIImpl implements VCorePlayerAPI, QueryHandler
     }
 
     @Override
-    public void teleport(@Nonnull VCorePlayer vCorePlayer, @Nonnull VCorePlayer target) {
-        plugin.async(() -> {
-            try {
-                ServerLocation serverLocation = getServerLocation(target).get(5,TimeUnit.SECONDS);
-                if(serverLocation == null)
-                    return;
-                teleport(vCorePlayer,serverLocation);
-            } catch (InterruptedException | ExecutionException e) {
-                e.printStackTrace();
-            } catch (TimeoutException e) {
-                sendMessage(vCorePlayer,"&cTarget location could not be found&7!");
-            }
-        });
+    public VCorePlayerTaskScheduler getPlayerScheduler() {
+        return this.vCorePlayerTaskScheduler;
     }
 
     @Override
@@ -84,66 +98,86 @@ public abstract class VCorePlayerAPIImpl implements VCorePlayerAPI, QueryHandler
     }
 
     @Override
-    public CompletableFuture<List<VCorePlayer>> getAllOnlinePlayers() {
-        CompletableFuture<List<VCorePlayer>> completableFuture = new CompletableFuture<>();
-        plugin.async(() -> {
-            completableFuture.complete(new ArrayList<>(plugin.getServices().getPipeline().loadAllData(VCorePlayer.class, Pipeline.LoadingStrategy.LOAD_PIPELINE)));
-        });
-        return completableFuture;
+    public CompletableFuture<Set<VCorePlayer>> getAllOnlinePlayers() {
+        return plugin.getServices().getPipeline().loadAllDataAsync(VCorePlayer.class, Pipeline.LoadingStrategy.LOAD_PIPELINE);
     }
 
     @Override
     public CompletableFuture<ServerLocation> getServerLocation(@Nonnull VCorePlayer vCorePlayer) {
-        CompletableFuture<ServerLocation> completableFuture = new CompletableFuture<>();
-        plugin.async(() -> {
-            UUID queryUUID = queryService.sendQuery(messagingService.constructMessage()
-                    .withParameters(APIParameters.QUERY.getParameter(), APIParameters.PLAYER_LOCATION_QUERY.getParameter())
-                    .withData(vCorePlayer.getObjectUUID()).constructMessage());
-            locationQueryCache.put(queryUUID,completableFuture);
-        });
-        return completableFuture;
+        QueryPlayerPosition queryPlayerPosition = new QueryPlayerPosition(UUID.randomUUID());
+        queryPlayerPosition.withData(vCorePlayer.getObjectUUID());
+        plugin.getServices().getMessagingService().getInstructionService().sendInstruction(queryPlayerPosition);
+        return queryPlayerPosition.getFuture();
+    }
+
+    @Override
+    public CompletableFuture<String> getPlayerIP(@Nonnull VCorePlayer vCorePlayer) {
+        return null;
     }
 
     @Override
     public void teleport(@Nonnull VCorePlayer vCorePlayer, @Nonnull ServerLocation serverLocation) {
-        queryService.sendQuery(messagingService.constructMessage()
-                .withParameters(APIParameters.QUERY.getParameter(),APIParameters.PLAYER_TELEPORT.getParameter())
+        UpdatePlayerPosition updatePlayerPosition = new UpdatePlayerPosition(UUID.randomUUID());
+        updatePlayerPosition
                 .withData(vCorePlayer.getObjectUUID(),
                         serverLocation.serverName,
                         serverLocation.worldName,
                         serverLocation.x,
                         serverLocation.y,
-                        serverLocation.z
-                ).constructMessage());
+                        serverLocation.z);
+        plugin.getServices().getMessagingService().getInstructionService().sendInstruction(updatePlayerPosition);
+    }
+
+    @Override
+    public void teleport(@Nonnull VCorePlayer vCorePlayer, @Nonnull VCorePlayer target) {
+        plugin.async(() -> {
+            try {
+                ServerLocation serverLocation = getServerLocation(target).get(5,TimeUnit.SECONDS);
+                if(serverLocation == null)
+                    return;
+                teleport(vCorePlayer,serverLocation);
+            } catch (InterruptedException | ExecutionException e) {
+                e.printStackTrace();
+            } catch (TimeoutException e) {
+                sendMessage(vCorePlayer,PlayerMessageType.CHAT,"&cTarget location could not be found&7!");
+            }
+        });
     }
 
     @Override
     public void kickPlayer(@Nonnull VCorePlayer vCorePlayer, @Nonnull String message) {
-        queryService.sendQuery(messagingService.constructMessage()
-                .withParameters(APIParameters.QUERY.getParameter(),APIParameters.PLAYER_KICK.getParameter())
-                .withData(vCorePlayer.getObjectUUID(),
-                        message
-                ).constructMessage());
-    }
-
-    @Override
-    public void sendMessage(@Nonnull VCorePlayer vCorePlayer, @Nonnull String message) {
-        queryService.sendQuery(messagingService.constructMessage()
-                .withParameters(APIParameters.QUERY.getParameter(),APIParameters.PLAYER_SEND_MESSAGE.getParameter())
-                .withData(vCorePlayer.getObjectUUID(),
-                        message
-                ).constructMessage());
+        UpdatePlayerKick updatePlayerKick = new UpdatePlayerKick(UUID.randomUUID());
+        updatePlayerKick.withData(vCorePlayer.getObjectUUID(),message);
+        plugin.getServices().getMessagingService().getInstructionService().sendInstruction(updatePlayerKick);
     }
 
     @Override
     public void changeServer(@Nonnull VCorePlayer vCorePlayer, @Nonnull String serverName) {
-        queryService.sendQuery(messagingService.constructMessage()
-                .withParameters(APIParameters.QUERY.getParameter(),APIParameters.PLAYER_SERVER_CHANGE.getParameter())
-                .withData(vCorePlayer.getObjectUUID(),
-                        serverName
-                ).constructMessage());
+        UpdatePlayerServer updatePlayerServer = new UpdatePlayerServer(UUID.randomUUID());
+        updatePlayerServer.withData(vCorePlayer.getObjectUUID(),serverName);
+        plugin.getServices().getMessagingService().getInstructionService().sendInstruction(updatePlayerServer);
     }
 
     @Override
-    public void onQuerySend(UUID queryUUID, String[] parameters, Object[] queryData) { }
+    public void sendMessage(@Nonnull VCorePlayer vCorePlayer, @Nonnull PlayerMessageType playerMessageType, @Nonnull String message) {
+        UpdatePlayerSendMessage updatePlayerSendMessage = new UpdatePlayerSendMessage(UUID.randomUUID());
+        updatePlayerSendMessage.withData(vCorePlayer.getObjectUUID(),playerMessageType.name(),message);
+        plugin.getServices().getMessagingService().getInstructionService().sendInstruction(updatePlayerSendMessage);
+    }
+
+    @Override
+    public void healPlayer(@Nonnull VCorePlayer vCorePlayer) {
+    }
+
+    @Override
+    public void feedPlayer(@Nonnull VCorePlayer vCorePlayer) {
+    }
+
+    @Override
+    public void setGameMode(@Nonnull VCorePlayer vCorePlayer, @Nonnull PlayerGameMode gameMode) {
+    }
+
+    @Override
+    public void broadcastMessage(@Nonnull String message, @Nonnull PlayerMessageType playerMessageType, @Nonnull GlobalProperty globalProperty) {
+    }
 }

@@ -30,7 +30,7 @@ import java.util.function.Supplier;
  */
 @DataStorageIdentifier(identifier = "BukkitPlayerHandlerPlayerData")
 @RequiredSubsystemInfo(parentSubSystem = BukkitPlayerHandler.class)
-@VCoreDataContext(preloadStrategy = PreloadStrategy.LOAD_BEFORE, dataContext = DataContext.GLOBAL, cleanOnNoUse = false, time = 30)
+@VCoreDataContext(preloadStrategy = PreloadStrategy.LOAD_ON_NEED, dataContext = DataContext.GLOBAL, cleanOnNoUse = false, time = 30)
 public class PlayerHandlerData extends PlayerData {
 
     @VCorePersistentData

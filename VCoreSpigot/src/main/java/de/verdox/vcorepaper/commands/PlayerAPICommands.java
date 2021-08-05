@@ -7,8 +7,9 @@ package de.verdox.vcorepaper.commands;
 import de.verdox.vcore.plugin.command.VCommandCallback;
 import de.verdox.vcore.plugin.command.VCoreCommand;
 import de.verdox.vcore.plugin.command.callback.CommandCallback;
+import de.verdox.vcore.plugin.wrapper.types.enums.PlayerMessageType;
 import de.verdox.vcore.synchronization.networkmanager.player.VCorePlayer;
-import de.verdox.vcore.synchronization.networkmanager.player.api.querytypes.ServerLocation;
+import de.verdox.vcore.plugin.wrapper.types.ServerLocation;
 import de.verdox.vcore.synchronization.networkmanager.server.ServerInstance;
 import de.verdox.vcore.synchronization.pipeline.parts.Pipeline;
 import de.verdox.vcorepaper.VCorePaper;
@@ -18,7 +19,6 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -84,21 +84,50 @@ public class PlayerAPICommands extends VCoreCommand.VCoreBukkitCommand {
                     }
                     vCorePlugin.getCoreInstance().getPlayerAPI().teleport(vCorePlayer,target);
                 });
-        addCommandCallback("teleportPlayer")
-                .withPermission("vcore.teleportPlayer")
-                .askFor("teleportWho", VCommandCallback.CommandAskType.VCORE_PLAYER,"&cSpieler wurde nicht gefunden&7!")
-                .askFor("teleportTo", VCommandCallback.CommandAskType.VCORE_PLAYER,"&cSpieler wurde nicht gefunden&7!")
+        addCommandCallback("kickPlayer")
+                .withPermission("vcore.kickPlayer")
+                .askFor("kickWho", VCommandCallback.CommandAskType.VCORE_PLAYER,"&cSpieler wurde nicht gefunden&7!")
+                .askFor("kickMsg", VCommandCallback.CommandAskType.REST_OF_INPUT,"")
                 .setExecutor(VCommandCallback.CommandExecutorType.PLAYER)
                 .commandCallback((commandSender, commandParameters) -> {
                     VCorePlayer victim = commandParameters.getObject(0,VCorePlayer.class);
-                    VCorePlayer target = commandParameters.getObject(1,VCorePlayer.class);
-                    if(victim.getObjectUUID().equals(target.getObjectUUID())){
-                        commandSender.sendMessage(ChatColor.translateAlternateColorCodes('&',"&cThe players are identical&7!"));
-                        return;
-                    }
+                    String kickMessage = commandParameters.getObject(1,String.class);
 
-                    vCorePlugin.getCoreInstance().getPlayerAPI().teleport(victim,target);
+                    vCorePlugin.getCoreInstance().getPlayerAPI().kickPlayer(victim,kickMessage);
                 });
+
+        addCommandCallback("setServer")
+                .withPermission("vcore.setServer")
+                .askFor("PlayerTarget", VCommandCallback.CommandAskType.VCORE_PLAYER,"&cSpieler wurde nicht gefunden&7!")
+                .askFor("newServer", VCommandCallback.CommandAskType.VCORE_GAMESERVER,"")
+                .setExecutor(VCommandCallback.CommandExecutorType.PLAYER)
+                .commandCallback((commandSender, commandParameters) -> {
+                    VCorePlayer victim = commandParameters.getObject(0,VCorePlayer.class);
+                    ServerInstance serverInstance = commandParameters.getObject(1,ServerInstance.class);
+                    vCorePlugin.getCoreInstance().getPlayerAPI().changeServer(victim,serverInstance.serverName);
+                });
+
+        addCommandCallback("sendMessage")
+                .withPermission("vcore.sendMessage")
+                .askFor("PlayerTarget", VCommandCallback.CommandAskType.VCORE_PLAYER,"&cSpieler wurde nicht gefunden&7!")
+                .askFor("message", VCommandCallback.CommandAskType.REST_OF_INPUT,"")
+                .setExecutor(VCommandCallback.CommandExecutorType.PLAYER)
+                .commandCallback((commandSender, commandParameters) -> {
+                    VCorePlayer victim = commandParameters.getObject(0,VCorePlayer.class);
+                    String message = commandParameters.getObject(1,String.class);
+                    vCorePlugin.getCoreInstance().getPlayerAPI().sendMessage(victim, PlayerMessageType.CHAT,message);
+                });
+
+        addCommandCallback("stressTest")
+                .withPermission("vcore.stressTest")
+                .askFor("PlayerTarget", VCommandCallback.CommandAskType.VCORE_PLAYER,"&cSpieler wurde nicht gefunden&7!")
+                .setExecutor(VCommandCallback.CommandExecutorType.PLAYER)
+                .commandCallback((commandSender, commandParameters) -> {
+                    VCorePlayer victim = commandParameters.getObject(0,VCorePlayer.class);
+                    for(int i = 0; i < 100; i++)
+                        vCorePlugin.getCoreInstance().getPlayerAPI().sendMessage(victim, PlayerMessageType.CHAT,i+"");
+                });
+
     }
 
     @Override

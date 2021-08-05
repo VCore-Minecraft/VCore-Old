@@ -5,6 +5,7 @@
 package de.verdox.vcore.synchronization.networkmanager.server;
 
 import de.verdox.vcore.plugin.VCorePlugin;
+import de.verdox.vcore.plugin.wrapper.types.GameLocation;
 import de.verdox.vcore.synchronization.pipeline.annotations.*;
 import de.verdox.vcore.synchronization.pipeline.datatypes.NetworkData;
 

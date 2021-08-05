@@ -35,6 +35,7 @@ public class NetworkManager <T extends VCorePlugin<?,?>> {
     private final VCorePlayerCache vCorePlayerCache;
 
     public NetworkManager(@Nonnull ServerType serverType,  @Nonnull T plugin){
+        plugin.consoleMessage("&eStarting Network Manager&7!",false);
         this.serverType = serverType;
         this.plugin = plugin;
         this.serverPingManager = new ServerPingManager<>(this);
@@ -44,8 +45,10 @@ public class NetworkManager <T extends VCorePlugin<?,?>> {
     }
 
     private void preloadData(){
+        plugin.consoleMessage("&ePreloading Network Data&7...",false);
         getPlugin().getServices().getPipeline().loadAllData(VCorePlayer.class, Pipeline.LoadingStrategy.LOAD_PIPELINE);
         getPlugin().getServices().getPipeline().loadAllData(ServerInstance.class, Pipeline.LoadingStrategy.LOAD_PIPELINE);
+        plugin.consoleMessage("&aPreloaded Network Data",false);
     }
 
     public VCorePlayer getVCorePlayer(UUID playerUUID){

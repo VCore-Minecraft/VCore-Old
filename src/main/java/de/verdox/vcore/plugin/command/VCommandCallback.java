@@ -23,6 +23,8 @@ import javax.annotation.Nonnull;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
@@ -38,6 +40,7 @@ public class VCommandCallback {
     private CommandExecutorType commandExecutorType;
     private List<CommandCallbackInfo> callbackInfos = new ArrayList<>();
     private BiConsumer<CommandSender, CommandParameters> providedArguments;
+    private boolean restAsString = false;
 
     public VCommandCallback(@Nonnull VCorePlugin<?,?> plugin, @Nonnull String... commandPath){
         this.plugin = plugin;
@@ -57,6 +60,8 @@ public class VCommandCallback {
     public VCommandCallback askFor(@Nonnull String name, @Nonnull CommandAskType commandAskType, @Nonnull String errorMessage, @Nonnull String... suggested){
         int index = callbackInfos.size();
         callbackInfos.add(new CommandAskParameter(plugin, index, name, commandAskType, errorMessage, Arrays.asList(suggested)));
+        if(commandAskType.equals(CommandAskType.REST_OF_INPUT))
+            restAsString = true;
         return this;
     }
 
@@ -113,7 +118,9 @@ public class VCommandCallback {
     }
 
     CallbackResponse onCommand(CommandSender sender, Command command, String label, String[] args){
-        if(args.length != callbackInfos.size())
+        if(args.length != callbackInfos.size() && !restAsString)
+            return new CallbackResponse(CallbackResponse.ResponseType.FAILURE,false);
+        if(restAsString && args.length == 0)
             return new CallbackResponse(CallbackResponse.ResponseType.FAILURE,false);
         if(this.providedArguments == null)
             return new CallbackResponse(CallbackResponse.ResponseType.FAILURE,false);
@@ -139,14 +146,10 @@ public class VCommandCallback {
                         providedArguments.add(player);
                     }
                     else if(commandAskParameter.getCommandAskType().equals(CommandAskType.VCORE_PLAYER)){
-                        try {
-                            VCorePlayer vCorePlayer = plugin.getCoreInstance().getPlayerAPI().getVCorePlayer(argument).get();
-                            if(vCorePlayer == null)
-                                return new CallbackResponse(CallbackResponse.ResponseType.FAILURE,true);
-                            providedArguments.add(vCorePlayer);
-                        } catch (InterruptedException | ExecutionException e) {
-                            e.printStackTrace();
-                        }
+                        VCorePlayer vCorePlayer = plugin.getServices().getPipeline().getLocalCache().getAllData(VCorePlayer.class).stream().filter(vCorePlayer1 -> vCorePlayer1.getDisplayName().equalsIgnoreCase(argument)).findAny().orElse(null);
+                        if(vCorePlayer == null)
+                            return new CallbackResponse(CallbackResponse.ResponseType.FAILURE,true);
+                        providedArguments.add(vCorePlayer);
                     }
                 }
                 else if(commandAskParameter.getCommandAskType().name().contains("NUMBER")){
@@ -204,6 +207,14 @@ public class VCommandCallback {
                 }
                 else if(commandAskParameter.getCommandAskType().equals(CommandAskType.STRING)){
                     providedArguments.add(argument);
+                }
+                else if(commandAskParameter.getCommandAskType().equals(CommandAskType.REST_OF_INPUT)){
+                    StringBuilder stringBuilder = new StringBuilder();
+                    for(int j = i; j < args.length; j++)
+                        stringBuilder.append(args[j]).append(" ");
+                    providedArguments.add(stringBuilder.toString());
+                    // Stop the Command Parsing when the rest of the input is parsed as one string
+                    break;
                 }
             }
         }
@@ -337,12 +348,8 @@ public class VCommandCallback {
             if(commandAskType.equals(CommandAskType.BOOLEAN))
                 return List.of("true","false");
             if(commandAskType.equals(CommandAskType.VCORE_PLAYER)) {
-                try {
-                    List<VCorePlayer> players = plugin.getCoreInstance().getPlayerAPI().getAllOnlinePlayers().get();
-                    return players.stream().filter(Objects::nonNull).map(VCorePlayer::getDisplayName).collect(Collectors.toList());
-                } catch (InterruptedException | ExecutionException e) {
-                    e.printStackTrace();
-                }
+                Set<VCorePlayer> players = plugin.getServices().getPipeline().getLocalCache().getAllData(VCorePlayer.class);
+                return players.stream().filter(Objects::nonNull).map(VCorePlayer::getDisplayName).collect(Collectors.toList());
             }
             if(commandAskType.name().contains("NUMBER")){
                 if(commandAskType.equals(CommandAskType.NEGATIVE_NUMBER))
@@ -356,9 +363,9 @@ public class VCommandCallback {
                 else if(commandAskType.equals(CommandAskType.POSITIVE_NUMBER))
                     return List.of(VCoreUtil.getRandomUtil().randomInt(1, 100)+"");
             }
-            if(commandAskType.equals(CommandAskType.VCORE_GAMESERVER)){
-                return plugin.getServices().getPipeline().loadAllData(ServerInstance.class, Pipeline.LoadingStrategy.LOAD_PIPELINE).stream().filter(serverInstance -> serverInstance.getServerType().equals(ServerType.GAME_SERVER)).map(serverInstance -> serverInstance.serverName).collect(Collectors.toList());
-            }
+            //TODO: Lokale Listen separat anfertigen für AutoCompletion
+            if(commandAskType.equals(CommandAskType.VCORE_GAMESERVER))
+                return plugin.getServices().getPipeline().getLocalCache().getAllData(ServerInstance.class).stream().filter(serverInstance -> serverInstance.getServerType().equals(ServerType.GAME_SERVER)).map(serverInstance -> serverInstance.serverName).collect(Collectors.toList());
             return suggested;
         }
 
@@ -379,6 +386,7 @@ public class VCommandCallback {
 
     public enum CommandAskType {
         STRING,
+        REST_OF_INPUT,
         NUMBER,
         POSITIVE_NUMBER,
         POSITIVE_NUMBER_AND_ZERO,

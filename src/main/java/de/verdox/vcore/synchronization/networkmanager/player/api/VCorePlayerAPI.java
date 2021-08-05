@@ -4,13 +4,14 @@
 
 package de.verdox.vcore.synchronization.networkmanager.player.api;
 
+import de.verdox.vcore.plugin.wrapper.types.enums.PlayerMessageType;
 import de.verdox.vcore.synchronization.networkmanager.enums.GlobalProperty;
-import de.verdox.vcore.synchronization.networkmanager.enums.PlayerGameMode;
+import de.verdox.vcore.plugin.wrapper.types.enums.PlayerGameMode;
 import de.verdox.vcore.synchronization.networkmanager.player.VCorePlayer;
-import de.verdox.vcore.synchronization.networkmanager.player.api.querytypes.ServerLocation;
+import de.verdox.vcore.plugin.wrapper.types.ServerLocation;
+import de.verdox.vcore.synchronization.networkmanager.player.scheduling.VCorePlayerTaskScheduler;
 
 import javax.annotation.Nonnull;
-import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -21,11 +22,13 @@ import java.util.concurrent.CompletableFuture;
  * @date 03.08.2021 19:55
  */
 public interface VCorePlayerAPI {
+    VCorePlayerTaskScheduler getPlayerScheduler();
+
     CompletableFuture<Boolean> isOnline(@Nonnull UUID uuid);
     CompletableFuture<VCorePlayer> getVCorePlayer(@Nonnull UUID uuid);
     CompletableFuture<VCorePlayer> getVCorePlayer(@Nonnull String userName);
 
-    CompletableFuture<List<VCorePlayer>> getAllOnlinePlayers();
+    CompletableFuture<Set<VCorePlayer>> getAllOnlinePlayers();
 
     CompletableFuture<ServerLocation> getServerLocation(@Nonnull VCorePlayer vCorePlayer);
     CompletableFuture<String> getPlayerIP(@Nonnull VCorePlayer vCorePlayer);
@@ -39,26 +42,29 @@ public interface VCorePlayerAPI {
     void kickPlayer(@Nonnull VCorePlayer vCorePlayer, @Nonnull String message);
     void changeServer(@Nonnull VCorePlayer vCorePlayer, @Nonnull String serverName);
 
-    void sendMessage(@Nonnull VCorePlayer vCorePlayer, @Nonnull String message);
-    void sendTitle(@Nonnull VCorePlayer vCorePlayer, @Nonnull String message);
+    void sendMessage(@Nonnull VCorePlayer vCorePlayer, @Nonnull PlayerMessageType playerMessageType, @Nonnull String message);
 
     void healPlayer(@Nonnull VCorePlayer vCorePlayer);
     void feedPlayer(@Nonnull VCorePlayer vCorePlayer);
     void setGameMode(@Nonnull VCorePlayer vCorePlayer, @Nonnull PlayerGameMode gameMode);
 
-    void broadcastMessage(@Nonnull String message, @Nonnull GlobalProperty globalProperty);
+    void broadcastMessage(@Nonnull String message, @Nonnull PlayerMessageType playerMessageType, @Nonnull GlobalProperty globalProperty);
     //TODO: Send message an Liste von Spielern
     //TODO: Globale Message, Serverglobale MEssage ( Auf dem GameServer oder Proxy Globale Message)
 
 
 
     enum APIParameters{
-        QUERY("vCorePlayerQuery"),
-        PLAYER_LOCATION_QUERY("playerGetServerLocation"),
-        PLAYER_TELEPORT("playerTeleport"),
-        PLAYER_KICK("playerKick"),
-        PLAYER_SERVER_CHANGE("playerChangeServer"),
-        PLAYER_SEND_MESSAGE("playerSendMessage"),
+        QUERY_PLAYER_POSITION("QueryPlayerPosition"),
+
+        UPDATE_PLAYER_POSITION("UpdatePlayerPosition"),
+        UPDATE_PLAYER_KICK("UpdatePlayerKick"),
+        UPDATE_PLAYER_SERVER("UpdatePlayerServer"),
+        UPDATE_PLAYER_SENDMESSAGE("UpdatePlayerSendMessage"),
+        UPDATE_PLAYER_HEALTH("UpdatePlayerHeal"),
+        UPDATE_PLAYER_FOOD("UpdatePlayerFood"),
+        UPDATE_PLAYER_GAMEMODE("UpdatePlayerGameMode"),
+        UPDATE_BROADCASTMESSAGE("UpdateBroadcastMessage"),
         ;
         private final String parameter;
 
