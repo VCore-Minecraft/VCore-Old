@@ -23,10 +23,6 @@ public class PipelineQueue {
     private final Map<UUID,PipelineTask<?>> tasks = new ConcurrentHashMap<>();
     private boolean running = true;
 
-    public void test(){
-
-    }
-
     public abstract static class PipelineTask<T>{
         protected final VCorePlugin<?, ?> plugin;
         protected final PipelineQueue pipelineQueue;

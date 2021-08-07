@@ -1,5 +1,6 @@
 package de.verdox.vcorepaper.custom.blocks.files;
 
+import de.verdox.vcore.util.VCoreUtil;
 import de.verdox.vcore.util.bukkit.keys.LocationKey;
 import de.verdox.vcore.util.bukkit.keys.SplitChunkKey;
 import de.verdox.vcorepaper.custom.blocks.BlockPersistentData;
@@ -60,8 +61,7 @@ public class VBlockSaveFile {
     public BlockPersistentData getBlockPersistentData(){
         if(blockPersistentData != null)
             return blockPersistentData;
-        BlockPersistentData blockPersistentData = new BlockPersistentData(blockLocation,this);
-        return blockPersistentData;
+        return new BlockPersistentData(blockLocation, this);
     }
 
     File getFolder(){
@@ -105,7 +105,7 @@ public class VBlockSaveFile {
     }
 
     public SplitChunkKey getSplitChunkKey(){
-        return new SplitChunkKey(blockLocation.getChunk(),blockLocation.getBlockY());
+        return new SplitChunkKey(VCoreUtil.BukkitUtil.getBukkitWorldUtil().toWorldChunk(blockLocation.getChunk()), blockLocation.getBlockY());
     }
 
     public LocationKey getLocationKey(){

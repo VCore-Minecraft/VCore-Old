@@ -35,9 +35,4 @@ public class PlayerHandlerAdminCommands extends VCoreCommand.VCoreBukkitCommand 
                     commandSender.sendMessage(ChatColor.translateAlternateColorCodes('&',"&eDie Spielzeit des Spielers &e"+player.getName()+" &ewurde zurückgesetzt"));
                 });
     }
-
-    @Override
-    protected CommandCallback<CommandSender> commandCallback() {
-        return null;
-    }
 }

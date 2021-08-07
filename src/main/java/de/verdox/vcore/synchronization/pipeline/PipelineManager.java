@@ -117,12 +117,13 @@ public class PipelineManager implements Pipeline {
         if(!plugin.getPlatformWrapper().isPrimaryThread()){
             PipelineTaskScheduler.PipelineTask<T> existingTask = pipelineTaskScheduler.getExistingPipelineTask(type, uuid);
             if(existingTask != null){
+                System.out.println("Waiting for Existing Task to finish");
                 try {
                     return existingTask.getCompletableFuture().get(); } catch (InterruptedException | ExecutionException e) { e.printStackTrace();
                 }
             }
         }
-        pipelineTaskScheduler.removePipelineTask(uuid);
+        pipelineTaskScheduler.removePipelineTask(type,uuid);
         PipelineTaskScheduler.PipelineTask<T> pipelineTask = pipelineTaskScheduler.schedulePipelineTask(PipelineTaskScheduler.PipelineAction.LOAD, loadingStrategy, type, uuid);
 
         if(!NetworkData.class.isAssignableFrom(type)){
@@ -144,8 +145,7 @@ public class PipelineManager implements Pipeline {
                 }
             }
             if(!localCache.dataExist(type, uuid)){
-                pipelineTask.getCompletableFuture().complete(null);
-                return null;
+                throw new IllegalStateException("Does not exist in Local Cache");
             }
             T data = localCache.getData(type, uuid);
             if(callback != null)

@@ -26,7 +26,10 @@ import org.checkerframework.checker.index.qual.NonNegative;
 import javax.annotation.Nonnull;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 /**
  * @version 1.0
@@ -50,7 +53,12 @@ public class WorldHandler_V1_16_R3 implements NMSWorldHandler {
         VCorePaper.getInstance().createTaskBatch().doAsync(() -> {
             VCoreUtil.BukkitUtil.getBukkitPlayerUtil().getChunksInServerViewDistance(player).forEach(chunkKey -> {
                 org.bukkit.World world = player.getWorld();
-                refreshChunk(player,chunkKey.getChunkIn(world));
+                CompletableFuture<Chunk> futureChunk = chunkKey.getChunkIn(world);
+                if(futureChunk != null)
+                    futureChunk.thenApply(chunk -> {
+                        refreshChunk(player,chunk);
+                        return true;
+                    });
             });
         }).executeBatch(callback);
     }

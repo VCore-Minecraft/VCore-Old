@@ -22,7 +22,7 @@ public interface PipelineTaskScheduler extends SystemLoadable {
 
     <T extends VCoreData> PipelineTask<T> schedulePipelineTask(@Nonnull PipelineAction pipelineAction, @Nonnull Pipeline.LoadingStrategy loadingStrategy, @Nonnull Class<? extends T> type, @Nonnull UUID uuid);
     <T extends VCoreData> PipelineTask<T> getExistingPipelineTask(@Nonnull Class<? extends T> type, @Nonnull UUID uuid);
-    void removePipelineTask(@Nonnull UUID uuid);
+    <T extends VCoreData> void removePipelineTask(@Nonnull Class<? extends T> type, @Nonnull UUID uuid);
 
     class PipelineTask<T extends VCoreData>{
         private final PipelineAction pipelineAction;
@@ -38,9 +38,9 @@ public interface PipelineTaskScheduler extends SystemLoadable {
             this.uuid = uuid;
             this.completableFuture = new CompletableFuture<>();
             this.completableFuture.whenComplete((t, throwable) -> {
-                //plugin.consoleMessage("&6Task &a"+type.getSimpleName()+" &6done&7: "+getObjectUUID()+" &8[&e"+(System.currentTimeMillis() - start)+"ms&8]", true);
+                plugin.consoleMessage("&6Task &a"+type.getSimpleName()+" &6done&7: "+getObjectUUID()+" &8[&e"+t+"&8] &8[&e"+(System.currentTimeMillis() - start)+"ms&8]", true);
                 onComplete.run();
-                pipelineTaskScheduler.removePipelineTask(uuid);
+                pipelineTaskScheduler.removePipelineTask(type,uuid);
             });
         }
 

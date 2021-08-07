@@ -14,6 +14,7 @@ import de.verdox.vcorepaper.commands.NMSCommand;
 import de.verdox.vcorepaper.commands.PlayerAPICommands;
 import de.verdox.vcorepaper.custom.blocks.CustomBlockManager;
 import de.verdox.vcorepaper.custom.blocks.VBlockListener;
+import de.verdox.vcorepaper.custom.blocks.debug.BlockDebugData;
 import de.verdox.vcorepaper.custom.entities.CustomEntityListener;
 import de.verdox.vcorepaper.custom.entities.CustomEntityManager;
 import de.verdox.vcorepaper.custom.CustomDataListener;
@@ -65,6 +66,7 @@ public class VCorePaper extends VCoreCoreInstance.Minecraft {
         networkManager = new NetworkManager<>(ServerType.GAME_SERVER,this);
         new PlayerBukkitListener(networkManager);
         networkManager.getServerPingManager().sendOnlinePing();
+        getCustomBlockManager().registerData(BlockDebugData.class);
     }
 
     public ProtocolManager getProtocolManager() {

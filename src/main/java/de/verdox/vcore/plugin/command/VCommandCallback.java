@@ -272,6 +272,11 @@ public class VCommandCallback {
             return type.cast(parameters.get(index));
         }
 
+        public <E extends Enum<?>> E getEnum(@NonNegative int index, Class<? extends E> type){
+            String input = getObject(index,String.class);
+            return Arrays.stream(type.getEnumConstants()).filter(anEnum -> anEnum.name().equals(input)).findAny().orElse(null);
+        }
+
         public Class<?> getType(@NonNegative int index){
             return parameters.get(index).getClass();
         }
@@ -386,6 +391,7 @@ public class VCommandCallback {
 
     public enum CommandAskType {
         STRING,
+        ENUM,
         REST_OF_INPUT,
         NUMBER,
         POSITIVE_NUMBER,

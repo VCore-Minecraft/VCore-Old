@@ -1,5 +1,6 @@
 package de.verdox.vcorepaper.custom.blocks.files;
 
+import de.verdox.vcore.plugin.wrapper.types.WorldChunk;
 import de.verdox.vcore.util.bukkit.keys.ChunkKey;
 import de.verdox.vcore.util.bukkit.keys.LocationKey;
 import de.verdox.vcore.util.bukkit.keys.SplitChunkKey;
@@ -34,7 +35,7 @@ public class VBlockStorage {
 
     public Set<Location> findCustomBlockLocations(Chunk chunk){
         Set<Location> locations = new HashSet<>();
-        new ChunkKey(chunk).splitChunkKey(chunk.getWorld())
+        new ChunkKey(new WorldChunk(chunk.getWorld().getName(),chunk.getX(),chunk.getZ())).splitChunkKey()
                 .forEach(key -> {
                     Location location = key.toLocation(chunk.getWorld());
                     if(location == null)
@@ -63,8 +64,12 @@ public class VBlockStorage {
         File worldFolder = worldFolders.get(location.getWorld());
         int yCoordinate = location.getBlockY() / 16;
 
-        String chunkKey = new ChunkKey(location.getChunk()).toString();
-        String splitChunkKey = new SplitChunkKey(location.getChunk(),yCoordinate).toString();
+        int chunkX = location.getBlockX() >> 4;
+        int chunkZ = location.getBlockZ() >> 4;
+        WorldChunk worldChunk = new WorldChunk(location.getWorld().getName(),chunkX,chunkZ);
+
+        String chunkKey = new ChunkKey(worldChunk).toString();
+        String splitChunkKey = new SplitChunkKey(worldChunk,yCoordinate).toString();
         return new File(worldFolder
                 .getAbsolutePath()+"//VChunks//"+chunkKey+"//"+splitChunkKey);
     }

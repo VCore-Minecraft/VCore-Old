@@ -16,7 +16,8 @@ import java.util.UUID;
  * @date 05.08.2021 22:12
  */
 
-@InstructionInfo(awaitsResponse = true)
+@InstructionInfo(awaitsResponse = false)
+//TODO: Von Update erben lassen als CompletableFuture<Boolean>
 public abstract class Update extends MessagingInstruction implements InstructionResponder {
     public Update(UUID uuid) {
         super(uuid);

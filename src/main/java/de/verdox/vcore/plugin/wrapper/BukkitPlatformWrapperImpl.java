@@ -110,7 +110,7 @@ public class BukkitPlatformWrapperImpl implements PlatformWrapper {
             }
 
             @Override
-            public void broadcastMessage(@Nonnull UUID playerUUID ,@Nonnull String message, @Nonnull PlayerMessageType playerMessageType) {
+            public void broadcastMessage(@Nonnull String message, @Nonnull PlayerMessageType playerMessageType) {
                 for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
                     VCoreUtil.BukkitUtil.getBukkitPlayerUtil().sendPlayerMessage(onlinePlayer,playerMessageType,ChatColor.translateAlternateColorCodes('&',message));
                 }

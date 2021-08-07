@@ -4,6 +4,7 @@
 
 package de.verdox.vcore.util.bukkit;
 
+import de.verdox.vcore.plugin.wrapper.types.WorldChunk;
 import de.verdox.vcore.plugin.wrapper.types.enums.PlayerMessageType;
 import de.verdox.vcore.util.global.DirectionEnum;
 import de.verdox.vcore.util.bukkit.keys.ChunkKey;
@@ -60,7 +61,7 @@ public class BukkitPlayerUtil {
 
         for(int x = chunkX-viewDistanceInBlocks; x <= chunkX+viewDistanceInBlocks; x+=16){
             for(int z = chunkZ-viewDistanceInBlocks; z <= chunkZ+viewDistanceInBlocks; z+=16){
-                set.add(new ChunkKey(x,z));
+                set.add(new ChunkKey(new WorldChunk(player.getLocation().getWorld().getName(),x,z)));
             }
         }
         return set;

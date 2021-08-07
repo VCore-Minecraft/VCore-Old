@@ -103,6 +103,13 @@
             <artifactId>Simple-Yaml</artifactId>
             <version>1.7.2</version>
         </dependency>
+        <!-- Paper API-->
+        <dependency>
+            <groupId>io.papermc</groupId>
+            <artifactId>paperlib</artifactId>
+            <version>1.0.6</version>
+            <scope>compile</scope>
+        </dependency>
     </dependencies>
 
     <build>

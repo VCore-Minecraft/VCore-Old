@@ -2,6 +2,8 @@ package de.verdox.vcorepaper.custom.blocks;
 
 import de.verdox.vcore.performance.concurrent.CatchingRunnable;
 import de.verdox.vcore.performance.efficiency.Benchmark;
+import de.verdox.vcore.plugin.wrapper.types.WorldChunk;
+import de.verdox.vcore.util.VCoreUtil;
 import de.verdox.vcore.util.bukkit.keys.ChunkKey;
 import de.verdox.vcore.util.bukkit.keys.LocationKey;
 import de.verdox.vcore.util.bukkit.keys.SplitChunkKey;
@@ -114,7 +116,7 @@ public class CustomBlockManager extends CustomDataManager<Location, VBlockCustom
      */
     public Set<VBlockSaveFile> getDataOfChunk(Chunk chunk){
         Set<VBlockSaveFile> set = new HashSet<>();
-        new ChunkKey(chunk).splitChunkKey(chunk.getWorld()).parallelStream().forEach(splitChunkKey -> {
+        new ChunkKey(new WorldChunk(chunk.getWorld().getName(),chunk.getX(),chunk.getZ())).splitChunkKey().parallelStream().forEach(splitChunkKey -> {
             if(!cache.containsKey(splitChunkKey))
                 return;
             set.addAll(cache.get(splitChunkKey).values());
@@ -128,7 +130,7 @@ public class CustomBlockManager extends CustomDataManager<Location, VBlockCustom
      * @return Returns if any block inside the chunk is cached
      */
     public boolean isCached(Chunk chunk){
-        return new ChunkKey(chunk).splitChunkKey(chunk.getWorld()).stream().anyMatch(cache::containsKey);
+        return new ChunkKey(new WorldChunk(chunk.getWorld().getName(),chunk.getX(),chunk.getZ())).splitChunkKey().stream().anyMatch(cache::containsKey);
     }
 
     /**
@@ -161,7 +163,7 @@ public class CustomBlockManager extends CustomDataManager<Location, VBlockCustom
      * @return
      */
     public VBlockSaveFile getSaveFile(Location location){
-        SplitChunkKey splitChunkKey = new SplitChunkKey(location.getChunk(),location.getBlockY());
+        SplitChunkKey splitChunkKey = new SplitChunkKey(VCoreUtil.BukkitUtil.getBukkitWorldUtil().toWorldChunk(location), location.getBlockY());
         if(!cache.containsKey(splitChunkKey))
             cache.put(splitChunkKey,new ConcurrentHashMap<>());
         ConcurrentHashMap<LocationKey,VBlockSaveFile> saveFileSet = (ConcurrentHashMap<LocationKey, VBlockSaveFile>) cache.get(splitChunkKey);
@@ -175,7 +177,7 @@ public class CustomBlockManager extends CustomDataManager<Location, VBlockCustom
      * @return
      */
     public VBlockSaveFile loadSaveFile(Location location){
-        SplitChunkKey splitChunkKey = new SplitChunkKey(location.getChunk(),location.getBlockY());
+        SplitChunkKey splitChunkKey = new SplitChunkKey(VCoreUtil.BukkitUtil.getBukkitWorldUtil().toWorldChunk(location), location.getBlockY());
         if(!cache.containsKey(splitChunkKey))
             cache.put(splitChunkKey,new ConcurrentHashMap<>());
         VBlockSaveFile foundSaveFile = cache.get(splitChunkKey).get(new LocationKey(location));

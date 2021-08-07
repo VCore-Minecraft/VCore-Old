@@ -7,7 +7,9 @@ package de.verdox.vcorepaper.commands;
 import de.verdox.vcore.plugin.command.VCommandCallback;
 import de.verdox.vcore.plugin.command.VCoreCommand;
 import de.verdox.vcore.plugin.command.callback.CommandCallback;
+import de.verdox.vcore.plugin.wrapper.types.enums.PlayerGameMode;
 import de.verdox.vcore.plugin.wrapper.types.enums.PlayerMessageType;
+import de.verdox.vcore.synchronization.networkmanager.enums.GlobalProperty;
 import de.verdox.vcore.synchronization.networkmanager.player.VCorePlayer;
 import de.verdox.vcore.plugin.wrapper.types.ServerLocation;
 import de.verdox.vcore.synchronization.networkmanager.server.ServerInstance;
@@ -19,9 +21,12 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 
+import java.util.Arrays;
+import java.util.Locale;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.stream.Collectors;
 
 /**
  * @version 1.0
@@ -118,20 +123,43 @@ public class PlayerAPICommands extends VCoreCommand.VCoreBukkitCommand {
                     vCorePlugin.getCoreInstance().getPlayerAPI().sendMessage(victim, PlayerMessageType.CHAT,message);
                 });
 
-        addCommandCallback("stressTest")
-                .withPermission("vcore.stressTest")
+        addCommandCallback("healPlayer")
+                .withPermission("vcore.healPlayer")
                 .askFor("PlayerTarget", VCommandCallback.CommandAskType.VCORE_PLAYER,"&cSpieler wurde nicht gefunden&7!")
                 .setExecutor(VCommandCallback.CommandExecutorType.PLAYER)
                 .commandCallback((commandSender, commandParameters) -> {
                     VCorePlayer victim = commandParameters.getObject(0,VCorePlayer.class);
-                    for(int i = 0; i < 100; i++)
-                        vCorePlugin.getCoreInstance().getPlayerAPI().sendMessage(victim, PlayerMessageType.CHAT,i+"");
+                    vCorePlugin.getCoreInstance().getPlayerAPI().healPlayer(victim);
                 });
 
-    }
+        addCommandCallback("feedPlayer")
+                .withPermission("vcore.feedPlayer")
+                .askFor("PlayerTarget", VCommandCallback.CommandAskType.VCORE_PLAYER,"&cSpieler wurde nicht gefunden&7!")
+                .setExecutor(VCommandCallback.CommandExecutorType.PLAYER)
+                .commandCallback((commandSender, commandParameters) -> {
+                    VCorePlayer victim = commandParameters.getObject(0,VCorePlayer.class);
+                    vCorePlugin.getCoreInstance().getPlayerAPI().feedPlayer(victim);
+                });
 
-    @Override
-    protected CommandCallback<CommandSender> commandCallback() {
-        return null;
+        addCommandCallback("setGameMode")
+                .withPermission("vcore.feedPlayer")
+                .askFor("PlayerTarget", VCommandCallback.CommandAskType.VCORE_PLAYER,"&cSpieler wurde nicht gefunden&7!")
+                .askFor("String", VCommandCallback.CommandAskType.STRING,"&cGameMode existiert nicht&7!", suggestEnum(PlayerGameMode.class))
+                .setExecutor(VCommandCallback.CommandExecutorType.PLAYER)
+                .commandCallback((commandSender, commandParameters) -> {
+                    VCorePlayer victim = commandParameters.getObject(0,VCorePlayer.class);
+                    PlayerGameMode playerGameMode = commandParameters.getEnum(1,PlayerGameMode.class);
+                    if(playerGameMode != null)
+                        vCorePlugin.getCoreInstance().getPlayerAPI().setGameMode(victim,playerGameMode);
+                });
+
+        addCommandCallback("broadCastMessage")
+                .withPermission("vcore.broadCastMessage")
+                .askFor("message", VCommandCallback.CommandAskType.REST_OF_INPUT,"")
+                .setExecutor(VCommandCallback.CommandExecutorType.PLAYER)
+                .commandCallback((commandSender, commandParameters) -> {
+                    String message = commandParameters.getObject(0,String.class);
+                    vCorePlugin.getCoreInstance().getPlayerAPI().broadcastMessage(message,PlayerMessageType.CHAT, GlobalProperty.NETWORK);
+                });
     }
 }

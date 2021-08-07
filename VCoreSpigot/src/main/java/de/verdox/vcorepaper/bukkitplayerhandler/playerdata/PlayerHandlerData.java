@@ -126,9 +126,6 @@ public class PlayerHandlerData extends PlayerData {
 
         inventoryCache.put(inventoryID,serializableInventory.getData());
         VCorePaper.getInstance().consoleMessage("&eInventory &6"+inventoryID+" &eof player &b"+getObjectUUID()+" &esaved&7! &b"+System.currentTimeMillis(), true);
-        VCorePaper.getInstance().consoleMessage(Arrays.toString(storageContents),2,true);
-        VCorePaper.getInstance().consoleMessage(Arrays.toString(armorContents),2,true);
-        VCorePaper.getInstance().consoleMessage(Arrays.toString(enderChest),2,true);
     }
 
     public void restoreInventory(@Nonnull Supplier<Player> supplier){
@@ -162,14 +159,7 @@ public class PlayerHandlerData extends PlayerData {
         SerializableJsonInventory serializableInventory = new SerializableJsonInventory(inventoryCache.get(inventoryID));
         serializableInventory.restoreInventory(player, null);
 
-        ItemStack[] storageContents = player.getInventory().getStorageContents().clone();
-        ItemStack[] armorContents = player.getInventory().getArmorContents().clone();
-        ItemStack[] enderChest = player.getEnderChest().getStorageContents().clone();
-
         VCorePaper.getInstance().consoleMessage("&eInventory &6"+inventoryID+" &eof player &b"+getObjectUUID()+" &erestored&7! &b"+System.currentTimeMillis(), true);
-        VCorePaper.getInstance().consoleMessage(Arrays.toString(storageContents),2,true);
-        VCorePaper.getInstance().consoleMessage(Arrays.toString(armorContents),2,true);
-        VCorePaper.getInstance().consoleMessage(Arrays.toString(enderChest),2,true);
     }
 
     @Override

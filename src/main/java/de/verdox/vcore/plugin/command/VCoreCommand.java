@@ -9,6 +9,7 @@ import de.verdox.vcore.plugin.command.callback.CommandCallback;
 import de.verdox.vcore.plugin.command.callback.CommandSuggestionCallback;
 import de.verdox.vcore.plugin.VCorePlugin;
 import de.verdox.vcore.plugin.subsystem.VCoreSubsystem;
+import de.verdox.vcore.plugin.wrapper.types.enums.PlayerGameMode;
 import de.verdox.vcore.util.VCoreUtil;
 import net.md_5.bungee.api.ChatMessageType;
 import org.bukkit.Bukkit;
@@ -26,6 +27,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 /**
  * VCoreCommand which is used to build a Command inside VCore
@@ -61,20 +63,15 @@ public abstract class VCoreCommand <T extends VCorePlugin<?,?>, R> {
         return vCommandCallback;
     }
 
-    public VCoreCommand<T,R> addCommandSuggestions(int argNumber, CommandSuggestionCallback<R> commandSuggestionCallback){
-        if(argNumber < 0)
-            throw new IllegalStateException("ArgNumber must be positive!");
-        suggestionCallbackCache.put(argNumber,commandSuggestionCallback);
-        return this;
-    }
-
     public T getVCorePlugin() {
         return vCorePlugin;
     }
 
     protected abstract void registerCommand();
 
-    protected abstract CommandCallback<R> commandCallback();
+    public String[] suggestEnum (Class<? extends Enum<?>> enumType){
+        return Arrays.stream(enumType.getEnumConstants()).map(Enum::name).toArray(String[]::new);
+    }
 
     public abstract static class VCoreBukkitCommand extends VCoreCommand<VCorePlugin.Minecraft, CommandSender> implements TabExecutor, Listener {
 

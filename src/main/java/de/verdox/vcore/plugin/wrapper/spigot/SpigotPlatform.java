@@ -24,7 +24,7 @@ public interface SpigotPlatform {
     void teleportPlayer(@Nonnull UUID playerUUID, @Nonnull GameLocation gameLocation);
     void setGameMode(@Nonnull UUID playerUUID, @Nonnull PlayerGameMode playerGameMode);
     void sendMessage(@Nonnull UUID playerUUID, @Nonnull String message, @Nonnull PlayerMessageType playerMessageType);
-    void broadcastMessage(@Nonnull UUID playerUUID, @Nonnull String message, @Nonnull PlayerMessageType playerMessageType);
+    void broadcastMessage(@Nonnull String message, @Nonnull PlayerMessageType playerMessageType);
     void kickPlayer(@Nonnull UUID playerUUID, @Nonnull String kickMessage);
     void killPlayer(@Nonnull UUID playerUUID);
     GameLocation getLocation(@Nonnull UUID playerUUID);
