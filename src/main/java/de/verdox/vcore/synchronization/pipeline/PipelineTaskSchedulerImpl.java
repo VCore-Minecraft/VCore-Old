@@ -30,21 +30,11 @@ public class PipelineTaskSchedulerImpl implements PipelineTaskScheduler {
 
     @Override
     public <T extends VCoreData> PipelineTask<T> schedulePipelineTask(@Nonnull PipelineAction pipelineAction, @Nonnull Pipeline.LoadingStrategy loadingStrategy, @Nonnull Class<? extends T> type, @Nonnull UUID uuid) {
-            PipelineTask<T> existingTask = getExistingPipelineTask(type, uuid);
-            if(existingTask != null){
-                if(!pipelineManager.getPlugin().getPlatformWrapper().isPrimaryThread()){
-                    if(existingTask.getPipelineAction().equals(pipelineAction))
-                        return existingTask;
-                    else {
-                        try { existingTask.getCompletableFuture().get(); } catch (InterruptedException | ExecutionException e) { e.printStackTrace(); }
-                    }
-                }
-            }
-        PipelineTask<T> pipelineTask = new PipelineTask<>(pipelineManager.getPlugin(), this, pipelineAction, type, uuid, () -> pendingTasks.remove(type,uuid));
-            //if(!Bukkit.isPrimaryThread())
-            //    pipelineManager.getPlugin().consoleMessage("&6Scheduling "+loadingStrategy+" PipelineTask &a"+type.getSimpleName()+" &7: "+pipelineTask.getObjectUUID(),true);
-            //else
-            //    pipelineManager.getPlugin().consoleMessage("&6Scheduling "+loadingStrategy+" PipelineTask on Main Thread &a"+type.getSimpleName()+" &7: "+pipelineTask.getObjectUUID(),true);
+        PipelineTask<T> existingTask = getExistingPipelineTask(type, uuid);
+        if(existingTask != null)
+            return existingTask;
+        PipelineTask<T> pipelineTask = new PipelineTask<>(pipelineManager.getPlugin(), this, pipelineAction, type, uuid, () -> removePipelineTask(type,uuid));
+
         if(!pendingTasks.containsKey(uuid))
             pendingTasks.put(uuid, new ConcurrentHashMap<>());
         pendingTasks.get(uuid).put(type, pipelineTask);
@@ -64,9 +54,13 @@ public class PipelineTaskSchedulerImpl implements PipelineTaskScheduler {
 
     @Override
     public <T extends VCoreData> void removePipelineTask(@Nonnull Class<? extends T> type, @Nonnull UUID uuid) {
+        System.out.println("Trying to remove "+type+" | "+uuid);
         if(!pendingTasks.containsKey(uuid))
             return;
-        pendingTasks.get(uuid).remove(type);
+        System.out.println("1");
+        PipelineTask<?> task = pendingTasks.get(uuid).get(type);
+        if(!task.getCompletableFuture().isDone())
+            System.out.println("Deleting Task that has not been completed yet!");
         if(pendingTasks.get(uuid).isEmpty())
             pendingTasks.remove(uuid);
     }
