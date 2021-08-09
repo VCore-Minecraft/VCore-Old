@@ -18,37 +18,37 @@ public class NBTEntityHolder implements NBTHolder {
 
     @Override
     public Boolean getBoolean(String key) {
-        return nbtEntity.getBoolean(key);
+        return nbtEntity.getPersistentDataContainer().getBoolean(key);
     }
 
     @Override
     public Integer getInteger(String key) {
-        return nbtEntity.getInteger(key);
+        return nbtEntity.getPersistentDataContainer().getInteger(key);
     }
 
     @Override
     public Double getDouble(String key) {
-        return nbtEntity.getDouble(key);
+        return nbtEntity.getPersistentDataContainer().getDouble(key);
     }
 
     @Override
     public String getString(String key) {
-        return nbtEntity.getString(key);
+        return nbtEntity.getPersistentDataContainer().getString(key);
     }
 
     @Override
     public UUID getUUID(String key) {
-        return nbtEntity.getUUID(key);
+        return nbtEntity.getPersistentDataContainer().getUUID(key);
     }
 
     @Override
     public Long getLong(String key) {
-        return nbtEntity.getLong(key);
+        return nbtEntity.getPersistentDataContainer().getLong(key);
     }
 
     @Override
     public ItemStack getItemStack(String key) {
-        return nbtEntity.getItemStack(key);
+        return nbtEntity.getPersistentDataContainer().getItemStack(key);
     }
 
     @Override
@@ -66,43 +66,43 @@ public class NBTEntityHolder implements NBTHolder {
         else if(type.equals(Long.class))
             return (T) getLong(key);
         else if(type.equals(ItemStack.class))
-            return (T) nbtEntity.getItemStack(key);
-        return nbtEntity.getObject(key,type);
+            return (T) nbtEntity.getPersistentDataContainer().getItemStack(key);
+        return nbtEntity.getPersistentDataContainer().getObject(key,type);
     }
 
     @Override
     public void setObject(String key, Object value) {
         if(value instanceof Boolean)
-            nbtEntity.setBoolean(key, (Boolean) value);
+            nbtEntity.getPersistentDataContainer().setBoolean(key, (Boolean) value);
         else if(value instanceof Integer)
-            nbtEntity.setInteger(key, (Integer) value);
+            nbtEntity.getPersistentDataContainer().setInteger(key, (Integer) value);
         else if(value instanceof Double)
-            nbtEntity.setDouble(key, (Double) value);
+            nbtEntity.getPersistentDataContainer().setDouble(key, (Double) value);
         else if(value instanceof String)
-            nbtEntity.setString(key, (String) value);
+            nbtEntity.getPersistentDataContainer().setString(key, (String) value);
         else if(value instanceof UUID)
-            nbtEntity.setUUID(key, (UUID) value);
+            nbtEntity.getPersistentDataContainer().setUUID(key, (UUID) value);
         else if(value instanceof Long)
-            nbtEntity.setLong(key, (Long) value);
+            nbtEntity.getPersistentDataContainer().setLong(key, (Long) value);
         else if(value instanceof ItemStack)
-            nbtEntity.setItemStack(key, (ItemStack) value);
+            nbtEntity.getPersistentDataContainer().setItemStack(key, (ItemStack) value);
         else
-            nbtEntity.setObject(key, value);
+            nbtEntity.getPersistentDataContainer().setObject(key, value);
     }
 
     @Override
     public Set<String> getKeys() {
-        return nbtEntity.getKeys();
+        return nbtEntity.getPersistentDataContainer().getKeys();
     }
 
     @Override
     public boolean hasKey(String key) {
-        return nbtEntity.hasKey(key);
+        return nbtEntity.getPersistentDataContainer().hasKey(key);
     }
 
     @Override
     public void removeKey(String key) {
-        nbtEntity.removeKey(key);
+        nbtEntity.getPersistentDataContainer().removeKey(key);
     }
 
     @Override

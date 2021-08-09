@@ -21,7 +21,7 @@ public class CustomEntityManager extends CustomDataManager<Entity, EntityCustomD
     @Override
     public <U extends VCoreEntity> U wrap(Class<? extends U> type, Entity inputObject) {
         try {
-            return type.getDeclaredConstructor(CustomEntityManager.class, Entity.class).newInstance(this,inputObject);
+            return type.getDeclaredConstructor(Entity.class, CustomEntityManager.class).newInstance(inputObject,this);
         } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
             e.printStackTrace();
             return null;
@@ -31,7 +31,7 @@ public class CustomEntityManager extends CustomDataManager<Entity, EntityCustomD
     @Override
     public <U extends VCoreEntity> U convertTo(Class<? extends U> type, VCoreEntity customData) {
         try {
-            return type.getDeclaredConstructor(CustomEntityManager.class, Entity.class).newInstance(this,customData.getDataHolder());
+            return type.getDeclaredConstructor(Entity.class, CustomEntityManager.class).newInstance(customData.getDataHolder(),this);
         } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
             e.printStackTrace();
             return null;

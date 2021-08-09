@@ -10,8 +10,16 @@ public abstract class EntityCustomData<T> extends CustomData<T> {
         super();
     }
 
-    public abstract boolean onDeath(Entity entity);
-    public abstract boolean onDamageReceive(Entity entity);
-    public abstract boolean onDamageEntity(Entity entity);
-    public abstract boolean onPhysicalInteraction(Entity entity, Block block);
+    public boolean onDeath(Entity entity){
+        return false;
+    }
+    public boolean onDamageReceive(Entity entity){
+        return false;
+    }
+    public boolean onDamageEntity(Entity entity){
+        return false;
+    }
+    public boolean onPhysicalInteraction(Entity entity, Block block){
+        return false;
+    }
 }

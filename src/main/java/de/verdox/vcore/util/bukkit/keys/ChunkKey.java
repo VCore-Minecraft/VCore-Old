@@ -12,7 +12,6 @@ import java.util.concurrent.CompletableFuture;
 
 public class ChunkKey extends VCoreKey{
 
-
     protected final WorldChunk worldChunk;
 
     public ChunkKey(WorldChunk worldChunk){
@@ -44,5 +43,18 @@ public class ChunkKey extends VCoreKey{
     @Override
     public String toString() {
         return worldChunk.x + "_" + worldChunk.z;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof ChunkKey)) return false;
+        ChunkKey chunkKey = (ChunkKey) o;
+        return Objects.equals(worldChunk, chunkKey.worldChunk);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(worldChunk);
     }
 }

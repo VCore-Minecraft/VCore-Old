@@ -9,11 +9,13 @@ import de.verdox.vcorepaper.VCorePaper;
 import de.verdox.vcorepaper.custom.blocks.VBlock;
 import de.verdox.vcorepaper.custom.blocks.debug.BlockDebugData;
 import de.verdox.vcorepaper.custom.blocks.enums.VBlockEventPermission;
+import de.verdox.vcorepaper.custom.entities.VCoreEntity;
 import de.verdox.vcorepaper.custom.items.VCoreItem;
 import net.md_5.bungee.api.ChatMessageType;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
@@ -124,7 +126,30 @@ public class AdminCommands extends VCoreCommand.VCoreBukkitCommand {
                     VBlock vBlock = VCorePaper.getInstance().getCustomBlockManager().wrap(VBlock.class, hitBlock.getLocation());
                     commandSender.sendMessage("");
                     vBlock.getNBTCompound().getKeys().forEach(s -> {
-                        commandSender.sendMessage(ChatColor.translateAlternateColorCodes('&',"&7>> "+vBlock.getNBTCompound().getObject(s,Object.class).toString()));
+                        commandSender.sendMessage(ChatColor.translateAlternateColorCodes('&',"&7>> &e"+s+"&7: "+vBlock.getNBTCompound().getObject(s,Object.class).toString()));
+                    });
+                });
+        addCommandCallback("debugEntity")
+                .setExecutor(VCommandCallback.CommandExecutorType.PLAYER)
+                .commandCallback((commandSender, commandParameters) -> {
+                    Player player = (Player) commandSender;
+                    vCorePlugin.sync(() -> {
+                        RayTraceResult rayTraceResult = player.getWorld().rayTraceEntities(player.getEyeLocation().clone().add(0,1,0),player.getLocation().getDirection(),7);
+                        if(rayTraceResult == null) {
+                            commandSender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&cBitte schaue ein Entity an&7!"));
+                            return;
+                        }
+                        Entity hitEntity = rayTraceResult.getHitEntity();
+                        if(hitEntity == null) {
+                            commandSender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&cBitte schaue ein Entity an&7!"));
+                            return;
+                        }
+                        VCoreEntity vCoreEntity = VCorePaper.getInstance().getCustomEntityManager().wrap(VCoreEntity.class,hitEntity);
+                        commandSender.sendMessage("");
+                        commandSender.sendMessage(ChatColor.translateAlternateColorCodes('&',"&eDebugging &7: "+hitEntity));
+                        vCoreEntity.getNBTCompound().getKeys().forEach(s -> {
+                            commandSender.sendMessage(ChatColor.translateAlternateColorCodes('&',"&7>> &e"+s+"&7: "+vCoreEntity.getNBTCompound().getObject(s,Object.class)));
+                        });
                     });
                 });
     }

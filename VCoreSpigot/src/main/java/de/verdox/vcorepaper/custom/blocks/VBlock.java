@@ -13,6 +13,7 @@ import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.Item;
 import org.bukkit.inventory.ItemStack;
 
+import javax.annotation.Nonnull;
 import java.lang.reflect.InvocationTargetException;
 import java.util.function.Consumer;
 
@@ -115,6 +116,7 @@ public class VBlock extends CustomDataHolder<Location, NBTBlockHolder, CustomBlo
         return blockPersistentData;
     }
 
+    @Nonnull
     @Override
     public NBTBlockHolder getNBTCompound() {
         return new NBTBlockHolder(getDataHolder(), blockPersistentData);

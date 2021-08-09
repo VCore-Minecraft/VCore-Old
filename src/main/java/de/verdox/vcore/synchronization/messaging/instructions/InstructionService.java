@@ -10,6 +10,7 @@ import de.verdox.vcore.synchronization.messaging.event.MessageEvent;
 import de.verdox.vcore.synchronization.messaging.instructions.annotations.InstructionInfo;
 import de.verdox.vcore.synchronization.messaging.messages.Message;
 import de.verdox.vcore.synchronization.messaging.messages.MessageWrapper;
+import org.bukkit.World;
 import org.checkerframework.checker.index.qual.NonNegative;
 
 import javax.annotation.Nonnull;
@@ -129,6 +130,8 @@ public class InstructionService {
                 return;
 
             Class<? extends MessagingInstruction> type = instructionTypes.get(instructionID);
+            if(type == null)
+                return;
             if(messageWrapper.parameterContains("VCoreInstruction")){
                 InstructionInfo instructionInfo = getInstructionInfo(type);
                 MessagingInstruction responseInstruction = instantiateInstruction(type,instructionUUID);

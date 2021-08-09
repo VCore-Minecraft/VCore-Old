@@ -8,6 +8,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
+import javax.annotation.Nonnull;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
@@ -90,6 +91,7 @@ public class VCoreItem extends CustomDataHolder<ItemStack, NBTItemHolder, Custom
         }
     }
 
+    @Nonnull
     @Override
     public NBTItemHolder getNBTCompound() {
         return new NBTItemHolder(getDataHolder(),true);

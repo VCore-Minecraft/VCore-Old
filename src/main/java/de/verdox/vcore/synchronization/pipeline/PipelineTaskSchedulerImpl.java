@@ -31,9 +31,12 @@ public class PipelineTaskSchedulerImpl implements PipelineTaskScheduler {
     @Override
     public <T extends VCoreData> PipelineTask<T> schedulePipelineTask(@Nonnull PipelineAction pipelineAction, @Nonnull Pipeline.LoadingStrategy loadingStrategy, @Nonnull Class<? extends T> type, @Nonnull UUID uuid) {
         PipelineTask<T> existingTask = getExistingPipelineTask(type, uuid);
-        if(existingTask != null)
+        if(existingTask != null) {
+            pipelineManager.getPlugin().consoleMessage("&8[&e"+loadingStrategy+"&8] &eFound existing Pipeline Task: "+existingTask,true);
             return existingTask;
+        }
         PipelineTask<T> pipelineTask = new PipelineTask<>(pipelineManager.getPlugin(), this, pipelineAction, type, uuid, () -> removePipelineTask(type,uuid));
+        pipelineManager.getPlugin().consoleMessage("&8[&e"+loadingStrategy+"&8] &eScheduling Pipeline Task: "+pipelineTask,true);
 
         if(!pendingTasks.containsKey(uuid))
             pendingTasks.put(uuid, new ConcurrentHashMap<>());
@@ -54,7 +57,6 @@ public class PipelineTaskSchedulerImpl implements PipelineTaskScheduler {
 
     @Override
     public <T extends VCoreData> void removePipelineTask(@Nonnull Class<? extends T> type, @Nonnull UUID uuid) {
-        System.out.println("Trying to remove "+type+" | "+uuid);
         if(!pendingTasks.containsKey(uuid))
             return;
         System.out.println("1");

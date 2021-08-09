@@ -33,12 +33,13 @@ import java.util.stream.Collectors;
  * @Author: Lukas Jonsson (Verdox)
  * @date 27.06.2021 00:59
  */
+//TODO: Bei CommandCallback CommandSender direkt in VCorePlayer umwandelbar machen
 public class VCommandCallback {
     private final VCorePlugin<?, ?> plugin;
     private String[] commandPath;
     private String neededPermission;
     private CommandExecutorType commandExecutorType;
-    private List<CommandCallbackInfo> callbackInfos = new ArrayList<>();
+    private final List<CommandCallbackInfo> callbackInfos = new ArrayList<>();
     private BiConsumer<CommandSender, CommandParameters> providedArguments;
     private boolean restAsString = false;
 
@@ -82,9 +83,9 @@ public class VCommandCallback {
 
     public String getSuggested(VCoreCommand<?,?> command){
         StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append("&7/&b"+command.getCommandName()+" ");
+        stringBuilder.append("&7/&b").append(command.getCommandName()).append(" ");
         for (CommandCallbackInfo callbackInfo : callbackInfos) {
-            stringBuilder.append(callbackInfo.commandHelpPlaceholder()+" ");
+            stringBuilder.append(callbackInfo.commandHelpPlaceholder()).append(" ");
         }
         return stringBuilder.toString();
     }
@@ -146,7 +147,7 @@ public class VCommandCallback {
                         providedArguments.add(player);
                     }
                     else if(commandAskParameter.getCommandAskType().equals(CommandAskType.VCORE_PLAYER)){
-                        VCorePlayer vCorePlayer = plugin.getServices().getPipeline().getLocalCache().getAllData(VCorePlayer.class).stream().filter(vCorePlayer1 -> vCorePlayer1.getDisplayName().equalsIgnoreCase(argument)).findAny().orElse(null);
+                        VCorePlayer vCorePlayer = plugin.getCoreInstance().getServices().getPipeline().getLocalCache().getAllData(VCorePlayer.class).stream().filter(vCorePlayer1 -> vCorePlayer1.getDisplayName().equalsIgnoreCase(argument)).findAny().orElse(null);
                         if(vCorePlayer == null)
                             return new CallbackResponse(CallbackResponse.ResponseType.FAILURE,true);
                         providedArguments.add(vCorePlayer);
@@ -198,7 +199,7 @@ public class VCommandCallback {
                 }
                 else if(commandAskParameter.getCommandAskType().equals(CommandAskType.VCORE_GAMESERVER)){
                     UUID serverUUID = UUID.nameUUIDFromBytes(argument.getBytes(StandardCharsets.UTF_8));
-                    ServerInstance serverInstance = plugin.getServices().getPipeline().load(ServerInstance.class,serverUUID, Pipeline.LoadingStrategy.LOAD_PIPELINE);
+                    ServerInstance serverInstance = plugin.getCoreInstance().getServices().getPipeline().load(ServerInstance.class,serverUUID, Pipeline.LoadingStrategy.LOAD_PIPELINE);
                     if(serverInstance == null){
                         sender.sendMessage(ChatColor.translateAlternateColorCodes('&',commandAskParameter.errorMessage));
                         return new CallbackResponse(CallbackResponse.ResponseType.FAILURE,true);
@@ -353,7 +354,7 @@ public class VCommandCallback {
             if(commandAskType.equals(CommandAskType.BOOLEAN))
                 return List.of("true","false");
             if(commandAskType.equals(CommandAskType.VCORE_PLAYER)) {
-                Set<VCorePlayer> players = plugin.getServices().getPipeline().getLocalCache().getAllData(VCorePlayer.class);
+                Set<VCorePlayer> players = plugin.getCoreInstance().getServices().getPipeline().getLocalCache().getAllData(VCorePlayer.class);
                 return players.stream().filter(Objects::nonNull).map(VCorePlayer::getDisplayName).collect(Collectors.toList());
             }
             if(commandAskType.name().contains("NUMBER")){
@@ -370,7 +371,7 @@ public class VCommandCallback {
             }
             //TODO: Lokale Listen separat anfertigen für AutoCompletion
             if(commandAskType.equals(CommandAskType.VCORE_GAMESERVER))
-                return plugin.getServices().getPipeline().getLocalCache().getAllData(ServerInstance.class).stream().filter(serverInstance -> serverInstance.getServerType().equals(ServerType.GAME_SERVER)).map(serverInstance -> serverInstance.serverName).collect(Collectors.toList());
+                return plugin.getCoreInstance().getServices().getPipeline().getLocalCache().getAllData(ServerInstance.class).stream().filter(serverInstance -> serverInstance.getServerType().equals(ServerType.GAME_SERVER)).map(serverInstance -> serverInstance.serverName).collect(Collectors.toList());
             return suggested;
         }
 

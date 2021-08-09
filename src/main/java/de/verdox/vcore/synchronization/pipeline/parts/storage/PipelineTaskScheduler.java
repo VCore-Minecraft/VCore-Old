@@ -38,7 +38,7 @@ public interface PipelineTaskScheduler extends SystemLoadable {
             this.uuid = uuid;
             this.completableFuture = new CompletableFuture<>();
             this.completableFuture.whenComplete((t, throwable) -> {
-                plugin.consoleMessage("&6Task &a"+type.getSimpleName()+" &6done&7: "+getObjectUUID()+" &8[&e"+t+"&8] &8[&e"+(System.currentTimeMillis() - start)+"ms&8]", true);
+                plugin.consoleMessage("&6Task &a"+this+" &6done&7: "+type+"  |  "+getObjectUUID()+" &8[&e"+t+"&8] &8[&e"+(System.currentTimeMillis() - start)+"ms&8]", true);
                 onComplete.run();
                 pipelineTaskScheduler.removePipelineTask(type,uuid);
             });

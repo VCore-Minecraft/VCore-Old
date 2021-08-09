@@ -161,35 +161,35 @@ public class WorldHandler_V1_16_R3 implements NMSWorldHandler {
             entityPlayer.playerConnection.teleport(location);
         });//.executeBatch(callback);
 
-        try {
-            PacketContainer respawnPacket = PacketContainer.fromPacket(new PacketPlayOutRespawn(dimensionManager, world, seed, enumGamemode, enumGamemode, false, false, flag));
-
-            int viewDistance = player.getWorld().getViewDistance();
-
-            entityPlayer.playerConnection.sendPacket(new PacketPlayOutSpawnPosition(worldServer.getSpawn(), worldServer.v()));
-            craftPlayer.getHandle().playerConnection.sendPacket(new PacketPlayOutViewDistance(500));
-
-            ProtocolLibrary.getProtocolManager().sendServerPacket(player,respawnPacket, true);
-
-            worldServer.getChunkProvider().addTicket(TicketType.POST_TELEPORT, new ChunkCoordIntPair(location.getBlockX() >> 4, location.getBlockZ() >> 4), 1, entityPlayer.getId());
-
-            //for (Chunk chunk : VCoreUtil.getBukkitPlayerUtil().getChunksAroundPlayer(player)) {
-            //    PacketContainer chunkPacket = PacketContainer.fromPacket(new PacketPlayOutMapChunk(((CraftChunk) chunk).getHandle(), viewDistance,false));
-            //    ProtocolLibrary.getProtocolManager().sendServerPacket(player,chunkPacket, true);
-            //}
-
-
-
-            dedicatedServer.getPlayerList().updateClient(entityPlayer);
-            entityPlayer.updateAbilities();
-
-
-            //entityPlayer.spawnIn(worldServer);
-            //entityPlayer.dead = false;
-            entityPlayer.playerConnection.teleport(location);
-        } catch (InvocationTargetException e) {
-            e.printStackTrace();
-        }
+        //try {
+        //    PacketContainer respawnPacket = PacketContainer.fromPacket(new PacketPlayOutRespawn(dimensionManager, world, seed, enumGamemode, enumGamemode, false, false, flag));
+//
+        //    int viewDistance = player.getWorld().getViewDistance();
+//
+        //    entityPlayer.playerConnection.sendPacket(new PacketPlayOutSpawnPosition(worldServer.getSpawn(), worldServer.v()));
+        //    craftPlayer.getHandle().playerConnection.sendPacket(new PacketPlayOutViewDistance(500));
+//
+        //    ProtocolLibrary.getProtocolManager().sendServerPacket(player,respawnPacket, true);
+//
+        //    worldServer.getChunkProvider().addTicket(TicketType.POST_TELEPORT, new ChunkCoordIntPair(location.getBlockX() >> 4, location.getBlockZ() >> 4), 1, entityPlayer.getId());
+//
+        //    //for (Chunk chunk : VCoreUtil.getBukkitPlayerUtil().getChunksAroundPlayer(player)) {
+        //    //    PacketContainer chunkPacket = PacketContainer.fromPacket(new PacketPlayOutMapChunk(((CraftChunk) chunk).getHandle(), viewDistance,false));
+        //    //    ProtocolLibrary.getProtocolManager().sendServerPacket(player,chunkPacket, true);
+        //    //}
+//
+//
+//
+        //    dedicatedServer.getPlayerList().updateClient(entityPlayer);
+        //    entityPlayer.updateAbilities();
+//
+//
+        //    //entityPlayer.spawnIn(worldServer);
+        //    //entityPlayer.dead = false;
+        //    entityPlayer.playerConnection.teleport(location);
+        //} catch (InvocationTargetException e) {
+        //    e.printStackTrace();
+        //}
     }
 
     @Override

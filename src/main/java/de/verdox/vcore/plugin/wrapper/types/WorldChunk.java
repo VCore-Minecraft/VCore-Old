@@ -4,6 +4,8 @@
 
 package de.verdox.vcore.plugin.wrapper.types;
 
+import java.util.Objects;
+
 /**
  * @version 1.0
  * @Author: Lukas Jonsson (Verdox)
@@ -45,5 +47,18 @@ public class WorldChunk {
                 ", globalSpaceX=" + globalSpaceX +
                 ", globalSpaceZ=" + globalSpaceZ +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof WorldChunk)) return false;
+        WorldChunk that = (WorldChunk) o;
+        return x == that.x && z == that.z && globalSpaceX == that.globalSpaceX && globalSpaceZ == that.globalSpaceZ && Objects.equals(worldName, that.worldName);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(worldName, x, z, globalSpaceX, globalSpaceZ);
     }
 }

@@ -3,6 +3,7 @@ package de.verdox.vcorepaper.custom;
 import de.verdox.vcorepaper.custom.annotation.NBTIdentifier;
 import org.bukkit.inventory.ItemStack;
 
+import javax.annotation.Nonnull;
 import java.util.List;
 import java.util.UUID;
 
@@ -12,7 +13,9 @@ import java.util.UUID;
 public abstract class CustomData <T> {
     public CustomData(){}
 
-    public abstract List<String> asLabel(String valueAsString);
+    public List<String> asLabel(String valueAsString){
+        return List.of(valueAsString);
+    }
 
     public T findInDataHolder(CustomDataHolder<?,?,?> customDataHolder){
         String nbtKey = getNBTKey();
@@ -27,9 +30,11 @@ public abstract class CustomData <T> {
         customDataHolder.getNBTCompound().setObject(getNBTKey(),data);
     }
 
+    @Nonnull
     public abstract Class<T> getTypeClass();
     public abstract T defaultValue();
 
+    @Nonnull
     public String getNBTKey(){
         NBTIdentifier nbtIdentifier = getClass().getAnnotation(NBTIdentifier.class);
         if(nbtIdentifier == null)

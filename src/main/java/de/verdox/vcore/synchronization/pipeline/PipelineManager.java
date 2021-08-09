@@ -114,6 +114,7 @@ public class PipelineManager implements Pipeline {
      */
     @Override
     public final <T extends VCoreData> T load(@Nonnull Class<? extends T> type, @Nonnull UUID uuid, @Nonnull LoadingStrategy loadingStrategy, boolean createIfNotExist, @Nullable Consumer<T> callback){
+        plugin.consoleMessage("&8[&e"+loadingStrategy+"&8] &bLoading data from pipeline &a"+type.getSimpleName()+" &b"+uuid,true);
         PipelineTaskScheduler.PipelineTask<T> pipelineTask = pipelineTaskScheduler.schedulePipelineTask(PipelineTaskScheduler.PipelineAction.LOAD, loadingStrategy, type, uuid);
 
         if(!NetworkData.class.isAssignableFrom(type)){
@@ -128,10 +129,9 @@ public class PipelineManager implements Pipeline {
                 else{
                     // LOAD_LOCAL_ELSE_LOAD
                     executorService.submit(new CatchingRunnable(() -> {
-                        plugin.consoleMessage("&8[&eLOAD_LOCAL_ELSE_LOAD&8] &bLoading data from pipeline &a"+type.getSimpleName()+" &b"+uuid,true);
                         T data = loadFromPipeline(type, uuid, createIfNotExist);
                         pipelineTask.getCompletableFuture().complete(data);
-                        plugin.consoleMessage("&8[&eLOAD_LOCAL_ELSE_LOAD&8] &eCompleted with&7: &b "+data,true);
+                        plugin.consoleMessage("&8[&e"+loadingStrategy+"&8] &eCompleted with&7: &b "+data,true);
                         if(callback != null)
                             callback.accept(data);
                     }));
@@ -145,20 +145,21 @@ public class PipelineManager implements Pipeline {
                 callback.accept(data);
             data.updateLastUse();
             pipelineTask.getCompletableFuture().complete(data);
-            plugin.consoleMessage("&8[&eLOAD_LOCAL_ELSE_LOAD&8] &eCompleted with&7: &b "+data,true);
+            plugin.consoleMessage("&8[&e"+loadingStrategy+"&8] &eCompleted with&7: &b "+data,true);
             return data;
         }
         if(localCache.dataExist(type, uuid)) {
             T data = localCache.getData(type, uuid);
             data.updateLastUse();
             pipelineTask.getCompletableFuture().complete(data);
-            plugin.consoleMessage("&8[&eLOAD_LOCAL_ELSE_LOAD&8] &eCompleted with&7: &b "+data,true);
+            plugin.consoleMessage("&8[&e"+loadingStrategy+"&8] &eCompleted with&7: &b "+data,true);
             if(callback != null)
                 callback.accept(data);
             return data;
         }
         T data = loadFromPipeline(type, uuid, createIfNotExist);
         pipelineTask.getCompletableFuture().complete(data);
+        plugin.consoleMessage("&8[&e"+loadingStrategy+"&8] &eCompleted with&7: &b "+data,true);
         return data;
     }
 

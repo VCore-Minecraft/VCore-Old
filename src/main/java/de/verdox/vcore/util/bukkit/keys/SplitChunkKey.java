@@ -28,5 +28,17 @@ public class SplitChunkKey extends ChunkKey{
         return this.worldChunk.x+"_"+yCoordinate+"_"+this.worldChunk.z;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof SplitChunkKey)) return false;
+        if (!super.equals(o)) return false;
+        SplitChunkKey that = (SplitChunkKey) o;
+        return yCoordinate == that.yCoordinate;
+    }
 
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), yCoordinate);
+    }
 }
