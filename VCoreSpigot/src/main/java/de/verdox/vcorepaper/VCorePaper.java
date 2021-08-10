@@ -18,6 +18,7 @@ import de.verdox.vcorepaper.custom.blocks.debug.BlockDebugData;
 import de.verdox.vcorepaper.custom.entities.CustomEntityListener;
 import de.verdox.vcorepaper.custom.entities.CustomEntityManager;
 import de.verdox.vcorepaper.custom.CustomDataListener;
+import de.verdox.vcorepaper.custom.events.paper.CustomPaperEventListener;
 import de.verdox.vcorepaper.custom.items.CustomItemManager;
 import de.verdox.vcorepaper.nms.NMSManager;
 import de.verdox.vcorepaper.bukkitplayerhandler.BukkitPlayerHandler;
@@ -55,6 +56,7 @@ public class VCorePaper extends VCoreCoreInstance.Minecraft {
         new CustomDataListener(this);
         new CustomEntityListener(this);
         new VBlockListener(this,customBlockManager);
+        new CustomPaperEventListener(this);
 
         new AdminCommands(this,"debug");
         new NMSCommand(this,"nms");

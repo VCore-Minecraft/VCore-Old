@@ -7,6 +7,7 @@ package de.verdox.vcore.util.bukkit;
 import de.verdox.vcore.plugin.wrapper.types.GameLocation;
 import de.verdox.vcore.plugin.wrapper.types.WorldChunk;
 import org.bukkit.Chunk;
+import org.bukkit.DyeColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -34,6 +35,10 @@ public class BukkitWorldUtil {
         else if(hasBlockStem(block, BlockFace.WEST))
             return block.getRelative(BlockFace.WEST);
         return block;
+    }
+
+    public Material getWoolByColor(DyeColor dyeColor){
+        return Material.valueOf(dyeColor.name()+"_WOOL");
     }
 
     public WorldChunk toWorldChunk(Chunk chunk){
