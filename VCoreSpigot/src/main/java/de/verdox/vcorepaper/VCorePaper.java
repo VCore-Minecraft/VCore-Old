@@ -12,14 +12,15 @@ import de.verdox.vcore.synchronization.networkmanager.player.listener.PlayerBukk
 import de.verdox.vcorepaper.commands.AdminCommands;
 import de.verdox.vcorepaper.commands.NMSCommand;
 import de.verdox.vcorepaper.commands.PlayerAPICommands;
-import de.verdox.vcorepaper.custom.blocks.CustomBlockManager;
-import de.verdox.vcorepaper.custom.blocks.VBlockListener;
-import de.verdox.vcorepaper.custom.blocks.debug.BlockDebugData;
+import de.verdox.vcorepaper.custom.block.CustomBlockManager;
+import de.verdox.vcorepaper.custom.block.data.debug.BlockDebugData;
+import de.verdox.vcorepaper.custom.block.internal.VBlockListener;
 import de.verdox.vcorepaper.custom.entities.CustomEntityListener;
 import de.verdox.vcorepaper.custom.entities.CustomEntityManager;
 import de.verdox.vcorepaper.custom.CustomDataListener;
 import de.verdox.vcorepaper.custom.events.paper.CustomPaperEventListener;
 import de.verdox.vcorepaper.custom.items.CustomItemManager;
+import de.verdox.vcorepaper.custom.nbtholders.block.BlockFileStorage;
 import de.verdox.vcorepaper.nms.NMSManager;
 import de.verdox.vcorepaper.bukkitplayerhandler.BukkitPlayerHandler;
 import org.bukkit.Bukkit;
@@ -39,6 +40,8 @@ public class VCorePaper extends VCoreCoreInstance.Minecraft {
     private ProtocolManager protocolManager;
     private VCorePlayerAPI vCorePlayerAPI;
 
+    private BlockFileStorage blockFileStorage;
+
     public static VCorePaper getInstance() {
         return instance;
     }
@@ -55,8 +58,10 @@ public class VCorePaper extends VCoreCoreInstance.Minecraft {
 
         new CustomDataListener(this);
         new CustomEntityListener(this);
-        new VBlockListener(this,customBlockManager);
+        new VBlockListener(this);
         new CustomPaperEventListener(this);
+
+        this.blockFileStorage = new BlockFileStorage(this);
 
         new AdminCommands(this,"debug");
         new NMSCommand(this,"nms");
@@ -79,6 +84,7 @@ public class VCorePaper extends VCoreCoreInstance.Minecraft {
 
     @Override
     public void onPluginDisable() {
+        blockFileStorage.shutdown();
         networkManager.getServerPingManager().sendOfflinePing();
     }
 
@@ -134,5 +140,9 @@ public class VCorePaper extends VCoreCoreInstance.Minecraft {
     @Override
     public String getServerName() {
         return getNetworkManager().getServerPingManager().getServerName();
+    }
+
+    public BlockFileStorage getBlockFileStorage() {
+        return blockFileStorage;
     }
 }

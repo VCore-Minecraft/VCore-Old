@@ -2,28 +2,20 @@ package de.verdox.vcorepaper.commands;
 
 import de.verdox.vcore.plugin.command.VCommandCallback;
 import de.verdox.vcore.plugin.command.VCoreCommand;
-import de.verdox.vcore.plugin.command.callback.CommandCallback;
 import de.verdox.vcore.plugin.VCorePlugin;
-import de.verdox.vcore.util.VCoreUtil;
 import de.verdox.vcorepaper.VCorePaper;
-import de.verdox.vcorepaper.custom.blocks.VBlock;
-import de.verdox.vcorepaper.custom.blocks.debug.BlockDebugData;
-import de.verdox.vcorepaper.custom.blocks.enums.VBlockEventPermission;
+import de.verdox.vcorepaper.custom.old_blocks.VBlock;
+import de.verdox.vcorepaper.custom.block.data.debug.BlockDebugData;
 import de.verdox.vcorepaper.custom.entities.VCoreEntity;
-import de.verdox.vcorepaper.custom.items.VCoreItem;
-import net.md_5.bungee.api.ChatMessageType;
+import de.verdox.vcorepaper.custom.nbtholders.block.NBTBlock;
 import org.bukkit.*;
 import org.bukkit.block.Block;
-import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.util.RayTraceResult;
 
 import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
 
 public class AdminCommands extends VCoreCommand.VCoreBukkitCommand {
     private VCorePaper vCorePaper;
@@ -123,6 +115,9 @@ public class AdminCommands extends VCoreCommand.VCoreBukkitCommand {
                         commandSender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&cBitte schaue einen Block an&7!"));
                         return;
                     }
+                    NBTBlock nbtBlock = new NBTBlock(hitBlock.getLocation());
+                    nbtBlock.setObject("testString","test123");
+                    nbtBlock.save();
                     VBlock vBlock = VCorePaper.getInstance().getCustomBlockManager().wrap(VBlock.class, hitBlock.getLocation());
                     commandSender.sendMessage("");
                     vBlock.getNBTCompound().getKeys().forEach(s -> {

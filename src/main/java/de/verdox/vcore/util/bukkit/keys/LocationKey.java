@@ -33,7 +33,11 @@ public class LocationKey extends VCoreKey{
 
     @Override
     public String toString() {
-        return worldName+"_"+x+"_"+y+"_"+z;
+        return worldName+"_"+toStringWithoutWorld();
+    }
+
+    public String toStringWithoutWorld(){
+        return x+"_"+y+"_"+z;
     }
 
     @Override

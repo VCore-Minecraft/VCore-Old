@@ -2,10 +2,10 @@
  * Copyright (c) 2021. Lukas Jonsson
  */
 
-package de.verdox.vcorepaper.custom.blocks.debug;
+package de.verdox.vcorepaper.custom.block.data.debug;
 
 import de.verdox.vcorepaper.custom.annotation.NBTIdentifier;
-import de.verdox.vcorepaper.custom.blocks.data.VBlockCustomData;
+import de.verdox.vcorepaper.custom.block.data.VBlockCustomData;
 
 import javax.annotation.Nonnull;
 

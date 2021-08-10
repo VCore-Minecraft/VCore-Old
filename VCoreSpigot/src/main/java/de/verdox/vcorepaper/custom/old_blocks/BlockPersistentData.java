@@ -1,10 +1,10 @@
-package de.verdox.vcorepaper.custom.blocks;
+package de.verdox.vcorepaper.custom.old_blocks;
 
 import de.verdox.vcore.util.bukkit.keys.LocationKey;
 import de.verdox.vcorepaper.VCorePaper;
-import de.verdox.vcorepaper.custom.blocks.events.LoadVBlockDataEvent;
-import de.verdox.vcorepaper.custom.blocks.events.UnloadVBlockDataEvent;
-import de.verdox.vcorepaper.custom.blocks.files.VBlockSaveFile;
+import de.verdox.vcorepaper.custom.old_blocks.events.LoadVBlockDataEvent;
+import de.verdox.vcorepaper.custom.old_blocks.events.UnloadVBlockDataEvent;
+import de.verdox.vcorepaper.custom.old_blocks.files.VBlockSaveFile;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.block.data.BlockData;

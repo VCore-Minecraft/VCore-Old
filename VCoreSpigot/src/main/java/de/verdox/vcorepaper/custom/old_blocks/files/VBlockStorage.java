@@ -1,11 +1,11 @@
-package de.verdox.vcorepaper.custom.blocks.files;
+package de.verdox.vcorepaper.custom.old_blocks.files;
 
 import de.verdox.vcore.plugin.wrapper.types.WorldChunk;
 import de.verdox.vcore.util.bukkit.keys.ChunkKey;
 import de.verdox.vcore.util.bukkit.keys.LocationKey;
 import de.verdox.vcore.util.bukkit.keys.SplitChunkKey;
 import de.verdox.vcorepaper.VCorePaper;
-import de.verdox.vcorepaper.custom.blocks.CustomBlockManager;
+import de.verdox.vcorepaper.custom.old_blocks.CustomBlockManager;
 import org.apache.commons.io.FilenameUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;

@@ -1,6 +1,6 @@
-package de.verdox.vcorepaper.custom.blocks.enums;
+package de.verdox.vcorepaper.custom.old_blocks.enums;
 
-import de.verdox.vcorepaper.custom.blocks.VBlock;
+import de.verdox.vcorepaper.custom.old_blocks.VBlock;
 
 public enum VBlockEventPermission {
 

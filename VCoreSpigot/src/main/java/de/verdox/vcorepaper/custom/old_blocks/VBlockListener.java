@@ -1,10 +1,10 @@
-package de.verdox.vcorepaper.custom.blocks;
+package de.verdox.vcorepaper.custom.old_blocks;
 
 import de.verdox.vcore.plugin.listener.VCoreListener;
 import de.verdox.vcore.plugin.VCorePlugin;
 import de.verdox.vcorepaper.VCorePaper;
-import de.verdox.vcorepaper.custom.blocks.enums.VBlockEventPermission;
-import de.verdox.vcorepaper.custom.blocks.files.VBlockSaveFile;
+import de.verdox.vcorepaper.custom.old_blocks.enums.VBlockEventPermission;
+import de.verdox.vcorepaper.custom.old_blocks.files.VBlockSaveFile;
 import org.bukkit.Chunk;
 import org.bukkit.block.Block;
 import org.bukkit.event.EventHandler;

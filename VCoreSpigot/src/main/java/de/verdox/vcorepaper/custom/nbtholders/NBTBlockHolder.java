@@ -1,14 +1,10 @@
 package de.verdox.vcorepaper.custom.nbtholders;
 
 import de.verdox.vcore.util.VCoreUtil;
-import de.verdox.vcorepaper.VCorePaper;
-import de.verdox.vcorepaper.custom.blocks.BlockPersistentData;
-import de.verdox.vcorepaper.custom.blocks.CustomBlockManager;
+import de.verdox.vcorepaper.custom.old_blocks.BlockPersistentData;
 import de.verdox.vcorepaper.custom.util.Serializer;
 import org.bukkit.Location;
-import org.bukkit.block.BlockState;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.metadata.FixedMetadataValue;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -23,19 +19,15 @@ public class NBTBlockHolder implements NBTHolder {
     private final Lock readLock = readWriteLock.readLock();
     private final Lock writeLock = readWriteLock.writeLock();
 
-    private final Location blockLocation;
-    private final CustomBlockManager customBlockManager;
     private final BlockPersistentData blockPersistentData;
     private long lastUse = System.currentTimeMillis();
 
     public NBTBlockHolder(Location location, BlockPersistentData blockPersistentData){
         if(location == null)
             throw new NullPointerException("blockState can't be null!");
-        this.blockLocation = location;
         if(blockPersistentData == null)
             throw new NullPointerException("blockPersistentData can't be null!");
         this.blockPersistentData = blockPersistentData;
-        customBlockManager = VCorePaper.getInstance().getCustomBlockManager();
     }
 
     private <T> void saveMetaDataKey(String key, Class<T> type, T value){

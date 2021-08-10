@@ -1,6 +1,6 @@
-package de.verdox.vcorepaper.custom.blocks.events;
+package de.verdox.vcorepaper.custom.old_blocks.events;
 
-import de.verdox.vcorepaper.custom.blocks.VBlock;
+import de.verdox.vcorepaper.custom.old_blocks.VBlock;
 
 /**
  * Called when a VBlockSaveFile is unloaded

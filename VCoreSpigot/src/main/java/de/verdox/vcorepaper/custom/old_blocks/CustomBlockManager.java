@@ -1,4 +1,4 @@
-package de.verdox.vcorepaper.custom.blocks;
+package de.verdox.vcorepaper.custom.old_blocks;
 
 import de.verdox.vcore.performance.concurrent.CatchingRunnable;
 import de.verdox.vcore.performance.efficiency.Benchmark;
@@ -9,9 +9,9 @@ import de.verdox.vcore.util.bukkit.keys.LocationKey;
 import de.verdox.vcore.util.bukkit.keys.SplitChunkKey;
 import de.verdox.vcorepaper.VCorePaper;
 import de.verdox.vcorepaper.custom.CustomDataManager;
-import de.verdox.vcorepaper.custom.blocks.data.VBlockCustomData;
-import de.verdox.vcorepaper.custom.blocks.files.VBlockSaveFile;
-import de.verdox.vcorepaper.custom.blocks.files.VBlockStorage;
+import de.verdox.vcorepaper.custom.block.data.VBlockCustomData;
+import de.verdox.vcorepaper.custom.old_blocks.files.VBlockSaveFile;
+import de.verdox.vcorepaper.custom.old_blocks.files.VBlockStorage;
 import io.netty.util.concurrent.DefaultThreadFactory;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;

@@ -6,10 +6,9 @@ package de.verdox.vcore.util.bukkit;
 
 import de.verdox.vcore.plugin.wrapper.types.GameLocation;
 import de.verdox.vcore.plugin.wrapper.types.WorldChunk;
-import org.bukkit.Chunk;
-import org.bukkit.DyeColor;
-import org.bukkit.Location;
-import org.bukkit.Material;
+import de.verdox.vcore.plugin.wrapper.types.WorldRegion;
+import io.papermc.lib.PaperLib;
+import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.data.Directional;
@@ -22,6 +21,28 @@ public class BukkitWorldUtil {
         return loc1.getBlockX() == loc2.getBlockX()
                 && loc1.getBlockY() == loc2.getBlockY()
                 && loc1.getBlockZ() == loc2.getBlockZ();
+    }
+
+    public boolean isRegionLoaded(WorldRegion worldRegion){
+        World world = Bukkit.getWorld(worldRegion.worldName);
+        if(world == null)
+            return false;
+        for (WorldChunk chunk : worldRegion.getChunks()) {
+            if(world.isChunkLoaded(chunk.x,chunk.z))
+                return true;
+        }
+        return false;
+    }
+
+    public boolean isRegionLoaded(String worldName, WorldRegion worldRegion){
+        World world = Bukkit.getWorld(worldName);
+        if(world == null)
+            return false;
+        for (WorldChunk chunk : worldRegion.getChunks()) {
+            if(world.isChunkLoaded(chunk.x,chunk.z))
+                return true;
+        }
+        return false;
     }
 
     //TODO: Funktioniert noch nicht

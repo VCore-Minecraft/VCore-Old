@@ -1,11 +1,10 @@
-package de.verdox.vcorepaper.custom.blocks;
+package de.verdox.vcorepaper.custom.old_blocks;
 
-import com.google.gson.JsonObject;
 import de.verdox.vcorepaper.VCorePaper;
 import de.verdox.vcorepaper.custom.CustomData;
 import de.verdox.vcorepaper.custom.CustomDataHolder;
-import de.verdox.vcorepaper.custom.blocks.enums.VBlockEventPermission;
-import de.verdox.vcorepaper.custom.blocks.files.VBlockSaveFile;
+import de.verdox.vcorepaper.custom.old_blocks.enums.VBlockEventPermission;
+import de.verdox.vcorepaper.custom.old_blocks.files.VBlockSaveFile;
 import de.verdox.vcorepaper.custom.nbtholders.NBTBlockHolder;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -36,10 +35,6 @@ public class VBlock extends CustomDataHolder<Location, NBTBlockHolder, CustomBlo
     public void updateBlockData(BlockData blockData){
         this.blockDataAsString = blockData.getAsString();
         getBlockPersistentData().getJsonObject().put("vBlockBlockData",blockDataAsString);
-    }
-
-    public void updateBlockData(){
-        blockDataAsString = getDataHolder().getBlock().getBlockData().getAsString();
     }
 
     public void dropItemInWorld(ItemStack itemStack, org.bukkit.util.Consumer<Item> beforeDrop){
