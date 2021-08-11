@@ -3,11 +3,13 @@ package de.verdox.vcorepaper.commands;
 import de.verdox.vcore.plugin.command.VCommandCallback;
 import de.verdox.vcore.plugin.command.VCoreCommand;
 import de.verdox.vcore.plugin.VCorePlugin;
+import de.verdox.vcore.plugin.wrapper.types.WorldChunk;
 import de.verdox.vcorepaper.VCorePaper;
-import de.verdox.vcorepaper.custom.old_blocks.VBlock;
+import de.verdox.vcorepaper.custom.block.VBlock;
 import de.verdox.vcorepaper.custom.block.data.debug.BlockDebugData;
 import de.verdox.vcorepaper.custom.entities.VCoreEntity;
 import de.verdox.vcorepaper.custom.nbtholders.block.NBTBlock;
+import io.papermc.lib.PaperLib;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
@@ -146,6 +148,18 @@ public class AdminCommands extends VCoreCommand.VCoreBukkitCommand {
                             commandSender.sendMessage(ChatColor.translateAlternateColorCodes('&',"&7>> &e"+s+"&7: "+vCoreEntity.getNBTCompound().getObject(s,Object.class)));
                         });
                     });
+                });
+        addCommandCallback("debugChunk")
+                .setExecutor(VCommandCallback.CommandExecutorType.PLAYER)
+                .commandCallback((commandSender, commandParameters) -> {
+                    Player player = (Player) commandSender;
+                    Chunk chunk = player.getChunk();
+                    WorldChunk worldChunk = new WorldChunk(chunk.getWorld().getName(),chunk.getX(),chunk.getZ());
+                    player.sendMessage("");
+                    player.sendMessage(ChatColor.translateAlternateColorCodes('&',"&cDebugging World Chunk"));
+                    player.sendMessage(ChatColor.translateAlternateColorCodes('&',"&bWorldChunk&7: &e"+worldChunk));
+                    player.sendMessage(ChatColor.translateAlternateColorCodes('&',"&bWorldRegion&7: &e"+worldChunk.getRegion()));
+                    player.sendMessage("");
                 });
     }
 }

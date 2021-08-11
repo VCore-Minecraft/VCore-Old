@@ -1,6 +1,6 @@
 package de.verdox.vcorepaper.custom.events.callbacks;
 
-import de.verdox.vcorepaper.custom.old_blocks.VBlock;
+import de.verdox.vcorepaper.custom.block.VBlock;
 import de.verdox.vcorepaper.custom.items.VCoreItem;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.Action;

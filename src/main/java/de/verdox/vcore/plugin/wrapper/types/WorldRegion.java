@@ -57,7 +57,7 @@ public class WorldRegion {
         if (this == o) return true;
         if (!(o instanceof WorldRegion)) return false;
         WorldRegion that = (WorldRegion) o;
-        return regionX == that.regionX && regionZ == that.regionZ && Objects.equals(worldName, that.worldName);
+        return regionX == that.regionX && regionZ == that.regionZ && worldName.equals(that.worldName);
     }
 
     @Override

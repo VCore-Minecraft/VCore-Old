@@ -10,14 +10,13 @@ package de.verdox.vcorepaper.custom.block.flags;
  * @date 10.08.2021 22:19
  */
 public enum VBlockFlag {
-    BLOCK_GROW_EVENT("flag_deny_grow"),
-    BLOCK_EXPLODE_EVENT("flag_deny_explosionDamage"),
-    BLOCK_DROP_ITEMS_EVENT("flag_deny_dropItems"),
-    BLOCK_LIQUID_EVENT("flag_deny_liquidEvent"),
-    BLOCK_GRAVITY_EVENT("flag_deny_gravity"),
-    BLOCK_PISTON_EVENT("flag_deny_pistonEvent"),
-    BLOCK_BURN_EVENT("flag_deny_burnEvent"),
-    BLOCK_LEAVES_DECAY_EVENT("flag_deny_leavesDecay"),
+    DENY_BLOCK_GROW_EVENT("flag_deny_grow"),
+    DENY_BLOCK_EXPLODE_EVENT("flag_deny_explosionDamage"),
+    DENY_BLOCK_DROP_ITEMS_EVENT("flag_deny_dropItems"),
+    DENY_BLOCK_LIQUID_EVENT("flag_deny_liquidEvent"),
+    DENY_BLOCK_PISTON_EVENT("flag_deny_pistonEvent"),
+    DENY_BLOCK_BURN_EVENT("flag_deny_burnEvent"),
+    DENY_BLOCK_LEAVES_DECAY_EVENT("flag_deny_leavesDecay"),
     PRESERVE_DATA_ON_BREAK("flag_deny_deleteDataOnBreak"),
     ;
     private final String nbtTag;

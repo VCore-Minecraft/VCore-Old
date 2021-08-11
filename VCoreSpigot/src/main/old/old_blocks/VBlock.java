@@ -5,7 +5,6 @@ import de.verdox.vcorepaper.custom.CustomData;
 import de.verdox.vcorepaper.custom.CustomDataHolder;
 import de.verdox.vcorepaper.custom.old_blocks.enums.VBlockEventPermission;
 import de.verdox.vcorepaper.custom.old_blocks.files.VBlockSaveFile;
-import de.verdox.vcorepaper.custom.nbtholders.NBTBlockHolder;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.block.data.BlockData;

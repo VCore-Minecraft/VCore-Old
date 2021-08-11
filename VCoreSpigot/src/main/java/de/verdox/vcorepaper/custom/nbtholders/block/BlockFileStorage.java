@@ -11,8 +11,11 @@ import de.verdox.vcore.plugin.listener.VCoreListener;
 import de.verdox.vcore.plugin.wrapper.types.WorldChunk;
 import de.verdox.vcore.plugin.wrapper.types.WorldRegion;
 import de.verdox.vcore.util.VCoreUtil;
+import de.verdox.vcorepaper.custom.events.paper.BlockChangeStateEvent;
 import io.netty.util.concurrent.DefaultThreadFactory;
+import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
+import org.bukkit.World;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.world.ChunkLoadEvent;
 import org.bukkit.event.world.ChunkUnloadEvent;
@@ -21,10 +24,7 @@ import org.bukkit.event.world.WorldSaveEvent;
 import java.io.File;
 import java.io.IOException;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 /**
  * @version 1.0
@@ -32,35 +32,82 @@ import java.util.concurrent.TimeUnit;
  * @date 10.08.2021 14:33
  */
 public class BlockFileStorage extends VCoreListener.VCoreBukkitListener implements SystemLoadable {
-    private final ExecutorService executor = Executors.newSingleThreadScheduledExecutor(new DefaultThreadFactory("NBTBlock IO Loader"));
-    private final Map<WorldRegion, NBTFile> fileCache = new ConcurrentHashMap<>();
+    private final ExecutorService executor = Executors.newSingleThreadExecutor(new DefaultThreadFactory("NBTBlock IO Loader"));
+    private final Map<String, WorldStorage> fileCache = new ConcurrentHashMap<>();
 
     public BlockFileStorage(VCorePlugin.Minecraft plugin) {
         super(plugin);
     }
 
-    NBTFile getNBTFile(WorldChunk worldChunk){
+    CompletableFuture<NBTFile> getNBTFile(WorldChunk worldChunk){
+        CompletableFuture<NBTFile> nbtFileFuture = new CompletableFuture<>();
+        executor.submit(() -> {
+            nbtFileFuture.complete(getNBTFileUnsafe(worldChunk));
+        });
+        return nbtFileFuture;
+    }
+
+    NBTFile getNBTFileUnsafe(WorldChunk worldChunk){
+        if(!fileCache.containsKey(worldChunk.worldName)) {
+            return null;
+        }
+        return fileCache.get(worldChunk.worldName).getFileCache().get(worldChunk.getRegion());
+    }
+
+    NBTFile loadNBTFileUnsafe(File worldDirectory, WorldChunk worldChunk){
         WorldRegion worldRegion = new WorldRegion(worldChunk);
-        return fileCache.get(worldRegion);
+        try{
+            if(fileCache.containsKey(worldChunk.worldName) && fileCache.get(worldChunk.worldName).getFileCache().containsKey(worldRegion))
+                return fileCache.get(worldChunk.worldName).getFileCache().get(worldRegion);
+            NBTFile nbtFile = new NBTFile(new File(worldDirectory.getAbsolutePath()+"//VBlocks//"+worldRegion.toStringWithoutWorld()+".nbt"));
+            if(!fileCache.containsKey(worldChunk.worldName))
+                fileCache.put(worldRegion.worldName,new WorldStorage(worldChunk.worldName));
+            fileCache.get(worldChunk.worldName).getFileCache().put(worldRegion,nbtFile);
+            return nbtFile;
+        }
+        catch (IOException e){
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    CompletableFuture<NBTFile> loadNBTFile(File worldDirectory, WorldChunk worldChunk) {
+        CompletableFuture<NBTFile> nbtFileFuture = new CompletableFuture<>();
+        executor.submit(() -> {
+            nbtFileFuture.complete(loadNBTFileUnsafe(worldDirectory,worldChunk));
+        });
+        return nbtFileFuture;
+    }
+
+    CompletableFuture<NBTFile> loadNBTFile(WorldChunk worldChunk) {
+        World world = Bukkit.getWorld(worldChunk.worldName);
+        if(world == null)
+            throw new IllegalStateException("Trying to load NBTFile of world that is not loaded");
+        return loadNBTFile(world.getWorldFolder(),worldChunk);
+    }
+
+    NBTFile loadNBTFileUnsafe(WorldChunk worldChunk){
+        World world = Bukkit.getWorld(worldChunk.worldName);
+        if(world == null)
+            throw new IllegalStateException("Trying to load NBTFile of world that is not loaded");
+        return loadNBTFileUnsafe(world.getWorldFolder(),worldChunk);
     }
 
     @EventHandler
     public void onChunkLoad(ChunkLoadEvent e){
         Chunk chunk = e.getChunk();
-        File worldDirectory = e.getChunk().getWorld().getWorldFolder();
         // Only load for already generated Chunks?
         WorldChunk worldChunk = new WorldChunk(e.getChunk().getWorld().getName(),chunk.getX(),chunk.getZ());
         WorldRegion worldRegion = new WorldRegion(worldChunk);
+
+        File worldDirectory = e.getWorld().getWorldFolder();
         executor.submit(() -> {
-            if(fileCache.containsKey(worldRegion))
+            if(fileCache.containsKey(worldChunk.worldName))
+                return;
+            if(!fileCache.get(worldChunk.worldName).getFileCache().containsKey(worldRegion))
                 return;
             plugin.consoleMessage("&8[&b"+e.getChunk().getWorld().getName()+"&8]&eLoading Region "+worldRegion,true);
-            try {
-                NBTFile nbtFile = new NBTFile(new File(worldDirectory.getAbsolutePath()+"//VBlocks//"+worldRegion.toStringWithoutWorld()+".nbt"));
-                fileCache.put(worldRegion,nbtFile);
-            } catch (IOException ioException) {
-                ioException.printStackTrace();
-            }
+            loadNBTFile(worldDirectory,worldChunk);
         });
     }
 
@@ -69,11 +116,13 @@ public class BlockFileStorage extends VCoreListener.VCoreBukkitListener implemen
         Chunk chunk = e.getChunk();
         executor.submit(() -> {
             WorldChunk worldChunk = new WorldChunk(e.getChunk().getWorld().getName(),chunk.getX(),chunk.getZ());
-            NBTFile nbtFile = getNBTFile(worldChunk);
+            NBTFile nbtFile = getNBTFileUnsafe(worldChunk);
+            if(nbtFile == null)
+                return;
 
-            if(!VCoreUtil.BukkitUtil.getBukkitWorldUtil().isRegionLoaded(worldChunk.getRegion())) {
+            if(!VCoreUtil.BukkitUtil.getBukkitWorldUtil().isRegionLoaded(worldChunk.getRegion()) && fileCache.containsKey(worldChunk.worldName) && fileCache.get(worldChunk.worldName).getFileCache().containsKey(worldChunk.getRegion())) {
                 plugin.consoleMessage("&8[&b"+e.getChunk().getWorld().getName()+"&8]&eUnloading Region "+worldChunk.getRegion(),true);
-                fileCache.remove(worldChunk.getRegion());
+                fileCache.get(worldChunk.worldName).getFileCache().remove(worldChunk.getRegion());
             }
             try {
                 nbtFile.save();
@@ -89,13 +138,11 @@ public class BlockFileStorage extends VCoreListener.VCoreBukkitListener implemen
     }
 
     private void saveAll(){
-        for (NBTFile value : fileCache.values()) {
-            try {
-                value.save();
-            } catch (IOException ioException) {
-                ioException.printStackTrace();
-            }
-        }
+        fileCache.values().parallelStream().forEach(worldStorage -> {
+            worldStorage.getFileCache().forEach((worldRegion, nbtFile) -> {
+                try { nbtFile.save(); } catch (IOException e) { e.printStackTrace(); }
+            });
+        });
     }
 
     @Override

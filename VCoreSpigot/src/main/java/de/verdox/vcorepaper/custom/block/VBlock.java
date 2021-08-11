@@ -12,7 +12,6 @@ import org.bukkit.Location;
 
 import javax.annotation.Nonnull;
 import java.lang.reflect.InvocationTargetException;
-import java.util.function.Consumer;
 
 /**
  * @version 1.0
@@ -24,7 +23,7 @@ public class VBlock extends CustomDataHolder<Location, NBTBlock, CustomBlockMana
         super(dataHolder, customDataManager);
     }
 
-    public boolean isFlagAllowed(VBlockFlag flag){
+    public boolean isFlagSet(VBlockFlag flag){
         if(!getNBTCompound().hasKey(flag.getNbtTag()))
             return false;
         return getNBTCompound().getBoolean(flag.getNbtTag());

@@ -3,8 +3,8 @@ package de.verdox.vcorepaper.custom;
 import de.verdox.vcore.plugin.listener.VCoreListener;
 import de.verdox.vcore.plugin.VCorePlugin;
 import de.verdox.vcorepaper.VCorePaper;
-import de.verdox.vcorepaper.custom.old_blocks.VBlock;
-import de.verdox.vcorepaper.custom.old_blocks.enums.VBlockEventPermission;
+import de.verdox.vcorepaper.custom.block.VBlock;
+import de.verdox.vcorepaper.custom.block.flags.VBlockFlag;
 import de.verdox.vcorepaper.custom.events.callbacks.BlockDestroyCallback;
 import de.verdox.vcorepaper.custom.events.callbacks.BlockInteractCallback;
 import de.verdox.vcorepaper.custom.events.callbacks.BlockPlaceCallback;
@@ -12,7 +12,6 @@ import de.verdox.vcorepaper.custom.events.callbacks.EventBlockCallback;
 import de.verdox.vcorepaper.custom.items.VCoreItem;
 import io.netty.util.concurrent.DefaultThreadFactory;
 import org.bukkit.block.Block;
-import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -48,11 +47,9 @@ public class CustomDataListener extends VCoreListener.VCoreBukkitListener {
         Block block = e.getClickedBlock();
         if(block == null)
             return;
-        BlockData blockData = e.getClickedBlock().getBlockData();
 
         executorService.submit(() -> {
             VBlock vBlock = VCorePaper.getInstance().getCustomBlockManager().wrap(VBlock.class, block.getLocation());
-            vBlock.updateBlockData(blockData);
 
             VCoreItem vCoreItem = null;
             if(stack != null && !stack.getType().isAir())
@@ -85,11 +82,9 @@ public class CustomDataListener extends VCoreListener.VCoreBukkitListener {
         Player player = e.getPlayer();
         ItemStack stack = e.getItemInHand();
         Block block = e.getBlock();
-        BlockData blockData = e.getBlock().getBlockData();
 
         executorService.submit(() -> {
             VBlock vBlock = VCorePaper.getInstance().getCustomBlockManager().wrap(VBlock.class, block.getLocation());
-            vBlock.updateBlockData(blockData);
 
             VCoreItem vCoreItem = null;
             if(!stack.getType().isAir())
@@ -122,11 +117,9 @@ public class CustomDataListener extends VCoreListener.VCoreBukkitListener {
         Player player = e.getPlayer();
         ItemStack stack = player.getInventory().getItemInMainHand();
         Block block = e.getBlock();
-        BlockData blockData = e.getBlock().getBlockData();
 
         executorService.submit(() -> {
             VBlock vBlock = VCorePaper.getInstance().getCustomBlockManager().wrap(VBlock.class, block.getLocation());
-            vBlock.updateBlockData(blockData);
 
             VCoreItem vCoreItem = null;
             if(!stack.getType().isAir())
@@ -151,8 +144,8 @@ public class CustomDataListener extends VCoreListener.VCoreBukkitListener {
                         .forEach(vBlockCustomData -> ((BlockDestroyCallback) vBlockCustomData).blockCallback(player, Action.LEFT_CLICK_BLOCK,finalVCoreItem,vBlock,EventBlockCallback.CallbackType.BREAK_BLOCK));
             }
             finally {
-                if(vBlock.isBlockPermissionAllowed(VBlockEventPermission.DELETE_DATA_ON_BREAK))
-                    vBlock.deleteData();
+                if(!vBlock.isFlagSet(VBlockFlag.PRESERVE_DATA_ON_BREAK))
+                    vBlock.getNBTCompound().delete();
             }
         });
     }

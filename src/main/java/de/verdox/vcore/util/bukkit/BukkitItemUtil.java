@@ -7,6 +7,7 @@ package de.verdox.vcore.util.bukkit;
 import de.verdox.vcore.util.VCoreUtil;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.Damageable;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -21,13 +22,17 @@ import javax.annotation.Nullable;
  */
 public class BukkitItemUtil {
 
+    public int applyDamageNaturally(@Nullable ItemStack stack, @Nonnull Material material){
+        return applyDamageNaturally(stack,material,null);
+    }
+
     /**
      * Applys damage to the tool as if it has broken the given material
      * @param stack ItemStack to apply damage on
      * @param material Material the Item would break
      * @return damage that was dealt
      */
-    public int applyDamageNaturally(@Nullable ItemStack stack, @Nonnull Material material){
+    public int applyDamageNaturally(@Nullable ItemStack stack, @Nonnull Material material, @Nullable Player player){
         if(stack == null)
             return 0;
         ItemMeta meta = stack.getItemMeta();
@@ -58,11 +63,10 @@ public class BukkitItemUtil {
 
         damageable.setDamage((damageable.getDamage()+damageDealt));
         stack.setItemMeta((ItemMeta) damageable);
-        if(damageable.getDamage() <= 0) {
-            stack.setType(Material.AIR);
-            stack.subtract();
+        if(damageable.getDamage() > stack.getType().getMaxDurability()) {
+            if(player != null)
+                player.getInventory().removeItem(stack);
         }
-        //TODO: Item Stack break wenn kaputt
         return damageDealt;
     }
 

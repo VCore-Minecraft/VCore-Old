@@ -12,12 +12,17 @@ import de.verdox.vcore.util.bukkit.keys.LocationKey;
 import de.verdox.vcore.util.bukkit.keys.SplitChunkKey;
 import de.verdox.vcorepaper.VCorePaper;
 import de.verdox.vcorepaper.custom.nbtholders.NBTHolder;
+import de.verdox.vcorepaper.custom.nbtholders.block.event.NBTBlockDeleteEvent;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.inventory.ItemStack;
 
 import java.io.IOException;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 /**
  * @version 1.0
@@ -42,7 +47,7 @@ public class NBTBlock implements NBTHolder {
         WorldChunk worldChunk = new WorldChunk(location.getWorld().getName(),chunkX,chunkZ);
         SplitChunkKey splitChunkKey = new SplitChunkKey(worldChunk,chunkY);
 
-        this.nbtFile = VCorePaper.getInstance().getBlockFileStorage().getNBTFile(worldChunk);
+        this.nbtFile = VCorePaper.getInstance().getBlockFileStorage().loadNBTFileUnsafe(worldChunk);
 
         this.chunkCompound = this.nbtFile.getOrCreateCompound(((ChunkKey) splitChunkKey).toString());
         this.splitChunkCompound = this.chunkCompound.getOrCreateCompound(splitChunkKey.toString());
@@ -119,6 +124,13 @@ public class NBTBlock implements NBTHolder {
     }
 
     public void delete(){
-        splitChunkCompound.removeKey(new LocationKey(this.location).toStringWithoutWorld());
+        NBTBlockDeleteEvent NBTBlockDeleteEvent = new NBTBlockDeleteEvent(this);
+        Bukkit.getPluginManager().callEvent(NBTBlockDeleteEvent);
+        if(!NBTBlockDeleteEvent.isCancelled())
+            splitChunkCompound.removeKey(new LocationKey(this.location).toStringWithoutWorld());
+    }
+
+    public Location getLocation() {
+        return location;
     }
 }

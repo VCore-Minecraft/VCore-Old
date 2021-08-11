@@ -45,4 +45,81 @@ public class CustomPaperEventListener extends VCoreListener.VCoreBukkitListener 
                 e.setCancelled(true);
         }
     }
+
+    //private boolean callBlockChangeState(Block block, boolean materialChanged){
+    //    BlockChangeStateEvent blockChangeStateEvent = new BlockChangeStateEvent(block,materialChanged);
+    //    Bukkit.getPluginManager().callEvent(blockChangeStateEvent);
+    //    return blockChangeStateEvent.isCancelled();
+    //}
+//
+    //@EventHandler(priority = EventPriority.HIGHEST)
+    //public void blockBreak(BlockBreakEvent e){
+    //    if(e.isCancelled())
+    //        return;
+    //    e.setCancelled(callBlockChangeState(e.getBlock(),true));
+    //}
+//
+    //@EventHandler(priority = EventPriority.HIGHEST)
+    //public void blockPlace(BlockPlaceEvent e){
+    //    if(e.isCancelled())
+    //        return;
+    //    e.setCancelled(callBlockChangeState(e.getBlock(),true));
+    //}
+//
+    //@EventHandler
+    //public void pistonRetract(BlockPistonRetractEvent e){
+    //    if(e.isCancelled())
+    //        return;
+    //    for (Block block : e.getBlocks()) {
+    //        if(callBlockChangeState(block,true)) {
+    //            e.setCancelled(true);
+    //            return;
+    //        }
+    //    }
+    //}
+//
+    //@EventHandler
+    //public void pistonExtend(BlockPistonExtendEvent e){
+    //    if(e.isCancelled())
+    //        return;
+    //    for (Block block : e.getBlocks()) {
+    //        if(callBlockChangeState(block,true)) {
+    //            e.setCancelled(true);
+    //            return;
+    //        }
+    //    }
+    //}
+//
+    //@EventHandler
+    //public void blockFromTo(BlockFromToEvent e){
+    //    if(e.isCancelled())
+    //        return;
+    //    e.setCancelled(callBlockChangeState(e.getBlock(),true));
+    //}
+//
+    //@EventHandler
+    //public void explodeEvent(BlockExplodeEvent e){
+    //    if(e.isCancelled())
+    //        return;
+    //    e.setCancelled(callBlockChangeState(e.getBlock(),true));
+    //}
+//
+    //@EventHandler
+    //public void entityChangeBlock(EntityChangeBlockEvent e){
+    //    if(e.isCancelled())
+    //        return;
+    //    e.setCancelled(callBlockChangeState(e.getBlock(),true));
+    //}
+//
+    //@EventHandler
+    //public void interact(PlayerInteractEvent e){
+    //    if(e.isCancelled())
+    //        return;
+    //    if(e.getAction().equals(Action.PHYSICAL)){
+    //        Block block = e.getClickedBlock();
+    //        if(block == null)
+    //            return;
+    //        e.setCancelled(callBlockChangeState(e.getClickedBlock(),block.getType().equals(Material.FARMLAND)));
+    //    }
+    //}
 }
