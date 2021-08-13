@@ -22,6 +22,9 @@ import java.util.Set;
  * @Author: Lukas Jonsson (Verdox)
  * @date 20.06.2021 00:19
  */
+
+//TODO: Pro Server ein StandardInventory
+
 @DataStorageIdentifier(identifier = "BukkitPlayerHandler")
 public class BukkitPlayerHandler extends VCoreSubsystem.Bukkit {
     public BukkitPlayerHandler(VCorePlugin.Minecraft VCorePlugin) {

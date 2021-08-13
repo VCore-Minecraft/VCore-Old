@@ -47,7 +47,13 @@ public class NBTBlock implements NBTHolder {
         WorldChunk worldChunk = new WorldChunk(location.getWorld().getName(),chunkX,chunkZ);
         SplitChunkKey splitChunkKey = new SplitChunkKey(worldChunk,chunkY);
 
-        this.nbtFile = VCorePaper.getInstance().getBlockFileStorage().loadNBTFileUnsafe(worldChunk);
+        try {
+            this.nbtFile = VCorePaper.getInstance().getBlockFileStorage().loadNBTFile(worldChunk).get(10,TimeUnit.SECONDS);
+        } catch (InterruptedException | ExecutionException | TimeoutException e) {
+            VCorePaper.getInstance().consoleMessage("&cCould not load NBT File for: "+location,true);
+            e.printStackTrace();
+            throw new IllegalStateException();
+        }
 
         this.chunkCompound = this.nbtFile.getOrCreateCompound(((ChunkKey) splitChunkKey).toString());
         this.splitChunkCompound = this.chunkCompound.getOrCreateCompound(splitChunkKey.toString());
@@ -117,6 +123,10 @@ public class NBTBlock implements NBTHolder {
     @Override
     public void save() {
         try {
+            String key = new LocationKey(this.location).toStringWithoutWorld();
+            if(splitChunkCompound.hasKey(key))
+                if(splitChunkCompound.getCompound(key).getKeys().isEmpty())
+                    splitChunkCompound.removeKey(key);
             nbtFile.save();
         } catch (IOException e) {
             e.printStackTrace();

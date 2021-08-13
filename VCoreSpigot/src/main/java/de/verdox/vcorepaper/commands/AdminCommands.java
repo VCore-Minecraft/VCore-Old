@@ -1,5 +1,6 @@
 package de.verdox.vcorepaper.commands;
 
+import de.verdox.vcore.performance.concurrent.TaskBatch;
 import de.verdox.vcore.plugin.command.VCommandCallback;
 import de.verdox.vcore.plugin.command.VCoreCommand;
 import de.verdox.vcore.plugin.VCorePlugin;
@@ -8,8 +9,6 @@ import de.verdox.vcorepaper.VCorePaper;
 import de.verdox.vcorepaper.custom.block.VBlock;
 import de.verdox.vcorepaper.custom.block.data.debug.BlockDebugData;
 import de.verdox.vcorepaper.custom.entities.VCoreEntity;
-import de.verdox.vcorepaper.custom.nbtholders.block.NBTBlock;
-import io.papermc.lib.PaperLib;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
@@ -17,7 +16,13 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.util.RayTraceResult;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.CopyOption;
+import java.nio.file.Files;
 import java.util.Arrays;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 public class AdminCommands extends VCoreCommand.VCoreBukkitCommand {
     private VCorePaper vCorePaper;
@@ -117,9 +122,6 @@ public class AdminCommands extends VCoreCommand.VCoreBukkitCommand {
                         commandSender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&cBitte schaue einen Block an&7!"));
                         return;
                     }
-                    NBTBlock nbtBlock = new NBTBlock(hitBlock.getLocation());
-                    nbtBlock.setObject("testString","test123");
-                    nbtBlock.save();
                     VBlock vBlock = VCorePaper.getInstance().getCustomBlockManager().wrap(VBlock.class, hitBlock.getLocation());
                     commandSender.sendMessage("");
                     vBlock.getNBTCompound().getKeys().forEach(s -> {

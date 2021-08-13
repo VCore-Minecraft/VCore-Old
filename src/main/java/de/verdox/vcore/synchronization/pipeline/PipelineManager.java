@@ -225,12 +225,16 @@ public class PipelineManager implements Pipeline {
 
     @Override
     public <T extends VCoreData> boolean delete(@Nonnull Class<? extends T> type, @Nonnull UUID uuid) {
+        plugin.consoleMessage("&eDeleting&7: &b"+type.getSimpleName()+" &ewith uuid &a"+uuid,true);
         if(getLocalCache() != null)
-            getLocalCache().remove(type, uuid);
+            if(!getLocalCache().remove(type, uuid))
+                plugin.consoleMessage("&8[&eLocalCache&8] &cCould not delete&7: &b"+type.getSimpleName()+" &ewith uuid &a"+uuid,true);
         if(getGlobalCache() != null)
-            getGlobalCache().remove(type,uuid);
+            if(!getGlobalCache().remove(type,uuid))
+                plugin.consoleMessage("&8[&eGlobalCache&8] &cCould not delete&7: &b"+type.getSimpleName()+" &ewith uuid &a"+uuid,true);
         if(getGlobalStorage() != null)
-            getGlobalStorage().remove(type,uuid);
+            if(!getGlobalStorage().remove(type,uuid))
+                plugin.consoleMessage("&8[&eGlobalStorage&8] &cCould not delete&7: &b"+type.getSimpleName()+" &ewith uuid &a"+uuid,true);
         return true;
     }
 

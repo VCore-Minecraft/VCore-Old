@@ -17,9 +17,15 @@ import net.minecraft.server.v1_16_R3.*;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.block.Biome;
+import org.bukkit.boss.DragonBattle;
 import org.bukkit.craftbukkit.v1_16_R3.CraftChunk;
 import org.bukkit.craftbukkit.v1_16_R3.CraftServer;
+import org.bukkit.craftbukkit.v1_16_R3.CraftWorld;
+import org.bukkit.craftbukkit.v1_16_R3.boss.CraftDragonBattle;
+import org.bukkit.craftbukkit.v1_16_R3.entity.CraftEnderDragon;
 import org.bukkit.craftbukkit.v1_16_R3.entity.CraftPlayer;
+import org.bukkit.entity.EnderDragon;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.checkerframework.checker.index.qual.NonNegative;
 
@@ -224,5 +230,27 @@ public class WorldHandler_V1_16_R3 implements NMSWorldHandler {
                     PacketPlayOutWorldBorder packetPlayOutWorldBorder = new PacketPlayOutWorldBorder(craftPlayer.getHandle().getWorld().getWorldBorder(), PacketPlayOutWorldBorder.EnumWorldBorderAction.INITIALIZE);
                     craftPlayer.getHandle().playerConnection.sendPacket(packetPlayOutWorldBorder);
                 }).executeBatch(callback);
+    }
+
+    @Override
+    public DragonBattle createDragonBattle(@Nonnull Location dragonSpawnLoc, @Nonnull Location exitPortalLoc) {
+        WorldServer worldServer = ((CraftWorld)dragonSpawnLoc.getWorld()).getHandle();
+
+        NBTTagCompound nbtTagCompound = new NBTTagCompound();
+
+        EnderDragon enderDragon = (EnderDragon) dragonSpawnLoc.getWorld().spawnEntity(dragonSpawnLoc, EntityType.ENDER_DRAGON);
+
+        nbtTagCompound.setUUID("Dragon",enderDragon.getUniqueId());
+        nbtTagCompound.setBoolean("PreviouslyKilled",false);
+        nbtTagCompound.setBoolean("DragonKilled",false);
+        nbtTagCompound.setBoolean("IsRespawning",false);
+
+        NBTTagCompound exitPortalLocation = nbtTagCompound.getCompound("ExitPortalLocation");
+        exitPortalLocation.setInt("X",exitPortalLoc.getBlockX());
+        exitPortalLocation.setInt("Y",exitPortalLoc.getBlockY());
+        exitPortalLocation.setInt("Z",exitPortalLoc.getBlockZ());
+
+        EnderDragonBattle enderDragonBattle = new EnderDragonBattle(worldServer,dragonSpawnLoc.getWorld().getSeed(),nbtTagCompound);
+        return new CraftDragonBattle(enderDragonBattle);
     }
 }

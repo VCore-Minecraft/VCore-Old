@@ -39,8 +39,8 @@ public interface VCoreSerializable {
             try {
                 Field field = getClass().getDeclaredField(dataKey);
                 field.setAccessible(true);
-                if(field.get(this) == null)
-                    return;
+                //if(field.get(this) == null)
+                //    return;
                 serializedData.put(field.getName(), field.get(this));
             } catch (NoSuchFieldException | IllegalAccessException e) { e.printStackTrace(); }
         });

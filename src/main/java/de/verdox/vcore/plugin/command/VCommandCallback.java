@@ -81,7 +81,7 @@ public class VCommandCallback {
         return this;
     }
 
-    public String getSuggested(VCoreCommand<?,?> command){
+    String getSuggested(VCoreCommand<?,?> command){
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("&7/&b").append(command.getCommandName()).append(" ");
         for (CommandCallbackInfo callbackInfo : callbackInfos) {
