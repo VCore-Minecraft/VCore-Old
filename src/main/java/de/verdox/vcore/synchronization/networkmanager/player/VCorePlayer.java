@@ -19,7 +19,7 @@ import java.util.UUID;
  */
 
 @DataStorageIdentifier(identifier = "VCorePlayer")
-@VCoreDataContext(preloadStrategy = PreloadStrategy.LOAD_ON_NEED, dataContext = DataContext.GLOBAL, cleanOnNoUse = false)
+@VCoreDataProperties(preloadStrategy = PreloadStrategy.LOAD_ON_NEED, dataContext = DataContext.GLOBAL, cleanOnNoUse = false)
 public class VCorePlayer extends NetworkData {
 
     @VCorePersistentData

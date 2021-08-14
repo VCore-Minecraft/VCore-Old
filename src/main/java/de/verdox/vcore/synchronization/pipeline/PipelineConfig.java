@@ -13,6 +13,7 @@ import de.verdox.vcore.synchronization.pipeline.parts.local.LocalCache;
 import de.verdox.vcore.synchronization.pipeline.parts.local.LocalCacheImpl;
 import de.verdox.vcore.synchronization.pipeline.parts.storage.GlobalStorage;
 import de.verdox.vcore.synchronization.pipeline.parts.storage.mongodb.MongoDBStorage;
+import de.verdox.vcore.synchronization.pipeline.parts.storage.yaml.YamlStorage;
 
 import java.io.File;
 import java.util.List;
@@ -36,40 +37,50 @@ public class PipelineConfig extends VCoreYAMLConfig {
         GlobalCache globalCache = null;
         GlobalStorage globalStorage = null;
 
-        String globalCacheType = config.getString("GlobalCache.type");
-        plugin.consoleMessage("&eGlobalCacheType&7: &b"+globalCacheType,false);
-        if(globalCacheType.equalsIgnoreCase("redis")){
-            boolean useCluster = config.getBoolean("GlobalCache.redis.useCluster");
-            String[] addresses = config.getStringList("GlobalCache.redis.addresses").toArray(new String[0]);
-            String password = config.getString("GlobalCache.redis.password");
-
-            boolean useCoreInstance = useCoreGlobalCache();
-
-            if(useCoreInstance) {
-                globalCache = plugin.getCoreInstance().getServices().getPipeline().getGlobalCache();
-                plugin.consoleMessage("&eSelecting Core GlobalCache",false);
-            }
-            else
-                globalCache = new RedisCache(plugin,useCluster,addresses,password);
+        // Initializing Global Cache
+        if(useCoreGlobalCache()){
+            globalCache = plugin.getCoreInstance().getServices().getPipeline().getGlobalCache();
+            plugin.consoleMessage("&eSelecting Core GlobalCache",false);
         }
-        String globalStorageType = config.getString("GlobalStorage.type");
-        plugin.consoleMessage("&eGlobalStorageType&7: &b"+globalStorageType,false);
-        if(globalStorageType.equalsIgnoreCase("mongoDB")){
+        else {
+            String globalCacheType = config.getString("GlobalCache.type");
+            plugin.consoleMessage("&eGlobalCacheType&7: &b"+globalCacheType,false);
+            if(globalCacheType.equalsIgnoreCase("redis")){
+                boolean useCluster = config.getBoolean("GlobalCache.redis.useCluster");
+                String[] addresses = config.getStringList("GlobalCache.redis.addresses").toArray(new String[0]);
+                String password = config.getString("GlobalCache.redis.password");
 
-            String host = config.getString("GlobalStorage.mongodb.host");
-            int port = config.getInt("GlobalStorage.mongodb.port");
-            String database = config.getString("GlobalStorage.mongodb.database");
-            String user = config.getString("GlobalStorage.mongodb.user");
-            String password = config.getString("GlobalStorage.mongodb.password");
-
-            boolean useCoreInstance = useCoreGlobalStorage();
-
-            if(useCoreInstance) {
-                globalStorage = plugin.getCoreInstance().getServices().getPipeline().getGlobalStorage();
-                plugin.consoleMessage("&eSelecting Core GlobalStorage",false);
+                globalCache = new RedisCache(plugin,useCluster,addresses,password);
             }
-            else
+            else {
+                plugin.consoleMessage("&cNo GlobalCache loaded&7!",false);
+            }
+        }
+
+        // Initializing Global Storage
+        if(useCoreGlobalStorage()){
+            globalStorage = plugin.getCoreInstance().getServices().getPipeline().getGlobalStorage();
+            plugin.consoleMessage("&eSelecting Core GlobalStorage",false);
+        }
+        else {
+            String globalStorageType = config.getString("GlobalStorage.type");
+            plugin.consoleMessage("&eGlobalStorageType&7: &b"+globalStorageType,false);
+            if(globalStorageType.equalsIgnoreCase("mongoDB")){
+
+                String host = config.getString("GlobalStorage.mongodb.host");
+                int port = config.getInt("GlobalStorage.mongodb.port");
+                String database = config.getString("GlobalStorage.mongodb.database");
+                String user = config.getString("GlobalStorage.mongodb.user");
+                String password = config.getString("GlobalStorage.mongodb.password");
+
                 globalStorage = new MongoDBStorage(plugin, host, database, port, user, password);
+            }
+            else if(globalStorageType.equalsIgnoreCase("yaml") || globalStorageType.equalsIgnoreCase("yml")){
+                globalStorage = new YamlStorage(plugin);
+            }
+            else {
+                plugin.consoleMessage("&cNo GlobalStorage loaded&7!",false);
+            }
         }
         return new PipelineManager(plugin, localCache, globalCache, globalStorage);
     }

@@ -8,6 +8,7 @@ import de.verdox.vcore.synchronization.pipeline.datatypes.NetworkData;
 import de.verdox.vcore.synchronization.pipeline.datatypes.VCoreData;
 import de.verdox.vcore.plugin.VCorePlugin;
 import de.verdox.vcore.plugin.subsystem.VCoreSubsystem;
+import de.verdox.vcore.util.global.AnnotationResolver;
 
 import javax.annotation.Nonnull;
 import java.lang.reflect.InvocationTargetException;
@@ -81,7 +82,7 @@ public class LocalCacheImpl implements LocalCache{
     public <S extends VCoreData> S instantiateData(@Nonnull Class<? extends S> dataClass, @Nonnull UUID objectUUID) {
         // Network Data is not subsystem dependent
         if(!NetworkData.class.isAssignableFrom(dataClass)){
-            if(VCorePlugin.findDependSubsystemClass(dataClass) == null)
+            if(AnnotationResolver.findDependSubsystemClass(dataClass) == null)
                 throw new NullPointerException(dataClass+" does not have RequiredSubsystem Annotation set.");
             VCoreSubsystem<?> subsystem = plugin.findDependSubsystem(dataClass);
             if(subsystem == null)

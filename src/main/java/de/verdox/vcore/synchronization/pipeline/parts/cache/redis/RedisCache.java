@@ -9,9 +9,9 @@ import de.verdox.vcore.synchronization.pipeline.datatypes.VCoreData;
 import de.verdox.vcore.synchronization.pipeline.interfaces.DataManipulator;
 import de.verdox.vcore.synchronization.pipeline.interfaces.VCoreSerializable;
 import de.verdox.vcore.synchronization.pipeline.parts.cache.GlobalCache;
-import de.verdox.vcore.synchronization.pipeline.parts.storage.GlobalStorage;
 import de.verdox.vcore.plugin.VCorePlugin;
 import de.verdox.vcore.synchronization.redisson.RedisConnection;
+import de.verdox.vcore.util.global.AnnotationResolver;
 import org.redisson.api.*;
 import org.redisson.codec.SerializationCodec;
 
@@ -64,9 +64,9 @@ public class RedisCache extends RedisConnection implements GlobalCache {
     public Map<String, Object> getObjectCache(Class<? extends VCoreData> dataClass, UUID objectUUID) {
         RMap<String, Object> objectCache;
         if(NetworkData.class.isAssignableFrom(dataClass))
-            objectCache = redissonClient.getMap("VCoreCache:"+objectUUID+":"+ GlobalStorage.getDataStorageIdentifier(dataClass));
+            objectCache = redissonClient.getMap("VCoreCache:"+objectUUID+":"+ AnnotationResolver.getDataStorageIdentifier(dataClass));
         else {
-            objectCache = redissonClient.getMap(plugin.getPluginName() + "Cache:" + objectUUID + ":" + GlobalStorage.getDataStorageIdentifier(dataClass));
+            objectCache = redissonClient.getMap(plugin.getPluginName() + "Cache:" + objectUUID + ":" + AnnotationResolver.getDataStorageIdentifier(dataClass));
             objectCache.expire(12, TimeUnit.HOURS);
         }
         return objectCache;
@@ -83,7 +83,7 @@ public class RedisCache extends RedisConnection implements GlobalCache {
     @Override
     public Set<String> getKeys(Class<? extends VCoreData> dataClass) {
         String pluginName = plugin.getPluginName();
-        String mongoIdentifier = GlobalStorage.getDataStorageIdentifier(dataClass);
+        String mongoIdentifier = AnnotationResolver.getDataStorageIdentifier(dataClass);
         return redissonClient.getKeys().getKeysStream().filter(s -> {
             String[] parts = s.split(":");
             return parts[0].equals(pluginName) && parts[2].equals(mongoIdentifier);
@@ -129,7 +129,7 @@ public class RedisCache extends RedisConnection implements GlobalCache {
             throw new NullPointerException("DataClass is null");
         if(objectUUID == null)
             throw new NullPointerException("objectUUID is null");
-        String key = plugin.getPluginName()+"DataTopic:"+GlobalStorage.getDataStorageIdentifier(dataClass)+":"+objectUUID;
+        String key = plugin.getPluginName()+"DataTopic:"+ AnnotationResolver.getDataStorageIdentifier(dataClass)+":"+objectUUID;
         return redissonClient.getTopic(key, new SerializationCodec());
     }
 }

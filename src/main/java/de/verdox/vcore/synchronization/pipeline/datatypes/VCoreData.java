@@ -4,12 +4,12 @@
 
 package de.verdox.vcore.synchronization.pipeline.datatypes;
 
-import de.verdox.vcore.synchronization.pipeline.annotations.VCoreDataContext;
+import de.verdox.vcore.synchronization.pipeline.annotations.VCoreDataProperties;
 import de.verdox.vcore.synchronization.pipeline.interfaces.DataManipulator;
 import de.verdox.vcore.synchronization.pipeline.interfaces.VCoreSerializable;
 import de.verdox.vcore.plugin.VCorePlugin;
 import de.verdox.vcore.synchronization.pipeline.parts.DataSynchronizer;
-import de.verdox.vcore.synchronization.pipeline.parts.cache.GlobalCache;
+import de.verdox.vcore.util.global.AnnotationResolver;
 
 import java.util.Map;
 import java.util.Objects;
@@ -47,7 +47,7 @@ public abstract class VCoreData implements VCoreSerializable {
 
                 }
             };
-        VCoreDataContext dataContext = GlobalCache.getDataContext(getClass());
+        VCoreDataProperties dataContext = AnnotationResolver.getDataProperties(getClass());
         this.cleanTime = dataContext.time();
         this.cleanTimeUnit = dataContext.timeUnit();
     }

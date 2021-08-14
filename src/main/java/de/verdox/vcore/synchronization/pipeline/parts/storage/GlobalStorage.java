@@ -13,10 +13,4 @@ import de.verdox.vcore.synchronization.pipeline.parts.DataProvider;
  * @date 24.06.2021 15:25
  */
 public interface GlobalStorage extends DataProvider {
-    static String getDataStorageIdentifier(Class<?> customClass){
-        DataStorageIdentifier dataStorageIdentifier = customClass.getAnnotation(DataStorageIdentifier.class);
-        if(dataStorageIdentifier == null)
-            throw new NullPointerException("DataStorageIdentifier not set for class: "+customClass);
-        return dataStorageIdentifier.identifier();
-    }
 }

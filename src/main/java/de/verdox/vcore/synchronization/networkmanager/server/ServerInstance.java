@@ -5,7 +5,6 @@
 package de.verdox.vcore.synchronization.networkmanager.server;
 
 import de.verdox.vcore.plugin.VCorePlugin;
-import de.verdox.vcore.plugin.wrapper.types.GameLocation;
 import de.verdox.vcore.synchronization.pipeline.annotations.*;
 import de.verdox.vcore.synchronization.pipeline.datatypes.NetworkData;
 
@@ -20,7 +19,7 @@ import java.util.UUID;
  */
 
 @DataStorageIdentifier(identifier = "ServerInstance")
-@VCoreDataContext(preloadStrategy = PreloadStrategy.LOAD_ON_NEED, dataContext = DataContext.GLOBAL, cleanOnNoUse = false)
+@VCoreDataProperties(preloadStrategy = PreloadStrategy.LOAD_ON_NEED, dataContext = DataContext.GLOBAL, cleanOnNoUse = false)
 public class ServerInstance extends NetworkData {
 
     //TODO: VersionTag

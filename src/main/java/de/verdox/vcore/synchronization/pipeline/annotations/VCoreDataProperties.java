@@ -9,7 +9,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.util.concurrent.TimeUnit;
 
 @Retention(RetentionPolicy.RUNTIME)
-public @interface VCoreDataContext {
+public @interface VCoreDataProperties {
     DataContext dataContext();
     PreloadStrategy preloadStrategy();
     boolean cleanOnNoUse() default true;

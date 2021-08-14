@@ -47,13 +47,6 @@ public interface VCorePlugin <T, R extends VCoreSubsystem<?>> extends SystemLoad
 
     PluginServiceParts<?,R> getServices();
 
-    static Class<? extends VCoreSubsystem<?>> findDependSubsystemClass(Class<?> classType){
-        RequiredSubsystemInfo requiredSubsystemInfo = classType.getAnnotation(RequiredSubsystemInfo.class);
-        if(requiredSubsystemInfo == null)
-            throw new RuntimeException(classType.getName()+" does not have RequiredSubsystemInfo Annotation set");
-        return requiredSubsystemInfo.parentSubSystem();
-    }
-
     default VCoreSubsystem<?> findDependSubsystem(Class<?> classType){
         RequiredSubsystemInfo requiredSubsystemInfo = classType.getAnnotation(RequiredSubsystemInfo.class);
         if(requiredSubsystemInfo == null)

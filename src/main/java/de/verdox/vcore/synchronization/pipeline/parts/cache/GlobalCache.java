@@ -4,10 +4,7 @@
 
 package de.verdox.vcore.synchronization.pipeline.parts.cache;
 
-import com.j256.ormlite.field.DataPersister;
-import de.verdox.vcore.synchronization.pipeline.annotations.DataContext;
-import de.verdox.vcore.synchronization.pipeline.annotations.PreloadStrategy;
-import de.verdox.vcore.synchronization.pipeline.annotations.VCoreDataContext;
+import de.verdox.vcore.synchronization.pipeline.annotations.VCoreDataProperties;
 import de.verdox.vcore.synchronization.pipeline.datatypes.VCoreData;
 import de.verdox.vcore.synchronization.pipeline.interfaces.DataManipulator;
 import de.verdox.vcore.synchronization.pipeline.parts.DataProvider;
@@ -45,21 +42,4 @@ public interface GlobalCache extends DataProvider {
         };
     }
 
-    static DataContext getContext(Class<? extends VCoreData> dataClass){
-        VCoreDataContext vCoreDataContext = dataClass.getAnnotation(VCoreDataContext.class);
-        if(vCoreDataContext == null)
-            return DataContext.GLOBAL;
-        return vCoreDataContext.dataContext();
-    }
-
-    static VCoreDataContext getDataContext(Class<? extends VCoreData> dataClass){
-        return dataClass.getAnnotation(VCoreDataContext.class);
-    }
-
-    static PreloadStrategy getPreloadStrategy(Class<? extends VCoreData> dataClass){
-        VCoreDataContext vCoreDataContext = dataClass.getAnnotation(VCoreDataContext.class);
-        if(vCoreDataContext == null)
-            return PreloadStrategy.LOAD_ON_NEED;
-        return vCoreDataContext.preloadStrategy();
-    }
 }

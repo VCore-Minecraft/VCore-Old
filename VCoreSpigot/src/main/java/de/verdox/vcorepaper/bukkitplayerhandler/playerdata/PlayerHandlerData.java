@@ -12,6 +12,7 @@ import de.verdox.vcorepaper.bukkitplayerhandler.BukkitPlayerHandler;
 import de.verdox.vcorepaper.bukkitplayerhandler.event.PlayerInventoryRestoreEvent;
 import de.verdox.vcorepaper.bukkitplayerhandler.event.PlayerInventorySaveEvent;
 import de.verdox.vcorepaper.bukkitplayerhandler.model.SerializableJsonInventory;
+import org.bson.BsonDocument;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
@@ -30,7 +31,7 @@ import java.util.function.Supplier;
  */
 @DataStorageIdentifier(identifier = "BukkitPlayerHandlerPlayerData")
 @RequiredSubsystemInfo(parentSubSystem = BukkitPlayerHandler.class)
-@VCoreDataContext(preloadStrategy = PreloadStrategy.LOAD_ON_NEED, dataContext = DataContext.GLOBAL, cleanOnNoUse = false, time = 30)
+@VCoreDataProperties(preloadStrategy = PreloadStrategy.LOAD_ON_NEED, dataContext = DataContext.GLOBAL, cleanOnNoUse = false, time = 30)
 public class PlayerHandlerData extends PlayerData {
 
     @VCorePersistentData
@@ -50,7 +51,6 @@ public class PlayerHandlerData extends PlayerData {
 
     @VCorePersistentData
     private String activeInventoryID = null;
-    private final PreloadStrategy loadOnNeed = PreloadStrategy.LOAD_ON_NEED;
 
     public PlayerHandlerData(VCorePlugin<?,?> plugin, UUID playerUUID) {
         super(plugin, playerUUID);

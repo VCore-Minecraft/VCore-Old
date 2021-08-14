@@ -6,7 +6,9 @@ import de.verdox.vcore.plugin.files.config.bukkit.VCoreBukkitConfig;
 import de.verdox.vcore.plugin.files.config.bungeecord.VCoreBungeeConfig;
 import de.verdox.vcore.plugin.files.config.serialization.VCoreDeserializer;
 import de.verdox.vcore.plugin.files.config.serialization.VCoreSerializable;
+import de.verdox.vcore.synchronization.pipeline.datatypes.VCoreData;
 import org.apache.commons.io.FilenameUtils;
+import org.bukkit.inventory.ItemStack;
 
 import java.io.File;
 
@@ -16,6 +18,7 @@ public abstract class VCoreConfig <T> {
     protected String pluginDirectory;
     protected File file;
     protected T config;
+    protected boolean initialized = false;
 
     public VCoreConfig(VCorePlugin<?,?> plugin, File file) {
         this.plugin = plugin;
@@ -45,9 +48,12 @@ public abstract class VCoreConfig <T> {
 
     public void init() {
         this.config = create();
+        if(initialized)
+            return;
         setupConfig();
         save();
         onInit();
+        initialized = true;
     }
     public abstract T create();
     public abstract void onInit();

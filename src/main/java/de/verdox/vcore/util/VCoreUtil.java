@@ -21,7 +21,6 @@ public class VCoreUtil {
         return new TimeUtil();
     }
 
-
     public static class BukkitUtil{
         public static VanillaUtil getVanillaUtil() {
             return new VanillaUtil();

@@ -7,7 +7,7 @@ package de.verdox.vcore.synchronization.pipeline;
 import de.verdox.vcore.performance.concurrent.CatchingRunnable;
 import de.verdox.vcore.synchronization.pipeline.annotations.DataContext;
 import de.verdox.vcore.synchronization.pipeline.annotations.PreloadStrategy;
-import de.verdox.vcore.synchronization.pipeline.annotations.VCoreDataContext;
+import de.verdox.vcore.synchronization.pipeline.annotations.VCoreDataProperties;
 import de.verdox.vcore.synchronization.pipeline.datatypes.NetworkData;
 import de.verdox.vcore.synchronization.pipeline.datatypes.VCoreData;
 import de.verdox.vcore.synchronization.pipeline.parts.DataSynchronizer;
@@ -18,6 +18,7 @@ import de.verdox.vcore.synchronization.pipeline.parts.storage.GlobalStorage;
 import de.verdox.vcore.plugin.VCorePlugin;
 import de.verdox.vcore.plugin.subsystem.VCoreSubsystem;
 import de.verdox.vcore.synchronization.pipeline.parts.storage.PipelineTaskScheduler;
+import de.verdox.vcore.util.global.AnnotationResolver;
 import io.netty.util.concurrent.DefaultThreadFactory;
 
 import javax.annotation.Nonnull;
@@ -60,10 +61,10 @@ public class PipelineManager implements Pipeline {
         this.pipelineDataSynchronizer = new PipelineDataSynchronizer(this);
         plugin.getServices().getVCoreScheduler().asyncInterval(() -> {
             plugin.getServices().getSubsystemManager().getRegisteredPlayerDataClasses().forEach(aClass -> {
-                VCoreDataContext vCoreDataContext = GlobalCache.getDataContext(aClass);
-                if(vCoreDataContext == null)
+                VCoreDataProperties vCoreDataProperties = AnnotationResolver.getDataProperties(aClass);
+                if(vCoreDataProperties == null)
                     return;
-                if(!vCoreDataContext.cleanOnNoUse())
+                if(!vCoreDataProperties.cleanOnNoUse())
                     return;
                 Set<UUID> cachedUUIDs = localCache.getSavedUUIDs(aClass);
                 if(cachedUUIDs.isEmpty())
@@ -82,10 +83,10 @@ public class PipelineManager implements Pipeline {
                 });
             });
             plugin.getServices().getSubsystemManager().getRegisteredServerDataClasses().forEach(aClass -> {
-                VCoreDataContext vCoreDataContext = GlobalCache.getDataContext(aClass);
-                if(vCoreDataContext == null)
+                VCoreDataProperties vCoreDataProperties = AnnotationResolver.getDataProperties(aClass);
+                if(vCoreDataProperties == null)
                     return;
-                if(!vCoreDataContext.cleanOnNoUse())
+                if(!vCoreDataProperties.cleanOnNoUse())
                     return;
                 Set<UUID> cachedUUIDs = localCache.getSavedUUIDs(aClass);
                 if(cachedUUIDs.isEmpty())
@@ -323,7 +324,7 @@ public class PipelineManager implements Pipeline {
             //getDatabaseHandler().databaseToLocal(dataClass,uuid);
             pipelineDataSynchronizer.doSynchronisation(DataSynchronizer.DataSourceType.GLOBAL_STORAGE, DataSynchronizer.DataSourceType.LOCAL, dataClass, uuid, null);
 
-            if(GlobalCache.getContext(dataClass).equals(DataContext.GLOBAL))
+            if(AnnotationResolver.getDataProperties(dataClass).dataContext().equals(DataContext.GLOBAL))
                 //globalStorage.dataBaseToRedis(dataClass, uuid);
                 pipelineDataSynchronizer.doSynchronisation(DataSynchronizer.DataSourceType.GLOBAL_STORAGE, DataSynchronizer.DataSourceType.GLOBAL_CACHE, dataClass, uuid, null);
         }
@@ -346,9 +347,13 @@ public class PipelineManager implements Pipeline {
     }
 
     private <S extends VCoreData> void preloadData(Class<? extends S> type){
-        PreloadStrategy preloadStrategy = GlobalCache.getPreloadStrategy(type);
+        VCoreDataProperties vCoreDataProperties = AnnotationResolver.getDataProperties(type);
+        if(vCoreDataProperties == null)
+            return;
+        PreloadStrategy preloadStrategy = vCoreDataProperties.preloadStrategy();
         if(!preloadStrategy.equals(PreloadStrategy.LOAD_BEFORE))
             return;
+        plugin.consoleMessage("&ePreloading &b"+type.getSimpleName(),true);
         if(globalCache != null)
             globalCache.getSavedUUIDs(type).forEach(uuid -> pipelineDataSynchronizer.doSynchronisation(DataSynchronizer.DataSourceType.GLOBAL_CACHE, DataSynchronizer.DataSourceType.LOCAL, type, uuid, null));
         if(globalStorage != null)

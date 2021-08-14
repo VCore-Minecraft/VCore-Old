@@ -2,9 +2,9 @@ package de.verdox.vcore.plugin.subsystem;
 
 import de.verdox.vcore.synchronization.pipeline.datatypes.PlayerData;
 import de.verdox.vcore.synchronization.pipeline.datatypes.ServerData;
-import de.verdox.vcore.synchronization.pipeline.parts.storage.GlobalStorage;
 import de.verdox.vcore.plugin.VCorePlugin;
 import de.verdox.vcore.plugin.subsystem.exceptions.SubsystemDeactivatedException;
+import de.verdox.vcore.util.global.AnnotationResolver;
 
 import java.util.Set;
 import java.util.UUID;
@@ -16,9 +16,9 @@ public abstract class VCoreSubsystem<S extends VCorePlugin<?,?>> {
 
     public VCoreSubsystem(S vCorePlugin){
         this.vCorePlugin = vCorePlugin;
-        if(GlobalStorage.getDataStorageIdentifier(this.getClass()) == null)
+        if(AnnotationResolver.getDataStorageIdentifier(this.getClass()) == null)
             throw new RuntimeException(getClass().getName()+" has no MongoDBAnnotation");
-        uuid = UUID.nameUUIDFromBytes(GlobalStorage.getDataStorageIdentifier(this.getClass()).getBytes());
+        uuid = UUID.nameUUIDFromBytes(AnnotationResolver.getDataStorageIdentifier(this.getClass()).getBytes());
     }
 
     public abstract boolean isActivated();

@@ -17,7 +17,7 @@ import java.io.IOException;
  * @Author: Lukas Jonsson (Verdox)
  * @date 27.06.2021 20:00
  */
-public abstract class VCoreYAMLConfig extends VCoreConfig<YamlFile> {
+public class VCoreYAMLConfig extends VCoreConfig<YamlFile> {
 
     public VCoreYAMLConfig(VCorePlugin<?, ?> plugin, String fileName, String pluginDirectory) {
         super(plugin, fileName, pluginDirectory);
@@ -35,6 +35,16 @@ public abstract class VCoreYAMLConfig extends VCoreConfig<YamlFile> {
         yamlFile.options().copyDefaults(true);
         yamlFile.options().copyHeader(true);
         return yamlFile;
+    }
+
+    @Override
+    public void onInit() {
+
+    }
+
+    @Override
+    public void setupConfig() {
+
     }
 
     @Override

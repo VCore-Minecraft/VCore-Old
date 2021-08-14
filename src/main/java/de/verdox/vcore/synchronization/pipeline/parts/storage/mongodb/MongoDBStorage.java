@@ -4,15 +4,11 @@
 
 package de.verdox.vcore.synchronization.pipeline.parts.storage.mongodb;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoCredential;
 import com.mongodb.ServerAddress;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
-import com.mongodb.client.model.IndexOptions;
-import com.mongodb.client.model.Indexes;
 import de.verdox.vcore.synchronization.pipeline.datatypes.NetworkData;
 import de.verdox.vcore.synchronization.pipeline.datatypes.PlayerData;
 import de.verdox.vcore.synchronization.pipeline.datatypes.ServerData;
@@ -21,6 +17,7 @@ import de.verdox.vcore.synchronization.pipeline.parts.storage.GlobalStorage;
 import de.verdox.vcore.synchronization.pipeline.parts.storage.RemoteStorage;
 import de.verdox.vcore.plugin.VCorePlugin;
 import de.verdox.vcore.plugin.subsystem.VCoreSubsystem;
+import de.verdox.vcore.util.global.AnnotationResolver;
 import org.bson.Document;
 
 import javax.annotation.Nonnull;
@@ -137,13 +134,13 @@ public class MongoDBStorage implements GlobalStorage, RemoteStorage {
             return getCollection("VCore_NetworkData_"+dataClass.getCanonicalName()+suffix);
         }
         else {
-            Class<? extends VCoreSubsystem<?>> subsystemClass = VCorePlugin.findDependSubsystemClass(dataClass);
+            Class<? extends VCoreSubsystem<?>> subsystemClass = AnnotationResolver.findDependSubsystemClass(dataClass);
             if(subsystemClass == null)
                 throw new NullPointerException("Dependent Subsystem Annotation not set. ["+dataClass.getCanonicalName()+"]");
-            String mongoIdentifier = GlobalStorage.getDataStorageIdentifier(subsystemClass);
+            String mongoIdentifier = AnnotationResolver.getDataStorageIdentifier(subsystemClass);
             if(mongoIdentifier == null)
                 throw new NullPointerException("MongoDBIdentifier Annotation not set. ["+subsystemClass.getCanonicalName()+"]");
-            return getCollection(GlobalStorage.getDataStorageIdentifier(subsystemClass)+suffix);
+            return getCollection(AnnotationResolver.getDataStorageIdentifier(subsystemClass)+suffix);
         }
     }
 
