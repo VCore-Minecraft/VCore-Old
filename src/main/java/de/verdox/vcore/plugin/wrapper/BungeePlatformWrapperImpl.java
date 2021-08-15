@@ -10,6 +10,7 @@ import de.verdox.vcore.synchronization.networkmanager.player.VCorePlayer;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.chat.TextComponent;
+import net.md_5.bungee.api.config.ServerInfo;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -56,21 +57,26 @@ public class BungeePlatformWrapperImpl implements PlatformWrapper{
     public BungeePlatform getBungeePlatform() {
         return new BungeePlatform() {
             @Override
-            public void sendToServer(@Nonnull UUID playerUUID, @Nonnull String serverName) {
+            public boolean sendToServer(@Nonnull UUID playerUUID, @Nonnull String serverName) {
                 ProxiedPlayer proxiedPlayer = ProxyServer.getInstance().getPlayer(playerUUID);
                 if(proxiedPlayer == null)
-                    return;
+                    return false;
                 if(serverName.equals(proxiedPlayer.getServer().getInfo().getName()))
-                    return;
-                proxiedPlayer.connect(ProxyServer.getInstance().getServerInfo(serverName));
+                    return false;
+                ServerInfo serverInfo = ProxyServer.getInstance().getServerInfo(serverName);
+                if(serverInfo == null)
+                    return false;
+                proxiedPlayer.connect(serverInfo);
+                return true;
             }
 
             @Override
-            public void kickPlayer(@Nonnull UUID playerUUID, @Nonnull String kickMessage) {
+            public boolean kickPlayer(@Nonnull UUID playerUUID, @Nonnull String kickMessage) {
                 ProxiedPlayer proxiedPlayer = ProxyServer.getInstance().getPlayer(playerUUID);
                 if(proxiedPlayer == null)
-                    return;
+                    return false;
                 proxiedPlayer.disconnect(new TextComponent(ChatColor.translateAlternateColorCodes('&',kickMessage)));
+                return true;
             }
         };
     }

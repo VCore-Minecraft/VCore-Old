@@ -43,6 +43,8 @@ public class VCommandCallback {
     private BiConsumer<CommandSender, CommandParameters> providedArguments;
     private boolean restAsString = false;
 
+    //TODO: Im Command Callback eine Möglichkeit dem Spieler vorzeitig die Error Message zu senden
+
     public VCommandCallback(@Nonnull VCorePlugin<?,?> plugin, @Nonnull String... commandPath){
         this.plugin = plugin;
         this.commandPath = commandPath;

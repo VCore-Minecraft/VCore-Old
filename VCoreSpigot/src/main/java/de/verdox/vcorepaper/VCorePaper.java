@@ -22,7 +22,6 @@ import de.verdox.vcorepaper.custom.events.paper.CustomPaperEventListener;
 import de.verdox.vcorepaper.custom.items.CustomItemManager;
 import de.verdox.vcorepaper.custom.nbtholders.block.BlockFileStorage;
 import de.verdox.vcorepaper.nms.NMSManager;
-import de.verdox.vcorepaper.bukkitplayerhandler.BukkitPlayerHandler;
 import org.bukkit.Bukkit;
 
 import java.util.List;
@@ -90,7 +89,7 @@ public class VCorePaper extends VCoreCoreInstance.Minecraft {
 
     @Override
     public List<VCoreSubsystem.Bukkit> provideSubsystems() {
-        return List.of(new BukkitPlayerHandler(this));
+        return null;
     }
 
     public CustomEntityManager getCustomEntityManager() {

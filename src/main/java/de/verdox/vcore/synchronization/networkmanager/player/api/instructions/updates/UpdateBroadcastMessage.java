@@ -8,6 +8,7 @@ import de.verdox.vcore.plugin.wrapper.types.enums.PlayerMessageType;
 import de.verdox.vcore.synchronization.messaging.instructions.update.Update;
 import de.verdox.vcore.synchronization.networkmanager.player.api.VCorePlayerAPI;
 
+import javax.annotation.Nonnull;
 import java.util.List;
 import java.util.UUID;
 
@@ -21,15 +22,18 @@ public class UpdateBroadcastMessage extends Update {
         super(uuid);
     }
 
+    @Nonnull
     @Override
-    public Object[] respondToInstruction(Object[] instructionData) {
-        if(spigotPlatform != null){
-            String messageType = (String) instructionData[0];
-            String message = (String) instructionData[1];
-            PlayerMessageType playerMessageType = PlayerMessageType.valueOf(messageType);
-            spigotPlatform.broadcastMessage(message, playerMessageType);
-        }
-        return new Object[0];
+    public UpdateCompletion executeUpdate(Object[] instructionData) {
+        if (spigotPlatform == null)
+            return UpdateCompletion.NOTHING;
+
+        String messageType = (String) instructionData[0];
+        String message = (String) instructionData[1];
+        PlayerMessageType playerMessageType = PlayerMessageType.valueOf(messageType);
+        spigotPlatform.broadcastMessage(message, playerMessageType);
+
+        return UpdateCompletion.TRUE;
     }
 
     @Override

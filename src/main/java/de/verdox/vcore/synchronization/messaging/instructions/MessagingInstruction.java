@@ -5,9 +5,14 @@
 package de.verdox.vcore.synchronization.messaging.instructions;
 
 import de.verdox.vcore.plugin.VCorePlugin;
+import de.verdox.vcore.plugin.wrapper.Platform;
+import de.verdox.vcore.plugin.wrapper.PlatformWrapper;
 import de.verdox.vcore.plugin.wrapper.bungeecord.BungeePlatform;
 import de.verdox.vcore.plugin.wrapper.spigot.SpigotPlatform;
+import de.verdox.vcore.synchronization.messaging.instructions.update.Update;
+import reactor.util.annotation.NonNull;
 
+import javax.annotation.Nonnull;
 import java.util.List;
 import java.util.UUID;
 
@@ -20,6 +25,7 @@ public abstract class MessagingInstruction {
     protected VCorePlugin<?,?> plugin;
     protected SpigotPlatform spigotPlatform;
     protected BungeePlatform bungeePlatform;
+    protected PlatformWrapper platformWrapper;
     protected final String[] parameters;
     protected final List<Class<?>> types;
     protected final UUID uuid;
@@ -34,6 +40,7 @@ public abstract class MessagingInstruction {
     }
     public void setPlugin(VCorePlugin<?, ?> plugin) {
         this.plugin = plugin;
+        this.platformWrapper = plugin.getPlatformWrapper();
         this.spigotPlatform = plugin.getPlatformWrapper().getSpigotPlatform();
         this.bungeePlatform = plugin.getPlatformWrapper().getBungeePlatform();
     }
@@ -49,6 +56,18 @@ public abstract class MessagingInstruction {
         }
         this.data = data;
         return this;
+    }
+
+    public boolean checkOnlineOnSpigot(@Nonnull UUID playerUUID){
+        if(spigotPlatform == null)
+            return false;
+        return platformWrapper.isPlayerOnline(playerUUID);
+    }
+
+    public boolean checkOnlineOnBungeeCord(@Nonnull UUID playerUUID){
+        if(bungeePlatform == null)
+            return false;
+        return platformWrapper.isPlayerOnline(playerUUID);
     }
 
     public UUID getUuid() {

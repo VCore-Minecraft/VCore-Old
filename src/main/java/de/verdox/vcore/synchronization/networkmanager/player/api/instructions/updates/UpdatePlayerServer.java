@@ -8,6 +8,7 @@ import de.verdox.vcore.synchronization.messaging.instructions.update.Update;
 import de.verdox.vcore.synchronization.networkmanager.player.api.VCorePlayerAPI;
 import net.md_5.bungee.api.ProxyServer;
 
+import javax.annotation.Nonnull;
 import java.util.List;
 import java.util.UUID;
 
@@ -21,16 +22,20 @@ public class UpdatePlayerServer extends Update {
         super(uuid);
     }
 
+    @Nonnull
     @Override
-    public Object[] respondToInstruction(Object[] instructionData) {
+    public UpdateCompletion executeUpdate(Object[] instructionData) {
+
         UUID targetUUID = (UUID) instructionData[0];
         String serverName = (String) instructionData[1];
-        if(bungeePlatform != null){
-            if(serverName.equals(plugin.getCoreInstance().getServerName()))
-                return null;
-            bungeePlatform.sendToServer(targetUUID,serverName);
-        }
-        return new Object[0];
+
+        if(!checkOnlineOnBungeeCord(targetUUID))
+            return UpdateCompletion.NOTHING;
+
+        if(serverName.equals(plugin.getCoreInstance().getServerName()))
+            return UpdateCompletion.FALSE;
+        bungeePlatform.sendToServer(targetUUID,serverName);
+        return UpdateCompletion.TRUE;
     }
 
     @Override

@@ -52,6 +52,7 @@ public abstract class VCorePlayerAPIImpl implements VCorePlayerAPI, SystemLoadab
         plugin.getServices().getMessagingService().getInstructionService().registerInstructionType(6, UpdatePlayerFood.class);
         plugin.getServices().getMessagingService().getInstructionService().registerInstructionType(7, UpdatePlayerGameMode.class);
         plugin.getServices().getMessagingService().getInstructionService().registerInstructionType(8, UpdateBroadcastMessage.class);
+        plugin.getServices().getMessagingService().getInstructionService().registerInstructionType(9, UpdatePlayerClearInventory.class);
     }
 
     @Override
@@ -192,5 +193,12 @@ public abstract class VCorePlayerAPIImpl implements VCorePlayerAPI, SystemLoadab
         UpdateBroadcastMessage updateBroadcastMessage = new UpdateBroadcastMessage(UUID.randomUUID());
         updateBroadcastMessage.withData(playerMessageType.name(),message);
         plugin.getServices().getMessagingService().getInstructionService().sendInstruction(updateBroadcastMessage);
+    }
+
+    @Override
+    public void clearInventory(@Nonnull VCorePlayer vCorePlayer) {
+        UpdatePlayerClearInventory updatePlayerClearInventory = new UpdatePlayerClearInventory(UUID.randomUUID());
+        updatePlayerClearInventory.withData(vCorePlayer.getObjectUUID());
+        plugin.getServices().getMessagingService().getInstructionService().sendInstruction(updatePlayerClearInventory);
     }
 }

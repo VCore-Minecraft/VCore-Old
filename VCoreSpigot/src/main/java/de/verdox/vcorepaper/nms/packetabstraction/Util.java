@@ -14,7 +14,6 @@ import java.lang.reflect.Field;
  * @date 13.07.2021 23:24
  */
 public class Util {
-
     public static void debugPacketContainer(PacketContainer packetContainer){
         System.out.println("");
         System.out.println(packetContainer.getHandle().getClass().getSimpleName());

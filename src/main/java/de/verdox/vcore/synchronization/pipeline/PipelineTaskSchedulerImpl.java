@@ -59,10 +59,7 @@ public class PipelineTaskSchedulerImpl implements PipelineTaskScheduler {
     public <T extends VCoreData> void removePipelineTask(@Nonnull Class<? extends T> type, @Nonnull UUID uuid) {
         if(!pendingTasks.containsKey(uuid))
             return;
-        System.out.println("1");
         PipelineTask<?> task = pendingTasks.get(uuid).get(type);
-        if(!task.getCompletableFuture().isDone())
-            System.out.println("Deleting Task that has not been completed yet!");
         if(pendingTasks.get(uuid).isEmpty())
             pendingTasks.remove(uuid);
     }

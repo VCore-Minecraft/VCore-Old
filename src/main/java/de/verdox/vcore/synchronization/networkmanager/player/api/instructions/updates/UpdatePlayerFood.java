@@ -7,6 +7,7 @@ package de.verdox.vcore.synchronization.networkmanager.player.api.instructions.u
 import de.verdox.vcore.synchronization.messaging.instructions.update.Update;
 import de.verdox.vcore.synchronization.networkmanager.player.api.VCorePlayerAPI;
 
+import javax.annotation.Nonnull;
 import java.util.List;
 import java.util.UUID;
 
@@ -20,19 +21,22 @@ public class UpdatePlayerFood extends Update {
         super(uuid);
     }
 
+    @Nonnull
     @Override
-    public Object[] respondToInstruction(Object[] instructionData) {
+    public UpdateCompletion executeUpdate(Object[] instructionData) {
         UUID target = (UUID) instructionData[0];
         int food = (int) instructionData[1];
 
-        if(spigotPlatform != null)
-            plugin.sync(() -> spigotPlatform.setPlayerFood(target,food));
-        return new Object[0];
+        if (!checkOnlineOnSpigot(target))
+            return UpdateCompletion.NOTHING;
+
+        plugin.sync(() -> spigotPlatform.setPlayerFood(target, food));
+        return UpdateCompletion.TRUE;
     }
 
     @Override
     protected List<Class<?>> dataTypes() {
-        return List.of(UUID.class,Integer.class);
+        return List.of(UUID.class, Integer.class);
     }
 
     @Override

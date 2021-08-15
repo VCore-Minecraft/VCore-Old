@@ -133,6 +133,14 @@ public class BukkitPlatformWrapperImpl implements PlatformWrapper {
             }
 
             @Override
+            public void clearInventory(@Nonnull UUID playerUUID) {
+                Player player = Bukkit.getPlayer(playerUUID);
+                if(player == null)
+                    return;
+                player.getInventory().clear();
+            }
+
+            @Override
             public GameLocation getLocation(@Nonnull UUID playerUUID) {
                 Player player = Bukkit.getPlayer(playerUUID);
                 if(player == null)

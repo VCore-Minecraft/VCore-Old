@@ -161,5 +161,14 @@ public class PlayerAPICommands extends VCoreCommand.VCoreBukkitCommand {
                     String message = commandParameters.getObject(0,String.class);
                     vCorePlugin.getCoreInstance().getPlayerAPI().broadcastMessage(message,PlayerMessageType.CHAT, GlobalProperty.NETWORK);
                 });
+
+        addCommandCallback("clearInventory")
+                .withPermission("vcore.clearInventory")
+                .askFor("PlayerTarget", VCommandCallback.CommandAskType.VCORE_PLAYER,"&cSpieler wurde nicht gefunden&7!")
+                .setExecutor(VCommandCallback.CommandExecutorType.PLAYER)
+                .commandCallback((commandSender, commandParameters) -> {
+                    VCorePlayer victim = commandParameters.getObject(0,VCorePlayer.class);
+                    vCorePlugin.getCoreInstance().getPlayerAPI().clearInventory(victim);
+                });
     }
 }

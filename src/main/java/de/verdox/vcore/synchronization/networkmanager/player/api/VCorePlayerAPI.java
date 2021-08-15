@@ -36,6 +36,7 @@ public interface VCorePlayerAPI {
     //TODO: gamerules global ändern (für alle welten und nur eine welt (mehrere welten auf anderen servern mit gleichem server)), difficulty, sendTitle,
     //TODO: globales Scoreboard, globale BossBar, give, kill, IP Command, PlayerInfo Command mit allen verfügbaren Daten über den VCorePlayer
 
+    //TODO: Update Functions auf Future Objekte ändern -> Checken obs geklappt hat -> Command Response für Sender
     void teleport(@Nonnull VCorePlayer vCorePlayer, @Nonnull ServerLocation serverLocation);
     void teleport(@Nonnull VCorePlayer vCorePlayer, @Nonnull VCorePlayer target);
 
@@ -47,6 +48,7 @@ public interface VCorePlayerAPI {
     void healPlayer(@Nonnull VCorePlayer vCorePlayer);
     void feedPlayer(@Nonnull VCorePlayer vCorePlayer);
     void setGameMode(@Nonnull VCorePlayer vCorePlayer, @Nonnull PlayerGameMode gameMode);
+    void clearInventory(@Nonnull VCorePlayer vCorePlayer);
 
     void broadcastMessage(@Nonnull String message, @Nonnull PlayerMessageType playerMessageType, @Nonnull GlobalProperty globalProperty);
     //TODO: Send message an Liste von Spielern
@@ -56,6 +58,7 @@ public interface VCorePlayerAPI {
 
     enum APIParameters{
         QUERY_PLAYER_POSITION("QueryPlayerPosition"),
+        QUERY_PLAYER_INVSEE("QueryPlayerInvsee"),
 
         UPDATE_PLAYER_POSITION("UpdatePlayerPosition"),
         UPDATE_PLAYER_KICK("UpdatePlayerKick"),
@@ -65,6 +68,7 @@ public interface VCorePlayerAPI {
         UPDATE_PLAYER_FOOD("UpdatePlayerFood"),
         UPDATE_PLAYER_GAMEMODE("UpdatePlayerGameMode"),
         UPDATE_BROADCASTMESSAGE("UpdateBroadcastMessage"),
+        UPDATE_Player_CLEARINV("UpdatePlayerClearInv"),
         ;
         private final String parameter;
 

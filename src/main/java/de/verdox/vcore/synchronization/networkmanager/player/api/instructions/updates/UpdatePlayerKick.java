@@ -7,6 +7,7 @@ package de.verdox.vcore.synchronization.networkmanager.player.api.instructions.u
 import de.verdox.vcore.synchronization.messaging.instructions.update.Update;
 import de.verdox.vcore.synchronization.networkmanager.player.api.VCorePlayerAPI;
 
+import javax.annotation.Nonnull;
 import java.util.List;
 import java.util.UUID;
 
@@ -20,20 +21,24 @@ public class UpdatePlayerKick extends Update {
         super(uuid);
     }
 
+    @Nonnull
     @Override
-    public Object[] respondToInstruction(Object[] instructionData) {
+    public UpdateCompletion executeUpdate(Object[] instructionData) {
         UUID targetUUID = (UUID) instructionData[0];
         String kickMessage = (String) instructionData[1];
-        if(kickMessage == null)
+        if (kickMessage == null)
             kickMessage = "&cYou were kicked from the network&7!";
-        if(bungeePlatform != null){
-            bungeePlatform.kickPlayer(targetUUID,kickMessage);
-        }
-        else if(spigotPlatform != null){
+
+        if (!platformWrapper.isPlayerOnline(targetUUID))
+            return UpdateCompletion.NOTHING;
+
+        if (bungeePlatform != null)
+            bungeePlatform.kickPlayer(targetUUID, kickMessage);
+        else if (spigotPlatform != null) {
             String finalKickMessage = kickMessage;
             plugin.sync(() -> spigotPlatform.kickPlayer(targetUUID, finalKickMessage));
         }
-        return new Object[0];
+        return UpdateCompletion.TRUE;
     }
 
     @Override
