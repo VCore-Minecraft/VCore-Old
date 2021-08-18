@@ -57,13 +57,37 @@ public class InstructionService {
 
     public void sendInstruction(@Nonnull MessagingInstruction messagingInstruction){
         InstructionInfo instructionInfo = getInstructionInfo(messagingInstruction.getClass());
+        UUID uuid = messagingInstruction.getUuid();
+
+        Message instructionMessage = constructMessage(messagingInstruction);
+        if(instructionMessage == null)
+            return;
+        plugin.consoleMessage("&eSending Instruction &8[&b"+messagingInstruction.getUuid()+"&8] &7| &eParameters &8[&b"+ Arrays.toString(instructionMessage.getParameters())+"&8] &7| &eInstructionData&8[&e"+Arrays.toString(instructionMessage.dataToSend())+"&8]",true);
+        plugin.getServices().getMessagingService().publishMessage(instructionMessage);
+        if(instructionInfo.awaitsResponse())
+            pendingInstructions.put(uuid,messagingInstruction);
+    }
+
+    public void sendInstruction(@Nonnull MessagingInstruction messagingInstruction, String... serverNames){
+        InstructionInfo instructionInfo = getInstructionInfo(messagingInstruction.getClass());
+        UUID uuid = messagingInstruction.getUuid();
+
+        Message instructionMessage = constructMessage(messagingInstruction);
+        if(instructionMessage == null)
+            return;
+        plugin.consoleMessage("&eSending Instruction &8[&b"+messagingInstruction.getUuid()+"&8] &7| &eParameters &8[&b"+ Arrays.toString(instructionMessage.getParameters())+"&8] &7| &eInstructionData&8[&e"+Arrays.toString(instructionMessage.dataToSend())+"&8]",true);
+        plugin.getServices().getMessagingService().sendMessage(instructionMessage, serverNames);
+        if(instructionInfo.awaitsResponse())
+            pendingInstructions.put(uuid,messagingInstruction);
+    }
+
+    private Message constructMessage(@Nonnull MessagingInstruction messagingInstruction){
         if(messagingInstruction.getData() == null)
             throw new IllegalStateException("You can't send empty instructions");
         int instructionID = getID(messagingInstruction.getClass());
         if(instructionID == -1)
             throw new IllegalStateException("Sending an Instruction that has not been registered: "+messagingInstruction.getClass().getSimpleName());
         messagingInstruction.setPlugin(plugin);
-        UUID uuid = messagingInstruction.getUuid();
         Message instructionMessage = plugin.getServices().getMessagingService()
                 .constructMessage()
                 .withParameters("VCoreInstruction")
@@ -71,12 +95,9 @@ public class InstructionService {
                 .constructMessage();
         if(!messagingInstruction.onSend(messagingInstruction.getData())) {
             plugin.consoleMessage("&cCancelled Instruction &8[&b"+messagingInstruction.getUuid()+"&8]" ,true);
-            return;
+            return null;
         }
-        plugin.consoleMessage("&eSending Instruction &8[&b"+messagingInstruction.getUuid()+"&8] &7| &eParameters &8[&b"+ Arrays.toString(instructionMessage.getParameters())+"&8] &7| &eInstructionData&8[&e"+Arrays.toString(instructionMessage.dataToSend())+"&8]",true);
-        plugin.getServices().getMessagingService().publishMessage(instructionMessage);
-        if(instructionInfo.awaitsResponse())
-            pendingInstructions.put(uuid,messagingInstruction);
+        return instructionMessage;
     }
 
     private void sendResponse(int instructionID, UUID instructionUUID, String[] arguments, Object[] instructionData, Object[] responseData){

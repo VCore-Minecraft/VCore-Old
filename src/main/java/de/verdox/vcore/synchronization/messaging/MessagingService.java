@@ -19,13 +19,10 @@ import java.util.UUID;
  */
 public interface MessagingService<T extends MessageBuilder> extends SystemLoadable {
 
-    //TODO: Jeder Messaging Channel bekommt für diese eine Session einen direkten Nachrichtenkanal, an welchen er genauso Nachrichten empfangen kann
-    // Das Message Event soll auch da gecalled werden
-    // Beim InstructionService wo querys und updates versendet werden soll die Möglichkeit gegeben werden ServerNamen (String... serverNames) anzugeben, als
-    // direkte Ziele für die Instruktion
-
     T constructMessage();
     void publishMessage(Message message);
+    void sendMessage(Message message, String... serverNames);
+    void setupPrivateMessagingChannel();
 
     boolean isOwnMessage(Message message);
     default UUID getSessionUUID(){

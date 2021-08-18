@@ -87,10 +87,10 @@ public class VCoreGUI<T> {
         if(this.size == 0) {
             if(inventoryType == null)
                 throw new IllegalArgumentException("Please specify either an InventoryType or an InventorySize");
-            this.inventory = Bukkit.createInventory(player,inventoryType,inventoryTitle);
+            this.inventory = Bukkit.createInventory(player,inventoryType,ChatColor.translateAlternateColorCodes('&',inventoryTitle));
         }
         else {
-            this.inventory = Bukkit.createInventory(player,size,inventoryTitle);
+            this.inventory = Bukkit.createInventory(player,size,ChatColor.translateAlternateColorCodes('&',inventoryTitle));
         }
 
         itemCache.forEach((slot, inventoryContent) -> {
@@ -105,38 +105,40 @@ public class VCoreGUI<T> {
         Bukkit.getScheduler().runTask(plugin,() -> player.openInventory(inventory));
 
         if(updater){
-            this.guiUpdater = Bukkit.getScheduler().runTaskTimerAsynchronously(plugin,() -> {
-
-                if(inventory.getViewers().size() <= 0)
-                    guiUpdater.cancel();
-
-                ContentBuilder<T> contentBuilder = new ContentBuilder<T>();
-                consumer.accept(contentBuilder);
-
-                // Removing every item that was changed in contentBuilder since last update
-                this.itemCache.forEach((integer, inventoryContent) -> {
-                    if(contentBuilder.getItemCache().containsValue(inventoryContent))
-                        return;
-                    removeItem(integer);
-                });
-
-                contentBuilder.getItemCache().forEach((itemSlot, inventoryContent) -> {
-                    if(inventoryContent.slot < 0)
-                        return;
-
-                    if(inventory.getSize() <= inventoryContent.slot)
-                        return;
-
-                    if(itemCache.containsKey(itemSlot))
-                        if(itemCache.get(itemSlot).equals(inventoryContent))
-                            return;
-
-                    itemCache.put(itemSlot,inventoryContent);
-                    inventory.setItem(inventoryContent.slot,inventoryContent.stack.getDataHolder());
-                });
-            },20L,20L);
+            this.guiUpdater = Bukkit.getScheduler().runTaskTimerAsynchronously(plugin, this::updateGUI,20L,20L);
         }
     }
+
+    public void updateGUI(){
+        if(inventory.getViewers().size() <= 0)
+            guiUpdater.cancel();
+
+        ContentBuilder<T> contentBuilder = new ContentBuilder<T>();
+        consumer.accept(contentBuilder);
+
+        // Removing every item that was changed in contentBuilder since last update
+        this.itemCache.forEach((integer, inventoryContent) -> {
+            if(contentBuilder.getItemCache().containsValue(inventoryContent))
+                return;
+            removeItem(integer);
+        });
+
+        contentBuilder.getItemCache().forEach((itemSlot, inventoryContent) -> {
+            if(inventoryContent.slot < 0)
+                return;
+
+            if(inventory.getSize() <= inventoryContent.slot)
+                return;
+
+            if(itemCache.containsKey(itemSlot))
+                if(itemCache.get(itemSlot).equals(inventoryContent))
+                    return;
+
+            itemCache.put(itemSlot,inventoryContent);
+            inventory.setItem(inventoryContent.slot,inventoryContent.stack.getDataHolder());
+        });
+    }
+
     private VCoreGUI<T> copy(){
         return new VCoreGUI<>(plugin
                 , player

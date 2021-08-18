@@ -81,7 +81,7 @@ public abstract class VCoreData implements VCoreSerializable {
         });
     }
 
-    public abstract void onSync(Map<String, Object> dataBeforeSync);
+
 
     public void cleanUp(){
         this.dataManipulator.cleanUp();
@@ -93,9 +93,33 @@ public abstract class VCoreData implements VCoreSerializable {
         return plugin;
     }
 
-    public abstract void onCreate();
-    public abstract void onLoad();
-    public abstract void onCleanUp();
+    /**
+     * Executed after a DataManipulator synced the object
+     * @param dataBeforeSync The data the object had before syncing
+     */
+    public void onSync(Map<String, Object> dataBeforeSync){}
+
+    /**
+     * Executed after instantiation of the Object
+     * Executed before Object is put into LocalCache
+     */
+    public  void onCreate(){}
+
+    /**
+     * Executed after the object was deleted from local cache. Only it was deleted successfully
+     */
+    public void onDelete(){}
+
+    /**
+     * Executed after Data was loaded from Pipeline. Not if it was found in LocalCache
+     */
+    public void onLoad(){}
+
+    /**
+     * Executed before Data is cleared from LocalCache
+     */
+    public void onCleanUp(){}
+
     public void debugToConsole(){
         serialize().forEach((s, o) -> {
             getPlugin().consoleMessage("&e"+s+"&7: &b"+o.toString(),2,true);

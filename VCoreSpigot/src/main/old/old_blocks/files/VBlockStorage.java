@@ -58,7 +58,6 @@ public class VBlockStorage {
     }
 
     File getFolder(Location location){
-        //TODO: getWorldFolder causes ConcurrentModificationException
         if(!worldFolders.containsKey(location.getWorld()))
             worldFolders.put(location.getWorld(),location.getWorld().getWorldFolder());
         File worldFolder = worldFolders.get(location.getWorld());

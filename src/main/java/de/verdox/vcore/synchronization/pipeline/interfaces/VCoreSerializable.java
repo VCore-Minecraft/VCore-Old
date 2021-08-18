@@ -8,10 +8,8 @@ import de.verdox.vcore.synchronization.pipeline.annotations.VCorePersistentData;
 import de.verdox.vcore.util.VCoreUtil;
 
 import java.lang.reflect.Field;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.lang.reflect.InvocationTargetException;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -39,9 +37,13 @@ public interface VCoreSerializable {
             try {
                 Field field = getClass().getDeclaredField(dataKey);
                 field.setAccessible(true);
-                //if(field.get(this) == null)
-                //    return;
-                serializedData.put(field.getName(), field.get(this));
+                Object data = field.get(this);
+                if(data instanceof Collection<?>) {
+                    Collection<?> collection = (Collection<?>) data;
+                    serializedData.put(field.getName(), new ArrayList<>(collection));
+                }
+                else
+                    serializedData.put(field.getName(), field.get(this));
             } catch (NoSuchFieldException | IllegalAccessException e) { e.printStackTrace(); }
         });
         serializedData.remove("_id");
@@ -68,16 +70,26 @@ public interface VCoreSerializable {
                 field.setAccessible(true);
                 dataBeforeDeserialization.put(key,field.get(this));
                 if(!field.getType().isPrimitive()){
-                    try{
-                        field.set(this, VCoreUtil.getTypeUtil().castData(value,field.getType()));
+                    if(Collection.class.isAssignableFrom(field.getType())){
+                        // Instantiation of Collection if value is null in the first place
+                        if(field.get(this) == null)
+                            field.set(field.getType().getConstructor().newInstance(),this);
+                        Collection<?> fieldCollection = (Collection<?>) field.get(this);
+                        fieldCollection.clear();
+                        fieldCollection.addAll((Collection) value);
                     }
-                    catch (ClassCastException e){
-                        field.set(this,value);
+                    else {
+                        try{
+                            field.set(this, VCoreUtil.getTypeUtil().castData(value,field.getType()));
+                        }
+                        catch (ClassCastException e){
+                            field.set(this,value);
+                        }
                     }
                 }
                 else
                     field.set(this, value);
-            } catch (IllegalAccessException e) {
+            } catch (IllegalAccessException | NoSuchMethodException | InstantiationException | InvocationTargetException e) {
                 e.printStackTrace();
             } catch (NoSuchFieldException e) {
                 System.err.println("Field e not found. Cleanup Task for missing fields will be implemented in a future release");

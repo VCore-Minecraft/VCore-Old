@@ -13,6 +13,8 @@ import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.plugin.Plugin;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
+import org.bukkit.event.Cancellable;
+import org.bukkit.event.Event;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import javax.annotation.Nonnull;
@@ -96,7 +98,6 @@ public interface VCorePlugin <T, R extends VCoreSubsystem<?>> extends SystemLoad
 
         @Override
         public final void onDisable() {
-            //TODO: Wenn Server schließt werden VCorePlayer nicht rausgelöscht
             consoleMessage("&ePlugin stopping&7!",false);
             onPluginDisable();
             Bukkit.getWorlds().forEach(World::save);

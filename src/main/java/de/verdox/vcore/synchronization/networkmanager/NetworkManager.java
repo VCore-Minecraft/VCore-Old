@@ -4,6 +4,7 @@
 
 package de.verdox.vcore.synchronization.networkmanager;
 
+import de.verdox.vcore.plugin.SystemLoadable;
 import de.verdox.vcore.plugin.VCorePlugin;
 import de.verdox.vcore.synchronization.networkmanager.server.ServerInstance;
 import de.verdox.vcore.synchronization.networkmanager.player.VCorePlayer;
@@ -26,13 +27,14 @@ import java.util.stream.Collectors;
  * @Author: Lukas Jonsson (Verdox)
  * @date 31.07.2021 21:01
  */
-public class NetworkManager <T extends VCorePlugin<?,?>> {
+public class NetworkManager <T extends VCorePlugin<?,?>> implements SystemLoadable {
 
     private final ServerType serverType;
     private final T plugin;
     private final ServerPingManager<T> serverPingManager;
     private final ServerCache serverCache;
     private final VCorePlayerCache vCorePlayerCache;
+    private boolean loaded;
 
     public NetworkManager(@Nonnull ServerType serverType,  @Nonnull T plugin){
         plugin.consoleMessage("&eStarting Network Manager&7!",false);
@@ -42,6 +44,7 @@ public class NetworkManager <T extends VCorePlugin<?,?>> {
         this.serverCache = new ServerCache(this);
         this.vCorePlayerCache = new VCorePlayerCache(this);
         preloadData();
+        loaded = true;
     }
 
     private void preloadData(){
@@ -108,5 +111,15 @@ public class NetworkManager <T extends VCorePlugin<?,?>> {
 
     public VCorePlayerCache getVCorePlayerCache() {
         return vCorePlayerCache;
+    }
+
+    @Override
+    public boolean isLoaded() {
+        return loaded;
+    }
+
+    @Override
+    public void shutdown() {
+        serverPingManager.shutdown();
     }
 }

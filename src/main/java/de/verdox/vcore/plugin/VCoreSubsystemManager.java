@@ -58,8 +58,8 @@ public class VCoreSubsystemManager<T extends VCorePlugin<?,R>, R extends VCoreSu
         return subSystems;
     }
 
-    public VCoreSubsystem<?> findSubsystemByClass(Class<?> subsystemClass){
-        return this.subSystems.stream().filter(r -> r.getClass().equals(subsystemClass)).findAny().orElse(null);
+    public <S extends VCoreSubsystem<?>> S findSubsystemByClass(Class<? extends S> subsystemClass){
+        return subsystemClass.cast(this.subSystems.stream().filter(r -> r.getClass().equals(subsystemClass)).findAny().orElse(null));
     }
 
     void disable(){

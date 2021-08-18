@@ -227,9 +227,14 @@ public class PipelineManager implements Pipeline {
     @Override
     public <T extends VCoreData> boolean delete(@Nonnull Class<? extends T> type, @Nonnull UUID uuid) {
         plugin.consoleMessage("&eDeleting&7: &b"+type.getSimpleName()+" &ewith uuid &a"+uuid,true);
-        if(getLocalCache() != null)
-            if(!getLocalCache().remove(type, uuid))
-                plugin.consoleMessage("&8[&eLocalCache&8] &cCould not delete&7: &b"+type.getSimpleName()+" &ewith uuid &a"+uuid,true);
+        if(getLocalCache() != null) {
+            T data = getLocalCache().getData(type,uuid);
+            if (!getLocalCache().remove(type, uuid))
+                plugin.consoleMessage("&8[&eLocalCache&8] &cCould not delete&7: &b" + type.getSimpleName() + " &ewith uuid &a" + uuid, true);
+            else
+                if(data != null)
+                    data.onDelete();
+        }
         if(getGlobalCache() != null)
             if(!getGlobalCache().remove(type,uuid))
                 plugin.consoleMessage("&8[&eGlobalCache&8] &cCould not delete&7: &b"+type.getSimpleName()+" &ewith uuid &a"+uuid,true);
@@ -311,14 +316,17 @@ public class PipelineManager implements Pipeline {
     }
 
     <T extends VCoreData> T loadFromPipeline(@Nonnull Class<? extends T> dataClass, @Nonnull UUID uuid, boolean createIfNotExist){
+        // ExistCheck LocalCache
         if(localCache.dataExist(dataClass,uuid)) {
             plugin.consoleMessage("&eFound Data in Local Cache &8[&b"+dataClass.getSimpleName()+"&8]", 1,true);
         }
+        // ExistCheck GlobalCache
         else if(globalCache != null && globalCache.dataExist(dataClass,uuid)) {
             plugin.consoleMessage("&eFound Data in Redis Cache &8[&b"+dataClass.getSimpleName()+"&8]", 1,true);
             pipelineDataSynchronizer.doSynchronisation(DataSynchronizer.DataSourceType.GLOBAL_CACHE, DataSynchronizer.DataSourceType.LOCAL, dataClass, uuid, null);
             //getRedisHandler().redisToLocal(dataClass, uuid);
         }
+        // ExistCheck GlobalStorage
         else if(globalStorage != null && globalStorage.dataExist(dataClass,uuid)) {
             plugin.consoleMessage("&eFound Data in Database &8[&b"+dataClass.getSimpleName()+"&8]", 1,true);
             //getDatabaseHandler().databaseToLocal(dataClass,uuid);
@@ -337,6 +345,9 @@ public class PipelineManager implements Pipeline {
             localCache.save(dataClass, vCoreData);
             //getLocalDataHandler().localToRedis(vCoreData,dataClass,vCoreData.getUUID());
             pipelineDataSynchronizer.synchronize(DataSynchronizer.DataSourceType.LOCAL, DataSynchronizer.DataSourceType.GLOBAL_CACHE, dataClass, uuid);
+
+            if(!NetworkData.class.isAssignableFrom(dataClass))
+                pipelineDataSynchronizer.synchronize(DataSynchronizer.DataSourceType.LOCAL, DataSynchronizer.DataSourceType.GLOBAL_STORAGE, dataClass, uuid);
         }
         plugin.consoleMessage("&eLoaded &a"+dataClass.getSimpleName()+" &ewith uuid&7: "+uuid, 1,true);
         if(!localCache.dataExist(dataClass, uuid))

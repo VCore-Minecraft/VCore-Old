@@ -62,13 +62,7 @@ public class VCorePlayerAPIBukkitImpl extends VCorePlayerAPIImpl implements List
     }
 
     private ServerLocation convertToServerLocation(Location location){
-        ServerLocation serverLocation = new ServerLocation();
-        serverLocation.serverName = plugin.getCoreInstance().getServerName();
-        serverLocation.worldName = location.getWorld().getName();
-        serverLocation.x = location.getX();
-        serverLocation.y = location.getY();
-        serverLocation.z = location.getZ();
-        return serverLocation;
+        return new ServerLocation(plugin.getCoreInstance().getServerName(), location.getWorld().getName(), location.getX(), location.getY(), location.getZ());
     }
 
     private Location convertToLocation(GameLocation gameLocation){

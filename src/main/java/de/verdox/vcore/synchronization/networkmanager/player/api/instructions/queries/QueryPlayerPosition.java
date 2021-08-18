@@ -44,12 +44,7 @@ public class QueryPlayerPosition extends Query<ServerLocation> {
 
     @Override
     public void onResponse(CompletableFuture<ServerLocation> future, Object[] queryData, Object[] responseData) {
-        ServerLocation serverLocation = new ServerLocation();
-        serverLocation.serverName = (String) responseData[0];
-        serverLocation.worldName = (String) responseData[1];
-        serverLocation.x = (double) responseData[2];
-        serverLocation.y = (double) responseData[3];
-        serverLocation.z = (double) responseData[4];
+        ServerLocation serverLocation = new ServerLocation((String) responseData[0], (String) responseData[1], (double) responseData[2], (double) responseData[3], (double) responseData[4]);
         future.complete(serverLocation);
     }
 

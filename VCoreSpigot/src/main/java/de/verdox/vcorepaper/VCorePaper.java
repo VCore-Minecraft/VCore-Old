@@ -71,6 +71,14 @@ public class VCorePaper extends VCoreCoreInstance.Minecraft {
 
         networkManager = new NetworkManager<>(ServerType.GAME_SERVER,this);
         new PlayerBukkitListener(networkManager);
+        if(networkManager.getServerCache().isServerNameTaken(getServerName())){
+            consoleMessage("&4<> ============================================= <>",false);
+            consoleMessage("",false);
+            consoleMessage("&cThe ServerName &e"+getServerName()+" &cis already online in this VCore Network &7(&bExists in Global Cache&7)",false);
+            consoleMessage("",false);
+            consoleMessage("&4<> ============================================= <>",false);
+            this.shutdown();
+        }
         networkManager.getServerPingManager().sendOnlinePing();
         getCustomBlockManager().registerData(BlockDebugData.class);
     }
@@ -84,7 +92,7 @@ public class VCorePaper extends VCoreCoreInstance.Minecraft {
     @Override
     public void onPluginDisable() {
         blockFileStorage.shutdown();
-        networkManager.getServerPingManager().sendOfflinePing();
+        networkManager.shutdown();
     }
 
     @Override
@@ -138,6 +146,7 @@ public class VCorePaper extends VCoreCoreInstance.Minecraft {
 
     @Override
     public String getServerName() {
+
         return getNetworkManager().getServerPingManager().getServerName();
     }
 

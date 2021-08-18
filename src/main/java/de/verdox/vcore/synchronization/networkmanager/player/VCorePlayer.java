@@ -49,24 +49,4 @@ public class VCorePlayer extends NetworkData {
     public String getDisplayName() {
         return displayName;
     }
-
-    @Override
-    public void onSync(Map<String, Object> dataBeforeSync) {
-
-    }
-
-    @Override
-    public void onCreate() {
-
-    }
-
-    @Override
-    public void onLoad() {
-
-    }
-
-    @Override
-    public void onCleanUp() {
-
-    }
 }

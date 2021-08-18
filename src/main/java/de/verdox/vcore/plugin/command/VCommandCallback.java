@@ -200,7 +200,7 @@ public class VCommandCallback {
                     providedArguments.add(Boolean.parseBoolean(argument));
                 }
                 else if(commandAskParameter.getCommandAskType().equals(CommandAskType.VCORE_GAMESERVER)){
-                    UUID serverUUID = UUID.nameUUIDFromBytes(argument.getBytes(StandardCharsets.UTF_8));
+                    UUID serverUUID = plugin.getCoreInstance().getNetworkManager().getServerCache().getServerUUID(argument);
                     ServerInstance serverInstance = plugin.getCoreInstance().getServices().getPipeline().load(ServerInstance.class,serverUUID, Pipeline.LoadingStrategy.LOAD_PIPELINE);
                     if(serverInstance == null){
                         sender.sendMessage(ChatColor.translateAlternateColorCodes('&',commandAskParameter.errorMessage));
@@ -371,7 +371,6 @@ public class VCommandCallback {
                 else if(commandAskType.equals(CommandAskType.POSITIVE_NUMBER))
                     return List.of(VCoreUtil.getRandomUtil().randomInt(1, 100)+"");
             }
-            //TODO: Lokale Listen separat anfertigen für AutoCompletion
             if(commandAskType.equals(CommandAskType.VCORE_GAMESERVER))
                 return plugin.getCoreInstance().getServices().getPipeline().getLocalCache().getAllData(ServerInstance.class).stream().filter(serverInstance -> serverInstance.getServerType().equals(ServerType.GAME_SERVER)).map(serverInstance -> serverInstance.serverName).collect(Collectors.toList());
             return suggested;

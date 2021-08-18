@@ -71,21 +71,11 @@ public class BukkitWorldUtil {
     }
 
     public GameLocation toGameLocation(Chunk chunk){
-        GameLocation gameLocation = new GameLocation();
-        gameLocation.worldName = chunk.getWorld().getName();
-        gameLocation.x = chunk.getX();
-        gameLocation.y = 70;
-        gameLocation.z = chunk.getZ();
-        return gameLocation;
+        return new GameLocation(chunk.getWorld().getName(),chunk.getX(),70,chunk.getZ());
     }
 
     public GameLocation toGameLocation(Location location){
-        GameLocation gameLocation = new GameLocation();
-        gameLocation.worldName = location.getWorld().getName();
-        gameLocation.x = location.getBlockX();
-        gameLocation.y = location.getBlockY();
-        gameLocation.z = location.getBlockZ();
-        return gameLocation;
+        return new GameLocation(location.getWorld().getName(), location.getBlockX(), location.getBlockY(), location.getBlockZ());
     }
 
     private boolean hasBlockStem(Block block, BlockFace stemBlockFaceLocation){

@@ -32,7 +32,7 @@ public class VCoreWaterfall extends VCoreCoreInstance.BungeeCord {
     @Override
     public void onPluginDisable() {
         ProxyServer.getInstance().getPlayers().forEach(proxiedPlayer -> getServices().getPipeline().delete(VCorePlayer.class,proxiedPlayer.getUniqueId()));
-        networkManager.getServerPingManager().sendOfflinePing();
+        networkManager.shutdown();
     }
 
     @Override

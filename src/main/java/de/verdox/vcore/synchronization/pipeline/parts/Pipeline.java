@@ -54,7 +54,7 @@ public interface Pipeline extends SystemLoadable {
     <T extends VCoreData> boolean exist(@Nonnull Class<? extends T> type, @Nonnull UUID uuid, @Nonnull QueryStrategy... strategies);
     <T extends VCoreData> CompletableFuture<Boolean> existAsync(@Nonnull Class<? extends T> type, @Nonnull UUID uuid, @Nonnull QueryStrategy... strategies);
 
-    //TODO: Bei nem TODO Muss eine Redis Message geschickt werden damit alle das Objekt aus dem lokalen Cache entfernen!
+    //TODO: Bei nem delete muss eine Redis Message geschickt werden, damit alle Serverinstanzen das Objekt aus dem lokalen Cache entfernt können!
     <T extends VCoreData> boolean delete(@Nonnull Class<? extends T> type, @Nonnull UUID uuid);
     <T extends VCoreData> CompletableFuture<Boolean> deleteAsync(@Nonnull Class<? extends T> type, @Nonnull UUID uuid);
 

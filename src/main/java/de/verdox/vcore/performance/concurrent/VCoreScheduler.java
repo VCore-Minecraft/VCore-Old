@@ -22,16 +22,16 @@ public class VCoreScheduler implements SystemLoadable {
         this.scheduledExecutorService  = Executors.newScheduledThreadPool(4,new DefaultThreadFactory(vCorePlugin.getPluginName()+"Scheduler"));
     }
 
-    public void asyncInterval(Runnable task, long delay, long interval){
-        scheduledExecutorService.scheduleAtFixedRate(new CatchingRunnable(task),delay*50,interval*50, TimeUnit.MILLISECONDS);
+    public ScheduledFuture<?> asyncInterval(Runnable task, long delay, long interval){
+        return scheduledExecutorService.scheduleAtFixedRate(new CatchingRunnable(task),delay*50,interval*50, TimeUnit.MILLISECONDS);
     }
 
-    public void asyncSchedule(Runnable task, long delay){
-        scheduledExecutorService.schedule(new CatchingRunnable(task),delay*50, TimeUnit.MILLISECONDS);
+    public ScheduledFuture<?>  asyncSchedule(Runnable task, long delay){
+        return scheduledExecutorService.schedule(new CatchingRunnable(task),delay*50, TimeUnit.MILLISECONDS);
     }
 
-    public void asyncSchedule(Runnable task, @NonNegative long delay, TimeUnit timeUnit){
-        scheduledExecutorService.schedule(new CatchingRunnable(task),delay, timeUnit);
+    public ScheduledFuture<?>  asyncSchedule(Runnable task, @NonNegative long delay, TimeUnit timeUnit){
+        return scheduledExecutorService.schedule(new CatchingRunnable(task),delay, timeUnit);
     }
 
     public void async(Runnable task){

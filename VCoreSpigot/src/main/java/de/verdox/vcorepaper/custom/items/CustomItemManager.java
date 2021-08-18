@@ -167,6 +167,15 @@ public class CustomItemManager extends CustomDataManager<ItemStack,ItemCustomDat
             return this;
         }
 
+        public VCoreItemBuilder appendItemLore(){
+            if(this.meta == null)
+                return this;
+            if(!this.meta.hasLore())
+                return this;
+            this.lore.addAll(meta.getLore());
+            return this;
+        }
+
         public VCoreItemBuilder lore(String... lore){
             List<String> loreList = new ArrayList<>();
             for (String s : lore)

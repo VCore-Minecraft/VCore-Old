@@ -57,12 +57,7 @@ public class BukkitPlatformWrapperImpl implements PlatformWrapper {
             }
 
             private GameLocation getGameLocation(@Nonnull Location location){
-                GameLocation gameLocation = new GameLocation();
-                gameLocation.worldName = location.getWorld().getName();
-                gameLocation.x = location.getX();
-                gameLocation.y = location.getY();
-                gameLocation.z = location.getZ();
-                return gameLocation;
+                return new GameLocation(location.getWorld().getName(), location.getX(), location.getY(), location.getZ());
             }
 
             private GameMode getGameMode(@Nonnull PlayerGameMode playerGameMode){

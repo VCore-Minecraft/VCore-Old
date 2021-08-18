@@ -27,6 +27,9 @@ import java.util.concurrent.ExecutionException;
  */
 public class VCorePlayerCache {
 
+    //TODO: VCOrePlaer auch in DB speichern, Bei Delete evtl mitgeben wo deleted werden soll? (Nur aus Local und Global Cache aber Persistent Speichern -> Alternative zu Bukkit.getOfflinePlayer())
+    //TODO: Eigene bukkit.getOfflinePlayer Implementierung mit Mojang API implementieren?
+
     private final VCorePlugin<?, ?> vCorePlugin;
     private final NetworkManager<?> networkManager;
 
@@ -50,7 +53,7 @@ public class VCorePlayerCache {
             UUID playerUUID = message.getData(2, UUID.class);
             String displayName = message.getData(3, String.class);
 
-            UUID serverUUID = UUID.nameUUIDFromBytes(serverName.getBytes(StandardCharsets.UTF_8));
+            UUID serverUUID = vCorePlugin.getCoreInstance().getNetworkManager().getServerCache().getServerUUID(serverName);
 
             if (messageWrapper.parameterContains("connection", VCorePlayerCacheListener.PlayerPingType.JOIN.name())) {
                 if (serverType.equals(ServerType.PROXY.name())) {
@@ -62,7 +65,7 @@ public class VCorePlayerCache {
 
                 ServerInstance serverInstance = networkManager.getPlugin().getServices().getPipeline().load(ServerInstance.class,serverUUID, Pipeline.LoadingStrategy.LOAD_PIPELINE,false);
                 if(serverInstance == null) {
-                    networkManager.getPlugin().consoleMessage("&ePlayer &a"+displayName+" &ejoin to server that is not in Cache&7: &b"+serverName,false);
+                    networkManager.getPlugin().consoleMessage("&cPlayer &a"+displayName+" &cjoined a server that is not in Cache&7: &b"+serverName,false);
                     return;
                 }
                 if(serverInstance.getServerType().equals(ServerType.GAME_SERVER)){

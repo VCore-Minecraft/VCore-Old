@@ -53,6 +53,7 @@ public abstract class MessagingInstruction {
             Object datum = data[i];
             if(!type.isAssignableFrom(datum.getClass()))
                 throw new IllegalStateException(datum+" is not type or subtype of "+type.getName());
+
         }
         this.data = data;
         return this;

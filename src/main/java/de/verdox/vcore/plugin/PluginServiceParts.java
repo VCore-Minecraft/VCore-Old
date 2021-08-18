@@ -58,7 +58,7 @@ public abstract class PluginServiceParts <T extends VCorePlugin<?,S>, S extends 
     }
 
     public void enableAfter(){
-
+        this.messagingService.setupPrivateMessagingChannel();
     }
 
     @Override

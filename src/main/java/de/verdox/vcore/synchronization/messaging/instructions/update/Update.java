@@ -20,14 +20,13 @@ import java.util.concurrent.CompletableFuture;
  */
 
 @InstructionInfo(awaitsResponse = false)
-//TODO: Von Update erben lassen als CompletableFuture<Boolean>
 public abstract class Update extends Query<Boolean> implements InstructionResponder {
     public Update(UUID uuid) {
         super(uuid);
     }
 
     @Nonnull
-    public abstract UpdateCompletion executeUpdate(Object[] instructionData);
+    protected abstract UpdateCompletion executeUpdate(Object[] instructionData);
 
     @Override
     public boolean onSend(Object[] instructionData) {

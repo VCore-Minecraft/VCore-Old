@@ -57,11 +57,7 @@ public class UpdatePlayerPosition extends Update {
                 return UpdateCompletion.NOTHING;
             // Player is already online
             plugin.getCoreInstance().getPlayerAPI().getPlayerScheduler().schedulePlayerTask(uuid,() -> {
-                GameLocation gameLocation = new GameLocation();
-                gameLocation.worldName = worldName;
-                gameLocation.x = x;
-                gameLocation.y = y;
-                gameLocation.z = z;
+                GameLocation gameLocation = new GameLocation(worldName,x,y,z);
                 spigotPlatform.teleportPlayer(vCorePlayer.getObjectUUID(),gameLocation);
             },5, TimeUnit.SECONDS);
         }

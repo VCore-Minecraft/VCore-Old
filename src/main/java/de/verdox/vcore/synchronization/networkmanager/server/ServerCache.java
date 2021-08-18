@@ -14,6 +14,7 @@ import de.verdox.vcore.synchronization.messaging.messages.MessageWrapper;
 import de.verdox.vcore.synchronization.pipeline.parts.Pipeline;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Locale;
 import java.util.UUID;
 
 /**
@@ -33,7 +34,11 @@ public class ServerCache {
     }
 
     public UUID getServerUUID(String serverName){
-        return UUID.nameUUIDFromBytes(serverName.getBytes(StandardCharsets.UTF_8));
+        return UUID.nameUUIDFromBytes(serverName.toUpperCase(Locale.ROOT).getBytes(StandardCharsets.UTF_8));
+    }
+
+    public boolean isServerNameTaken(String serverName){
+        return networkManager.getPlugin().getServices().getPipeline().exist(ServerInstance.class,getServerUUID(serverName), Pipeline.QueryStrategy.LOCAL, Pipeline.QueryStrategy.GLOBAL_CACHE);
     }
 
     @Subscribe

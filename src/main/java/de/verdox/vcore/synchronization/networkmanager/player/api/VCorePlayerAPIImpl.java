@@ -67,10 +67,30 @@ public abstract class VCorePlayerAPIImpl implements VCorePlayerAPI, SystemLoadab
 
     // PlayerAPI Part
 
+
     @Override
-    public CompletableFuture<VCorePlayer> getVCorePlayer(@Nonnull UUID uuid) {
+    public VCorePlayer getVCorePlayer(@Nonnull String userName) {
+        return plugin.getServices().getPipeline().loadAllData(VCorePlayer.class, Pipeline.LoadingStrategy.LOAD_PIPELINE)
+                .stream()
+                .filter(vCorePlayer -> vCorePlayer.getDisplayName().equalsIgnoreCase(userName)).findAny().orElse(null);
+    }
+
+    @Override
+    public VCorePlayer getVCorePlayer(@Nonnull UUID uuid) {
+        return plugin.getServices().getPipeline().load(VCorePlayer.class,uuid, Pipeline.LoadingStrategy.LOAD_PIPELINE,false);
+    }
+
+    @Override
+    public CompletableFuture<VCorePlayer> getVCorePlayerAsync(@Nonnull UUID uuid) {
         CompletableFuture<VCorePlayer> future = new CompletableFuture<>();
-        plugin.async(() -> future.complete(plugin.getServices().getPipeline().load(VCorePlayer.class,uuid, Pipeline.LoadingStrategy.LOAD_PIPELINE,false)));
+        plugin.async(() -> future.complete(getVCorePlayer(uuid)));
+        return future;
+    }
+
+    @Override
+    public CompletableFuture<VCorePlayer> getVCorePlayerAsync(@Nonnull String userName) {
+        CompletableFuture<VCorePlayer> future = new CompletableFuture<>();
+        plugin.async(() -> future.complete(getVCorePlayer(userName)));
         return future;
     }
 
@@ -84,18 +104,6 @@ public abstract class VCorePlayerAPIImpl implements VCorePlayerAPI, SystemLoadab
         CompletableFuture<Boolean> completableFuture = new CompletableFuture<>();
         plugin.async(() -> completableFuture.complete(plugin.getServices().getPipeline().exist(VCorePlayer.class,uuid, Pipeline.QueryStrategy.LOCAL, Pipeline.QueryStrategy.GLOBAL_CACHE)));
         return completableFuture;
-    }
-
-    @Override
-    public CompletableFuture<VCorePlayer> getVCorePlayer(@Nonnull String userName) {
-        CompletableFuture<VCorePlayer> future = new CompletableFuture<>();
-        plugin.async(() -> {
-            VCorePlayer foundPlayer = plugin.getServices().getPipeline().loadAllData(VCorePlayer.class, Pipeline.LoadingStrategy.LOAD_PIPELINE)
-                    .stream()
-                    .filter(vCorePlayer -> vCorePlayer.getDisplayName().equalsIgnoreCase(userName)).findAny().orElse(null);
-            future.complete(foundPlayer);
-        });
-        return future;
     }
 
     @Override

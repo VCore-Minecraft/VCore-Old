@@ -75,8 +75,6 @@ public class VBlockListener extends VCoreListener.VCoreBukkitListener {
             e.setCancelled(!vBlock.isBlockPermissionAllowed(VBlockEventPermission.BLOCK_GROW_EVENT));
             return;
         }
-        //Block stemBlock = VCoreUtil.getBukkitWorldUtil().findStem(block);
-        //TODO: Für Crops fertig machen
     }
 
     @EventHandler

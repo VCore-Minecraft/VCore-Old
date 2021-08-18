@@ -22,7 +22,7 @@ import java.util.UUID;
 @VCoreDataProperties(preloadStrategy = PreloadStrategy.LOAD_ON_NEED, dataContext = DataContext.GLOBAL, cleanOnNoUse = false)
 public class ServerInstance extends NetworkData {
 
-    //TODO: VersionTag
+    //TODO: VersionTag als Info hinzufügen
     @VCorePersistentData
     private String serverType;
     @VCorePersistentData

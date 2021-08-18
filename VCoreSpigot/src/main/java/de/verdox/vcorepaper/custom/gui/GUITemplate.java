@@ -21,20 +21,21 @@ import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 public class GUITemplate {
+    //TODO: Callbacks ans Ende der Function
 
     public static void createSelectConfirmationGUI(BukkitPlugin bukkitPlugin, Player player, Function<Boolean, VCoreGUI.Response<?,?>> callback){
         VCoreItem yesItem = VCorePaper.getInstance().getCustomItemManager().createItemBuilder(Material.GREEN_STAINED_GLASS_PANE,1,"&aYes").buildItem();
         VCoreItem noItem = VCorePaper.getInstance().getCustomItemManager().createItemBuilder(Material.RED_STAINED_GLASS_PANE,1,"&cNo").buildItem();
-        createSelectConfirmationGUI(bukkitPlugin, player, callback, "&eAre you sure?", yesItem, noItem);
+        createSelectConfirmationGUI(bukkitPlugin, player, "&eAre you sure?", yesItem, noItem,callback);
     }
 
-    public static void createSelectConfirmationGUI(BukkitPlugin bukkitPlugin, Player player, Function<Boolean, VCoreGUI.Response<?,?>> callback, String title, String yesTitle, String noTitle){
+    public static void createSelectConfirmationGUI(BukkitPlugin bukkitPlugin, Player player, String title, String yesTitle, String noTitle, Function<Boolean, VCoreGUI.Response<?,?>> callback){
         VCoreItem yesItem = VCorePaper.getInstance().getCustomItemManager().createItemBuilder(Material.GREEN_STAINED_GLASS_PANE,1, yesTitle).buildItem();
         VCoreItem noItem = VCorePaper.getInstance().getCustomItemManager().createItemBuilder(Material.RED_STAINED_GLASS_PANE,1 ,noTitle).buildItem();
-        createSelectConfirmationGUI(bukkitPlugin, player, callback, "&eAre you sure?", yesItem, noItem);
+        createSelectConfirmationGUI(bukkitPlugin, player, title, yesItem, noItem,callback);
     }
 
-    public static void createSelectConfirmationGUI(BukkitPlugin bukkitPlugin, Player player, Function<Boolean, VCoreGUI.Response<?,?>> callback, String title, VCoreItem yesItem, VCoreItem noItem){
+    public static void createSelectConfirmationGUI(BukkitPlugin bukkitPlugin, Player player, String title, VCoreItem yesItem, VCoreItem noItem, Function<Boolean, VCoreGUI.Response<?,?>> callback){
         CustomItemManager customItemManager = VCorePaper.getInstance().getCustomItemManager();
         new VCoreGUI.Builder<String>()
                 .plugin(bukkitPlugin)
@@ -87,6 +88,10 @@ public class GUITemplate {
             this.bukkitPlugin = bukkitPlugin;
             this.objectToItemStack = objectToItemStack;
             this.page = page;
+        }
+
+        public SelectionGUI(@Nonnull String title, @Nonnull List<T> objectList, @Nonnull BukkitPlugin bukkitPlugin, @Nonnull Function<T, ItemStack> objectToItemStack){
+            this(title,objectList,bukkitPlugin,objectToItemStack,1);
         }
 
         public SelectionGUI<T> updateList(Supplier<List<T>> listUpdater){

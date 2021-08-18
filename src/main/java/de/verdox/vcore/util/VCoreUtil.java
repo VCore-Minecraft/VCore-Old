@@ -1,11 +1,7 @@
 package de.verdox.vcore.util;
 
+import de.verdox.vcore.util.bukkit.*;
 import de.verdox.vcore.util.global.*;
-import de.verdox.vcore.util.bukkit.GeometryUtil;
-import de.verdox.vcore.util.bukkit.BukkitItemUtil;
-import de.verdox.vcore.util.bukkit.BukkitPlayerUtil;
-import de.verdox.vcore.util.bukkit.BukkitWorldUtil;
-import de.verdox.vcore.util.bukkit.VanillaUtil;
 
 public class VCoreUtil {
     public static TypeUtil getTypeUtil() {
@@ -37,6 +33,7 @@ public class VCoreUtil {
         public static GeometryUtil getGeometryUtil() {
             return new GeometryUtil();
         }
+        public static BukkitServerUtil getBukkitServerUtil() {return new BukkitServerUtil();}
     }
     public static class BungeeCordUtil{
 

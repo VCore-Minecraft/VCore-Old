@@ -65,12 +65,11 @@ public class PlayerAPICommands extends VCoreCommand.VCoreBukkitCommand {
                         VCorePlayer vCorePlayer = vCorePaper.getServices().getPipeline().load(VCorePlayer.class,sender.getUniqueId(), Pipeline.LoadingStrategy.LOAD_PIPELINE);
                         ServerInstance serverInstance = commandParameters.getObject(0, ServerInstance.class);
 
-                        ServerLocation serverLocation = new ServerLocation();
-                        serverLocation.serverName = serverInstance.serverName;
-                        serverLocation.worldName = commandParameters.getObject(1,String.class);
-                        serverLocation.x = commandParameters.getObject(2,Double.class);
-                        serverLocation.y = commandParameters.getObject(3,Double.class);
-                        serverLocation.z = commandParameters.getObject(4,Double.class);
+                        ServerLocation serverLocation = new ServerLocation(serverInstance.serverName
+                                , commandParameters.getObject(1,String.class)
+                                , commandParameters.getObject(2,Double.class)
+                                , commandParameters.getObject(3,Double.class)
+                                , commandParameters.getObject(4,Double.class));
 
                         vCorePlugin.getCoreInstance().getPlayerAPI().teleport(vCorePlayer,serverLocation);
                     });

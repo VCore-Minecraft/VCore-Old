@@ -25,8 +25,10 @@ public interface VCorePlayerAPI {
     VCorePlayerTaskScheduler getPlayerScheduler();
 
     CompletableFuture<Boolean> isOnline(@Nonnull UUID uuid);
-    CompletableFuture<VCorePlayer> getVCorePlayer(@Nonnull UUID uuid);
-    CompletableFuture<VCorePlayer> getVCorePlayer(@Nonnull String userName);
+    CompletableFuture<VCorePlayer> getVCorePlayerAsync(@Nonnull UUID uuid);
+    CompletableFuture<VCorePlayer> getVCorePlayerAsync(@Nonnull String userName);
+    VCorePlayer getVCorePlayer(@Nonnull UUID uuid);
+    VCorePlayer getVCorePlayer(@Nonnull String userName);
 
     CompletableFuture<Set<VCorePlayer>> getAllOnlinePlayers();
 

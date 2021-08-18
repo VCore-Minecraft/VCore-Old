@@ -131,7 +131,7 @@ public class MongoDBStorage implements GlobalStorage, RemoteStorage {
 
     private MongoCollection<Document> getMongoStorage(Class<? extends VCoreData> dataClass, String suffix){
         if(NetworkData.class.isAssignableFrom(dataClass)){
-            return getCollection("VCore_NetworkData_"+dataClass.getCanonicalName()+suffix);
+            return getCollection("VCore_NetworkData_"+dataClass.getCanonicalName()+"_"+suffix);
         }
         else {
             Class<? extends VCoreSubsystem<?>> subsystemClass = AnnotationResolver.findDependSubsystemClass(dataClass);
@@ -140,7 +140,7 @@ public class MongoDBStorage implements GlobalStorage, RemoteStorage {
             String mongoIdentifier = AnnotationResolver.getDataStorageIdentifier(subsystemClass);
             if(mongoIdentifier == null)
                 throw new NullPointerException("MongoDBIdentifier Annotation not set. ["+subsystemClass.getCanonicalName()+"]");
-            return getCollection(AnnotationResolver.getDataStorageIdentifier(subsystemClass)+suffix);
+            return getCollection(AnnotationResolver.getDataStorageIdentifier(subsystemClass)+"_"+suffix);
         }
     }
 
@@ -183,11 +183,6 @@ public class MongoDBStorage implements GlobalStorage, RemoteStorage {
     }
 
     private String getSuffix(Class<? extends VCoreData> dataClass){
-        if(PlayerData.class.isAssignableFrom(dataClass))
-            return "PlayerData";
-        else if(ServerData.class.isAssignableFrom(dataClass))
-            return "ServerData";
-        else
-            return "UnknownData";
+        return AnnotationResolver.getDataStorageIdentifier(dataClass);
     }
 }
