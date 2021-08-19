@@ -5,12 +5,9 @@
 package de.verdox.vcore.synchronization.messaging.instructions;
 
 import de.verdox.vcore.plugin.VCorePlugin;
-import de.verdox.vcore.plugin.wrapper.Platform;
 import de.verdox.vcore.plugin.wrapper.PlatformWrapper;
 import de.verdox.vcore.plugin.wrapper.bungeecord.BungeePlatform;
 import de.verdox.vcore.plugin.wrapper.spigot.SpigotPlatform;
-import de.verdox.vcore.synchronization.messaging.instructions.update.Update;
-import reactor.util.annotation.NonNull;
 
 import javax.annotation.Nonnull;
 import java.util.List;
@@ -22,14 +19,14 @@ import java.util.UUID;
  * @date 05.08.2021 21:33
  */
 public abstract class MessagingInstruction {
-    protected VCorePlugin<?, ?> plugin;
-    protected SpigotPlatform spigotPlatform;
-    protected BungeePlatform bungeePlatform;
-    protected PlatformWrapper platformWrapper;
     protected final String[] parameters;
     protected final List<Class<?>> types;
     protected final UUID uuid;
     private final Long creationTimeStamp = System.currentTimeMillis();
+    protected VCorePlugin<?, ?> plugin;
+    protected SpigotPlatform spigotPlatform;
+    protected BungeePlatform bungeePlatform;
+    protected PlatformWrapper platformWrapper;
     private Object[] data;
 
 

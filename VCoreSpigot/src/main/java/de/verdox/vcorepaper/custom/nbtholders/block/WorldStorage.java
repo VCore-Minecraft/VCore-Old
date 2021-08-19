@@ -19,7 +19,7 @@ public class WorldStorage {
     private final String worldName;
     Map<WorldRegion, NBTFile> fileCache = new ConcurrentHashMap<>();
 
-    public WorldStorage(String worldName){
+    public WorldStorage(String worldName) {
         this.worldName = worldName;
     }
 

@@ -6,10 +6,10 @@ package de.verdox.vcore.synchronization.networkmanager.player.api.instructions.q
 
 import de.verdox.vcore.plugin.wrapper.spigot.SpigotPlatform;
 import de.verdox.vcore.plugin.wrapper.types.GameLocation;
+import de.verdox.vcore.plugin.wrapper.types.ServerLocation;
 import de.verdox.vcore.synchronization.messaging.instructions.query.Query;
 import de.verdox.vcore.synchronization.networkmanager.player.VCorePlayer;
 import de.verdox.vcore.synchronization.networkmanager.player.api.VCorePlayerAPI;
-import de.verdox.vcore.plugin.wrapper.types.ServerLocation;
 import de.verdox.vcore.synchronization.pipeline.parts.Pipeline;
 
 import java.util.List;
@@ -53,15 +53,15 @@ public class QueryPlayerPosition extends Query<ServerLocation> {
         UUID playerUUID = (UUID) instructionData[0];
         SpigotPlatform spigotPlatform = plugin.getPlatformWrapper().getSpigotPlatform();
         // Makes sure it runs on Spigot Platform
-        if(spigotPlatform == null)
+        if (spigotPlatform == null)
             return null;
-        VCorePlayer vCorePlayer = plugin.getServices().getPipeline().load(VCorePlayer.class,playerUUID, Pipeline.LoadingStrategy.LOAD_PIPELINE);
-        if(vCorePlayer == null)
+        VCorePlayer vCorePlayer = plugin.getServices().getPipeline().load(VCorePlayer.class, playerUUID, Pipeline.LoadingStrategy.LOAD_PIPELINE);
+        if (vCorePlayer == null)
             return null;
         GameLocation gameLocation = spigotPlatform.getLocation(vCorePlayer.getObjectUUID());
         // Player is not online on this Server
-        if(gameLocation == null)
+        if (gameLocation == null)
             return null;
-        return new Object[]{plugin.getCoreInstance().getServerName(),gameLocation.worldName,gameLocation.x,gameLocation.y,gameLocation.z};
+        return new Object[]{plugin.getCoreInstance().getServerName(), gameLocation.worldName, gameLocation.x, gameLocation.y, gameLocation.z};
     }
 }

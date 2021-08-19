@@ -1,7 +1,10 @@
+/*
+ * Copyright (c) 2021. Lukas Jonsson
+ */
+
 package de.verdox.vcorepaper.custom.nbtholders;
 
 import de.tr7zw.changeme.nbtapi.NBTEntity;
-import de.verdox.vcore.util.VCoreUtil;
 import org.bukkit.entity.Entity;
 import org.bukkit.inventory.ItemStack;
 
@@ -12,7 +15,7 @@ public class NBTEntityHolder implements NBTHolder {
 
     private final NBTEntity nbtEntity;
 
-    public NBTEntityHolder(Entity entity){
+    public NBTEntityHolder(Entity entity) {
         this.nbtEntity = new NBTEntity(entity);
     }
 
@@ -53,38 +56,38 @@ public class NBTEntityHolder implements NBTHolder {
 
     @Override
     public <T> T getObject(String key, Class<T> type) {
-        if(type.equals(Boolean.class))
+        if (type.equals(Boolean.class))
             return (T) getBoolean(key);
-        else if(type.equals(Integer.class))
+        else if (type.equals(Integer.class))
             return (T) getInteger(key);
-        else if(type.equals(Double.class))
+        else if (type.equals(Double.class))
             return (T) getDouble(key);
-        else if(type.equals(String.class))
+        else if (type.equals(String.class))
             return (T) getString(key);
-        else if(type.equals(UUID.class))
+        else if (type.equals(UUID.class))
             return (T) getUUID(key);
-        else if(type.equals(Long.class))
+        else if (type.equals(Long.class))
             return (T) getLong(key);
-        else if(type.equals(ItemStack.class))
+        else if (type.equals(ItemStack.class))
             return (T) nbtEntity.getPersistentDataContainer().getItemStack(key);
-        return nbtEntity.getPersistentDataContainer().getObject(key,type);
+        return nbtEntity.getPersistentDataContainer().getObject(key, type);
     }
 
     @Override
     public void setObject(String key, Object value) {
-        if(value instanceof Boolean)
+        if (value instanceof Boolean)
             nbtEntity.getPersistentDataContainer().setBoolean(key, (Boolean) value);
-        else if(value instanceof Integer)
+        else if (value instanceof Integer)
             nbtEntity.getPersistentDataContainer().setInteger(key, (Integer) value);
-        else if(value instanceof Double)
+        else if (value instanceof Double)
             nbtEntity.getPersistentDataContainer().setDouble(key, (Double) value);
-        else if(value instanceof String)
+        else if (value instanceof String)
             nbtEntity.getPersistentDataContainer().setString(key, (String) value);
-        else if(value instanceof UUID)
+        else if (value instanceof UUID)
             nbtEntity.getPersistentDataContainer().setUUID(key, (UUID) value);
-        else if(value instanceof Long)
+        else if (value instanceof Long)
             nbtEntity.getPersistentDataContainer().setLong(key, (Long) value);
-        else if(value instanceof ItemStack)
+        else if (value instanceof ItemStack)
             nbtEntity.getPersistentDataContainer().setItemStack(key, (ItemStack) value);
         else
             nbtEntity.getPersistentDataContainer().setObject(key, value);

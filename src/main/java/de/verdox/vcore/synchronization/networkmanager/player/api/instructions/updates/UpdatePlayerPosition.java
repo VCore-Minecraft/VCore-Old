@@ -32,8 +32,8 @@ public class UpdatePlayerPosition extends Update {
     public UpdateCompletion executeUpdate(Object[] instructionData) {
 
         UUID uuid = (UUID) instructionData[0];
-        VCorePlayer vCorePlayer = plugin.getServices().getPipeline().load(VCorePlayer.class,uuid, Pipeline.LoadingStrategy.LOAD_PIPELINE);
-        if(vCorePlayer == null)
+        VCorePlayer vCorePlayer = plugin.getServices().getPipeline().load(VCorePlayer.class, uuid, Pipeline.LoadingStrategy.LOAD_PIPELINE);
+        if (vCorePlayer == null)
             return UpdateCompletion.NOTHING;
 
         String serverName = (String) instructionData[1];
@@ -46,20 +46,19 @@ public class UpdatePlayerPosition extends Update {
         SpigotPlatform spigotPlatform = plugin.getPlatformWrapper().getSpigotPlatform();
 
         // If is BungeeCord
-        if(bungeePlatform != null){
-            if(vCorePlayer.currentGameServer.equals(serverName))
+        if (bungeePlatform != null) {
+            if (vCorePlayer.currentGameServer.equals(serverName))
                 return UpdateCompletion.NOTHING;
-            bungeePlatform.sendToServer(vCorePlayer.getObjectUUID(),serverName);
-        }
-        else if(spigotPlatform != null){
+            bungeePlatform.sendToServer(vCorePlayer.getObjectUUID(), serverName);
+        } else if (spigotPlatform != null) {
             String gameServerName = plugin.getCoreInstance().getServerName();
-            if(!serverName.equals(gameServerName))
+            if (!serverName.equals(gameServerName))
                 return UpdateCompletion.NOTHING;
             // Player is already online
-            plugin.getCoreInstance().getPlayerAPI().getPlayerScheduler().schedulePlayerTask(uuid,() -> {
-                GameLocation gameLocation = new GameLocation(worldName,x,y,z);
-                spigotPlatform.teleportPlayer(vCorePlayer.getObjectUUID(),gameLocation);
-            },5, TimeUnit.SECONDS);
+            plugin.getCoreInstance().getPlayerAPI().getPlayerScheduler().schedulePlayerTask(uuid, () -> {
+                GameLocation gameLocation = new GameLocation(worldName, x, y, z);
+                spigotPlatform.teleportPlayer(vCorePlayer.getObjectUUID(), gameLocation);
+            }, 5, TimeUnit.SECONDS);
         }
         return UpdateCompletion.TRUE;
     }
@@ -71,7 +70,7 @@ public class UpdatePlayerPosition extends Update {
 
     @Override
     protected List<Class<?>> dataTypes() {
-        return List.of(UUID.class,String.class,String.class,Double.class,Double.class,Double.class);
+        return List.of(UUID.class, String.class, String.class, Double.class, Double.class, Double.class);
     }
 
     @Override

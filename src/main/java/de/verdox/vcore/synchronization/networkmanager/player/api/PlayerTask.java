@@ -16,7 +16,7 @@ public final class PlayerTask {
     private final UUID uuid;
     private final Runnable runnable;
 
-    public PlayerTask(@Nonnull UUID uuid, @Nonnull Runnable runnable){
+    public PlayerTask(@Nonnull UUID uuid, @Nonnull Runnable runnable) {
         this.uuid = uuid;
         this.runnable = runnable;
     }

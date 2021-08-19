@@ -1,10 +1,17 @@
+/*
+ * Copyright (c) 2021. Lukas Jonsson
+ */
+
 package de.verdox.vcorepaper.custom.hologram;
 
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class HologramContent {
@@ -13,23 +20,23 @@ public class HologramContent {
     private final Map<Integer, HologramLine> hologramLines = new ConcurrentHashMap<>();
     private final Set<Player> visibleTo = new HashSet<>();
 
-    HologramContent(HologramInterface hologramInterface){
+    HologramContent(HologramInterface hologramInterface) {
         this.hologramInterface = hologramInterface;
     }
 
-    public void setItemLine(int row, ItemStack stack){
-        if(row < 0)
+    public void setItemLine(int row, ItemStack stack) {
+        if (row < 0)
             throw new IllegalArgumentException("row must be a positive number");
-        if(stack == null)
+        if (stack == null)
             throw new NullPointerException("stack can't be null!");
-        hologramLines.put(row,new ItemHologramLine(row,stack));
+        hologramLines.put(row, new ItemHologramLine(row, stack));
     }
 
-    void showToPlayer(Player player){
+    void showToPlayer(Player player) {
         visibleTo.add(player);
     }
 
-    void hideFromPlayer(Player player){
+    void hideFromPlayer(Player player) {
         visibleTo.remove(player);
     }
 
@@ -37,15 +44,15 @@ public class HologramContent {
         return visibleTo;
     }
 
-    public void setTextLine(int row, String text){
-        if(row < 0)
+    public void setTextLine(int row, String text) {
+        if (row < 0)
             throw new IllegalArgumentException("row must be a positive number");
-        if(text == null)
+        if (text == null)
             throw new NullPointerException("text can't be null!");
-        hologramLines.put(row,new TextHologramLine(row,text));
+        hologramLines.put(row, new TextHologramLine(row, text));
     }
 
-    public void clear(){
+    public void clear() {
         this.hologramLines.clear();
     }
 
@@ -53,17 +60,18 @@ public class HologramContent {
         return hologramLines;
     }
 
-    public int size(){
+    public int size() {
         return hologramLines.size();
     }
 
-    public abstract static class HologramLine{
+    public abstract static class HologramLine {
 
-        private int row;
+        private final int row;
 
-        HologramLine(int row){
+        HologramLine(int row) {
             this.row = row;
         }
+
         public int getRow() {
             return row;
         }
@@ -82,9 +90,9 @@ public class HologramContent {
         }
     }
 
-    public static class ItemHologramLine extends HologramLine{
+    public static class ItemHologramLine extends HologramLine {
 
-        private ItemStack stack;
+        private final ItemStack stack;
 
         ItemHologramLine(int row, ItemStack stack) {
             super(row);
@@ -109,9 +117,9 @@ public class HologramContent {
         }
     }
 
-    public static class TextHologramLine extends HologramLine{
+    public static class TextHologramLine extends HologramLine {
 
-        private String text;
+        private final String text;
 
         TextHologramLine(int row, String text) {
             super(row);
@@ -119,7 +127,7 @@ public class HologramContent {
         }
 
         public String getText() {
-            return ChatColor.translateAlternateColorCodes('&',text);
+            return ChatColor.translateAlternateColorCodes('&', text);
         }
 
         @Override

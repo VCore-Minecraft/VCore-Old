@@ -1,6 +1,9 @@
+/*
+ * Copyright (c) 2021. Lukas Jonsson
+ */
+
 package de.verdox.vcorepaper.custom;
 
-import de.verdox.vcorepaper.custom.items.VCoreItem;
 import de.verdox.vcorepaper.custom.nbtholders.NBTHolder;
 
 import javax.annotation.Nonnull;
@@ -10,62 +13,61 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 /**
- *
  * @param <S> DataHolder Class (e.g. ItemStack, Entity)
  * @param <N> NBTCompound (e.g. NBTItem, NBTEntity)
  */
-public abstract class CustomDataHolder <S, N extends NBTHolder, C extends CustomDataManager<S,?,?>> {
+public abstract class CustomDataHolder<S, N extends NBTHolder, C extends CustomDataManager<S, ?, ?>> {
 
     private final S dataHolder;
     private final C customDataManager;
 
-    public CustomDataHolder(@Nonnull S dataHolder, @Nonnull C customDataManager){
+    public CustomDataHolder(@Nonnull S dataHolder, @Nonnull C customDataManager) {
         this.dataHolder = dataHolder;
         this.customDataManager = customDataManager;
     }
 
-    protected abstract <T,R extends CustomData<T>> void onStoreData(Class<? extends R> customDataType, T value);
+    protected abstract <T, R extends CustomData<T>> void onStoreData(Class<? extends R> customDataType, T value);
 
     @Nonnull
-    public final <T, R extends CustomData<T>> CustomDataHolder<S,N,C> storeCustomData(Class<? extends R> customDataType, T value, Consumer<R> callback){
+    public final <T, R extends CustomData<T>> CustomDataHolder<S, N, C> storeCustomData(Class<? extends R> customDataType, T value, Consumer<R> callback) {
         R customData = instantiateData(customDataType);
-        if(customData == null)
+        if (customData == null)
             throw new NullPointerException("CustomData could not be instantiated");
-        if(!customDataManager.exists(customData.getNBTKey()))
-            throw new IllegalStateException("CustomDataClass "+customDataType+" has not yet been registered in your plugin!");
-        if(value == null)
+        if (!customDataManager.exists(customData.getNBTKey()))
+            throw new IllegalStateException("CustomDataClass " + customDataType + " has not yet been registered in your plugin!");
+        if (value == null)
             throw new NullPointerException("Can't store value null to dataHolder");
-        customData.storeCustomData(this,value);
-        onStoreData(customDataType,value);
-        if(callback == null)
+        customData.storeCustomData(this, value);
+        onStoreData(customDataType, value);
+        if (callback == null)
             return this;
         callback.accept(customData);
         return this;
     }
 
     @Nonnull
-    public final <T,R extends CustomData<T>> T getCustomData(Class<? extends R> customDataClass){
+    public final <T, R extends CustomData<T>> T getCustomData(Class<? extends R> customDataClass) {
         R customData = instantiateData(customDataClass);
-        if(customData == null)
-            throw new NullPointerException("Could not instantiate: "+customDataClass);
-        if(!containsCustomData(customDataClass))
+        if (customData == null)
+            throw new NullPointerException("Could not instantiate: " + customDataClass);
+        if (!containsCustomData(customDataClass))
             return customData.defaultValue();
-        if(!customDataManager.exists(customData.getNBTKey()))
-            throw new IllegalStateException("CustomDataClass "+customDataClass+" has not yet been registered in your plugin!");
+        if (!customDataManager.exists(customData.getNBTKey()))
+            throw new IllegalStateException("CustomDataClass " + customDataClass + " has not yet been registered in your plugin!");
         return customData.findInDataHolder(this);
     }
 
-    public <T,R extends CustomData<T>> boolean containsCustomData(Class<? extends R> customDataClass){
+    public <T, R extends CustomData<T>> boolean containsCustomData(Class<? extends R> customDataClass) {
         String nbtKey = customDataManager.getNBTKey(customDataClass);
         return getNBTCompound().hasKey(nbtKey);
     }
 
     @Nonnull
-    public Set<String> getCustomDataKeys(){
+    public Set<String> getCustomDataKeys() {
         return getNBTCompound().getKeys().parallelStream().collect(Collectors.toSet());
     }
 
-    protected abstract <T,R extends CustomData<T>> R instantiateData(Class <? extends R> customDataType);
+    protected abstract <T, R extends CustomData<T>> R instantiateData(Class<? extends R> customDataType);
 
     @Nonnull
     public S getDataHolder() {

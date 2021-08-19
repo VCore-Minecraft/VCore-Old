@@ -4,11 +4,11 @@
 
 package de.verdox.vcore.synchronization.networkmanager.player.api;
 
+import de.verdox.vcore.plugin.wrapper.types.ServerLocation;
+import de.verdox.vcore.plugin.wrapper.types.enums.PlayerGameMode;
 import de.verdox.vcore.plugin.wrapper.types.enums.PlayerMessageType;
 import de.verdox.vcore.synchronization.networkmanager.enums.GlobalProperty;
-import de.verdox.vcore.plugin.wrapper.types.enums.PlayerGameMode;
 import de.verdox.vcore.synchronization.networkmanager.player.VCorePlayer;
-import de.verdox.vcore.plugin.wrapper.types.ServerLocation;
 import de.verdox.vcore.synchronization.networkmanager.player.scheduling.VCorePlayerTaskScheduler;
 
 import javax.annotation.Nonnull;
@@ -25,14 +25,19 @@ public interface VCorePlayerAPI {
     VCorePlayerTaskScheduler getPlayerScheduler();
 
     CompletableFuture<Boolean> isOnline(@Nonnull UUID uuid);
+
     CompletableFuture<VCorePlayer> getVCorePlayerAsync(@Nonnull UUID uuid);
+
     CompletableFuture<VCorePlayer> getVCorePlayerAsync(@Nonnull String userName);
+
     VCorePlayer getVCorePlayer(@Nonnull UUID uuid);
+
     VCorePlayer getVCorePlayer(@Nonnull String userName);
 
     CompletableFuture<Set<VCorePlayer>> getAllOnlinePlayers();
 
     CompletableFuture<ServerLocation> getServerLocation(@Nonnull VCorePlayer vCorePlayer);
+
     CompletableFuture<String> getPlayerIP(@Nonnull VCorePlayer vCorePlayer);
 
     //TODO: gamerules global ändern (für alle welten und nur eine welt (mehrere welten auf anderen servern mit gleichem server)), difficulty, sendTitle,
@@ -40,16 +45,21 @@ public interface VCorePlayerAPI {
 
     //TODO: Update Functions auf Future Objekte ändern -> Checken obs geklappt hat -> Command Response für Sender
     void teleport(@Nonnull VCorePlayer vCorePlayer, @Nonnull ServerLocation serverLocation);
+
     void teleport(@Nonnull VCorePlayer vCorePlayer, @Nonnull VCorePlayer target);
 
     void kickPlayer(@Nonnull VCorePlayer vCorePlayer, @Nonnull String message);
+
     void changeServer(@Nonnull VCorePlayer vCorePlayer, @Nonnull String serverName);
 
     void sendMessage(@Nonnull VCorePlayer vCorePlayer, @Nonnull PlayerMessageType playerMessageType, @Nonnull String message);
 
     void healPlayer(@Nonnull VCorePlayer vCorePlayer);
+
     void feedPlayer(@Nonnull VCorePlayer vCorePlayer);
+
     void setGameMode(@Nonnull VCorePlayer vCorePlayer, @Nonnull PlayerGameMode gameMode);
+
     void clearInventory(@Nonnull VCorePlayer vCorePlayer);
 
     void broadcastMessage(@Nonnull String message, @Nonnull PlayerMessageType playerMessageType, @Nonnull GlobalProperty globalProperty);
@@ -57,8 +67,7 @@ public interface VCorePlayerAPI {
     //TODO: Globale Message, Serverglobale MEssage ( Auf dem GameServer oder Proxy Globale Message)
 
 
-
-    enum APIParameters{
+    enum APIParameters {
         QUERY_PLAYER_POSITION("QueryPlayerPosition"),
         QUERY_PLAYER_INVSEE("QueryPlayerInvsee"),
 
@@ -74,7 +83,7 @@ public interface VCorePlayerAPI {
         ;
         private final String parameter;
 
-        APIParameters(String parameter){
+        APIParameters(String parameter) {
             this.parameter = parameter;
         }
 

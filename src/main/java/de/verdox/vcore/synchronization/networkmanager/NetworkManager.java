@@ -6,12 +6,12 @@ package de.verdox.vcore.synchronization.networkmanager;
 
 import de.verdox.vcore.plugin.SystemLoadable;
 import de.verdox.vcore.plugin.VCorePlugin;
-import de.verdox.vcore.synchronization.networkmanager.server.ServerInstance;
 import de.verdox.vcore.synchronization.networkmanager.player.VCorePlayer;
 import de.verdox.vcore.synchronization.networkmanager.player.VCorePlayerCache;
 import de.verdox.vcore.synchronization.networkmanager.server.ServerCache;
-import de.verdox.vcore.synchronization.networkmanager.serverping.ServerPingManager;
+import de.verdox.vcore.synchronization.networkmanager.server.ServerInstance;
 import de.verdox.vcore.synchronization.networkmanager.server.ServerType;
+import de.verdox.vcore.synchronization.networkmanager.serverping.ServerPingManager;
 import de.verdox.vcore.synchronization.pipeline.parts.Pipeline;
 
 import javax.annotation.Nonnull;
@@ -27,17 +27,17 @@ import java.util.stream.Collectors;
  * @Author: Lukas Jonsson (Verdox)
  * @date 31.07.2021 21:01
  */
-public class NetworkManager <T extends VCorePlugin<?,?>> implements SystemLoadable {
+public class NetworkManager<T extends VCorePlugin<?, ?>> implements SystemLoadable {
 
     private final ServerType serverType;
     private final T plugin;
     private final ServerPingManager<T> serverPingManager;
     private final ServerCache serverCache;
     private final VCorePlayerCache vCorePlayerCache;
-    private boolean loaded;
+    private final boolean loaded;
 
-    public NetworkManager(@Nonnull ServerType serverType,  @Nonnull T plugin){
-        plugin.consoleMessage("&eStarting Network Manager&7!",false);
+    public NetworkManager(@Nonnull ServerType serverType, @Nonnull T plugin) {
+        plugin.consoleMessage("&eStarting Network Manager&7!", false);
         this.serverType = serverType;
         this.plugin = plugin;
         this.serverPingManager = new ServerPingManager<>(this);
@@ -47,29 +47,29 @@ public class NetworkManager <T extends VCorePlugin<?,?>> implements SystemLoadab
         loaded = true;
     }
 
-    private void preloadData(){
-        plugin.consoleMessage("&ePreloading Network Data&7...",false);
+    private void preloadData() {
+        plugin.consoleMessage("&ePreloading Network Data&7...", false);
         getPlugin().getServices().getPipeline().loadAllData(VCorePlayer.class, Pipeline.LoadingStrategy.LOAD_PIPELINE);
         getPlugin().getServices().getPipeline().loadAllData(ServerInstance.class, Pipeline.LoadingStrategy.LOAD_PIPELINE);
-        plugin.consoleMessage("&aPreloaded Network Data",false);
+        plugin.consoleMessage("&aPreloaded Network Data", false);
     }
 
-    public VCorePlayer getVCorePlayer(UUID playerUUID){
-        return plugin.getServices().getPipeline().load(VCorePlayer.class,playerUUID, Pipeline.LoadingStrategy.LOAD_PIPELINE,false);
+    public VCorePlayer getVCorePlayer(UUID playerUUID) {
+        return plugin.getServices().getPipeline().load(VCorePlayer.class, playerUUID, Pipeline.LoadingStrategy.LOAD_PIPELINE, false);
     }
 
-    public boolean isPlayerOnNetwork(UUID playerUUID){
-        return plugin.getServices().getPipeline().exist(VCorePlayer.class,playerUUID, Pipeline.QueryStrategy.LOCAL, Pipeline.QueryStrategy.GLOBAL_CACHE);
+    public boolean isPlayerOnNetwork(UUID playerUUID) {
+        return plugin.getServices().getPipeline().exist(VCorePlayer.class, playerUUID, Pipeline.QueryStrategy.LOCAL, Pipeline.QueryStrategy.GLOBAL_CACHE);
     }
 
-    public ServerInstance findPlayerServer(UUID playerUUID){
+    public ServerInstance findPlayerServer(UUID playerUUID) {
         VCorePlayer vCorePlayer = getVCorePlayer(playerUUID);
-        if(vCorePlayer == null)
+        if (vCorePlayer == null)
             return null;
         return getServer(vCorePlayer.currentGameServer);
     }
 
-    public Map<String, List<VCorePlayer>> getAllPlayers(){
+    public Map<String, List<VCorePlayer>> getAllPlayers() {
         Set<VCorePlayer> players = plugin.getServices().getPipeline().loadAllData(VCorePlayer.class, Pipeline.LoadingStrategy.LOAD_PIPELINE);
 
         Map<String, List<VCorePlayer>> playersByGameServers = players.stream().collect(Collectors.groupingBy(VCorePlayer::getCurrentGameServer));
@@ -78,19 +78,19 @@ public class NetworkManager <T extends VCorePlugin<?,?>> implements SystemLoadab
         return playersByGameServers;
     }
 
-    public Map<String, List<VCorePlayer>> getGameServerPlayers(){
+    public Map<String, List<VCorePlayer>> getGameServerPlayers() {
         Set<VCorePlayer> players = plugin.getServices().getPipeline().loadAllData(VCorePlayer.class, Pipeline.LoadingStrategy.LOAD_PIPELINE);
         return players.stream().collect(Collectors.groupingBy(VCorePlayer::getCurrentGameServer));
     }
 
-    public Map<String, List<VCorePlayer>> getProxyPlayers(){
+    public Map<String, List<VCorePlayer>> getProxyPlayers() {
         Set<VCorePlayer> players = plugin.getServices().getPipeline().loadAllData(VCorePlayer.class, Pipeline.LoadingStrategy.LOAD_PIPELINE);
         return players.stream().collect(Collectors.groupingBy(VCorePlayer::getCurrentProxyServer));
     }
 
-    public ServerInstance getServer(String serverName){
+    public ServerInstance getServer(String serverName) {
         UUID serverUUID = UUID.nameUUIDFromBytes(serverName.getBytes(StandardCharsets.UTF_8));
-        return plugin.getServices().getPipeline().load(ServerInstance.class,serverUUID, Pipeline.LoadingStrategy.LOAD_PIPELINE,false);
+        return plugin.getServices().getPipeline().load(ServerInstance.class, serverUUID, Pipeline.LoadingStrategy.LOAD_PIPELINE, false);
     }
 
     public ServerPingManager<T> getServerPingManager() {

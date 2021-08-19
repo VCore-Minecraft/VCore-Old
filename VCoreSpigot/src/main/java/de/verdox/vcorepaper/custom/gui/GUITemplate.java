@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2021. Lukas Jonsson
+ */
+
 package de.verdox.vcorepaper.custom.gui;
 
 import de.verdox.vcore.plugin.bukkit.BukkitPlugin;
@@ -18,7 +22,6 @@ import java.text.NumberFormat;
 import java.text.ParseException;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
@@ -26,70 +29,68 @@ import java.util.stream.Stream;
 public class GUITemplate {
     //TODO: Callbacks ans Ende der Function
 
-    public static AnvilGUI.Builder createIntegerInputGUI(BukkitPlugin bukkitPlugin, Player player, String title, String notValidNumber, Function<Integer, AnvilGUI.Response> callback){
+    public static AnvilGUI.Builder createIntegerInputGUI(BukkitPlugin bukkitPlugin, Player player, String title, String notValidNumber, Function<Integer, AnvilGUI.Response> callback) {
         return new AnvilGUI.Builder()
                 .plugin(bukkitPlugin)
-                .title(ChatColor.translateAlternateColorCodes('&',title))
+                .title(ChatColor.translateAlternateColorCodes('&', title))
                 .itemLeft(new ItemStack(Material.GOLD_INGOT))
                 .onComplete((player1, s) -> {
-                    try{
+                    try {
                         Integer number = Integer.parseInt(s);
                         return callback.apply(number);
-                    }
-                    catch (NumberFormatException e){
+                    } catch (NumberFormatException e) {
                         return AnvilGUI.Response.text(notValidNumber);
                     }
                 });
     }
 
-    public static AnvilGUI.Builder createDoubleInputGUI(Locale parsingLocale, BukkitPlugin bukkitPlugin, Player player, String title, String notValidNumber, Function<Double, AnvilGUI.Response> callback){
+    public static AnvilGUI.Builder createDoubleInputGUI(Locale parsingLocale, BukkitPlugin bukkitPlugin, Player player, String title, String notValidNumber, Function<Double, AnvilGUI.Response> callback) {
         return new AnvilGUI.Builder()
                 .plugin(bukkitPlugin)
-                .title(ChatColor.translateAlternateColorCodes('&',title))
+                .title(ChatColor.translateAlternateColorCodes('&', title))
                 .itemLeft(new ItemStack(Material.GOLD_INGOT))
                 .onComplete((player1, s) -> {
-                    try{
+                    try {
                         NumberFormat format = NumberFormat.getInstance(parsingLocale);
                         Number number = format.parse(s);
                         return callback.apply(number.doubleValue());
-                    }
-                    catch (NumberFormatException | ParseException e){
+                    } catch (NumberFormatException | ParseException e) {
                         return AnvilGUI.Response.text(notValidNumber);
                     }
                 });
     }
 
-    public static void createSelectConfirmationGUI(BukkitPlugin bukkitPlugin, Player player, Function<Boolean, VCoreGUI.Response<?,?>> callback){
-        VCoreItem yesItem = VCorePaper.getInstance().getCustomItemManager().createItemBuilder(Material.GREEN_STAINED_GLASS_PANE,1,"&aYes").buildItem();
-        VCoreItem noItem = VCorePaper.getInstance().getCustomItemManager().createItemBuilder(Material.RED_STAINED_GLASS_PANE,1,"&cNo").buildItem();
-        createSelectConfirmationGUI(bukkitPlugin, player, "&eAre you sure?", yesItem, noItem,callback);
+    public static void createSelectConfirmationGUI(BukkitPlugin bukkitPlugin, Player player, Function<Boolean, VCoreGUI.Response<?, ?>> callback) {
+        VCoreItem yesItem = VCorePaper.getInstance().getCustomItemManager().createItemBuilder(Material.GREEN_STAINED_GLASS_PANE, 1, "&aYes").buildItem();
+        VCoreItem noItem = VCorePaper.getInstance().getCustomItemManager().createItemBuilder(Material.RED_STAINED_GLASS_PANE, 1, "&cNo").buildItem();
+        createSelectConfirmationGUI(bukkitPlugin, player, "&eAre you sure?", yesItem, noItem, callback);
     }
 
-    public static void createSelectConfirmationGUI(BukkitPlugin bukkitPlugin, Player player, String title, String yesTitle, String noTitle, Function<Boolean, VCoreGUI.Response<?,?>> callback){
-        VCoreItem yesItem = VCorePaper.getInstance().getCustomItemManager().createItemBuilder(Material.GREEN_STAINED_GLASS_PANE,1, yesTitle).buildItem();
-        VCoreItem noItem = VCorePaper.getInstance().getCustomItemManager().createItemBuilder(Material.RED_STAINED_GLASS_PANE,1 ,noTitle).buildItem();
-        createSelectConfirmationGUI(bukkitPlugin, player, title, yesItem, noItem,callback);
+    public static void createSelectConfirmationGUI(BukkitPlugin bukkitPlugin, Player player, String title, String yesTitle, String noTitle, Function<Boolean, VCoreGUI.Response<?, ?>> callback) {
+        VCoreItem yesItem = VCorePaper.getInstance().getCustomItemManager().createItemBuilder(Material.GREEN_STAINED_GLASS_PANE, 1, yesTitle).buildItem();
+        VCoreItem noItem = VCorePaper.getInstance().getCustomItemManager().createItemBuilder(Material.RED_STAINED_GLASS_PANE, 1, noTitle).buildItem();
+        createSelectConfirmationGUI(bukkitPlugin, player, title, yesItem, noItem, callback);
     }
 
-    public static void createSelectConfirmationGUI(BukkitPlugin bukkitPlugin, Player player, String title, VCoreItem yesItem, VCoreItem noItem, Function<Boolean, VCoreGUI.Response<?,?>> callback){
+    public static void createSelectConfirmationGUI(BukkitPlugin bukkitPlugin, Player player, String title, VCoreItem yesItem, VCoreItem noItem, Function<Boolean, VCoreGUI.Response<?, ?>> callback) {
         CustomItemManager customItemManager = VCorePaper.getInstance().getCustomItemManager();
         new VCoreGUI.Builder<String>()
                 .plugin(bukkitPlugin)
-                .title(ChatColor.translateAlternateColorCodes('&',title))
+                .title(ChatColor.translateAlternateColorCodes('&', title))
                 .type(InventoryType.HOPPER)
                 .content(objectContentBuilder -> {
-                    objectContentBuilder.addContent(0,customItemManager.createItemBuilder(Material.BLACK_STAINED_GLASS_PANE,1,"")
-                            .buildItem(),"");
-                    objectContentBuilder.addContent(1, noItem,"");
-                    objectContentBuilder.addContent(2,customItemManager.createItemBuilder(Material.BLACK_STAINED_GLASS_PANE,1,"")
-                            .buildItem(),"");
-                    objectContentBuilder.addContent(3,yesItem,"");
-                    objectContentBuilder.addContent(4,customItemManager.createItemBuilder(Material.BLACK_STAINED_GLASS_PANE,1,"")
-                            .buildItem(),"");
+                    objectContentBuilder.addContent(0, customItemManager.createItemBuilder(Material.BLACK_STAINED_GLASS_PANE, 1, "")
+                            .buildItem(), "");
+                    objectContentBuilder.addContent(1, noItem, "");
+                    objectContentBuilder.addContent(2, customItemManager.createItemBuilder(Material.BLACK_STAINED_GLASS_PANE, 1, "")
+                            .buildItem(), "");
+                    objectContentBuilder.addContent(3, yesItem, "");
+                    objectContentBuilder.addContent(4, customItemManager.createItemBuilder(Material.BLACK_STAINED_GLASS_PANE, 1, "")
+                            .buildItem(), "");
                 })
                 .onItemClick(stringVCoreGUIClick -> {
                     VCoreItem vCoreItem = stringVCoreGUIClick.getClickedItem();
-                    if(vCoreItem.getDataHolder().getType().equals(Material.GREEN_STAINED_GLASS_PANE))
+                    if (vCoreItem.getDataHolder().getType().equals(Material.GREEN_STAINED_GLASS_PANE))
                         return callback.apply(true);
                     else
                         return callback.apply(false);
@@ -97,121 +98,121 @@ public class GUITemplate {
                 .open(player);
     }
 
-    public static void selectMaterial(BukkitPlugin bukkitPlugin, Player player, Function<VCoreGUI.VCoreGUIClick<Material>, VCoreGUI.Response<?,?>> onClick, Runnable backCallback){
-        new SelectionGUI<Material>("&eMaterial Selection",Arrays.asList(Material.values()),bukkitPlugin,1,5,ItemStack::new)
+    public static void selectMaterial(BukkitPlugin bukkitPlugin, Player player, Function<VCoreGUI.VCoreGUIClick<Material>, VCoreGUI.Response<?, ?>> onClick, Runnable backCallback) {
+        new SelectionGUI<Material>("&eMaterial Selection", Arrays.asList(Material.values()), bukkitPlugin, 1, 5, ItemStack::new)
                 .onClick(onClick)
                 .onBack(backCallback)
                 .toStringFunc(Enum::name)
                 .open(player);
     }
 
-    public static class SelectionGUI<T>{
-        private String title;
-        private List<T> objectList;
+    public static class SelectionGUI<T> {
         private final BukkitPlugin bukkitPlugin;
         private final Function<T, ItemStack> objectToItemStack;
+        private final Map<VCoreItem, Function<VCoreGUI.VCoreGUIClick<T>, VCoreGUI.Response<?, ?>>> additionalItems = new HashMap<>();
+        private final int rows;
+        private final int guiSize;
+        private final String title;
+        private List<T> objectList;
         private int page;
         private Supplier<List<T>> listUpdater;
         private String pattern;
-        private Function<T,String> toStringFunc;
-        private Function<VCoreGUI.VCoreGUIClick<T>, VCoreGUI.Response<?,?>> clickCallback;
+        private Function<T, String> toStringFunc;
+        private Function<VCoreGUI.VCoreGUIClick<T>, VCoreGUI.Response<?, ?>> clickCallback;
         private Runnable backCallback;
-        private final Map<VCoreItem, Function<VCoreGUI.VCoreGUIClick<T>, VCoreGUI.Response<?,?>>> additionalItems = new HashMap<>();
-        private final int rows;
-        private final int guiSize;
 
-        public SelectionGUI(@Nonnull String title, @Nonnull List<T> objectList, @Nonnull BukkitPlugin bukkitPlugin, @Positive int page, @Positive int rows, @Nonnull Function<T, ItemStack> objectToItemStack){
+        public SelectionGUI(@Nonnull String title, @Nonnull List<T> objectList, @Nonnull BukkitPlugin bukkitPlugin, @Positive int page, @Positive int rows, @Nonnull Function<T, ItemStack> objectToItemStack) {
             this.title = title;
             this.objectList = objectList;
             this.bukkitPlugin = bukkitPlugin;
             this.objectToItemStack = objectToItemStack;
             this.page = page;
             this.rows = rows;
-            if(rows > 5)
+            if (rows > 5)
                 rows = 5;
-            guiSize = (rows*9)+9;
+            guiSize = (rows * 9) + 9;
         }
 
-        public SelectionGUI(@Nonnull String title, @Nonnull List<T> objectList, @Nonnull BukkitPlugin bukkitPlugin, @Nonnull Function<T, ItemStack> objectToItemStack){
-            this(title,objectList,bukkitPlugin,1,5,objectToItemStack);
+        public SelectionGUI(@Nonnull String title, @Nonnull List<T> objectList, @Nonnull BukkitPlugin bukkitPlugin, @Nonnull Function<T, ItemStack> objectToItemStack) {
+            this(title, objectList, bukkitPlugin, 1, 5, objectToItemStack);
         }
 
-        public SelectionGUI(@Nonnull String title, @Nonnull List<T> objectList, @Nonnull BukkitPlugin bukkitPlugin, @Positive int rows, @Nonnull Function<T, ItemStack> objectToItemStack){
-            this(title,objectList,bukkitPlugin,1,rows,objectToItemStack);
+        public SelectionGUI(@Nonnull String title, @Nonnull List<T> objectList, @Nonnull BukkitPlugin bukkitPlugin, @Positive int rows, @Nonnull Function<T, ItemStack> objectToItemStack) {
+            this(title, objectList, bukkitPlugin, 1, rows, objectToItemStack);
         }
 
-        public SelectionGUI<T> updateList(Supplier<List<T>> listUpdater){
+        public SelectionGUI<T> updateList(Supplier<List<T>> listUpdater) {
             this.listUpdater = listUpdater;
             return this;
         }
 
-        public SelectionGUI<T> addItem(VCoreItem vCoreItem, @NonNegative int slot, Function<VCoreGUI.VCoreGUIClick<T>, VCoreGUI.Response<?,?>> clickCallback){
-            if(vCoreItem == null)
+        public SelectionGUI<T> addItem(VCoreItem vCoreItem, @NonNegative int slot, Function<VCoreGUI.VCoreGUIClick<T>, VCoreGUI.Response<?, ?>> clickCallback) {
+            if (vCoreItem == null)
                 throw new NullPointerException("VCoreItem can't be null!");
-            if(clickCallback == null)
+            if (clickCallback == null)
                 throw new NullPointerException("clickCallback can't be null!");
-            if(slot > guiSize)
-                slot = (rows*9+(slot%9));
-            vCoreItem.getNBTCompound().setObject("vcore_gui_slot",slot);
-            additionalItems.put(vCoreItem,clickCallback);
+            if (slot > guiSize)
+                slot = (rows * 9 + (slot % 9));
+            vCoreItem.getNBTCompound().setObject("vcore_gui_slot", slot);
+            additionalItems.put(vCoreItem, clickCallback);
             return this;
         }
 
-        public SelectionGUI<T> onClick(Function<VCoreGUI.VCoreGUIClick<T>, VCoreGUI.Response<?,?>> clickCallback){
+        public SelectionGUI<T> onClick(Function<VCoreGUI.VCoreGUIClick<T>, VCoreGUI.Response<?, ?>> clickCallback) {
             this.clickCallback = clickCallback;
             return this;
         }
 
-        public SelectionGUI<T> onBack(Runnable backCallback){
+        public SelectionGUI<T> onBack(Runnable backCallback) {
             this.backCallback = backCallback;
             return this;
         }
 
-        public SelectionGUI<T> toStringFunc(Function<T,String> toStringFunc){
+        public SelectionGUI<T> toStringFunc(Function<T, String> toStringFunc) {
             this.toStringFunc = toStringFunc;
             return this;
         }
 
-        public SelectionGUI<T> withSearchPattern(String pattern, Function<T,String> toStringFunc){
+        public SelectionGUI<T> withSearchPattern(String pattern, Function<T, String> toStringFunc) {
             this.pattern = pattern;
             this.toStringFunc = toStringFunc;
             return this;
         }
 
-        private void nextPage(){
-            if(page+1 > getMaxPage())
+        private void nextPage() {
+            if (page + 1 > getMaxPage())
                 page = getMaxPage();
             else
                 page++;
         }
 
-        private void lastPage(){
-            if(page-1 <= 0)
+        private void lastPage() {
+            if (page - 1 <= 0)
                 page = 1;
             else
                 page--;
         }
 
-        private int getMaxPage(){
+        private int getMaxPage() {
             long count = filterWithPattern().count();
-            return (int) ((count / rows*9)+1);
+            return (int) ((count / rows * 9) + 1);
         }
 
-        private Stream<T> filterWithPattern(){
+        private Stream<T> filterWithPattern() {
             return objectList.stream().filter(t -> {
-                if(t == null)
+                if (t == null)
                     return false;
                 ItemStack stack = objectToItemStack.apply(t);
-                if(stack == null || stack.getType().equals(Material.AIR) || stack.getType().isAir())
+                if (stack == null || stack.getType().equals(Material.AIR) || stack.getType().isAir())
                     return false;
-                if(pattern == null || pattern.isEmpty() || toStringFunc == null)
+                if (pattern == null || pattern.isEmpty() || toStringFunc == null)
                     return true;
                 String string = toStringFunc.apply(t);
                 return string.toLowerCase().contains(pattern.toLowerCase());
             });
         }
 
-        public void open(Player player){
+        public void open(Player player) {
 
             VCoreItem border = VCorePaper.getInstance().getCustomItemManager().createItemBuilder(Material.BLACK_STAINED_GLASS_PANE, 1, "&8").buildItem();
             VCoreItem nextPage = VCorePaper.getInstance().getCustomItemManager().createItemBuilder(Material.PAPER, 1, "&aNext page").buildItem();
@@ -222,80 +223,79 @@ public class GUITemplate {
             new VCoreGUI.Builder<T>()
                     .plugin(bukkitPlugin)
                     .update()
-                    .title(ChatColor.translateAlternateColorCodes('&',title))
+                    .title(ChatColor.translateAlternateColorCodes('&', title))
                     .type(InventoryType.CHEST)
                     .size(guiSize)
                     .content(contentBuilder -> {
-                        if(listUpdater != null)
+                        if (listUpdater != null)
                             objectList = listUpdater.get();
 
                         AtomicInteger counter = new AtomicInteger(0);
                         filterWithPattern()
-                                .skip((page-1)* (rows*9L))
-                                .limit(rows*9L)
+                                .skip((page - 1) * (rows * 9L))
+                                .limit(rows * 9L)
                                 .forEach(t -> {
                                     ItemStack stack = objectToItemStack.apply(t);
-                                    if(stack == null)
+                                    if (stack == null)
                                         return;
-                                    if(stack.getType().equals(Material.AIR))
+                                    if (stack.getType().equals(Material.AIR))
                                         return;
-                                    if(stack.getType().isEmpty())
+                                    if (stack.getType().isEmpty())
                                         return;
                                     VCoreItem vCoreItem = VCorePaper.getInstance().getCustomItemManager().wrap(VCoreItem.class, stack);
-                                    contentBuilder.addContent(counter.getAndIncrement(),vCoreItem,t);
+                                    contentBuilder.addContent(counter.getAndIncrement(), vCoreItem, t);
                                 });
 
-                        if(page > 1)
-                            contentBuilder.addContent((rows*9),lastPage,null);
+                        if (page > 1)
+                            contentBuilder.addContent((rows * 9), lastPage, null);
                         else
-                            contentBuilder.addContent((rows*9),border,null);
-                        contentBuilder.addContent((rows*9)+1,border,null);
-                        if(backCallback != null)
-                            contentBuilder.addContent((rows*9)+2,back,null);
+                            contentBuilder.addContent((rows * 9), border, null);
+                        contentBuilder.addContent((rows * 9) + 1, border, null);
+                        if (backCallback != null)
+                            contentBuilder.addContent((rows * 9) + 2, back, null);
                         else
-                            contentBuilder.addContent((rows*9)+2,border,null);
-                        contentBuilder.addContent((rows*9)+3,border,null);
-                        contentBuilder.addContent((rows*9)+4,border,null);
-                        contentBuilder.addContent((rows*9)+5,border,null);
-                        if(this.toStringFunc != null)
-                            contentBuilder.addContent((rows*9)+6,search,null);
+                            contentBuilder.addContent((rows * 9) + 2, border, null);
+                        contentBuilder.addContent((rows * 9) + 3, border, null);
+                        contentBuilder.addContent((rows * 9) + 4, border, null);
+                        contentBuilder.addContent((rows * 9) + 5, border, null);
+                        if (this.toStringFunc != null)
+                            contentBuilder.addContent((rows * 9) + 6, search, null);
                         else
-                            contentBuilder.addContent((rows*9)+6,border,null);
-                        contentBuilder.addContent((rows*9)+7,border,null);
-                        if(((page)*((rows*9)))+1 < objectList.size() || counter.get() >= (rows*9)-1)
-                            contentBuilder.addContent((rows*9)+8,nextPage,null);
+                            contentBuilder.addContent((rows * 9) + 6, border, null);
+                        contentBuilder.addContent((rows * 9) + 7, border, null);
+                        if (((page) * ((rows * 9))) + 1 < objectList.size() || counter.get() >= (rows * 9) - 1)
+                            contentBuilder.addContent((rows * 9) + 8, nextPage, null);
                         else
-                            contentBuilder.addContent((rows*9)+8,border,null);
+                            contentBuilder.addContent((rows * 9) + 8, border, null);
 
 
                         additionalItems.forEach((vCoreItem, vCoreItemResponseFunction) -> {
-                            if(!vCoreItem.getNBTCompound().hasKey("vcore_gui_slot"))
+                            if (!vCoreItem.getNBTCompound().hasKey("vcore_gui_slot"))
                                 return;
                             int slot = vCoreItem.getNBTCompound().getInteger("vcore_gui_slot");
                             contentBuilder.removeItem(slot);
-                            contentBuilder.addContent(slot,vCoreItem,null);
+                            contentBuilder.addContent(slot, vCoreItem, null);
                         });
                     })
                     .onItemClick(vCoreGUIClick -> {
                         VCoreItem vCoreItem = vCoreGUIClick.getClickedItem();
-                        if(additionalItems.containsKey(vCoreItem))
+                        if (additionalItems.containsKey(vCoreItem))
                             return additionalItems.get(vCoreItem).apply(vCoreGUIClick);
-                        else if(vCoreItem.equals(nextPage))
+                        else if (vCoreItem.equals(nextPage))
                             nextPage();
-                        else if(vCoreItem.equals(lastPage))
+                        else if (vCoreItem.equals(lastPage))
                             lastPage();
-                        else if(vCoreItem.equals(back) && backCallback != null) {
+                        else if (vCoreItem.equals(back) && backCallback != null) {
                             backCallback.run();
                             return VCoreGUI.Response.nothing();
-                        }
-                        else if(vCoreItem.equals(search)){
+                        } else if (vCoreItem.equals(search)) {
                             return VCoreGUI.Response.input(s -> {
                                 this.pattern = s;
                                 return AnvilGUI.Response.close();
                             });
                         }
                         T object = vCoreGUIClick.getDataInItemStack();
-                        if(object != null && clickCallback != null)
+                        if (object != null && clickCallback != null)
                             return clickCallback.apply(vCoreGUIClick);
                         else
                             return VCoreGUI.Response.nothing();

@@ -9,7 +9,7 @@ package de.verdox.vcorepaper.nms.nmshandler.api.hologram.lines;
  * @Author: Lukas Jonsson (Verdox)
  * @date 23.06.2021 02:41
  */
-public interface TextLine extends HologramLine{
+public interface TextLine extends HologramLine {
     String getText();
 
     void setText(String text);

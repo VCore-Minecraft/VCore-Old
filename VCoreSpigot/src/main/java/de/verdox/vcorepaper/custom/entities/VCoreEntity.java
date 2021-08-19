@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2021. Lukas Jonsson
+ */
+
 package de.verdox.vcorepaper.custom.entities;
 
 import de.verdox.vcorepaper.VCorePaper;
@@ -11,13 +15,13 @@ import java.lang.reflect.InvocationTargetException;
 
 public class VCoreEntity extends CustomDataHolder<Entity, NBTEntityHolder, CustomEntityManager> {
 
-    public VCoreEntity(@Nonnull Entity entity, @Nonnull CustomEntityManager customEntityManager){
+    public VCoreEntity(@Nonnull Entity entity, @Nonnull CustomEntityManager customEntityManager) {
         super(entity, customEntityManager);
     }
 
     @Override
     protected <T, R extends CustomData<T>> void onStoreData(Class<? extends R> customDataType, T value) {
-        VCorePaper.getInstance().consoleMessage("&eStoring&7 &a"+customDataType+": &b"+value, true);
+        VCorePaper.getInstance().consoleMessage("&eStoring&7 &a" + customDataType + ": &b" + value, true);
         getNBTCompound().getKeys().forEach(s -> VCorePaper.getInstance().consoleMessage(s, 2, true));
     }
 

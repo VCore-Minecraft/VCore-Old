@@ -18,16 +18,16 @@ public abstract class VCoreHybridEvent extends Event {
 
     private static final HandlerList handlers = new HandlerList();
 
-    public VCoreHybridEvent(){
+    public VCoreHybridEvent() {
         super(!Bukkit.isPrimaryThread());
+    }
+
+    public static HandlerList getHandlerList() {
+        return handlers;
     }
 
     @Override
     public HandlerList getHandlers() {
-        return handlers;
-    }
-
-    public static HandlerList getHandlerList() {
         return handlers;
     }
 }

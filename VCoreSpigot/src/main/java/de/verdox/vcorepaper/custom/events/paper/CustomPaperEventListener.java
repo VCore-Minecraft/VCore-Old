@@ -25,23 +25,22 @@ public class CustomPaperEventListener extends VCoreListener.VCoreBukkitListener 
     }
 
     @EventHandler
-    public void onMilk(PlayerInteractEntityEvent e){
-        if(e instanceof PlayerMilkCowEvent)
+    public void onMilk(PlayerInteractEntityEvent e) {
+        if (e instanceof PlayerMilkCowEvent)
             return;
         Player player = e.getPlayer();
-        if(!(e.getRightClicked() instanceof Cow))
+        if (!(e.getRightClicked() instanceof Cow))
             return;
         Cow cow = (Cow) e.getRightClicked();
         PlayerMilkCowEvent playerMilkCowEvent = null;
-        if(player.getInventory().getItemInMainHand().getType().equals(Material.BUCKET)) {
+        if (player.getInventory().getItemInMainHand().getType().equals(Material.BUCKET)) {
             playerMilkCowEvent = new PlayerMilkCowEvent(player, cow, EquipmentSlot.HAND);
-        }
-        else if(player.getInventory().getItemInOffHand().getType().equals(Material.BUCKET)) {
+        } else if (player.getInventory().getItemInOffHand().getType().equals(Material.BUCKET)) {
             playerMilkCowEvent = new PlayerMilkCowEvent(player, cow, EquipmentSlot.OFF_HAND);
         }
-        if(playerMilkCowEvent != null){
+        if (playerMilkCowEvent != null) {
             Bukkit.getPluginManager().callEvent(playerMilkCowEvent);
-            if(playerMilkCowEvent.isCancelled())
+            if (playerMilkCowEvent.isCancelled())
                 e.setCancelled(true);
         }
     }

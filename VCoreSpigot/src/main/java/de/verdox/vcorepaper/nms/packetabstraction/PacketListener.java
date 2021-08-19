@@ -12,7 +12,9 @@ import de.verdox.vcorepaper.VCorePaper;
 import reactor.util.annotation.NonNull;
 
 import javax.annotation.Nonnull;
-import java.util.*;
+import java.util.Map;
+import java.util.NoSuchElementException;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -22,17 +24,17 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public abstract class PacketListener {
 
-    private Map<UUID, PacketInstruction> packetInstructionMap = new ConcurrentHashMap<>();
+    private final Map<UUID, PacketInstruction> packetInstructionMap = new ConcurrentHashMap<>();
     private boolean applyGlobal;
 
-    public PacketListener(ListenerPriority listenerPriority, boolean applyGlobal, PacketType... packetTypes){
+    public PacketListener(ListenerPriority listenerPriority, boolean applyGlobal, PacketType... packetTypes) {
         this.applyGlobal = applyGlobal;
 
 
         PacketAdapter adapter = new PacketAdapter(VCorePaper.getInstance(), listenerPriority, packetTypes) {
             @Override
             public void onPacketSending(PacketEvent event) {
-                if(!applyGlobal) {
+                if (!applyGlobal) {
                     if (!packetInstructionMap.containsKey(event.getPlayer().getUniqueId()))
                         return;
                 }
@@ -42,7 +44,7 @@ public abstract class PacketListener {
 
             @Override
             public void onPacketReceiving(PacketEvent event) {
-                if(!applyGlobal) {
+                if (!applyGlobal) {
                     if (!packetInstructionMap.containsKey(event.getPlayer().getUniqueId()))
                         return;
                 }
@@ -55,13 +57,14 @@ public abstract class PacketListener {
     }
 
     public abstract void onSend(PacketEvent event, PacketInstruction packetInstruction);
+
     public abstract void onReceive(PacketEvent event, PacketInstruction packetInstruction);
 
-    public void addPlayerInstruction(UUID playerUUID, Object... dataToSend){
+    public void addPlayerInstruction(UUID playerUUID, Object... dataToSend) {
         packetInstructionMap.put(playerUUID, new PacketInstruction(playerUUID, dataToSend));
     }
 
-    public void removePlayerInstruction(UUID playerUUID){
+    public void removePlayerInstruction(UUID playerUUID) {
         packetInstructionMap.remove(playerUUID);
     }
 
@@ -77,7 +80,7 @@ public abstract class PacketListener {
         private final UUID playerUUID;
         private final Object[] instructionData;
 
-        public PacketInstruction(@Nonnull UUID playerUUID, @NonNull Object... instructionData){
+        public PacketInstruction(@Nonnull UUID playerUUID, @NonNull Object... instructionData) {
             this.playerUUID = playerUUID;
             this.instructionData = instructionData;
         }
@@ -86,17 +89,17 @@ public abstract class PacketListener {
             return playerUUID;
         }
 
-        public <S> boolean isTypeOf(int index, Class<? extends S> type){
-            if(index < 0)
+        public <S> boolean isTypeOf(int index, Class<? extends S> type) {
+            if (index < 0)
                 return false;
-            else if(index >= instructionData.length)
+            else if (index >= instructionData.length)
                 return false;
             return instructionData[index].getClass().equals(type);
         }
 
-        public <S> S getData(int index, Class<? extends S> type){
-            if(!isTypeOf(index,type))
-                throw new NoSuchElementException("No element with type "+type+" was found at index "+index);
+        public <S> S getData(int index, Class<? extends S> type) {
+            if (!isTypeOf(index, type))
+                throw new NoSuchElementException("No element with type " + type + " was found at index " + index);
             return type.cast(instructionData[index]);
         }
     }

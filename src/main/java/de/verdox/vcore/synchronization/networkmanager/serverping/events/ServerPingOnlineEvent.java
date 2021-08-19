@@ -11,8 +11,8 @@ import de.verdox.vcore.synchronization.networkmanager.server.ServerType;
  * @Author: Lukas Jonsson (Verdox)
  * @date 09.07.2021 00:28
  */
-public class ServerPingOnlineEvent extends ServerPingEvent{
-    private boolean firstReceivedPing;
+public class ServerPingOnlineEvent extends ServerPingEvent {
+    private final boolean firstReceivedPing;
 
     public ServerPingOnlineEvent(ServerType serverType, String serverName, String serverAddress, int serverPort, boolean firstReceivedPing) {
         super(serverType, serverName, serverAddress, serverPort);

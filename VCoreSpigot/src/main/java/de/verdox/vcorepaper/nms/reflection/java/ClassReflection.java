@@ -13,7 +13,7 @@ import java.util.Objects;
  */
 public class ClassReflection {
 
-    public static ReferenceClass findClass(String name){
+    public static ReferenceClass findClass(String name) {
         try {
             return new ReferenceClass(Class.forName(name));
         } catch (ClassNotFoundException e) {
@@ -22,13 +22,14 @@ public class ClassReflection {
         }
     }
 
-    public static ReferenceClass toReferenceClass(Class<?> classToReference){
+    public static ReferenceClass toReferenceClass(Class<?> classToReference) {
         return new ReferenceClass(classToReference);
     }
 
-    public static class ReferenceClass{
+    public static class ReferenceClass {
         private final Class<?> reflectedClass;
-        ReferenceClass(Class<?> reflectedClass){
+
+        ReferenceClass(Class<?> reflectedClass) {
             this.reflectedClass = reflectedClass;
         }
 
@@ -36,19 +37,19 @@ public class ClassReflection {
             return reflectedClass;
         }
 
-        public boolean isInstance(Object object){
+        public boolean isInstance(Object object) {
             return reflectedClass.isInstance(object);
         }
 
-        public <T> FieldReflection.ReferenceField<T> findField(String fieldName, Class<T> fieldType){
+        public <T> FieldReflection.ReferenceField<T> findField(String fieldName, Class<T> fieldType) {
             return FieldReflection.getField(reflectedClass, fieldName, fieldType);
         }
 
-        public ConstructorReflection.ReferenceConstructor findConstructor(Class<?>... paramTypes){
+        public ConstructorReflection.ReferenceConstructor findConstructor(Class<?>... paramTypes) {
             return ConstructorReflection.findConstructor(reflectedClass, paramTypes);
         }
 
-        public <T> MethodReflection.ReferenceMethod<T> fiendMethod(String name, Class<T> returnType, Class<?>... paramTypes){
+        public <T> MethodReflection.ReferenceMethod<T> fiendMethod(String name, Class<T> returnType, Class<?>... paramTypes) {
             return MethodReflection.findMethod(reflectedClass, name, returnType, paramTypes);
         }
 

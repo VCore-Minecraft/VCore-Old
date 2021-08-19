@@ -6,21 +6,25 @@ package de.verdox.vcore.synchronization.networkmanager.player.api;
 
 import de.verdox.vcore.plugin.SystemLoadable;
 import de.verdox.vcore.plugin.VCorePlugin;
+import de.verdox.vcore.plugin.wrapper.types.ServerLocation;
+import de.verdox.vcore.plugin.wrapper.types.enums.PlayerGameMode;
 import de.verdox.vcore.plugin.wrapper.types.enums.PlayerMessageType;
 import de.verdox.vcore.synchronization.messaging.MessagingService;
 import de.verdox.vcore.synchronization.messaging.instructions.InstructionService;
 import de.verdox.vcore.synchronization.networkmanager.enums.GlobalProperty;
-import de.verdox.vcore.plugin.wrapper.types.enums.PlayerGameMode;
 import de.verdox.vcore.synchronization.networkmanager.player.VCorePlayer;
 import de.verdox.vcore.synchronization.networkmanager.player.api.instructions.queries.QueryPlayerPosition;
 import de.verdox.vcore.synchronization.networkmanager.player.api.instructions.updates.*;
-import de.verdox.vcore.plugin.wrapper.types.ServerLocation;
 import de.verdox.vcore.synchronization.networkmanager.player.scheduling.VCorePlayerTaskScheduler;
 import de.verdox.vcore.synchronization.pipeline.parts.Pipeline;
 
 import javax.annotation.Nonnull;
-import java.util.*;
-import java.util.concurrent.*;
+import java.util.Set;
+import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 /**
  * @version 1.0
@@ -34,7 +38,7 @@ public abstract class VCorePlayerAPIImpl implements VCorePlayerAPI, SystemLoadab
     private final InstructionService instructionService;
     protected VCorePlayerTaskScheduler vCorePlayerTaskScheduler;
 
-    public VCorePlayerAPIImpl(VCorePlugin<?,?> plugin){
+    public VCorePlayerAPIImpl(VCorePlugin<?, ?> plugin) {
         this.plugin = plugin;
         this.messagingService = plugin.getServices().getMessagingService();
         this.instructionService = messagingService.getInstructionService();
@@ -42,7 +46,7 @@ public abstract class VCorePlayerAPIImpl implements VCorePlayerAPI, SystemLoadab
         registerStandardInstructions();
     }
 
-    private void registerStandardInstructions(){
+    private void registerStandardInstructions() {
         plugin.getServices().getMessagingService().getInstructionService().registerInstructionType(0, QueryPlayerPosition.class);
         plugin.getServices().getMessagingService().getInstructionService().registerInstructionType(1, UpdatePlayerPosition.class);
         plugin.getServices().getMessagingService().getInstructionService().registerInstructionType(2, UpdatePlayerKick.class);
@@ -77,7 +81,7 @@ public abstract class VCorePlayerAPIImpl implements VCorePlayerAPI, SystemLoadab
 
     @Override
     public VCorePlayer getVCorePlayer(@Nonnull UUID uuid) {
-        return plugin.getServices().getPipeline().load(VCorePlayer.class,uuid, Pipeline.LoadingStrategy.LOAD_PIPELINE,false);
+        return plugin.getServices().getPipeline().load(VCorePlayer.class, uuid, Pipeline.LoadingStrategy.LOAD_PIPELINE, false);
     }
 
     @Override
@@ -102,7 +106,7 @@ public abstract class VCorePlayerAPIImpl implements VCorePlayerAPI, SystemLoadab
     @Override
     public CompletableFuture<Boolean> isOnline(@Nonnull UUID uuid) {
         CompletableFuture<Boolean> completableFuture = new CompletableFuture<>();
-        plugin.async(() -> completableFuture.complete(plugin.getServices().getPipeline().exist(VCorePlayer.class,uuid, Pipeline.QueryStrategy.LOCAL, Pipeline.QueryStrategy.GLOBAL_CACHE)));
+        plugin.async(() -> completableFuture.complete(plugin.getServices().getPipeline().exist(VCorePlayer.class, uuid, Pipeline.QueryStrategy.LOCAL, Pipeline.QueryStrategy.GLOBAL_CACHE)));
         return completableFuture;
     }
 
@@ -141,14 +145,14 @@ public abstract class VCorePlayerAPIImpl implements VCorePlayerAPI, SystemLoadab
     public void teleport(@Nonnull VCorePlayer vCorePlayer, @Nonnull VCorePlayer target) {
         plugin.async(() -> {
             try {
-                ServerLocation serverLocation = getServerLocation(target).get(5,TimeUnit.SECONDS);
-                if(serverLocation == null)
+                ServerLocation serverLocation = getServerLocation(target).get(5, TimeUnit.SECONDS);
+                if (serverLocation == null)
                     return;
-                teleport(vCorePlayer,serverLocation);
+                teleport(vCorePlayer, serverLocation);
             } catch (InterruptedException | ExecutionException e) {
                 e.printStackTrace();
             } catch (TimeoutException e) {
-                sendMessage(vCorePlayer,PlayerMessageType.CHAT,"&cTarget location could not be found&7!");
+                sendMessage(vCorePlayer, PlayerMessageType.CHAT, "&cTarget location could not be found&7!");
             }
         });
     }
@@ -156,35 +160,35 @@ public abstract class VCorePlayerAPIImpl implements VCorePlayerAPI, SystemLoadab
     @Override
     public void kickPlayer(@Nonnull VCorePlayer vCorePlayer, @Nonnull String message) {
         UpdatePlayerKick updatePlayerKick = new UpdatePlayerKick(UUID.randomUUID());
-        updatePlayerKick.withData(vCorePlayer.getObjectUUID(),message);
+        updatePlayerKick.withData(vCorePlayer.getObjectUUID(), message);
         plugin.getServices().getMessagingService().getInstructionService().sendInstruction(updatePlayerKick);
     }
 
     @Override
     public void changeServer(@Nonnull VCorePlayer vCorePlayer, @Nonnull String serverName) {
         UpdatePlayerServer updatePlayerServer = new UpdatePlayerServer(UUID.randomUUID());
-        updatePlayerServer.withData(vCorePlayer.getObjectUUID(),serverName);
+        updatePlayerServer.withData(vCorePlayer.getObjectUUID(), serverName);
         plugin.getServices().getMessagingService().getInstructionService().sendInstruction(updatePlayerServer);
     }
 
     @Override
     public void sendMessage(@Nonnull VCorePlayer vCorePlayer, @Nonnull PlayerMessageType playerMessageType, @Nonnull String message) {
         UpdatePlayerSendMessage updatePlayerSendMessage = new UpdatePlayerSendMessage(UUID.randomUUID());
-        updatePlayerSendMessage.withData(vCorePlayer.getObjectUUID(),playerMessageType.name(),message);
+        updatePlayerSendMessage.withData(vCorePlayer.getObjectUUID(), playerMessageType.name(), message);
         plugin.getServices().getMessagingService().getInstructionService().sendInstruction(updatePlayerSendMessage);
     }
 
     @Override
     public void healPlayer(@Nonnull VCorePlayer vCorePlayer) {
         UpdatePlayerHealth updatePlayerHealth = new UpdatePlayerHealth(UUID.randomUUID());
-        updatePlayerHealth.withData(vCorePlayer.getObjectUUID(),20d);
+        updatePlayerHealth.withData(vCorePlayer.getObjectUUID(), 20d);
         plugin.getServices().getMessagingService().getInstructionService().sendInstruction(updatePlayerHealth);
     }
 
     @Override
     public void feedPlayer(@Nonnull VCorePlayer vCorePlayer) {
         UpdatePlayerFood updatePlayerFood = new UpdatePlayerFood(UUID.randomUUID());
-        updatePlayerFood.withData(vCorePlayer.getObjectUUID(),10);
+        updatePlayerFood.withData(vCorePlayer.getObjectUUID(), 10);
         plugin.getServices().getMessagingService().getInstructionService().sendInstruction(updatePlayerFood);
     }
 
@@ -199,7 +203,7 @@ public abstract class VCorePlayerAPIImpl implements VCorePlayerAPI, SystemLoadab
     @Override
     public void broadcastMessage(@Nonnull String message, @Nonnull PlayerMessageType playerMessageType, @Nonnull GlobalProperty globalProperty) {
         UpdateBroadcastMessage updateBroadcastMessage = new UpdateBroadcastMessage(UUID.randomUUID());
-        updateBroadcastMessage.withData(playerMessageType.name(),message);
+        updateBroadcastMessage.withData(playerMessageType.name(), message);
         plugin.getServices().getMessagingService().getInstructionService().sendInstruction(updateBroadcastMessage);
     }
 

@@ -22,31 +22,38 @@ import java.util.List;
  */
 public interface NMSEntityHandler extends NMSHandler {
 
-    static NMSEntityHandler getRightHandler(NMSVersion nmsVersion){
-        if(nmsVersion.equals(NMSVersion.V1_16_5)){
+    static NMSEntityHandler getRightHandler(NMSVersion nmsVersion) {
+        if (nmsVersion.equals(NMSVersion.V1_16_5)) {
             return new EntityHandler_V1_16_R3();
         }
-        throw new NotImplementedException("This Handler ["+ NMSEntityHandler.class.getName()+"] is not implemented for NMS version: "+nmsVersion.getNmsVersionTag());
+        throw new NotImplementedException("This Handler [" + NMSEntityHandler.class.getName() + "] is not implemented for NMS version: " + nmsVersion.getNmsVersionTag());
     }
 
     /**
      * Send a Fake Entity to a player
+     *
      * @param entityType EntityType to Spawn
-     * @param location Location where to spawn
-     * @param visibleTo Players who see the entity
+     * @param location   Location where to spawn
+     * @param visibleTo  Players who see the entity
      * @return entityID of fake Entity
      */
     int sendFakeNonLivingEntity(EntityType entityType, Location location, List<Player> visibleTo);
+
     /**
      * Send a Fake Entity to a player
+     *
      * @param entityType EntityType to Spawn
-     * @param location Location where to spawn
-     * @param visibleTo Players who see the entity
+     * @param location   Location where to spawn
+     * @param visibleTo  Players who see the entity
      * @return entityID of fake Entity
      */
     int sendFakeLivingEntity(EntityType entityType, Location location, List<Player> visibleTo);
+
     void sendFakeEntityMovement(EntityType entityType, Location location, List<Player> visibleTo);
+
     void sendFakeEntityTeleport(EntityType entityType, Location location, List<Player> visibleTo);
+
     void sendArmorStandWithName(String name, Location location, List<Player> visibleTo);
+
     void sendFakeItem(ItemStack itemStack, Location location, List<Player> visibleTo);
 }

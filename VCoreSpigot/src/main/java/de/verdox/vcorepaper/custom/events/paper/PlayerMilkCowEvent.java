@@ -4,7 +4,6 @@
 
 package de.verdox.vcorepaper.custom.events.paper;
 
-import de.verdox.vcorepaper.custom.events.VCoreEvent;
 import org.bukkit.entity.Cow;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
@@ -19,8 +18,8 @@ import org.jetbrains.annotations.NotNull;
  */
 public class PlayerMilkCowEvent extends PlayerInteractEntityEvent {
 
-    private boolean cancelled;
     private final Cow cow;
+    private boolean cancelled;
 
     public PlayerMilkCowEvent(@NotNull Player who, @NotNull Entity clickedEntity, @NotNull final EquipmentSlot hand) {
         super(who, clickedEntity);
@@ -37,7 +36,6 @@ public class PlayerMilkCowEvent extends PlayerInteractEntityEvent {
     }
 
     /**
-     *
      * @return The Equipment Slot the player has used to milk the cow
      */
 

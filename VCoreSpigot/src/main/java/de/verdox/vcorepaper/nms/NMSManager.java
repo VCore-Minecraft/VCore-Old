@@ -20,23 +20,25 @@ public class NMSManager {
     private final VCorePaper vCorePaper;
     private final NMSVersion nmsVersion;
 
-    public NMSManager(VCorePaper vCorePaper){
+    public NMSManager(VCorePaper vCorePaper) {
         this.vCorePaper = vCorePaper;
         vCorePaper.consoleMessage("&eStarting NMS-Manager", false);
         String bukkitVersion = Bukkit.getBukkitVersion();
         nmsVersion = NMSVersion.findNMSVersion(bukkitVersion);
-        if(nmsVersion != null)
-            vCorePaper.consoleMessage("&eFound NMS-Version&7: &b"+nmsVersion.getNmsVersionTag(), false);
+        if (nmsVersion != null)
+            vCorePaper.consoleMessage("&eFound NMS-Version&7: &b" + nmsVersion.getNmsVersionTag(), false);
         else
-            vCorePaper.consoleMessage("&cCould not find proper NMS Version for Version&7: &b"+bukkitVersion +" &8| &b"+Bukkit.getVersion(), false);
+            vCorePaper.consoleMessage("&cCould not find proper NMS Version for Version&7: &b" + bukkitVersion + " &8| &b" + Bukkit.getVersion(), false);
     }
 
     public NMSWorldHandler getNmsWorldHandler() {
         return NMSWorldHandler.getRightHandler(nmsVersion);
     }
+
     public NMSServerHandler getNMSServerHandler() {
         return NMSServerHandler.getRightHandler(nmsVersion);
     }
+
     public NMSEntityHandler getNMSEntityHandler() {
         return NMSEntityHandler.getRightHandler(nmsVersion);
     }

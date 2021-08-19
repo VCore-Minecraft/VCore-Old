@@ -26,27 +26,27 @@ public class ServerPingConfig extends VCoreYAMLConfig {
 
     @Override
     public void setupConfig() {
-        config.addDefault("ServerInfos.serverName","serverName");
-        config.addDefault("ServerInfos.serverAddress","serverName");
-        config.addDefault("ServerInfos.serverPort",25565);
-        config.addDefault("bungee.enable",true);
+        config.addDefault("ServerInfos.serverName", "serverName");
+        config.addDefault("ServerInfos.serverAddress", "serverName");
+        config.addDefault("ServerInfos.serverPort", 25565);
+        config.addDefault("bungee.enable", true);
         config.options().copyDefaults(true);
         save();
     }
 
-    public String getServerName(){
+    public String getServerName() {
         return config.getString("ServerInfos.serverName").toLowerCase(Locale.ROOT);
     }
 
-    public String getServerAddress(){
+    public String getServerAddress() {
         return config.getString("ServerInfos.serverAddress");
     }
 
-    public int getServerPort(){
+    public int getServerPort() {
         return config.getInt("ServerInfos.serverPort");
     }
 
-    public boolean isBungeeMode(){
+    public boolean isBungeeMode() {
         return config.getBoolean("bungee.enable");
     }
 }

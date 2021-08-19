@@ -23,11 +23,11 @@ import java.util.stream.Collectors;
  * @date 05.08.2021 15:07
  */
 public final class VCorePlayerTaskScheduler implements SystemLoadable {
+    protected final Map<UUID, Set<PlayerTask>> scheduledTasks = new ConcurrentHashMap<>();
     private final VCorePlugin<?, ?> plugin;
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
-    protected final Map<UUID, Set<PlayerTask>> scheduledTasks = new ConcurrentHashMap<>();
 
-    public VCorePlayerTaskScheduler(VCorePlugin<?,?> plugin){
+    public VCorePlayerTaskScheduler(VCorePlugin<?, ?> plugin) {
         this.plugin = plugin;
     }
 
@@ -40,43 +40,43 @@ public final class VCorePlayerTaskScheduler implements SystemLoadable {
     public void shutdown() {
         executor.shutdown();
         try {
-            executor.awaitTermination(5,TimeUnit.SECONDS);
+            executor.awaitTermination(5, TimeUnit.SECONDS);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
     }
 
-    public void schedulePlayerTask(@Nonnull UUID playerUUID, @Nonnull Runnable runnable, int maxWaitTime, @Nonnull TimeUnit timeUnit){
+    public void schedulePlayerTask(@Nonnull UUID playerUUID, @Nonnull Runnable runnable, int maxWaitTime, @Nonnull TimeUnit timeUnit) {
         executor.submit(new CatchingRunnable(() -> {
-            if(plugin.getPlatformWrapper().isPlayerOnline(playerUUID)){
+            if (plugin.getPlatformWrapper().isPlayerOnline(playerUUID)) {
                 plugin.sync(runnable);
                 return;
             }
-            PlayerTask playerTask = new PlayerTask(playerUUID,runnable);
-            if(!scheduledTasks.containsKey(playerUUID))
-                scheduledTasks.put(playerUUID,new HashSet<>());
+            PlayerTask playerTask = new PlayerTask(playerUUID, runnable);
+            if (!scheduledTasks.containsKey(playerUUID))
+                scheduledTasks.put(playerUUID, new HashSet<>());
             scheduledTasks.get(playerUUID).add(playerTask);
             plugin.getServices().getVCoreScheduler().asyncSchedule(() -> {
                 executor.submit(() -> {
-                   removePlayerTask(playerUUID,playerTask);
+                    removePlayerTask(playerUUID, playerTask);
                 });
-            },maxWaitTime,timeUnit);
+            }, maxWaitTime, timeUnit);
         }));
     }
 
-    private void removePlayerTask(@Nonnull UUID playerUUID, @Nonnull PlayerTask playerTask){
-        if(!scheduledTasks.containsKey(playerUUID))
+    private void removePlayerTask(@Nonnull UUID playerUUID, @Nonnull PlayerTask playerTask) {
+        if (!scheduledTasks.containsKey(playerUUID))
             return;
         Set<PlayerTask> playerTasks = scheduledTasks.get(playerUUID);
         playerTasks.remove(playerTask);
-        if(playerTasks.isEmpty())
+        if (playerTasks.isEmpty())
             scheduledTasks.remove(playerUUID);
     }
 
-    public CompletableFuture<Set<Runnable>> getAllTasks(@Nonnull UUID playerUUID){
+    public CompletableFuture<Set<Runnable>> getAllTasks(@Nonnull UUID playerUUID) {
         CompletableFuture<Set<Runnable>> future = new CompletableFuture<>();
         executor.submit(new CatchingRunnable(() -> {
-            if(!scheduledTasks.containsKey(playerUUID)) {
+            if (!scheduledTasks.containsKey(playerUUID)) {
                 future.complete(new HashSet<>());
                 return;
             }

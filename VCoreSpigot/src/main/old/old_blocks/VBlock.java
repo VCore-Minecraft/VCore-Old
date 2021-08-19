@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2021. Lukas Jonsson
+ */
+
 package de.verdox.vcorepaper.custom.old_blocks;
 
 import de.verdox.vcorepaper.VCorePaper;
@@ -23,23 +27,24 @@ public class VBlock extends CustomDataHolder<Location, NBTBlockHolder, CustomBlo
     public VBlock(Location blockLocation, CustomBlockManager customBlockManager, BlockPersistentData blockPersistentData) {
         super(blockLocation, customBlockManager);
         this.blockPersistentData = blockPersistentData;
-        if(getBlockPersistentData().getJsonObject().containsKey("vBlockBlockData"))
+        if (getBlockPersistentData().getJsonObject().containsKey("vBlockBlockData"))
             blockDataAsString = (String) getBlockPersistentData().getJsonObject().get("vBlockBlockData");
     }
 
     /**
      * Updates the internal cached blockData.
+     *
      * @param blockData
      */
-    public void updateBlockData(BlockData blockData){
+    public void updateBlockData(BlockData blockData) {
         this.blockDataAsString = blockData.getAsString();
-        getBlockPersistentData().getJsonObject().put("vBlockBlockData",blockDataAsString);
+        getBlockPersistentData().getJsonObject().put("vBlockBlockData", blockDataAsString);
     }
 
-    public void dropItemInWorld(ItemStack itemStack, org.bukkit.util.Consumer<Item> beforeDrop){
+    public void dropItemInWorld(ItemStack itemStack, org.bukkit.util.Consumer<Item> beforeDrop) {
         Location blockLocation = getBlockPersistentData().getLocation();
-        Bukkit.getScheduler().runTask(VCorePaper.getInstance(),() -> {
-           blockLocation.getWorld().dropItemNaturally(blockLocation.clone().add(0,1,0),itemStack,beforeDrop);
+        Bukkit.getScheduler().runTask(VCorePaper.getInstance(), () -> {
+            blockLocation.getWorld().dropItemNaturally(blockLocation.clone().add(0, 1, 0), itemStack, beforeDrop);
         });
     }
 
@@ -47,7 +52,7 @@ public class VBlock extends CustomDataHolder<Location, NBTBlockHolder, CustomBlo
         return blockDataAsString;
     }
 
-    public void addVBlockTickCallback(Consumer<VBlock> callback){
+    public void addVBlockTickCallback(Consumer<VBlock> callback) {
         blockPersistentData.addTickCallback(callback);
     }
 
@@ -66,41 +71,41 @@ public class VBlock extends CustomDataHolder<Location, NBTBlockHolder, CustomBlo
         }
     }
 
-    public boolean isBlockPermissionAllowed(VBlockEventPermission vBlockEventPermission){
+    public boolean isBlockPermissionAllowed(VBlockEventPermission vBlockEventPermission) {
         return vBlockEventPermission.isAllowed(this);
     }
 
-    public void allowBlockPermission(VBlockEventPermission vBlockEventPermission, boolean allowed){
-        vBlockEventPermission.setAllowed(this,allowed);
+    public void allowBlockPermission(VBlockEventPermission vBlockEventPermission, boolean allowed) {
+        vBlockEventPermission.setAllowed(this, allowed);
     }
 
     /**
      * Only deletes the internal data of the VBlock
      */
-    public void deleteData(){
-        synchronized (getBlockPersistentData().getJsonObject()){
+    public void deleteData() {
+        synchronized (getBlockPersistentData().getJsonObject()) {
             getBlockPersistentData().clearTickCallbacks();
             getBlockPersistentData().getJsonObject().clear();
             getBlockPersistentData().getVBlockSaveFile().save();
         }
     }
 
-    public int getChunkX(){
+    public int getChunkX() {
         return getDataHolder().clone().getBlockX() & 0xF; // keep the 4 least significant bits, range 0-15
     }
 
-    public int getChunkY(){
+    public int getChunkY() {
         return getDataHolder().clone().getBlockX() & 0xFF; // and 8 least significant, range 0-255
     }
 
-    public int getChunkZ(){
+    public int getChunkZ() {
         return getDataHolder().clone().getBlockZ() & 0xF; // keep the 4 least significant bits, range 0-15
     }
 
     /**
      * Deletes the VBlock and all save Files
      */
-    public void delete(){
+    public void delete() {
         VBlockSaveFile vBlockSaveFile = getBlockPersistentData().getVBlockSaveFile();
         getCustomDataManager().unloadSaveFile(vBlockSaveFile);
         vBlockSaveFile.delete();

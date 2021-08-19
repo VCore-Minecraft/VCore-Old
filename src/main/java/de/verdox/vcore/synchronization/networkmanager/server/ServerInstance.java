@@ -22,27 +22,27 @@ import java.util.UUID;
 @VCoreDataProperties(preloadStrategy = PreloadStrategy.LOAD_ON_NEED, dataContext = DataContext.GLOBAL, cleanOnNoUse = false)
 public class ServerInstance extends NetworkData {
 
-    //TODO: VersionTag als Info hinzufügen
-    @VCorePersistentData
-    private String serverType;
     @VCorePersistentData
     public String serverName;
     @VCorePersistentData
     public String serverAddress;
     @VCorePersistentData
     public int serverPort;
+    //TODO: VersionTag als Info hinzufügen
+    @VCorePersistentData
+    private String serverType;
 
     public ServerInstance(VCorePlugin<?, ?> plugin, UUID objectUUID) {
         super(plugin, objectUUID);
     }
 
-    public ServerType getServerType(){
-        if(serverType == null)
+    public ServerType getServerType() {
+        if (serverType == null)
             return null;
         return ServerType.valueOf(serverType);
     }
 
-    public void setServerType(@Nonnull ServerType serverType){
+    public void setServerType(@Nonnull ServerType serverType) {
         this.serverType = serverType.name();
     }
 

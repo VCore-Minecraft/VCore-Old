@@ -15,11 +15,12 @@ public class FieldReflection {
 
     /**
      * Gets a Field via reflective access
-     * @param fieldName The name of the field (Case sensitive)
+     *
+     * @param fieldName      The name of the field (Case sensitive)
      * @param reflectedClass The class to perform the action on
      * @return The found field
      */
-    public static <T> ReferenceField<T> getField(Class<?> reflectedClass, String fieldName, Class<T> fieldType){
+    public static <T> ReferenceField<T> getField(Class<?> reflectedClass, String fieldName, Class<T> fieldType) {
         try {
             Field field = reflectedClass.getDeclaredField(fieldName);
             return new ReferenceField<>(field);
@@ -30,25 +31,26 @@ public class FieldReflection {
     }
 
 
-    public static class ReferenceField<T>{
+    public static class ReferenceField<T> {
 
         private final Field field;
         private Object accessor = null;
 
-        ReferenceField(Field field){
+        ReferenceField(Field field) {
             this.field = field;
         }
 
-        public ReferenceField<T> of(Object accessor){
+        public ReferenceField<T> of(Object accessor) {
             this.accessor = accessor;
             return this;
         }
 
         /**
          * Reading a Fields value via Reflection
+         *
          * @return The Value of the Field
          */
-        public T readField(){
+        public T readField() {
             try {
                 field.setAccessible(true);
                 return (T) field.get(accessor);
@@ -60,9 +62,10 @@ public class FieldReflection {
 
         /**
          * Setting a Field via Reflection
+         *
          * @param value The Value the field will get
          */
-        public ReferenceField<T> setField(T value){
+        public ReferenceField<T> setField(T value) {
             try {
                 field.setAccessible(true);
                 field.set(accessor, value);

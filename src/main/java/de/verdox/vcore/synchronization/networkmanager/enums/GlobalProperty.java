@@ -9,7 +9,7 @@ package de.verdox.vcore.synchronization.networkmanager.enums;
  * @Author: Lukas Jonsson (Verdox)
  * @date 04.08.2021 21:16
  */
-public enum GlobalProperty{
+public enum GlobalProperty {
     GAME_SERVER,
     PROXY_SERVER,
     NETWORK

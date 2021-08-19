@@ -21,7 +21,7 @@ public enum VBlockFlag {
     ;
     private final String nbtTag;
 
-    VBlockFlag(String nbtTag){
+    VBlockFlag(String nbtTag) {
         this.nbtTag = nbtTag;
     }
 

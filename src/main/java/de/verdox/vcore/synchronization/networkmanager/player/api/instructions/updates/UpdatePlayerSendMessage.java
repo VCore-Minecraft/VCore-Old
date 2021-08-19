@@ -30,18 +30,18 @@ public class UpdatePlayerSendMessage extends Update {
         String messageType = (String) instructionData[1];
         String message = (String) instructionData[2];
 
-        if(!checkOnlineOnSpigot(targetUUID))
+        if (!checkOnlineOnSpigot(targetUUID))
             return UpdateCompletion.NOTHING;
 
         PlayerMessageType playerMessageType = PlayerMessageType.valueOf(messageType);
-        spigotPlatform.sendMessage(targetUUID,message,playerMessageType);
+        spigotPlatform.sendMessage(targetUUID, message, playerMessageType);
 
         return UpdateCompletion.TRUE;
     }
 
     @Override
     protected List<Class<?>> dataTypes() {
-        return List.of(UUID.class,String.class, String.class);
+        return List.of(UUID.class, String.class, String.class);
     }
 
     @Override

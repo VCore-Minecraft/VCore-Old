@@ -5,8 +5,8 @@
 package de.verdox.vcore.synchronization.networkmanager.player.listener;
 
 import de.verdox.vcore.plugin.VCorePlugin;
-import de.verdox.vcore.synchronization.networkmanager.server.ServerType;
 import de.verdox.vcore.synchronization.messaging.messages.Message;
+import de.verdox.vcore.synchronization.networkmanager.server.ServerType;
 
 import java.util.UUID;
 
@@ -17,7 +17,7 @@ import java.util.UUID;
  */
 public interface VCorePlayerCacheListener {
 
-    default void sendPlayerPing(VCorePlugin<?,?> plugin, String serverName, ServerType serverType, PlayerPingType playerPingType, UUID playerUUID, String playerName){
+    default void sendPlayerPing(VCorePlugin<?, ?> plugin, String serverName, ServerType serverType, PlayerPingType playerPingType, UUID playerUUID, String playerName) {
         Message message = plugin.getServices().getMessagingService().constructMessage()
                 .withParameters("connection", playerPingType.name())
                 .withData(serverType.name(), serverName, playerUUID, playerName)
@@ -25,7 +25,7 @@ public interface VCorePlayerCacheListener {
         plugin.getServices().getMessagingService().publishMessage(message);
     }
 
-    enum PlayerPingType{
+    enum PlayerPingType {
         JOIN,
         QUIT,
         KICK

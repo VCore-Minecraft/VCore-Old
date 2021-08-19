@@ -17,7 +17,7 @@ import org.bukkit.event.player.PlayerQuitEvent;
  * @Author: Lukas Jonsson (Verdox)
  * @date 01.08.2021 02:52
  */
-public class PlayerBukkitListener extends VCoreListener.VCoreBukkitListener implements VCorePlayerCacheListener{
+public class PlayerBukkitListener extends VCoreListener.VCoreBukkitListener implements VCorePlayerCacheListener {
     private final NetworkManager<?> networkManager;
 
     public PlayerBukkitListener(NetworkManager<?> networkManager) {
@@ -26,33 +26,33 @@ public class PlayerBukkitListener extends VCoreListener.VCoreBukkitListener impl
     }
 
     @EventHandler
-    public void onJoin(PlayerJoinEvent e){
+    public void onJoin(PlayerJoinEvent e) {
         plugin.async(() -> {
             sendPlayerPing(getPlugin(),
                     networkManager.getServerPingManager().getServerName(),
-                    networkManager.getServerType(),PlayerPingType.JOIN,
+                    networkManager.getServerType(), PlayerPingType.JOIN,
                     e.getPlayer().getUniqueId(),
                     e.getPlayer().getName());
         });
     }
 
     @EventHandler
-    public void onQuit(PlayerQuitEvent e){
+    public void onQuit(PlayerQuitEvent e) {
         plugin.async(() -> {
             sendPlayerPing(getPlugin(),
                     networkManager.getServerPingManager().getServerName(),
-                    networkManager.getServerType(),PlayerPingType.QUIT,
+                    networkManager.getServerType(), PlayerPingType.QUIT,
                     e.getPlayer().getUniqueId(),
                     e.getPlayer().getName());
         });
     }
 
     @EventHandler
-    public void onKick(PlayerKickEvent e){
+    public void onKick(PlayerKickEvent e) {
         plugin.async(() -> {
             sendPlayerPing(getPlugin(),
                     networkManager.getServerPingManager().getServerName(),
-                    networkManager.getServerType(),PlayerPingType.KICK,
+                    networkManager.getServerType(), PlayerPingType.KICK,
                     e.getPlayer().getUniqueId(),
                     e.getPlayer().getName());
         });

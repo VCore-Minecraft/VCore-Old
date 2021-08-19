@@ -27,14 +27,14 @@ public class CustomBlockManager extends CustomDataManager<Location, VBlockCustom
         super(vCorePaper);
     }
 
-    public VBlock getVBlock(Location location){
-        return wrap(VBlock.class,location);
+    public VBlock getVBlock(Location location) {
+        return wrap(VBlock.class, location);
     }
 
     @Override
     public <U extends VBlock> U wrap(Class<? extends U> type, Location inputObject) {
         try {
-            return type.getDeclaredConstructor(Location.class, CustomBlockManager.class).newInstance(inputObject,this);
+            return type.getDeclaredConstructor(Location.class, CustomBlockManager.class).newInstance(inputObject, this);
         } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
             e.printStackTrace();
             return null;
@@ -44,7 +44,7 @@ public class CustomBlockManager extends CustomDataManager<Location, VBlockCustom
     @Override
     public <U extends VBlock> U convertTo(Class<? extends U> type, VBlock customData) {
         try {
-            return type.getDeclaredConstructor(Location.class, CustomBlockManager.class).newInstance(customData.getDataHolder(),this);
+            return type.getDeclaredConstructor(Location.class, CustomBlockManager.class).newInstance(customData.getDataHolder(), this);
         } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
             e.printStackTrace();
             return null;

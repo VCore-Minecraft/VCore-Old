@@ -14,6 +14,8 @@ import org.bukkit.Location;
  */
 public interface HologramLine {
     VHologram getHologram();
+
     Location getLocation();
+
     boolean isEmpty();
 }

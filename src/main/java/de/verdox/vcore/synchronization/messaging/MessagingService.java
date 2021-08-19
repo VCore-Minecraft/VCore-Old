@@ -20,14 +20,19 @@ import java.util.UUID;
 public interface MessagingService<T extends MessageBuilder> extends SystemLoadable {
 
     T constructMessage();
+
     void publishMessage(Message message);
+
     void sendMessage(Message message, String... serverNames);
+
     void setupPrivateMessagingChannel();
 
     boolean isOwnMessage(Message message);
-    default UUID getSessionUUID(){
+
+    default UUID getSessionUUID() {
         return UUID.randomUUID();
     }
+
     String getSenderName();
 
     InstructionService getInstructionService();

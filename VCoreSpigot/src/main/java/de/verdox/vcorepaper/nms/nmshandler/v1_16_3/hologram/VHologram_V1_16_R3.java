@@ -26,7 +26,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class VHologram_V1_16_R3 implements VHologram {
 
-    private Map<Integer, HologramLine> lines = new ConcurrentHashMap<>();
+    private final Map<Integer, HologramLine> lines = new ConcurrentHashMap<>();
 
     @Override
     public TextLine setTextLine(String line) {
@@ -92,12 +92,12 @@ public class VHologram_V1_16_R3 implements VHologram {
         return false;
     }
 
-    static class HologramPacketManagerImpl implements HologramPacketManager{
+    static class HologramPacketManagerImpl implements HologramPacketManager {
 
         private final VHologram_V1_16_R3 vHologram;
         private boolean global;
 
-        HologramPacketManagerImpl(VHologram_V1_16_R3 vHologram){
+        HologramPacketManagerImpl(VHologram_V1_16_R3 vHologram) {
             this.vHologram = vHologram;
         }
 
@@ -122,7 +122,6 @@ public class VHologram_V1_16_R3 implements VHologram {
             vHologram.getLines().keySet().stream().sorted().forEach(integer -> {
 
 
-
             });
 
             PacketPlayOutSpawnEntity packetPlayOutSpawnEntity = new PacketPlayOutSpawnEntity();
@@ -139,12 +138,12 @@ public class VHologram_V1_16_R3 implements VHologram {
         }
     }
 
-    static abstract class HologramLineImpl implements HologramLine{
+    static abstract class HologramLineImpl implements HologramLine {
 
         protected final VHologram vHologram;
         protected Location location;
 
-        HologramLineImpl(VHologram vHologram, Location location){
+        HologramLineImpl(VHologram vHologram, Location location) {
             this.vHologram = vHologram;
             this.location = location;
         }
@@ -167,9 +166,10 @@ public class VHologram_V1_16_R3 implements VHologram {
         protected abstract Entity getLineEntity();
     }
 
-    static class TextLineImpl extends HologramLineImpl implements TextLine{
+    static class TextLineImpl extends HologramLineImpl implements TextLine {
         private final EntityArmorStand entityArmorStand;
         private String text;
+
         TextLineImpl(VHologram vHologram, Location location) {
             super(vHologram, location);
             CraftWorld craftWorld = (CraftWorld) location.getWorld();
@@ -187,7 +187,7 @@ public class VHologram_V1_16_R3 implements VHologram {
         @Override
         public void setText(String text) {
             entityArmorStand.setCustomNameVisible(text != null);
-            if(text != null)
+            if (text != null)
                 entityArmorStand.setCustomName(new ChatComponentText(text));
             this.text = text;
         }
@@ -203,9 +203,10 @@ public class VHologram_V1_16_R3 implements VHologram {
         }
     }
 
-    static class ItemLineImpl extends HologramLineImpl implements ItemLine{
+    static class ItemLineImpl extends HologramLineImpl implements ItemLine {
         private final EntityItem entityItem;
         private ItemStack stack;
+
         ItemLineImpl(VHologram vHologram, Location location) {
             super(vHologram, location);
             CraftWorld craftWorld = (CraftWorld) location.getWorld();
@@ -220,6 +221,13 @@ public class VHologram_V1_16_R3 implements VHologram {
         }
 
         @Override
+        public void setItemStack(ItemStack stack) {
+            if (stack != null)
+                entityItem.setItemStack(net.minecraft.server.v1_16_R3.ItemStack.fromBukkitCopy(stack));
+            this.stack = stack;
+        }
+
+        @Override
         public boolean isEmpty() {
             return stack == null || stack.getType().isEmpty();
         }
@@ -227,13 +235,6 @@ public class VHologram_V1_16_R3 implements VHologram {
         @Override
         protected Entity getLineEntity() {
             return entityItem;
-        }
-
-        @Override
-        public void setItemStack(ItemStack stack) {
-            if(stack != null)
-                entityItem.setItemStack(net.minecraft.server.v1_16_R3.ItemStack.fromBukkitCopy(stack));
-            this.stack = stack;
         }
     }
 }

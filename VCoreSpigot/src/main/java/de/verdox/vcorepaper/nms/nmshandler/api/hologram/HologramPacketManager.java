@@ -13,11 +13,13 @@ import org.bukkit.entity.Player;
  */
 public interface HologramPacketManager {
     VHologram getHologram();
+
     boolean isGlobal();
 
     void setGlobal(boolean value);
 
     void showTo(Player player);
+
     void hideFrom(Player player);
 
     boolean isVisibleTo(Player player);

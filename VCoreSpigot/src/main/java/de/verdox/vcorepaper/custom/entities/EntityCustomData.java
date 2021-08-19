@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2021. Lukas Jonsson
+ */
+
 package de.verdox.vcorepaper.custom.entities;
 
 import de.verdox.vcorepaper.custom.CustomData;
@@ -10,16 +14,19 @@ public abstract class EntityCustomData<T> extends CustomData<T> {
         super();
     }
 
-    public boolean onDeath(Entity entity){
+    public boolean onDeath(Entity entity) {
         return false;
     }
-    public boolean onDamageReceive(Entity entity){
+
+    public boolean onDamageReceive(Entity entity) {
         return false;
     }
-    public boolean onDamageEntity(Entity entity){
+
+    public boolean onDamageEntity(Entity entity) {
         return false;
     }
-    public boolean onPhysicalInteraction(Entity entity, Block block){
+
+    public boolean onPhysicalInteraction(Entity entity, Block block) {
         return false;
     }
 }

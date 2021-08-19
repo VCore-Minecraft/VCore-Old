@@ -6,7 +6,6 @@ package de.verdox.vcorepaper.nms.packetabstraction.wrapper;
 
 import de.verdox.vcorepaper.nms.reflection.java.FieldReflection;
 import net.minecraft.server.v1_16_R3.Packet;
-import net.minecraft.server.v1_16_R3.PacketPlayOutWorldBorder;
 import org.bukkit.craftbukkit.v1_16_R3.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 
@@ -22,7 +21,7 @@ public abstract class WorldBorderPacketWrapper extends PacketWrapper {
         super("PacketPlayOutWorldBorder");
     }
 
-    public static class V_1_16_R3 extends WorldBorderPacketWrapper{
+    public static class V_1_16_R3 extends WorldBorderPacketWrapper {
 
         public final FieldReflection.ReferenceField<net.minecraft.server.v1_16_R3.PacketPlayOutWorldBorder.EnumWorldBorderAction>
                 worldBorderAction = getReferenceClass().findField("a", net.minecraft.server.v1_16_R3.PacketPlayOutWorldBorder.EnumWorldBorderAction.class).of(getPacket());

@@ -17,17 +17,17 @@ public abstract class PacketWrapper {
     private final ClassReflection.ReferenceClass referenceClass;
     private Object packet;
 
-    public PacketWrapper(String packetName){
-        referenceClass = MinecraftClassFinder.findMinecraftClass(MinecraftClassFinder.MinecraftPackage.NMS,null,packetName);
+    public PacketWrapper(String packetName) {
+        referenceClass = MinecraftClassFinder.findMinecraftClass(MinecraftClassFinder.MinecraftPackage.NMS, null, packetName);
         packet = referenceClass.findConstructor().instantiate();
-    }
-
-    protected void setPacket(Object object){
-        packet = object;
     }
 
     public Object getPacket() {
         return packet;
+    }
+
+    protected void setPacket(Object object) {
+        packet = object;
     }
 
     public ClassReflection.ReferenceClass getReferenceClass() {

@@ -4,7 +4,6 @@
 
 package de.verdox.vcorepaper.custom.events.paper;
 
-import de.verdox.vcorepaper.custom.events.VCoreEvent;
 import org.bukkit.block.Block;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.block.BlockEvent;
@@ -26,16 +25,16 @@ public class BlockChangeStateEvent extends BlockEvent {
         this.materialChanged = materialChanged;
     }
 
+    public static HandlerList getHandlerList() {
+        return handlers;
+    }
+
     public boolean isMaterialChanged() {
         return materialChanged;
     }
 
     @Override
     public @NotNull HandlerList getHandlers() {
-        return handlers;
-    }
-
-    public static HandlerList getHandlerList() {
         return handlers;
     }
 

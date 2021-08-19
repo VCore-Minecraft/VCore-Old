@@ -8,7 +8,6 @@ import de.verdox.vcore.plugin.VCorePlugin;
 import de.verdox.vcore.synchronization.pipeline.annotations.*;
 import de.verdox.vcore.synchronization.pipeline.datatypes.NetworkData;
 
-import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 

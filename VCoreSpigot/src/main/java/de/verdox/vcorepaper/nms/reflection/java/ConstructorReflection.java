@@ -14,7 +14,7 @@ import java.lang.reflect.InvocationTargetException;
  */
 public class ConstructorReflection {
 
-    public static ReferenceConstructor findConstructor(Class<?> classToReflect, Class<?>... paramTypes){
+    public static ReferenceConstructor findConstructor(Class<?> classToReflect, Class<?>... paramTypes) {
         try {
             return new ReferenceConstructor(classToReflect.getDeclaredConstructor(paramTypes));
         } catch (NoSuchMethodException e) {
@@ -23,14 +23,14 @@ public class ConstructorReflection {
         return null;
     }
 
-    public static class ReferenceConstructor{
+    public static class ReferenceConstructor {
         private final Constructor<?> constructor;
 
-        public ReferenceConstructor(Constructor<?> constructor){
+        public ReferenceConstructor(Constructor<?> constructor) {
             this.constructor = constructor;
         }
 
-        public Object instantiate(Object... params){
+        public Object instantiate(Object... params) {
             try {
                 return this.constructor.newInstance(params);
             } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {

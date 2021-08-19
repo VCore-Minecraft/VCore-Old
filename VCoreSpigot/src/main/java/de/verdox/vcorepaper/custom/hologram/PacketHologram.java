@@ -4,7 +4,6 @@
 
 package de.verdox.vcorepaper.custom.hologram;
 
-import de.verdox.vcorepaper.VCorePaper;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -19,19 +18,19 @@ import java.util.function.Consumer;
  * @Author: Lukas Jonsson (Verdox)
  * @date 23.06.2021 02:23
  */
-public class PacketHologram implements HologramInterface{
+public class PacketHologram implements HologramInterface {
 
     private final Location location;
     private final boolean global;
     private final List<Integer> lines = new ArrayList<>();
 
-    public PacketHologram(Location location, boolean global){
+    public PacketHologram(Location location, boolean global) {
         this.location = location.clone();
         this.global = global;
     }
 
-    private Location getLine(@NonNegative int line){
-        return location.clone().add(0,1.2 * (1-line),0);
+    private Location getLine(@NonNegative int line) {
+        return location.clone().add(0, 1.2 * (1 - line), 0);
     }
 
     @Override

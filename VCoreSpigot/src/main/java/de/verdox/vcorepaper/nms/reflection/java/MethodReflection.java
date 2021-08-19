@@ -14,7 +14,7 @@ import java.lang.reflect.Method;
  */
 public class MethodReflection {
 
-    public static <T> ReferenceMethod<T> findMethod(Class<?> reflectedClass, String name, Class<T> returnType, Class<?>... paramTypes){
+    public static <T> ReferenceMethod<T> findMethod(Class<?> reflectedClass, String name, Class<T> returnType, Class<?>... paramTypes) {
         try {
             new ReferenceMethod<>(reflectedClass.getMethod(name, paramTypes));
         } catch (NoSuchMethodException e) {
@@ -24,21 +24,21 @@ public class MethodReflection {
     }
 
 
-    public static class ReferenceMethod<T>{
+    public static class ReferenceMethod<T> {
 
         private Object accessor;
-        private Method method;
+        private final Method method;
 
-        ReferenceMethod(Method method){
+        ReferenceMethod(Method method) {
             this.method = method;
         }
 
-        public ReferenceMethod<T> of(Object accessor){
+        public ReferenceMethod<T> of(Object accessor) {
             this.accessor = accessor;
             return this;
         }
 
-        public T invoke(Object... params){
+        public T invoke(Object... params) {
             try {
                 return (T) method.invoke(accessor, params);
             } catch (IllegalAccessException | InvocationTargetException e) {

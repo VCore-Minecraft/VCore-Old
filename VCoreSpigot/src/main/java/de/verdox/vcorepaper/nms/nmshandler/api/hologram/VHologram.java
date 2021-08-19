@@ -5,7 +5,6 @@
 package de.verdox.vcorepaper.nms.nmshandler.api.hologram;
 
 import de.verdox.vcorepaper.nms.NMSVersion;
-import de.verdox.vcorepaper.nms.nmshandler.api.entity.NMSEntityHandler;
 import de.verdox.vcorepaper.nms.nmshandler.api.hologram.lines.HologramLine;
 import de.verdox.vcorepaper.nms.nmshandler.api.hologram.lines.ItemLine;
 import de.verdox.vcorepaper.nms.nmshandler.api.hologram.lines.TextLine;
@@ -22,28 +21,35 @@ import org.bukkit.inventory.ItemStack;
  */
 public interface VHologram {
 
-    default VHologram createHologram(Location location){
+    default VHologram createHologram(Location location) {
         NMSVersion nmsVersion = NMSVersion.findNMSVersion(Bukkit.getServer().getBukkitVersion());
-        if(nmsVersion.equals(NMSVersion.V1_16_5)){
+        if (nmsVersion.equals(NMSVersion.V1_16_5)) {
             return new VHologram_V1_16_R3();
         }
-        throw new NotImplementedException("This Handler ["+ VHologram.class.getName()+"] is not implemented for NMS version: "+nmsVersion.getNmsVersionTag());
+        throw new NotImplementedException("This Handler [" + VHologram.class.getName() + "] is not implemented for NMS version: " + nmsVersion.getNmsVersionTag());
     }
 
     TextLine setTextLine(String line);
+
     ItemLine setItemLine(ItemStack stack);
 
     HologramLine getLine(int index);
+
     void removeLine(int index);
+
     void clearLines();
+
     int size();
 
     void teleport(Location location);
+
     Location getLocation();
 
     HologramPacketManager getHologramPacketManager();
+
     long getCreationTimeStamp();
 
     void delete();
+
     boolean isDeleted();
 }

@@ -14,10 +14,10 @@ import de.verdox.vcorepaper.custom.nbtholders.block.NBTBlock;
  */
 public abstract class NBTBlockEvent extends VCoreHybridEvent {
 
-    private boolean cancelled;
     private final NBTBlock nbtBlock;
+    private boolean cancelled;
 
-    public NBTBlockEvent(NBTBlock nbtBlock){
+    public NBTBlockEvent(NBTBlock nbtBlock) {
         this.nbtBlock = nbtBlock;
     }
 

@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2021. Lukas Jonsson
+ */
+
 package de.verdox.vcorepaper.custom.old_blocks.enums;
 
 import de.verdox.vcorepaper.custom.old_blocks.VBlock;
@@ -16,17 +20,17 @@ public enum VBlockEventPermission {
     ;
     private String nbtKey;
 
-    VBlockEventPermission(String nbtKey){
+    VBlockEventPermission(String nbtKey) {
         this.nbtKey = nbtKey;
     }
 
-    public boolean isAllowed(VBlock vBlock){
-        if(!vBlock.getNBTCompound().hasKey(nbtKey))
+    public boolean isAllowed(VBlock vBlock) {
+        if (!vBlock.getNBTCompound().hasKey(nbtKey))
             return true;
         return vBlock.getNBTCompound().getBoolean(nbtKey);
     }
 
-    public void setAllowed(VBlock vBlock, boolean value){
-        vBlock.getNBTCompound().setObject(nbtKey,value);
+    public void setAllowed(VBlock vBlock, boolean value) {
+        vBlock.getNBTCompound().setObject(nbtKey, value);
     }
 }

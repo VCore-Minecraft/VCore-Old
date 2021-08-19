@@ -4,8 +4,6 @@
 
 package de.verdox.vcorepaper.nms.nmshandler.v1_16_3.world;
 
-import com.comphenix.protocol.ProtocolLibrary;
-import com.comphenix.protocol.events.PacketContainer;
 import de.verdox.vcore.performance.concurrent.CatchingRunnable;
 import de.verdox.vcore.util.VCoreUtil;
 import de.verdox.vcorepaper.VCorePaper;
@@ -22,7 +20,6 @@ import org.bukkit.craftbukkit.v1_16_R3.CraftChunk;
 import org.bukkit.craftbukkit.v1_16_R3.CraftServer;
 import org.bukkit.craftbukkit.v1_16_R3.CraftWorld;
 import org.bukkit.craftbukkit.v1_16_R3.boss.CraftDragonBattle;
-import org.bukkit.craftbukkit.v1_16_R3.entity.CraftEnderDragon;
 import org.bukkit.craftbukkit.v1_16_R3.entity.CraftPlayer;
 import org.bukkit.entity.EnderDragon;
 import org.bukkit.entity.EntityType;
@@ -30,12 +27,9 @@ import org.bukkit.entity.Player;
 import org.checkerframework.checker.index.qual.NonNegative;
 
 import javax.annotation.Nonnull;
-import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 /**
  * @version 1.0
@@ -60,9 +54,9 @@ public class WorldHandler_V1_16_R3 implements NMSWorldHandler {
             VCoreUtil.BukkitUtil.getBukkitPlayerUtil().getChunksInServerViewDistance(player).forEach(chunkKey -> {
                 org.bukkit.World world = player.getWorld();
                 CompletableFuture<Chunk> futureChunk = chunkKey.getChunkIn(world);
-                if(futureChunk != null)
+                if (futureChunk != null)
                     futureChunk.thenApply(chunk -> {
-                        refreshChunk(player,chunk);
+                        refreshChunk(player, chunk);
                         return true;
                     });
             });
@@ -72,16 +66,16 @@ public class WorldHandler_V1_16_R3 implements NMSWorldHandler {
     @Override
     public void refreshChunk(@Nonnull Player player, @Nonnull Chunk chunk, Runnable callback) {
         VCorePaper.getInstance().createTaskBatch().doAsync(() -> {
-            PacketPlayOutMapChunk packetPlayOutMapChunk = new PacketPlayOutMapChunk(((CraftChunk) chunk).getHandle(), 65535,true);
+            PacketPlayOutMapChunk packetPlayOutMapChunk = new PacketPlayOutMapChunk(((CraftChunk) chunk).getHandle(), 65535, true);
             ((CraftPlayer) player).getHandle().playerConnection.sendPacket(packetPlayOutMapChunk);
-            VCorePaper.getInstance().consoleMessage("Sent Fake Chunk ["+chunk.getX()+"|"+chunk.getZ()+"]", true);
+            VCorePaper.getInstance().consoleMessage("Sent Fake Chunk [" + chunk.getX() + "|" + chunk.getZ() + "]", true);
         }).executeBatch(callback);
     }
 
     @Override
     public void sendFakeBiome(@Nonnull Player player, @Nonnull Chunk chunk, @Nonnull Biome biome, Runnable callback) {
         VCorePaper.getInstance().createTaskBatch().doAsync(() -> {
-            ChunkPacketWrapper.V_1_16_R3 chunkPacketWrapper = new ChunkPacketWrapper.V_1_16_R3(chunk, 65535,true);
+            ChunkPacketWrapper.V_1_16_R3 chunkPacketWrapper = new ChunkPacketWrapper.V_1_16_R3(chunk, 65535, true);
             int[] biomeArray = chunkPacketWrapper.biomes.readField();
             Arrays.fill(biomeArray, VCoreUtil.BukkitUtil.getVanillaUtil().getBiomeID_1_16(biome));
             chunkPacketWrapper.biomes.setField(biomeArray);
@@ -103,48 +97,48 @@ public class WorldHandler_V1_16_R3 implements NMSWorldHandler {
         long seed = craftPlayer.getWorld().getSeed();
 
 
-
         ResourceKey<World> world;
         ResourceKey<World> fakeWorld;
         DimensionManager dimensionManager;
         DimensionManager fakeDimensionManager;
-        switch (environment){
+        switch (environment) {
             case NORMAL: {
                 world = World.OVERWORLD;
-                dimensionManager = FieldReflection.getField(DimensionManager.class,"OVERWORLD_IMPL",DimensionManager.class).readField();
+                dimensionManager = FieldReflection.getField(DimensionManager.class, "OVERWORLD_IMPL", DimensionManager.class).readField();
 
                 fakeWorld = World.THE_NETHER;
-                fakeDimensionManager = FieldReflection.getField(DimensionManager.class,"THE_NETHER_IMPL",DimensionManager.class).readField();
+                fakeDimensionManager = FieldReflection.getField(DimensionManager.class, "THE_NETHER_IMPL", DimensionManager.class).readField();
                 break;
             }
             case NETHER: {
                 world = World.THE_NETHER;
-                dimensionManager = FieldReflection.getField(DimensionManager.class,"THE_NETHER_IMPL",DimensionManager.class).readField();
+                dimensionManager = FieldReflection.getField(DimensionManager.class, "THE_NETHER_IMPL", DimensionManager.class).readField();
 
                 fakeWorld = World.THE_END;
-                fakeDimensionManager = FieldReflection.getField(DimensionManager.class,"THE_END_IMPL",DimensionManager.class).readField();
+                fakeDimensionManager = FieldReflection.getField(DimensionManager.class, "THE_END_IMPL", DimensionManager.class).readField();
                 break;
             }
             case THE_END: {
                 world = World.THE_END;
-                dimensionManager = FieldReflection.getField(DimensionManager.class,"THE_END_IMPL",DimensionManager.class).readField();
+                dimensionManager = FieldReflection.getField(DimensionManager.class, "THE_END_IMPL", DimensionManager.class).readField();
 
                 fakeWorld = World.OVERWORLD;
-                fakeDimensionManager = FieldReflection.getField(DimensionManager.class,"OVERWORLD_IMPL",DimensionManager.class).readField();
+                fakeDimensionManager = FieldReflection.getField(DimensionManager.class, "OVERWORLD_IMPL", DimensionManager.class).readField();
                 break;
 
             }
-            default:throw new IllegalStateException("Unknwon Environment: "+environment);
+            default:
+                throw new IllegalStateException("Unknwon Environment: " + environment);
         }
 
-        if(world == null)
+        if (world == null)
             return;
         EnumGamemode enumGamemode = EnumGamemode.getById(player.getGameMode().getValue());
         VCorePaper.getInstance().createTaskBatch().doSync(new CatchingRunnable(() -> {
             //worldServer.removePlayer(entityPlayer);
         })).doAsync(() -> {
             //craftPlayer.getHandle().playerConnection.sendPacket(new PacketPlayOutRespawn(fakeDimensionManager, world, seed, enumGamemode, enumGamemode, false, false, flag));
-        }).wait(50,TimeUnit.MILLISECONDS).doAsync(() -> {
+        }).wait(50, TimeUnit.MILLISECONDS).doAsync(() -> {
             //craftPlayer.getHandle().playerConnection.sendPacket(new PacketPlayOutRespawn(fakeDimensionManager, fakeWorld, seed, enumGamemode, enumGamemode, false, false, flag));
             craftPlayer.getHandle().playerConnection.sendPacket(new PacketPlayOutRespawn(dimensionManager, world, seed, enumGamemode, enumGamemode, false, false, flag));
             //craftPlayer.getHandle().playerConnection.sendPacket(new PacketPlayOutViewDistance(craftPlayer.getWorld().getViewDistance()));
@@ -152,7 +146,7 @@ public class WorldHandler_V1_16_R3 implements NMSWorldHandler {
             //entityPlayer.spawnIn(worldServer);
             //entityPlayer.dead = false;
             //entityPlayer.playerConnection.teleport(new Location(worldServer.getWorld(), entityPlayer.locX(), entityPlayer.locY(), entityPlayer.locZ(), entityPlayer.yaw, entityPlayer.pitch));
-        }).wait(200,TimeUnit.MILLISECONDS).doAsync(new CatchingRunnable(() -> {
+        }).wait(200, TimeUnit.MILLISECONDS).doAsync(new CatchingRunnable(() -> {
             //entityPlayer.playerConnection.sendPacket(new PacketPlayOutSpawnPosition(worldServer.getSpawn(), worldServer.v()));
             //entityPlayer.playerConnection.sendPacket(new PacketPlayOutServerDifficulty(worldServer.getDifficulty(), worldData.isDifficultyLocked()));
             //entityPlayer.playerConnection.sendPacket(new PacketPlayOutExperience(entityPlayer.exp, entityPlayer.expTotal, entityPlayer.expLevel));
@@ -234,23 +228,23 @@ public class WorldHandler_V1_16_R3 implements NMSWorldHandler {
 
     @Override
     public DragonBattle createDragonBattle(@Nonnull Location dragonSpawnLoc, @Nonnull Location exitPortalLoc) {
-        WorldServer worldServer = ((CraftWorld)dragonSpawnLoc.getWorld()).getHandle();
+        WorldServer worldServer = ((CraftWorld) dragonSpawnLoc.getWorld()).getHandle();
 
         NBTTagCompound nbtTagCompound = new NBTTagCompound();
 
         EnderDragon enderDragon = (EnderDragon) dragonSpawnLoc.getWorld().spawnEntity(dragonSpawnLoc, EntityType.ENDER_DRAGON);
 
-        nbtTagCompound.setUUID("Dragon",enderDragon.getUniqueId());
-        nbtTagCompound.setBoolean("PreviouslyKilled",false);
-        nbtTagCompound.setBoolean("DragonKilled",false);
-        nbtTagCompound.setBoolean("IsRespawning",false);
+        nbtTagCompound.setUUID("Dragon", enderDragon.getUniqueId());
+        nbtTagCompound.setBoolean("PreviouslyKilled", false);
+        nbtTagCompound.setBoolean("DragonKilled", false);
+        nbtTagCompound.setBoolean("IsRespawning", false);
 
         NBTTagCompound exitPortalLocation = nbtTagCompound.getCompound("ExitPortalLocation");
-        exitPortalLocation.setInt("X",exitPortalLoc.getBlockX());
-        exitPortalLocation.setInt("Y",exitPortalLoc.getBlockY());
-        exitPortalLocation.setInt("Z",exitPortalLoc.getBlockZ());
+        exitPortalLocation.setInt("X", exitPortalLoc.getBlockX());
+        exitPortalLocation.setInt("Y", exitPortalLoc.getBlockY());
+        exitPortalLocation.setInt("Z", exitPortalLoc.getBlockZ());
 
-        EnderDragonBattle enderDragonBattle = new EnderDragonBattle(worldServer,dragonSpawnLoc.getWorld().getSeed(),nbtTagCompound);
+        EnderDragonBattle enderDragonBattle = new EnderDragonBattle(worldServer, dragonSpawnLoc.getWorld().getSeed(), nbtTagCompound);
         return new CraftDragonBattle(enderDragonBattle);
     }
 }

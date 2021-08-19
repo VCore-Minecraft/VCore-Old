@@ -1,23 +1,27 @@
+/*
+ * Copyright (c) 2021. Lukas Jonsson
+ */
+
 package de.verdox.vcorepaper;
 
 import com.comphenix.protocol.ProtocolLibrary;
 import com.comphenix.protocol.ProtocolManager;
 import de.verdox.vcore.plugin.VCoreCoreInstance;
+import de.verdox.vcore.plugin.subsystem.VCoreSubsystem;
 import de.verdox.vcore.synchronization.networkmanager.NetworkManager;
 import de.verdox.vcore.synchronization.networkmanager.player.api.VCorePlayerAPI;
 import de.verdox.vcore.synchronization.networkmanager.player.api.bukkit.VCorePlayerAPIBukkitImpl;
-import de.verdox.vcore.synchronization.networkmanager.server.ServerType;
-import de.verdox.vcore.plugin.subsystem.VCoreSubsystem;
 import de.verdox.vcore.synchronization.networkmanager.player.listener.PlayerBukkitListener;
+import de.verdox.vcore.synchronization.networkmanager.server.ServerType;
 import de.verdox.vcorepaper.commands.AdminCommands;
 import de.verdox.vcorepaper.commands.NMSCommand;
 import de.verdox.vcorepaper.commands.PlayerAPICommands;
+import de.verdox.vcorepaper.custom.CustomDataListener;
 import de.verdox.vcorepaper.custom.block.CustomBlockManager;
 import de.verdox.vcorepaper.custom.block.data.debug.BlockDebugData;
 import de.verdox.vcorepaper.custom.block.internal.VBlockListener;
 import de.verdox.vcorepaper.custom.entities.CustomEntityListener;
 import de.verdox.vcorepaper.custom.entities.CustomEntityManager;
-import de.verdox.vcorepaper.custom.CustomDataListener;
 import de.verdox.vcorepaper.custom.events.paper.CustomPaperEventListener;
 import de.verdox.vcorepaper.custom.items.CustomItemManager;
 import de.verdox.vcorepaper.custom.nbtholders.block.BlockFileStorage;
@@ -62,21 +66,21 @@ public class VCorePaper extends VCoreCoreInstance.Minecraft {
 
         this.blockFileStorage = new BlockFileStorage(this);
 
-        new AdminCommands(this,"debug");
-        new NMSCommand(this,"nms");
-        new PlayerAPICommands(this,"playerapi");
+        new AdminCommands(this, "debug");
+        new NMSCommand(this, "nms");
+        new PlayerAPICommands(this, "playerapi");
 
-        if(Bukkit.getPluginManager().getPlugin("ProtocolLib") != null)
+        if (Bukkit.getPluginManager().getPlugin("ProtocolLib") != null)
             protocolManager = ProtocolLibrary.getProtocolManager();
 
-        networkManager = new NetworkManager<>(ServerType.GAME_SERVER,this);
+        networkManager = new NetworkManager<>(ServerType.GAME_SERVER, this);
         new PlayerBukkitListener(networkManager);
-        if(networkManager.getServerCache().isServerNameTaken(getServerName())){
-            consoleMessage("&4<> ============================================= <>",false);
-            consoleMessage("",false);
-            consoleMessage("&cThe ServerName &e"+getServerName()+" &cis already online in this VCore Network &7(&bExists in Global Cache&7)",false);
-            consoleMessage("",false);
-            consoleMessage("&4<> ============================================= <>",false);
+        if (networkManager.getServerCache().isServerNameTaken(getServerName())) {
+            consoleMessage("&4<> ============================================= <>", false);
+            consoleMessage("", false);
+            consoleMessage("&cThe ServerName &e" + getServerName() + " &cis already online in this VCore Network &7(&bExists in Global Cache&7)", false);
+            consoleMessage("", false);
+            consoleMessage("&4<> ============================================= <>", false);
             this.shutdown();
         }
         networkManager.getServerPingManager().sendOnlinePing();
@@ -84,7 +88,7 @@ public class VCorePaper extends VCoreCoreInstance.Minecraft {
     }
 
     public ProtocolManager getProtocolManager() {
-        if(Bukkit.getPluginManager().getPlugin("ProtocolLib") == null)
+        if (Bukkit.getPluginManager().getPlugin("ProtocolLib") == null)
             throw new IllegalStateException("ProtocolLib could not be found on this server.");
         return protocolManager;
     }
@@ -112,14 +116,14 @@ public class VCorePaper extends VCoreCoreInstance.Minecraft {
         return customBlockManager;
     }
 
-    public void asyncThenSync(Runnable asyncTask, Runnable syncTask){
+    public void asyncThenSync(Runnable asyncTask, Runnable syncTask) {
         async(() -> {
             asyncTask.run();
             sync(syncTask);
         });
     }
 
-    public void syncThenAsync(Runnable syncTask, Runnable asyncTask){
+    public void syncThenAsync(Runnable syncTask, Runnable asyncTask) {
         sync(() -> {
             syncTask.run();
             async(asyncTask);

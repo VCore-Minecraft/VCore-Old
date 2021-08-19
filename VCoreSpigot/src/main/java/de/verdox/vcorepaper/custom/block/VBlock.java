@@ -23,14 +23,14 @@ public class VBlock extends CustomDataHolder<Location, NBTBlock, CustomBlockMana
         super(dataHolder, customDataManager);
     }
 
-    public boolean isFlagSet(VBlockFlag flag){
-        if(!getNBTCompound().hasKey(flag.getNbtTag()))
+    public boolean isFlagSet(VBlockFlag flag) {
+        if (!getNBTCompound().hasKey(flag.getNbtTag()))
             return false;
         return getNBTCompound().getBoolean(flag.getNbtTag());
     }
 
-    public void setBlockFlag(VBlockFlag flag, boolean allowed){
-        getNBTCompound().setObject(flag.getNbtTag(),allowed);
+    public void setBlockFlag(VBlockFlag flag, boolean allowed) {
+        getNBTCompound().setObject(flag.getNbtTag(), allowed);
     }
 
     @Override

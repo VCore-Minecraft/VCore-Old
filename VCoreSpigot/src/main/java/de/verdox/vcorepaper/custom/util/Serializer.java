@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2021. Lukas Jonsson
+ */
+
 package de.verdox.vcorepaper.custom.util;
 
 import org.bukkit.entity.Player;
@@ -13,15 +17,15 @@ import java.io.IOException;
 public class Serializer {
 
     public static String itemStackToBase64(ItemStack stack) {
-        if(stack == null)
+        if (stack == null)
             throw new NullPointerException("Stack can't be null");
-        if(stack.getType().isAir())
+        if (stack.getType().isAir())
             throw new NullPointerException("Stack can't be air");
         return itemStackArrayToBase64(new ItemStack[]{stack});
     }
 
     public static ItemStack Base64ToItemStack(String base64) {
-        if(base64 == null)
+        if (base64 == null)
             return null;
         try {
             return itemStackArrayFromBase64(base64)[0];
@@ -32,7 +36,7 @@ public class Serializer {
     }
 
     public static String itemStackArrayToBase64(ItemStack[] items) throws IllegalStateException {
-        if(items == null)
+        if (items == null)
             return null;
         try {
             ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
@@ -63,7 +67,7 @@ public class Serializer {
      * @throws IOException
      */
     public static ItemStack[] itemStackArrayFromBase64(String data) throws IOException {
-        if(data == null)
+        if (data == null)
             return null;
         Player player;
         try {

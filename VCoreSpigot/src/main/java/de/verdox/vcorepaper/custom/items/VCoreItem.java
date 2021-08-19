@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2021. Lukas Jonsson
+ */
+
 package de.verdox.vcorepaper.custom.items;
 
 import de.verdox.vcorepaper.VCorePaper;
@@ -15,45 +19,45 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class VCoreItem extends CustomDataHolder<ItemStack, NBTItemHolder, CustomItemManager> {
-    private static final String separatorLine = ChatColor.translateAlternateColorCodes('&',"                ");
+    private static final String separatorLine = ChatColor.translateAlternateColorCodes('&', "                ");
 
     public VCoreItem(ItemStack dataHolder, CustomItemManager customItemManager) {
-        super(dataHolder,customItemManager);
-        if(dataHolder == null || dataHolder.getType().isAir())
+        super(dataHolder, customItemManager);
+        if (dataHolder == null || dataHolder.getType().isAir())
             throw new NullPointerException("Stack can't be null or air!");
     }
 
-    public VCoreItem copy(){
+    public VCoreItem copy() {
         return VCorePaper.getInstance().getCustomItemManager().wrap(getClass(), getDataHolder().clone());
     }
 
-    protected List<String> getItemLore(){
+    protected List<String> getItemLore() {
         ItemStack stack = getDataHolder();
         List<String> lore = new ArrayList<>();
 
         boolean adding = true;
 
-        if(stack.getItemMeta().getLore() != null){
+        if (stack.getItemMeta().getLore() != null) {
             for (int i = 0; i < stack.getItemMeta().getLore().size(); i++) {
                 String line = stack.getItemMeta().getLore().get(i);
-                if(line.equals(separatorLine))
+                if (line.equals(separatorLine))
                     adding = !adding;
-                if(adding)
-                    lore.add(ChatColor.translateAlternateColorCodes('&',line));
+                if (adding)
+                    lore.add(ChatColor.translateAlternateColorCodes('&', line));
             }
         }
         return lore;
     }
 
-    public List<String> getLore(){
+    public List<String> getLore() {
         return getDataHolder().getItemMeta().getLore();
     }
 
-    public String getDisplayName(){
+    public String getDisplayName() {
         return getDataHolder().getI18NDisplayName();
     }
 
-    private void updateLore(){
+    private void updateLore() {
         ItemStack stack = getDataHolder();
         ItemMeta meta = getDataHolder().getItemMeta();
 
@@ -62,15 +66,15 @@ public class VCoreItem extends CustomDataHolder<ItemStack, NBTItemHolder, Custom
 
         getCustomDataKeys().forEach(nbtKey -> {
             ItemCustomData<?> customData = getCustomDataManager().getDataType(nbtKey);
-            if(customData == null)
+            if (customData == null)
                 return;
             Object object = getCustomData(customData.getClass());
-            if(object == null)
+            if (object == null)
                 return;
             List<String> customDataLore = customData.asLabel(object.toString());
 
-            if(customDataLore != null && !customDataLore.isEmpty())
-                lore.addAll(customDataLore.stream().map(line -> ChatColor.translateAlternateColorCodes('&',line)).collect(Collectors.toList()));
+            if (customDataLore != null && !customDataLore.isEmpty())
+                lore.addAll(customDataLore.stream().map(line -> ChatColor.translateAlternateColorCodes('&', line)).collect(Collectors.toList()));
         });
         meta.setLore(lore);
         stack.setItemMeta(meta);
@@ -94,7 +98,7 @@ public class VCoreItem extends CustomDataHolder<ItemStack, NBTItemHolder, Custom
     @Nonnull
     @Override
     public NBTItemHolder getNBTCompound() {
-        return new NBTItemHolder(getDataHolder(),true);
+        return new NBTItemHolder(getDataHolder(), true);
     }
 
 

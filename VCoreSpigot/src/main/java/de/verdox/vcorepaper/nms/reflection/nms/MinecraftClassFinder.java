@@ -16,28 +16,28 @@ import reactor.util.annotation.Nullable;
  * @date 21.06.2021 23:59
  */
 public class MinecraftClassFinder {
-    private static NMSVersion nmsVersion = NMSVersion.findNMSVersion(Bukkit.getServer().getBukkitVersion());
+    private static final NMSVersion nmsVersion = NMSVersion.findNMSVersion(Bukkit.getServer().getBukkitVersion());
 
-    public static ClassReflection.ReferenceClass findMinecraftClass(@NonNull MinecraftPackage minecraftPackage, @Nullable String classPackage, @NonNull String className){
+    public static ClassReflection.ReferenceClass findMinecraftClass(@NonNull MinecraftPackage minecraftPackage, @Nullable String classPackage, @NonNull String className) {
         String classPath;
-        if(classPackage == null || classPackage.isEmpty())
-            classPath = minecraftPackage.getPackageName()+".v"+nmsVersion.getNmsVersionTag()+"."+className;
+        if (classPackage == null || classPackage.isEmpty())
+            classPath = minecraftPackage.getPackageName() + ".v" + nmsVersion.getNmsVersionTag() + "." + className;
         else
-            classPath = minecraftPackage.getPackageName()+".v"+nmsVersion.getNmsVersionTag()+"."+classPackage+"."+className;
+            classPath = minecraftPackage.getPackageName() + ".v" + nmsVersion.getNmsVersionTag() + "." + classPackage + "." + className;
         ClassReflection.ReferenceClass foundClass = ClassReflection.findClass(classPath);
-        if(foundClass == null)
-            throw new RuntimeException("Could not find class: "+classPath);
+        if (foundClass == null)
+            throw new RuntimeException("Could not find class: " + classPath);
         return foundClass;
     }
 
-    public enum MinecraftPackage{
+    public enum MinecraftPackage {
         CraftBukkit("org.bukkit.craftbukkit"),
         NMS("net.minecraft.server"),
         NM("net.minecraft"),
         ;
-        private String packageName;
+        private final String packageName;
 
-        MinecraftPackage(String packageName){
+        MinecraftPackage(String packageName) {
             this.packageName = packageName;
         }
 

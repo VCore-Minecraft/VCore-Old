@@ -9,6 +9,6 @@ package de.verdox.vcorepaper.nms;
  * @Author: Lukas Jonsson (Verdox)
  * @date 14.06.2021 14:39
  */
-public interface NMSHandler{
+public interface NMSHandler {
 
 }

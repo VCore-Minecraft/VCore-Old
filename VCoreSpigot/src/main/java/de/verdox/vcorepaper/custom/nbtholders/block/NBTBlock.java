@@ -37,20 +37,20 @@ public class NBTBlock implements NBTHolder {
     private final NBTCompound splitChunkCompound;
     private final NBTCompound blockCompound;
 
-    public NBTBlock(Location location){
+    public NBTBlock(Location location) {
         this.location = location;
 
         int chunkY = location.getBlockY() / 16;
         int chunkX = location.getBlockX() >> 4;
         int chunkZ = location.getBlockZ() >> 4;
 
-        WorldChunk worldChunk = new WorldChunk(location.getWorld().getName(),chunkX,chunkZ);
-        SplitChunkKey splitChunkKey = new SplitChunkKey(worldChunk,chunkY);
+        WorldChunk worldChunk = new WorldChunk(location.getWorld().getName(), chunkX, chunkZ);
+        SplitChunkKey splitChunkKey = new SplitChunkKey(worldChunk, chunkY);
 
         try {
-            this.nbtFile = VCorePaper.getInstance().getBlockFileStorage().loadNBTFile(worldChunk).get(10,TimeUnit.SECONDS);
+            this.nbtFile = VCorePaper.getInstance().getBlockFileStorage().loadNBTFile(worldChunk).get(10, TimeUnit.SECONDS);
         } catch (InterruptedException | ExecutionException | TimeoutException e) {
-            VCorePaper.getInstance().consoleMessage("&cCould not load NBT File for: "+location,true);
+            VCorePaper.getInstance().consoleMessage("&cCould not load NBT File for: " + location, true);
             e.printStackTrace();
             throw new IllegalStateException();
         }
@@ -97,12 +97,12 @@ public class NBTBlock implements NBTHolder {
 
     @Override
     public <T> T getObject(String key, Class<T> type) {
-        return blockCompound.getObject(key,type);
+        return blockCompound.getObject(key, type);
     }
 
     @Override
     public void setObject(String key, Object value) {
-        blockCompound.setObject(key,value);
+        blockCompound.setObject(key, value);
     }
 
     @Override
@@ -124,8 +124,8 @@ public class NBTBlock implements NBTHolder {
     public void save() {
         try {
             String key = new LocationKey(this.location).toStringWithoutWorld();
-            if(splitChunkCompound.hasKey(key))
-                if(splitChunkCompound.getCompound(key).getKeys().isEmpty())
+            if (splitChunkCompound.hasKey(key))
+                if (splitChunkCompound.getCompound(key).getKeys().isEmpty())
                     splitChunkCompound.removeKey(key);
             nbtFile.save();
         } catch (IOException e) {
@@ -133,10 +133,10 @@ public class NBTBlock implements NBTHolder {
         }
     }
 
-    public void delete(){
+    public void delete() {
         NBTBlockDeleteEvent NBTBlockDeleteEvent = new NBTBlockDeleteEvent(this);
         Bukkit.getPluginManager().callEvent(NBTBlockDeleteEvent);
-        if(!NBTBlockDeleteEvent.isCancelled())
+        if (!NBTBlockDeleteEvent.isCancelled())
             splitChunkCompound.removeKey(new LocationKey(this.location).toStringWithoutWorld());
     }
 
