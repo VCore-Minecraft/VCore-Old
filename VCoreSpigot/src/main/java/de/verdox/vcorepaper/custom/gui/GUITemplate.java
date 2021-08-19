@@ -10,9 +10,12 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.ItemStack;
+import org.checkerframework.checker.index.qual.NonNegative;
 import org.checkerframework.checker.index.qual.Positive;
 
 import javax.annotation.Nonnull;
+import java.text.NumberFormat;
+import java.text.ParseException;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiFunction;
@@ -22,6 +25,39 @@ import java.util.stream.Stream;
 
 public class GUITemplate {
     //TODO: Callbacks ans Ende der Function
+
+    public static AnvilGUI.Builder createIntegerInputGUI(BukkitPlugin bukkitPlugin, Player player, String title, String notValidNumber, Function<Integer, AnvilGUI.Response> callback){
+        return new AnvilGUI.Builder()
+                .plugin(bukkitPlugin)
+                .title(ChatColor.translateAlternateColorCodes('&',title))
+                .itemLeft(new ItemStack(Material.GOLD_INGOT))
+                .onComplete((player1, s) -> {
+                    try{
+                        Integer number = Integer.parseInt(s);
+                        return callback.apply(number);
+                    }
+                    catch (NumberFormatException e){
+                        return AnvilGUI.Response.text(notValidNumber);
+                    }
+                });
+    }
+
+    public static AnvilGUI.Builder createDoubleInputGUI(Locale parsingLocale, BukkitPlugin bukkitPlugin, Player player, String title, String notValidNumber, Function<Double, AnvilGUI.Response> callback){
+        return new AnvilGUI.Builder()
+                .plugin(bukkitPlugin)
+                .title(ChatColor.translateAlternateColorCodes('&',title))
+                .itemLeft(new ItemStack(Material.GOLD_INGOT))
+                .onComplete((player1, s) -> {
+                    try{
+                        NumberFormat format = NumberFormat.getInstance(parsingLocale);
+                        Number number = format.parse(s);
+                        return callback.apply(number.doubleValue());
+                    }
+                    catch (NumberFormatException | ParseException e){
+                        return AnvilGUI.Response.text(notValidNumber);
+                    }
+                });
+    }
 
     public static void createSelectConfirmationGUI(BukkitPlugin bukkitPlugin, Player player, Function<Boolean, VCoreGUI.Response<?,?>> callback){
         VCoreItem yesItem = VCorePaper.getInstance().getCustomItemManager().createItemBuilder(Material.GREEN_STAINED_GLASS_PANE,1,"&aYes").buildItem();
@@ -62,7 +98,7 @@ public class GUITemplate {
     }
 
     public static void selectMaterial(BukkitPlugin bukkitPlugin, Player player, Function<VCoreGUI.VCoreGUIClick<Material>, VCoreGUI.Response<?,?>> onClick, Runnable backCallback){
-        new SelectionGUI<Material>("&eMaterial Selection",Arrays.asList(Material.values()),bukkitPlugin, ItemStack::new,1)
+        new SelectionGUI<Material>("&eMaterial Selection",Arrays.asList(Material.values()),bukkitPlugin,1,5,ItemStack::new)
                 .onClick(onClick)
                 .onBack(backCallback)
                 .toStringFunc(Enum::name)
@@ -81,17 +117,27 @@ public class GUITemplate {
         private Function<VCoreGUI.VCoreGUIClick<T>, VCoreGUI.Response<?,?>> clickCallback;
         private Runnable backCallback;
         private final Map<VCoreItem, Function<VCoreGUI.VCoreGUIClick<T>, VCoreGUI.Response<?,?>>> additionalItems = new HashMap<>();
+        private final int rows;
+        private final int guiSize;
 
-        public SelectionGUI(@Nonnull String title, @Nonnull List<T> objectList, @Nonnull BukkitPlugin bukkitPlugin, @Nonnull Function<T, ItemStack> objectToItemStack, @Positive int page){
+        public SelectionGUI(@Nonnull String title, @Nonnull List<T> objectList, @Nonnull BukkitPlugin bukkitPlugin, @Positive int page, @Positive int rows, @Nonnull Function<T, ItemStack> objectToItemStack){
             this.title = title;
             this.objectList = objectList;
             this.bukkitPlugin = bukkitPlugin;
             this.objectToItemStack = objectToItemStack;
             this.page = page;
+            this.rows = rows;
+            if(rows > 5)
+                rows = 5;
+            guiSize = (rows*9)+9;
         }
 
         public SelectionGUI(@Nonnull String title, @Nonnull List<T> objectList, @Nonnull BukkitPlugin bukkitPlugin, @Nonnull Function<T, ItemStack> objectToItemStack){
-            this(title,objectList,bukkitPlugin,objectToItemStack,1);
+            this(title,objectList,bukkitPlugin,1,5,objectToItemStack);
+        }
+
+        public SelectionGUI(@Nonnull String title, @Nonnull List<T> objectList, @Nonnull BukkitPlugin bukkitPlugin, @Positive int rows, @Nonnull Function<T, ItemStack> objectToItemStack){
+            this(title,objectList,bukkitPlugin,1,rows,objectToItemStack);
         }
 
         public SelectionGUI<T> updateList(Supplier<List<T>> listUpdater){
@@ -99,11 +145,13 @@ public class GUITemplate {
             return this;
         }
 
-        public SelectionGUI<T> addItem(VCoreItem vCoreItem, int slot, Function<VCoreGUI.VCoreGUIClick<T>, VCoreGUI.Response<?,?>> clickCallback){
+        public SelectionGUI<T> addItem(VCoreItem vCoreItem, @NonNegative int slot, Function<VCoreGUI.VCoreGUIClick<T>, VCoreGUI.Response<?,?>> clickCallback){
             if(vCoreItem == null)
                 throw new NullPointerException("VCoreItem can't be null!");
             if(clickCallback == null)
                 throw new NullPointerException("clickCallback can't be null!");
+            if(slot > guiSize)
+                slot = (rows*9+(slot%9));
             vCoreItem.getNBTCompound().setObject("vcore_gui_slot",slot);
             additionalItems.put(vCoreItem,clickCallback);
             return this;
@@ -146,7 +194,7 @@ public class GUITemplate {
 
         private int getMaxPage(){
             long count = filterWithPattern().count();
-            return (int) ((count / 45)+1);
+            return (int) ((count / rows*9)+1);
         }
 
         private Stream<T> filterWithPattern(){
@@ -176,15 +224,15 @@ public class GUITemplate {
                     .update()
                     .title(ChatColor.translateAlternateColorCodes('&',title))
                     .type(InventoryType.CHEST)
-                    .size(54)
+                    .size(guiSize)
                     .content(contentBuilder -> {
                         if(listUpdater != null)
                             objectList = listUpdater.get();
 
                         AtomicInteger counter = new AtomicInteger(0);
                         filterWithPattern()
-                                .skip((page-1)* 45L)
-                                .limit(45)
+                                .skip((page-1)* (rows*9L))
+                                .limit(rows*9L)
                                 .forEach(t -> {
                                     ItemStack stack = objectToItemStack.apply(t);
                                     if(stack == null)
@@ -198,20 +246,26 @@ public class GUITemplate {
                                 });
 
                         if(page > 1)
-                            contentBuilder.addContent(45,lastPage,null);
+                            contentBuilder.addContent((rows*9),lastPage,null);
                         else
-                            contentBuilder.addContent(45,border,null);
-                        contentBuilder.addContent(46,border,null);
-                        contentBuilder.addContent(47,back,null);
-                        contentBuilder.addContent(48,border,null);
-                        contentBuilder.addContent(49,border,null);
-                        contentBuilder.addContent(50,border,null);
-                        contentBuilder.addContent(51,search,null);
-                        contentBuilder.addContent(52,border,null);
-                        if(((page)*45)+1 < objectList.size() || counter.get() >= 44)
-                            contentBuilder.addContent(53,nextPage,null);
+                            contentBuilder.addContent((rows*9),border,null);
+                        contentBuilder.addContent((rows*9)+1,border,null);
+                        if(backCallback != null)
+                            contentBuilder.addContent((rows*9)+2,back,null);
                         else
-                            contentBuilder.addContent(53,border,null);
+                            contentBuilder.addContent((rows*9)+2,border,null);
+                        contentBuilder.addContent((rows*9)+3,border,null);
+                        contentBuilder.addContent((rows*9)+4,border,null);
+                        contentBuilder.addContent((rows*9)+5,border,null);
+                        if(this.toStringFunc != null)
+                            contentBuilder.addContent((rows*9)+6,search,null);
+                        else
+                            contentBuilder.addContent((rows*9)+6,border,null);
+                        contentBuilder.addContent((rows*9)+7,border,null);
+                        if(((page)*((rows*9)))+1 < objectList.size() || counter.get() >= (rows*9)-1)
+                            contentBuilder.addContent((rows*9)+8,nextPage,null);
+                        else
+                            contentBuilder.addContent((rows*9)+8,border,null);
 
 
                         additionalItems.forEach((vCoreItem, vCoreItemResponseFunction) -> {

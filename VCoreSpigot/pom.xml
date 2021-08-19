@@ -177,10 +177,6 @@
                                     <pattern>de.tr7zw.changeme.nbtapi</pattern>
                                     <shadedPattern>de.verdox.vcore.dependencies.nbtapi</shadedPattern>
                                 </relocation>
-                                <relocation>
-                                    <pattern>io.papermc.lib</pattern>
-                                    <shadedPattern>de.verdox.paperlib</shadedPattern>
-                                </relocation>
                             </relocations>
                             <createDependencyReducedPom>true</createDependencyReducedPom>
                             <shadedArtifactAttached>true</shadedArtifactAttached>

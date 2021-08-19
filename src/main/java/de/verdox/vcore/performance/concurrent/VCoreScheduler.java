@@ -40,7 +40,7 @@ public class VCoreScheduler implements SystemLoadable {
 
     public void waitUntilShutdown(){
         shutdown();
-        vCorePlugin.consoleMessage("&6Awaiting 20s for Scheduler to shut down&7!",true);
+        vCorePlugin.consoleMessage("&6Waiting 20s for Scheduler to shut down&7!",true);
         try { scheduledExecutorService.awaitTermination(20,TimeUnit.SECONDS);
         } catch (InterruptedException e) {
             vCorePlugin.consoleMessage("&cScheduler was interrupted&7!",true);

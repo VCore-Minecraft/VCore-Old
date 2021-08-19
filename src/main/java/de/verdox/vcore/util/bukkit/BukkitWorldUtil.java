@@ -11,7 +11,11 @@ import io.papermc.lib.PaperLib;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
+import org.bukkit.block.Chest;
 import org.bukkit.block.data.Directional;
+
+import java.util.HashSet;
+import java.util.Set;
 
 public class BukkitWorldUtil {
 
@@ -89,5 +93,57 @@ public class BukkitWorldUtil {
         Directional directional = (Directional) stem.getBlockData();
         BlockFace stemFacingTo = directional.getFacing();
         return stemFacingTo.getOppositeFace().equals(stemBlockFaceLocation);
+    }
+
+    public Set<Chest> findConnectedChest(Chest chest){
+        Set<Chest> set = new HashSet<>();
+        set.add(chest);
+        org.bukkit.block.data.type.Chest chestData = (org.bukkit.block.data.type.Chest) chest.getBlockData();
+        BlockFace blockFace = chestData.getFacing();
+
+        Location otherChestLocation = chest.getLocation().clone();
+        switch (chestData.getType()){
+            default: return set;
+            // Look at the Left side of the block for an other chest Block
+            case LEFT:{
+                if(blockFace.equals(BlockFace.NORTH)) {
+                    otherChestLocation.add(1, 0, 0);
+                    break;
+                }
+                else if(blockFace.equals(BlockFace.EAST)) {
+                    otherChestLocation.add(0, 0, 1);
+                    break;
+                }
+                if(blockFace.equals(BlockFace.SOUTH)) {
+                    otherChestLocation.add(-1, 0, 0);
+                    break;
+                }
+                else if(blockFace.equals(BlockFace.WEST)) {
+                    otherChestLocation.add(0, 0, -1);
+                    break;
+                }
+            }
+            // Look at the Right side of the block for an other chest Block
+            case RIGHT:{
+                if(blockFace.equals(BlockFace.NORTH)) {
+                    otherChestLocation.add(-1, 0, 0);
+                    break;
+                }
+                else if(blockFace.equals(BlockFace.EAST)) {
+                    otherChestLocation.add(0, 0, -1);
+                    break;
+                }
+                if(blockFace.equals(BlockFace.SOUTH)) {
+                    otherChestLocation.add(1, 0, 0);
+                    break;
+                }
+                else if(blockFace.equals(BlockFace.WEST)) {
+                    otherChestLocation.add(0, 0, 1);
+                    break;
+                }
+            }
+        }
+        set.add((Chest) otherChestLocation.getBlock().getState());
+        return set;
     }
 }

@@ -66,7 +66,7 @@ public class ServerPingManager<T extends VCorePlugin<?,?>> implements SystemLoad
     @Override
     public void shutdown() {
         //TODO: Wirft eine Exception wegen Cancellation
-        keepAlivePing.cancel(true);
+        keepAlivePing.cancel(false);
         sendOfflinePing();
     }
 }
