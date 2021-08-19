@@ -6,7 +6,6 @@ package de.verdox.vcore.synchronization.pipeline.player;
 
 import de.verdox.vcore.plugin.SystemLoadable;
 import de.verdox.vcore.plugin.VCorePlugin;
-import de.verdox.vcore.synchronization.messaging.messages.Message;
 import de.verdox.vcore.synchronization.pipeline.PipelineManager;
 import de.verdox.vcore.synchronization.pipeline.datatypes.PlayerData;
 import de.verdox.vcore.synchronization.pipeline.parts.Pipeline;
@@ -34,8 +33,8 @@ import java.util.concurrent.TimeUnit;
  * @date 26.06.2021 00:33
  */
 public class PlayerDataManager implements SystemLoadable {
+    protected final VCorePlugin<?, ?> plugin;
     private final PipelineManager pipelineManager;
-    protected final VCorePlugin<?,?> plugin;
     private boolean loaded;
 
     public PlayerDataManager(PipelineManager pipelineManager) {
@@ -44,10 +43,10 @@ public class PlayerDataManager implements SystemLoadable {
         loaded = true;
     }
 
-    protected final void loginPipeline(@Nonnull UUID player){
-        plugin.consoleMessage("&eHandling Player Join &b"+player,false);
+    protected final void loginPipeline(@Nonnull UUID player) {
+        plugin.consoleMessage("&eHandling Player Join &b" + player, false);
         plugin.getServices().eventBus.post(new PlayerPreSessionLoadEvent(player));
-        plugin.createTaskBatch().wait(400,TimeUnit.MILLISECONDS).doAsync(() -> {
+        plugin.createTaskBatch().wait(400, TimeUnit.MILLISECONDS).doAsync(() -> {
             plugin.getServices().getSubsystemManager().getActivePlayerDataClasses()
                     .forEach(aClass -> {
                         PlayerData playerData = pipelineManager.load(aClass, player, Pipeline.LoadingStrategy.LOAD_PIPELINE, true);
@@ -56,7 +55,7 @@ public class PlayerDataManager implements SystemLoadable {
         }).doSync(() -> plugin.getServices().eventBus.post(new PlayerSessionLoadedEvent(player, System.currentTimeMillis()))).executeBatch();
     }
 
-    protected final void logoutPipeline(@Nonnull UUID player){
+    protected final void logoutPipeline(@Nonnull UUID player) {
         plugin.getServices().eventBus.post(new PlayerPreSessionUnloadEvent(player));
         plugin.createTaskBatch()
                 .doAsync(() -> {
@@ -84,21 +83,21 @@ public class PlayerDataManager implements SystemLoadable {
         public Bukkit(PipelineManager pipelineManager) {
             super(pipelineManager);
             VCorePlugin.Minecraft bukkitPlugin = (VCorePlugin.Minecraft) plugin;
-            bukkitPlugin.getPlugin().getServer().getPluginManager().registerEvents(this,bukkitPlugin);
+            bukkitPlugin.getPlugin().getServer().getPluginManager().registerEvents(this, bukkitPlugin);
         }
 
         @EventHandler(priority = EventPriority.HIGHEST)
-        public void onJoin(PlayerJoinEvent e){
+        public void onJoin(PlayerJoinEvent e) {
             loginPipeline(e.getPlayer().getUniqueId());
         }
 
         @EventHandler(priority = EventPriority.HIGHEST)
-        public void onLeave(PlayerQuitEvent e){
+        public void onLeave(PlayerQuitEvent e) {
             logoutPipeline(e.getPlayer().getUniqueId());
         }
 
         @EventHandler(priority = EventPriority.HIGHEST)
-        public void onKick(PlayerKickEvent e){
+        public void onKick(PlayerKickEvent e) {
             logoutPipeline(e.getPlayer().getUniqueId());
         }
 
@@ -111,12 +110,12 @@ public class PlayerDataManager implements SystemLoadable {
         }
 
         @net.md_5.bungee.event.EventHandler(priority = 5)
-        public void onJoin(PostLoginEvent e){
+        public void onJoin(PostLoginEvent e) {
             loginPipeline(e.getPlayer().getUniqueId());
         }
 
         @net.md_5.bungee.event.EventHandler(priority = 5)
-        public void onPlayerLeave(PlayerDisconnectEvent e){
+        public void onPlayerLeave(PlayerDisconnectEvent e) {
             logoutPipeline(e.getPlayer().getUniqueId());
         }
     }

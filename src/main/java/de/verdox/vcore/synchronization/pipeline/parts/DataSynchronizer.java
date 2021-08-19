@@ -19,6 +19,7 @@ import java.util.concurrent.CompletableFuture;
 public interface DataSynchronizer extends SystemLoadable {
 
     CompletableFuture<Boolean> synchronize(@Nonnull DataSourceType source, @Nonnull DataSourceType destination, @Nonnull Class<? extends VCoreData> dataClass, @Nonnull UUID objectUUID);
+
     CompletableFuture<Boolean> synchronize(@Nonnull DataSourceType source, @Nonnull DataSourceType destination, @Nonnull Class<? extends VCoreData> dataClass, @Nonnull UUID objectUUID, Runnable callback);
 
     enum DataSourceType {

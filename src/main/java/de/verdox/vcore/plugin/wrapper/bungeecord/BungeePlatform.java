@@ -5,7 +5,6 @@
 package de.verdox.vcore.plugin.wrapper.bungeecord;
 
 import de.verdox.vcore.plugin.wrapper.Platform;
-import de.verdox.vcore.synchronization.networkmanager.player.VCorePlayer;
 
 import javax.annotation.Nonnull;
 import java.util.UUID;
@@ -17,5 +16,6 @@ import java.util.UUID;
  */
 public interface BungeePlatform extends Platform {
     boolean sendToServer(@Nonnull UUID playerUUID, @Nonnull String serverName);
+
     boolean kickPlayer(@Nonnull UUID playerUUID, @Nonnull String kickMessage);
 }

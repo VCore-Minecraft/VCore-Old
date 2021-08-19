@@ -11,6 +11,7 @@ package de.verdox.vcore.old.lowlevel.mysql.commands;
  */
 public abstract class MysqlFormat {
     protected final StringBuilder stringBuilder = new StringBuilder();
+
     public abstract String toMySQLCommand();
 
     @Override

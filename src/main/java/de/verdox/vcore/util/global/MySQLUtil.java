@@ -14,8 +14,8 @@ import com.j256.ormlite.field.DataType;
 
 public class MySQLUtil {
 
-    public static DataType getDataType(Class<?> objectType){
-        if(objectType.equals(Double.class) || objectType.equals(double.class)){
+    public static DataType getDataType(Class<?> objectType) {
+        if (objectType.equals(Double.class) || objectType.equals(double.class)) {
 
 
         }

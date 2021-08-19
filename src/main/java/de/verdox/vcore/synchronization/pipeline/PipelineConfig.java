@@ -15,7 +15,6 @@ import de.verdox.vcore.synchronization.pipeline.parts.storage.GlobalStorage;
 import de.verdox.vcore.synchronization.pipeline.parts.storage.mongodb.MongoDBStorage;
 import de.verdox.vcore.synchronization.pipeline.parts.storage.yaml.YamlStorage;
 
-import java.io.File;
 import java.util.List;
 
 /**
@@ -31,41 +30,38 @@ public class PipelineConfig extends VCoreYAMLConfig {
 
     //TODO: Wenn Verbindungen nicht hergestellt werden können, SpielerConnect mit geeigneter Nachricht abbrechen
 
-    public Pipeline constructPipeline(VCorePlugin<?,?> plugin){
-        plugin.consoleMessage("&eConstructing Pipeline",false);
+    public Pipeline constructPipeline(VCorePlugin<?, ?> plugin) {
+        plugin.consoleMessage("&eConstructing Pipeline", false);
         LocalCache localCache = new LocalCacheImpl(plugin);
         GlobalCache globalCache = null;
         GlobalStorage globalStorage = null;
 
         // Initializing Global Cache
-        if(useCoreGlobalCache()){
+        if (useCoreGlobalCache()) {
             globalCache = plugin.getCoreInstance().getServices().getPipeline().getGlobalCache();
-            plugin.consoleMessage("&eSelecting Core GlobalCache",false);
-        }
-        else {
+            plugin.consoleMessage("&eSelecting Core GlobalCache", false);
+        } else {
             String globalCacheType = config.getString("GlobalCache.type");
-            plugin.consoleMessage("&eGlobalCacheType&7: &b"+globalCacheType,false);
-            if(globalCacheType.equalsIgnoreCase("redis")){
+            plugin.consoleMessage("&eGlobalCacheType&7: &b" + globalCacheType, false);
+            if (globalCacheType.equalsIgnoreCase("redis")) {
                 boolean useCluster = config.getBoolean("GlobalCache.redis.useCluster");
                 String[] addresses = config.getStringList("GlobalCache.redis.addresses").toArray(new String[0]);
                 String password = config.getString("GlobalCache.redis.password");
 
-                globalCache = new RedisCache(plugin,useCluster,addresses,password);
-            }
-            else {
-                plugin.consoleMessage("&cNo GlobalCache loaded&7!",false);
+                globalCache = new RedisCache(plugin, useCluster, addresses, password);
+            } else {
+                plugin.consoleMessage("&cNo GlobalCache loaded&7!", false);
             }
         }
 
         // Initializing Global Storage
-        if(useCoreGlobalStorage()){
+        if (useCoreGlobalStorage()) {
             globalStorage = plugin.getCoreInstance().getServices().getPipeline().getGlobalStorage();
-            plugin.consoleMessage("&eSelecting Core GlobalStorage",false);
-        }
-        else {
+            plugin.consoleMessage("&eSelecting Core GlobalStorage", false);
+        } else {
             String globalStorageType = config.getString("GlobalStorage.type");
-            plugin.consoleMessage("&eGlobalStorageType&7: &b"+globalStorageType,false);
-            if(globalStorageType.equalsIgnoreCase("mongoDB")){
+            plugin.consoleMessage("&eGlobalStorageType&7: &b" + globalStorageType, false);
+            if (globalStorageType.equalsIgnoreCase("mongoDB")) {
 
                 String host = config.getString("GlobalStorage.mongodb.host");
                 int port = config.getInt("GlobalStorage.mongodb.port");
@@ -74,51 +70,49 @@ public class PipelineConfig extends VCoreYAMLConfig {
                 String password = config.getString("GlobalStorage.mongodb.password");
 
                 globalStorage = new MongoDBStorage(plugin, host, database, port, user, password);
-            }
-            else if(globalStorageType.equalsIgnoreCase("yaml") || globalStorageType.equalsIgnoreCase("yml")){
+            } else if (globalStorageType.equalsIgnoreCase("yaml") || globalStorageType.equalsIgnoreCase("yml")) {
                 globalStorage = new YamlStorage(plugin);
-            }
-            else {
-                plugin.consoleMessage("&cNo GlobalStorage loaded&7!",false);
+            } else {
+                plugin.consoleMessage("&cNo GlobalStorage loaded&7!", false);
             }
         }
         return new PipelineManager(plugin, localCache, globalCache, globalStorage);
     }
 
-    public boolean useCoreGlobalCache(){
+    public boolean useCoreGlobalCache() {
         boolean useCoreInstance = config.getBoolean("GlobalStorage.useCoreInstance");
-        if(plugin.equals(plugin.getCoreInstance()))
+        if (plugin.equals(plugin.getCoreInstance()))
             useCoreInstance = false;
         return useCoreInstance;
     }
 
-    public boolean useCoreGlobalStorage(){
+    public boolean useCoreGlobalStorage() {
         boolean useCoreInstance = config.getBoolean("GlobalStorage.useCoreInstance");
-        if(plugin.equals(plugin.getCoreInstance()))
+        if (plugin.equals(plugin.getCoreInstance()))
             useCoreInstance = false;
         return useCoreInstance;
     }
 
     @Override
     public void onInit() {
-        getPlugin().consoleMessage("&6Initializing PipelineConfig "+config.getFilePath(),true);
+        getPlugin().consoleMessage("&6Initializing PipelineConfig " + config.getFilePath(), true);
     }
 
     @Override
     public void setupConfig() {
-        config.addDefault("GlobalCache.type","redis");
-        config.addDefault("GlobalCache.useCoreInstance",true);
+        config.addDefault("GlobalCache.type", "redis");
+        config.addDefault("GlobalCache.useCoreInstance", true);
         config.addDefault("GlobalCache.redis.useCluster", false);
         config.addDefault("GlobalCache.redis.addresses", List.of("redis://localhost:6379"));
         config.addDefault("GlobalCache.redis.password", "");
 
-        config.addDefault("GlobalStorage.type","mongodb");
-        config.addDefault("GlobalStorage.useCoreInstance",true);
-        config.addDefault("GlobalStorage.mongodb.host","127.0.0.1");
-        config.addDefault("GlobalStorage.mongodb.port",27017);
-        config.addDefault("GlobalStorage.mongodb.database","vcore");
-        config.addDefault("GlobalStorage.mongodb.user","");
-        config.addDefault("GlobalStorage.mongodb.password","");
+        config.addDefault("GlobalStorage.type", "mongodb");
+        config.addDefault("GlobalStorage.useCoreInstance", true);
+        config.addDefault("GlobalStorage.mongodb.host", "127.0.0.1");
+        config.addDefault("GlobalStorage.mongodb.port", 27017);
+        config.addDefault("GlobalStorage.mongodb.database", "vcore");
+        config.addDefault("GlobalStorage.mongodb.user", "");
+        config.addDefault("GlobalStorage.mongodb.password", "");
         save();
     }
 }

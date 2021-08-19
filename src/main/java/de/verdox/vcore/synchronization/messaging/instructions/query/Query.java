@@ -21,7 +21,8 @@ import java.util.concurrent.CompletableFuture;
 @InstructionInfo(awaitsResponse = true)
 public abstract class Query<T> extends MessagingInstruction implements InstructionResponder, ResponseProcessor<T> {
     private final CompletableFuture<T> future = new CompletableFuture<>();
-    public Query(UUID uuid){
+
+    public Query(UUID uuid) {
         super(uuid);
     }
 

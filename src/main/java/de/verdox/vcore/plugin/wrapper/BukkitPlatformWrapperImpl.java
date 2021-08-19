@@ -4,15 +4,12 @@
 
 package de.verdox.vcore.plugin.wrapper;
 
-import de.verdox.vcore.plugin.wrapper.spigot.SpigotPlatform;
 import de.verdox.vcore.plugin.wrapper.bungeecord.BungeePlatform;
+import de.verdox.vcore.plugin.wrapper.spigot.SpigotPlatform;
 import de.verdox.vcore.plugin.wrapper.types.GameLocation;
 import de.verdox.vcore.plugin.wrapper.types.enums.PlayerGameMode;
 import de.verdox.vcore.plugin.wrapper.types.enums.PlayerMessageType;
-import de.verdox.vcore.synchronization.networkmanager.player.VCorePlayer;
 import de.verdox.vcore.util.VCoreUtil;
-import net.md_5.bungee.api.chat.BaseComponent;
-import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
@@ -43,7 +40,7 @@ public class BukkitPlatformWrapperImpl implements PlatformWrapper {
     @Override
     public InetSocketAddress getPlayerAddress(@Nonnull UUID playerUUID) {
         Player player = Bukkit.getPlayer(playerUUID);
-        if(player == null)
+        if (player == null)
             return null;
         return player.getAddress();
     }
@@ -52,22 +49,22 @@ public class BukkitPlatformWrapperImpl implements PlatformWrapper {
     public SpigotPlatform getSpigotPlatform() {
         return new SpigotPlatform() {
 
-            private Location getLocation(@Nonnull GameLocation gameLocation){
-                return new Location(Bukkit.getWorld(gameLocation.worldName),gameLocation.x,gameLocation.y,gameLocation.z);
+            private Location getLocation(@Nonnull GameLocation gameLocation) {
+                return new Location(Bukkit.getWorld(gameLocation.worldName), gameLocation.x, gameLocation.y, gameLocation.z);
             }
 
-            private GameLocation getGameLocation(@Nonnull Location location){
+            private GameLocation getGameLocation(@Nonnull Location location) {
                 return new GameLocation(location.getWorld().getName(), location.getX(), location.getY(), location.getZ());
             }
 
-            private GameMode getGameMode(@Nonnull PlayerGameMode playerGameMode){
+            private GameMode getGameMode(@Nonnull PlayerGameMode playerGameMode) {
                 return GameMode.valueOf(playerGameMode.name());
             }
 
             @Override
             public void setPlayerHealth(@Nonnull UUID playerUUID, double health) {
                 Player player = Bukkit.getPlayer(playerUUID);
-                if(player == null)
+                if (player == null)
                     return;
                 player.setHealth(health);
             }
@@ -75,7 +72,7 @@ public class BukkitPlatformWrapperImpl implements PlatformWrapper {
             @Override
             public void setPlayerFood(@Nonnull UUID playerUUID, int food) {
                 Player player = Bukkit.getPlayer(playerUUID);
-                if(player == null)
+                if (player == null)
                     return;
                 player.setFoodLevel(food);
             }
@@ -83,7 +80,7 @@ public class BukkitPlatformWrapperImpl implements PlatformWrapper {
             @Override
             public void teleportPlayer(@Nonnull UUID playerUUID, @Nonnull GameLocation gameLocation) {
                 Player player = Bukkit.getPlayer(playerUUID);
-                if(player == null)
+                if (player == null)
                     return;
                 player.teleportAsync(getLocation(gameLocation));
             }
@@ -91,7 +88,7 @@ public class BukkitPlatformWrapperImpl implements PlatformWrapper {
             @Override
             public void setGameMode(@Nonnull UUID playerUUID, @Nonnull PlayerGameMode playerGameMode) {
                 Player player = Bukkit.getPlayer(playerUUID);
-                if(player == null)
+                if (player == null)
                     return;
                 player.setGameMode(getGameMode(playerGameMode));
             }
@@ -99,30 +96,30 @@ public class BukkitPlatformWrapperImpl implements PlatformWrapper {
             @Override
             public void sendMessage(@Nonnull UUID playerUUID, @Nonnull String message, @Nonnull PlayerMessageType playerMessageType) {
                 Player player = Bukkit.getPlayer(playerUUID);
-                if(player == null)
+                if (player == null)
                     return;
-                VCoreUtil.BukkitUtil.getBukkitPlayerUtil().sendPlayerMessage(player,playerMessageType,ChatColor.translateAlternateColorCodes('&',message));
+                VCoreUtil.BukkitUtil.getBukkitPlayerUtil().sendPlayerMessage(player, playerMessageType, ChatColor.translateAlternateColorCodes('&', message));
             }
 
             @Override
             public void broadcastMessage(@Nonnull String message, @Nonnull PlayerMessageType playerMessageType) {
                 for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
-                    VCoreUtil.BukkitUtil.getBukkitPlayerUtil().sendPlayerMessage(onlinePlayer,playerMessageType,ChatColor.translateAlternateColorCodes('&',message));
+                    VCoreUtil.BukkitUtil.getBukkitPlayerUtil().sendPlayerMessage(onlinePlayer, playerMessageType, ChatColor.translateAlternateColorCodes('&', message));
                 }
             }
 
             @Override
             public void kickPlayer(@Nonnull UUID playerUUID, @Nonnull String kickMessage) {
                 Player player = Bukkit.getPlayer(playerUUID);
-                if(player == null)
+                if (player == null)
                     return;
-                player.kickPlayer(ChatColor.translateAlternateColorCodes('&',kickMessage));
+                player.kickPlayer(ChatColor.translateAlternateColorCodes('&', kickMessage));
             }
 
             @Override
             public void killPlayer(@Nonnull UUID playerUUID) {
                 Player player = Bukkit.getPlayer(playerUUID);
-                if(player == null)
+                if (player == null)
                     return;
                 player.setHealth(0);
             }
@@ -130,7 +127,7 @@ public class BukkitPlatformWrapperImpl implements PlatformWrapper {
             @Override
             public void clearInventory(@Nonnull UUID playerUUID) {
                 Player player = Bukkit.getPlayer(playerUUID);
-                if(player == null)
+                if (player == null)
                     return;
                 player.getInventory().clear();
             }
@@ -138,7 +135,7 @@ public class BukkitPlatformWrapperImpl implements PlatformWrapper {
             @Override
             public GameLocation getLocation(@Nonnull UUID playerUUID) {
                 Player player = Bukkit.getPlayer(playerUUID);
-                if(player == null)
+                if (player == null)
                     return null;
                 return getGameLocation(player.getLocation());
             }

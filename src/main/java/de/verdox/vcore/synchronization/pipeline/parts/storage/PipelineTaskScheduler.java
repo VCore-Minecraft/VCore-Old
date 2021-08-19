@@ -21,10 +21,16 @@ import java.util.concurrent.CompletableFuture;
 public interface PipelineTaskScheduler extends SystemLoadable {
 
     <T extends VCoreData> PipelineTask<T> schedulePipelineTask(@Nonnull PipelineAction pipelineAction, @Nonnull Pipeline.LoadingStrategy loadingStrategy, @Nonnull Class<? extends T> type, @Nonnull UUID uuid);
+
     <T extends VCoreData> PipelineTask<T> getExistingPipelineTask(@Nonnull Class<? extends T> type, @Nonnull UUID uuid);
+
     <T extends VCoreData> void removePipelineTask(@Nonnull Class<? extends T> type, @Nonnull UUID uuid);
 
-    class PipelineTask<T extends VCoreData>{
+    enum PipelineAction {
+        LOAD
+    }
+
+    class PipelineTask<T extends VCoreData> {
         private final PipelineAction pipelineAction;
         private final Class<? extends VCoreData> type;
         private final UUID uuid;
@@ -32,15 +38,15 @@ public interface PipelineTaskScheduler extends SystemLoadable {
         private final UUID taskUUID = UUID.randomUUID();
         private long start = System.currentTimeMillis();
 
-        public PipelineTask(VCorePlugin<?,?> plugin, PipelineTaskScheduler pipelineTaskScheduler, PipelineAction pipelineAction, Class<? extends T> type, UUID uuid, Runnable onComplete){
+        public PipelineTask(VCorePlugin<?, ?> plugin, PipelineTaskScheduler pipelineTaskScheduler, PipelineAction pipelineAction, Class<? extends T> type, UUID uuid, Runnable onComplete) {
             this.pipelineAction = pipelineAction;
             this.type = type;
             this.uuid = uuid;
             this.completableFuture = new CompletableFuture<>();
             this.completableFuture.whenComplete((t, throwable) -> {
-                plugin.consoleMessage("&6Task &a"+taskUUID+" &6done&7: "+type+"  |  "+getObjectUUID()+" &8[&e"+t+"&8] &8[&e"+(System.currentTimeMillis() - start)+"ms&8]", true);
+                plugin.consoleMessage("&6Task &a" + taskUUID + " &6done&7: " + type + "  |  " + getObjectUUID() + " &8[&e" + t + "&8] &8[&e" + (System.currentTimeMillis() - start) + "ms&8]", true);
                 onComplete.run();
-                pipelineTaskScheduler.removePipelineTask(type,uuid);
+                pipelineTaskScheduler.removePipelineTask(type, uuid);
             });
         }
 
@@ -63,9 +69,5 @@ public interface PipelineTaskScheduler extends SystemLoadable {
         public UUID getTaskUUID() {
             return taskUUID;
         }
-    }
-
-    enum PipelineAction{
-        LOAD
     }
 }

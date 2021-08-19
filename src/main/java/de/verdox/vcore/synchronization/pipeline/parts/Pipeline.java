@@ -24,38 +24,45 @@ import java.util.function.Consumer;
  */
 public interface Pipeline extends SystemLoadable {
 
-    default <T extends VCoreData> T load(@Nonnull Class<? extends T> type, @Nonnull UUID uuid, @Nonnull LoadingStrategy loadingStrategy){
+    default <T extends VCoreData> T load(@Nonnull Class<? extends T> type, @Nonnull UUID uuid, @Nonnull LoadingStrategy loadingStrategy) {
         return load(type, uuid, loadingStrategy, false, null);
     }
-    default <T extends VCoreData> CompletableFuture<T> loadAsync(@Nonnull Class<? extends T> type, @Nonnull UUID uuid, @Nonnull LoadingStrategy loadingStrategy){
+
+    default <T extends VCoreData> CompletableFuture<T> loadAsync(@Nonnull Class<? extends T> type, @Nonnull UUID uuid, @Nonnull LoadingStrategy loadingStrategy) {
         return loadAsync(type, uuid, loadingStrategy, false, null);
     }
 
-    default <T extends VCoreData> T load(@Nonnull Class<? extends T> type, @Nonnull UUID uuid, @Nonnull LoadingStrategy loadingStrategy, boolean createIfNotExist){
+    default <T extends VCoreData> T load(@Nonnull Class<? extends T> type, @Nonnull UUID uuid, @Nonnull LoadingStrategy loadingStrategy, boolean createIfNotExist) {
         return load(type, uuid, loadingStrategy, createIfNotExist, null);
     }
-    default <T extends VCoreData> CompletableFuture<T> loadAsync(@Nonnull Class<? extends T> type, @Nonnull UUID uuid, @Nonnull LoadingStrategy loadingStrategy, boolean createIfNotExist){
+
+    default <T extends VCoreData> CompletableFuture<T> loadAsync(@Nonnull Class<? extends T> type, @Nonnull UUID uuid, @Nonnull LoadingStrategy loadingStrategy, boolean createIfNotExist) {
         return loadAsync(type, uuid, loadingStrategy, createIfNotExist, null);
     }
 
-    default <T extends VCoreData> T load(@Nonnull Class<? extends T> type, @Nonnull UUID uuid, @Nonnull LoadingStrategy loadingStrategy, @Nullable Consumer<T> callback){
+    default <T extends VCoreData> T load(@Nonnull Class<? extends T> type, @Nonnull UUID uuid, @Nonnull LoadingStrategy loadingStrategy, @Nullable Consumer<T> callback) {
         return load(type, uuid, loadingStrategy, false, callback);
     }
-    default <T extends VCoreData> CompletableFuture<T> loadAsync(@Nonnull Class<? extends T> type, @Nonnull UUID uuid, @Nonnull LoadingStrategy loadingStrategy, @Nullable Consumer<T> callback){
+
+    default <T extends VCoreData> CompletableFuture<T> loadAsync(@Nonnull Class<? extends T> type, @Nonnull UUID uuid, @Nonnull LoadingStrategy loadingStrategy, @Nullable Consumer<T> callback) {
         return loadAsync(type, uuid, loadingStrategy, false, callback);
     }
 
     <T extends VCoreData> T load(@Nonnull Class<? extends T> type, @Nonnull UUID uuid, @Nonnull LoadingStrategy loadingStrategy, boolean createIfNotExist, @Nullable Consumer<T> callback);
+
     <T extends VCoreData> CompletableFuture<T> loadAsync(@Nonnull Class<? extends T> type, @Nonnull UUID uuid, @Nonnull LoadingStrategy loadingStrategy, boolean createIfNotExist, @Nullable Consumer<T> callback);
 
     <T extends VCoreData> Set<T> loadAllData(@Nonnull Class<? extends T> type, @Nonnull LoadingStrategy loadingStrategy);
+
     <T extends VCoreData> CompletableFuture<Set<T>> loadAllDataAsync(@Nonnull Class<? extends T> type, @Nonnull LoadingStrategy loadingStrategy);
 
     <T extends VCoreData> boolean exist(@Nonnull Class<? extends T> type, @Nonnull UUID uuid, @Nonnull QueryStrategy... strategies);
+
     <T extends VCoreData> CompletableFuture<Boolean> existAsync(@Nonnull Class<? extends T> type, @Nonnull UUID uuid, @Nonnull QueryStrategy... strategies);
 
     //TODO: Bei nem delete muss eine Redis Message geschickt werden, damit alle Serverinstanzen das Objekt aus dem lokalen Cache entfernt können!
     <T extends VCoreData> boolean delete(@Nonnull Class<? extends T> type, @Nonnull UUID uuid);
+
     <T extends VCoreData> CompletableFuture<Boolean> deleteAsync(@Nonnull Class<? extends T> type, @Nonnull UUID uuid);
 
     LocalCache getLocalCache();
@@ -65,11 +72,12 @@ public interface Pipeline extends SystemLoadable {
     GlobalStorage getGlobalStorage();
 
     void saveAllData();
+
     void preloadAllData();
 
     DataSynchronizer getSynchronizer();
 
-    enum LoadingStrategy{
+    enum LoadingStrategy {
         // Data will be loaded from Local Cache
         LOAD_LOCAL,
         // Data will be loaded from local Cache if not cached it will be loaded into local cache async for the next possible try
@@ -78,7 +86,7 @@ public interface Pipeline extends SystemLoadable {
         LOAD_PIPELINE;
     }
 
-    enum QueryStrategy{
+    enum QueryStrategy {
         LOCAL,
         GLOBAL_CACHE,
         GLOBAL_STORAGE,

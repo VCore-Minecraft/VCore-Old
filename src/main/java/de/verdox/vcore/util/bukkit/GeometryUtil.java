@@ -12,14 +12,14 @@ import org.bukkit.block.data.*;
 public class GeometryUtil {
 
     public static double dCos(double degrees) {
-        int dInt = (int)degrees;
-        if (degrees == (double)dInt && dInt % 90 == 0) {
+        int dInt = (int) degrees;
+        if (degrees == (double) dInt && dInt % 90 == 0) {
             dInt %= 360;
             if (dInt < 0) {
                 dInt += 360;
             }
 
-            switch(dInt) {
+            switch (dInt) {
                 case 0:
                     return 1.0D;
                 case 90:
@@ -35,14 +35,14 @@ public class GeometryUtil {
     }
 
     public static double dSin(double degrees) {
-        int dInt = (int)degrees;
-        if (degrees == (double)dInt && dInt % 90 == 0) {
+        int dInt = (int) degrees;
+        if (degrees == (double) dInt && dInt % 90 == 0) {
             dInt %= 360;
             if (dInt < 0) {
                 dInt += 360;
             }
 
-            switch(dInt) {
+            switch (dInt) {
                 case 0:
                     return 0.0D;
                 case 90:
@@ -57,11 +57,11 @@ public class GeometryUtil {
         return Math.sin(Math.toRadians(degrees));
     }
 
-    public Location rotateAround (Location point, Location rotateAround, double rotation){
-        if(rotation == 0)
+    public Location rotateAround(Location point, Location rotateAround, double rotation) {
+        if (rotation == 0)
             return point;
         rotation %= 360;
-        float part = (float) ((rotation/360.0f) * 2);
+        float part = (float) ((rotation / 360.0f) * 2);
 
         double angle = part * Math.PI;
 
@@ -74,7 +74,7 @@ public class GeometryUtil {
         double newRotatedX = Math.round(rotatedX);
         double newRotatedZ = Math.round(rotatedZ);
 
-        return new Location(point.getWorld(),newRotatedX,point.getY(),newRotatedZ);
+        return new Location(point.getWorld(), newRotatedX, point.getY(), newRotatedZ);
     }
 
     public Location rotatePointAround(Location point, Location rotateAround, double rotation) {
@@ -82,18 +82,25 @@ public class GeometryUtil {
         // Point will be rotated around rotateAround
 
         float part = 0;
-        if(rotation == 0){
+        if (rotation == 0) {
             return point;
         }
-        if(rotation<0)
+        if (rotation < 0)
             throw new IllegalArgumentException("Rotation can't be negative");
-        if(rotation>=360)
-            rotation-=360;
-        switch ((int)rotation){
-            case 0: return point;
-            case 90:part = 0.5f; break;
-            case 180:part = 1f; break;
-            case 270:part = 1.5f; break;
+        if (rotation >= 360)
+            rotation -= 360;
+        switch ((int) rotation) {
+            case 0:
+                return point;
+            case 90:
+                part = 0.5f;
+                break;
+            case 180:
+                part = 1f;
+                break;
+            case 270:
+                part = 1.5f;
+                break;
         }
 
         double angle = part * Math.PI;
@@ -109,7 +116,7 @@ public class GeometryUtil {
         double newRotatedX = Math.round(rotatedX);
         double newRotatedZ = Math.round(rotatedZ);
 
-        return new Location(point.getWorld(),newRotatedX,point.getY(),newRotatedZ);
+        return new Location(point.getWorld(), newRotatedX, point.getY(), newRotatedZ);
     }
 
     public BlockData rotateBlockData(BlockData blockData, double rotation) {
@@ -149,7 +156,7 @@ public class GeometryUtil {
         boolean oldEast = multipleFacing.hasFace(BlockFace.EAST);
         boolean oldSouth = multipleFacing.hasFace(BlockFace.SOUTH);
         boolean oldWest = multipleFacing.hasFace(BlockFace.WEST);
-        switch((int)rotation) {
+        switch ((int) rotation) {
             case 90:
                 multipleFacing.setFace(BlockFace.NORTH, oldWest);
                 multipleFacing.setFace(BlockFace.EAST, oldNorth);
@@ -210,7 +217,7 @@ public class GeometryUtil {
         BlockFaceDirectionDegree[] var2 = BlockFaceDirectionDegree.values();
         int var3 = var2.length;
 
-        for(int var4 = 0; var4 < var3; ++var4) {
+        for (int var4 = 0; var4 < var3; ++var4) {
             BlockFaceDirectionDegree blockFaceDirectionDegree = var2[var4];
             if (blockFaceDirectionDegree.getDegree() == degree) {
                 return BlockFace.valueOf(blockFaceDirectionDegree.name());

@@ -22,7 +22,7 @@ import java.util.UUID;
  * @date 05.08.2021 21:33
  */
 public abstract class MessagingInstruction {
-    protected VCorePlugin<?,?> plugin;
+    protected VCorePlugin<?, ?> plugin;
     protected SpigotPlatform spigotPlatform;
     protected BungeePlatform bungeePlatform;
     protected PlatformWrapper platformWrapper;
@@ -33,11 +33,12 @@ public abstract class MessagingInstruction {
     private Object[] data;
 
 
-    public MessagingInstruction(UUID uuid){
+    public MessagingInstruction(UUID uuid) {
         this.uuid = uuid;
         this.parameters = parameters().toArray(String[]::new);
         this.types = dataTypes();
     }
+
     public void setPlugin(VCorePlugin<?, ?> plugin) {
         this.plugin = plugin;
         this.platformWrapper = plugin.getPlatformWrapper();
@@ -45,28 +46,28 @@ public abstract class MessagingInstruction {
         this.bungeePlatform = plugin.getPlatformWrapper().getBungeePlatform();
     }
 
-    public MessagingInstruction withData(Object... data){
-        if(data.length != types.size())
-            throw new IllegalStateException("Wrong Input Parameter Length for "+getClass().getSimpleName()+" ["+dataTypes().size()+"]");
+    public MessagingInstruction withData(Object... data) {
+        if (data.length != types.size())
+            throw new IllegalStateException("Wrong Input Parameter Length for " + getClass().getSimpleName() + " [" + dataTypes().size() + "]");
         for (int i = 0; i < types.size(); i++) {
             Class<?> type = types.get(i);
             Object datum = data[i];
-            if(!type.isAssignableFrom(datum.getClass()))
-                throw new IllegalStateException(datum+" is not type or subtype of "+type.getName());
+            if (!type.isAssignableFrom(datum.getClass()))
+                throw new IllegalStateException(datum + " is not type or subtype of " + type.getName());
 
         }
         this.data = data;
         return this;
     }
 
-    public boolean checkOnlineOnSpigot(@Nonnull UUID playerUUID){
-        if(spigotPlatform == null)
+    public boolean checkOnlineOnSpigot(@Nonnull UUID playerUUID) {
+        if (spigotPlatform == null)
             return false;
         return platformWrapper.isPlayerOnline(playerUUID);
     }
 
-    public boolean checkOnlineOnBungeeCord(@Nonnull UUID playerUUID){
-        if(bungeePlatform == null)
+    public boolean checkOnlineOnBungeeCord(@Nonnull UUID playerUUID) {
+        if (bungeePlatform == null)
             return false;
         return platformWrapper.isPlayerOnline(playerUUID);
     }
@@ -88,6 +89,7 @@ public abstract class MessagingInstruction {
     }
 
     protected abstract List<Class<?>> dataTypes();
+
     protected abstract List<String> parameters();
 
     public abstract boolean onSend(Object[] instructionData);

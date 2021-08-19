@@ -9,14 +9,12 @@ import com.mongodb.MongoCredential;
 import com.mongodb.ServerAddress;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import de.verdox.vcore.plugin.VCorePlugin;
+import de.verdox.vcore.plugin.subsystem.VCoreSubsystem;
 import de.verdox.vcore.synchronization.pipeline.datatypes.NetworkData;
-import de.verdox.vcore.synchronization.pipeline.datatypes.PlayerData;
-import de.verdox.vcore.synchronization.pipeline.datatypes.ServerData;
 import de.verdox.vcore.synchronization.pipeline.datatypes.VCoreData;
 import de.verdox.vcore.synchronization.pipeline.parts.storage.GlobalStorage;
 import de.verdox.vcore.synchronization.pipeline.parts.storage.RemoteStorage;
-import de.verdox.vcore.plugin.VCorePlugin;
-import de.verdox.vcore.plugin.subsystem.VCoreSubsystem;
 import de.verdox.vcore.util.global.AnnotationResolver;
 import org.bson.Document;
 
@@ -41,7 +39,7 @@ public class MongoDBStorage implements GlobalStorage, RemoteStorage {
     private String password;
     //private final CodecRegistry codecRegistry;
 
-    public MongoDBStorage(VCorePlugin<?,?> vCorePlugin, String host, String database, int port, String user, String password) {
+    public MongoDBStorage(VCorePlugin<?, ?> vCorePlugin, String host, String database, int port, String user, String password) {
         this.vCorePlugin = vCorePlugin;
         this.host = host;
         this.database = database;
@@ -51,100 +49,98 @@ public class MongoDBStorage implements GlobalStorage, RemoteStorage {
         //this.codecRegistry = fromRegistries(MongoClient.getDefaultCodecRegistry(),CodecRegistries.fromProviders(new UuidCodecProvider(UuidRepresentation.JAVA_LEGACY)));
 
         connect();
-        vCorePlugin.consoleMessage("&eMongoDB Global Storage started",true);
+        vCorePlugin.consoleMessage("&eMongoDB Global Storage started", true);
     }
 
-    public MongoDBStorage(VCorePlugin<?,?> vCorePlugin, String host, String database, int port) {
-        this(vCorePlugin,host,database,port,"","");
+    public MongoDBStorage(VCorePlugin<?, ?> vCorePlugin, String host, String database, int port) {
+        this(vCorePlugin, host, database, port, "", "");
     }
 
 
     @Override
     public Map<String, Object> loadData(@Nonnull Class<? extends VCoreData> dataClass, @Nonnull UUID objectUUID) {
-        Document filter = new Document("objectUUID",objectUUID.toString());
+        Document filter = new Document("objectUUID", objectUUID.toString());
 
-        Document mongoDBData = getMongoStorage(dataClass,getSuffix(dataClass)).find(filter).first();
+        Document mongoDBData = getMongoStorage(dataClass, getSuffix(dataClass)).find(filter).first();
 
-        if(mongoDBData == null)
+        if (mongoDBData == null)
             mongoDBData = filter;
         return convertDocumentToHashMap(mongoDBData);
     }
 
-    private Map<String, Object> convertDocumentToHashMap(Object object){
-        if(!(object instanceof Document))
+    private Map<String, Object> convertDocumentToHashMap(Object object) {
+        if (!(object instanceof Document))
             return null;
         Document document = (Document) object;
         LinkedHashMap<String, Object> map = new LinkedHashMap<>(document);
         map.remove("_id");
         document.forEach((s, o) -> {
             Map<String, Object> possibleFoundDocument = convertDocumentToHashMap(o);
-            if(possibleFoundDocument == null)
+            if (possibleFoundDocument == null)
                 return;
-            map.put(s,possibleFoundDocument);
+            map.put(s, possibleFoundDocument);
         });
         return map;
     }
 
     @Override
     public boolean dataExist(@Nonnull Class<? extends VCoreData> dataClass, @Nonnull UUID objectUUID) {
-        Document document = getMongoStorage(dataClass, getSuffix(dataClass)).find(new Document("objectUUID",objectUUID.toString())).first();
+        Document document = getMongoStorage(dataClass, getSuffix(dataClass)).find(new Document("objectUUID", objectUUID.toString())).first();
         return document != null;
     }
 
     @Override
     public void save(@Nonnull Class<? extends VCoreData> dataClass, @Nonnull UUID objectUUID, @Nonnull Map<String, Object> dataToSave) {
-        Document filter = new Document("objectUUID",objectUUID.toString());
+        Document filter = new Document("objectUUID", objectUUID.toString());
 
-        MongoCollection<Document> collection = getMongoStorage(dataClass,getSuffix(dataClass));
+        MongoCollection<Document> collection = getMongoStorage(dataClass, getSuffix(dataClass));
 
-        if(collection.find(filter).first() == null){
-            Document newData = new Document("objectUUID",objectUUID.toString());
+        if (collection.find(filter).first() == null) {
+            Document newData = new Document("objectUUID", objectUUID.toString());
             newData.putAll(dataToSave);
             collection.insertOne(newData);
-        }
-        else {
+        } else {
             Document newData = new Document(dataToSave);
-            Document updateFunc = new Document("$set",newData);
-            collection.updateOne(filter,updateFunc);
+            Document updateFunc = new Document("$set", newData);
+            collection.updateOne(filter, updateFunc);
         }
     }
 
     @Override
     public boolean remove(@Nonnull Class<? extends VCoreData> dataClass, @Nonnull UUID objectUUID) {
-        Document filter = new Document("objectUUID",objectUUID.toString());
+        Document filter = new Document("objectUUID", objectUUID.toString());
 
-        MongoCollection<Document> collection = getMongoStorage(dataClass,getSuffix(dataClass));
+        MongoCollection<Document> collection = getMongoStorage(dataClass, getSuffix(dataClass));
         return collection.deleteOne(filter).getDeletedCount() >= 1;
     }
 
     @Override
     public Set<UUID> getSavedUUIDs(@Nonnull Class<? extends VCoreData> dataClass) {
-        MongoCollection<Document> collection = getMongoStorage(dataClass,getSuffix(dataClass));
+        MongoCollection<Document> collection = getMongoStorage(dataClass, getSuffix(dataClass));
         Set<UUID> uuids = new HashSet<>();
         for (Document document : collection.find()) {
-            if(!document.containsKey("objectUUID"))
+            if (!document.containsKey("objectUUID"))
                 continue;
             uuids.add(UUID.fromString((String) document.get("objectUUID")));
         }
         return uuids;
     }
 
-    private MongoCollection<Document> getMongoStorage(Class<? extends VCoreData> dataClass, String suffix){
-        if(NetworkData.class.isAssignableFrom(dataClass)){
-            return getCollection("VCore_NetworkData_"+dataClass.getCanonicalName()+"_"+suffix);
-        }
-        else {
+    private MongoCollection<Document> getMongoStorage(Class<? extends VCoreData> dataClass, String suffix) {
+        if (NetworkData.class.isAssignableFrom(dataClass)) {
+            return getCollection("VCore_NetworkData_" + dataClass.getCanonicalName() + "_" + suffix);
+        } else {
             Class<? extends VCoreSubsystem<?>> subsystemClass = AnnotationResolver.findDependSubsystemClass(dataClass);
-            if(subsystemClass == null)
-                throw new NullPointerException("Dependent Subsystem Annotation not set. ["+dataClass.getCanonicalName()+"]");
+            if (subsystemClass == null)
+                throw new NullPointerException("Dependent Subsystem Annotation not set. [" + dataClass.getCanonicalName() + "]");
             String mongoIdentifier = AnnotationResolver.getDataStorageIdentifier(subsystemClass);
-            if(mongoIdentifier == null)
-                throw new NullPointerException("MongoDBIdentifier Annotation not set. ["+subsystemClass.getCanonicalName()+"]");
-            return getCollection(AnnotationResolver.getDataStorageIdentifier(subsystemClass)+"_"+suffix);
+            if (mongoIdentifier == null)
+                throw new NullPointerException("MongoDBIdentifier Annotation not set. [" + subsystemClass.getCanonicalName() + "]");
+            return getCollection(AnnotationResolver.getDataStorageIdentifier(subsystemClass) + "_" + suffix);
         }
     }
 
-    private final com.mongodb.client.MongoCollection<Document> getCollection(String name){
+    private final com.mongodb.client.MongoCollection<Document> getCollection(String name) {
         try {
             com.mongodb.client.MongoCollection<Document> collection = mongoDatabase.getCollection(name);
             //String indexName = "vcore_objectUUID_index";
@@ -161,7 +157,7 @@ public class MongoDBStorage implements GlobalStorage, RemoteStorage {
             return mongoDatabase.getCollection(name);
         }
         // Collection does not exist
-        catch (IllegalArgumentException e){
+        catch (IllegalArgumentException e) {
             mongoDatabase.createCollection(name);
             return getCollection(name);
         }
@@ -169,11 +165,11 @@ public class MongoDBStorage implements GlobalStorage, RemoteStorage {
 
     @Override
     public void connect() {
-        vCorePlugin.consoleMessage("&6Trying to connect to MongoDB&7: &b"+host+"&7:&b"+port,false);
-        if(user.isEmpty() && password.isEmpty())
-            this.mongoClient = new MongoClient(host,port);
+        vCorePlugin.consoleMessage("&6Trying to connect to MongoDB&7: &b" + host + "&7:&b" + port, false);
+        if (user.isEmpty() && password.isEmpty())
+            this.mongoClient = new MongoClient(host, port);
         else
-            this.mongoClient = new MongoClient(new ServerAddress(host, port), List.of(MongoCredential.createCredential(user,database,password.toCharArray())));
+            this.mongoClient = new MongoClient(new ServerAddress(host, port), List.of(MongoCredential.createCredential(user, database, password.toCharArray())));
         this.mongoDatabase = mongoClient.getDatabase(database);
     }
 
@@ -182,7 +178,7 @@ public class MongoDBStorage implements GlobalStorage, RemoteStorage {
         this.mongoClient.close();
     }
 
-    private String getSuffix(Class<? extends VCoreData> dataClass){
+    private String getSuffix(Class<? extends VCoreData> dataClass) {
         return AnnotationResolver.getDataStorageIdentifier(dataClass);
     }
 }

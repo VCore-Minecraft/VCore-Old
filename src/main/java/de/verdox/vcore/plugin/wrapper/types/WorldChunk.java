@@ -4,16 +4,8 @@
 
 package de.verdox.vcore.plugin.wrapper.types;
 
-import io.papermc.lib.PaperLib;
-import org.bukkit.Bukkit;
-import org.bukkit.Chunk;
-import org.bukkit.World;
-
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.CompletableFuture;
 
 /**
  * @version 1.0
@@ -27,15 +19,15 @@ public class WorldChunk {
     public final int globalSpaceX;
     public final int globalSpaceZ;
 
-    public WorldChunk(@Nonnull String worldName, int x, int z){
+    public WorldChunk(@Nonnull String worldName, int x, int z) {
         this.worldName = worldName;
         this.x = x;
         this.z = z;
-        this.globalSpaceX = (16*x);
-        this.globalSpaceZ = (16*z);
+        this.globalSpaceX = (16 * x);
+        this.globalSpaceZ = (16 * z);
     }
 
-    public WorldRegion getRegion(){
+    public WorldRegion getRegion() {
         return new WorldRegion(this);
     }
 

@@ -6,8 +6,8 @@ package de.verdox.vcore.util.bukkit;
 
 import de.verdox.vcore.plugin.wrapper.types.WorldChunk;
 import de.verdox.vcore.plugin.wrapper.types.enums.PlayerMessageType;
-import de.verdox.vcore.util.global.DirectionEnum;
 import de.verdox.vcore.util.bukkit.keys.ChunkKey;
+import de.verdox.vcore.util.global.DirectionEnum;
 import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.*;
@@ -21,36 +21,37 @@ import java.util.Set;
 
 public class BukkitPlayerUtil {
 
-    public BukkitPlayerUtil(){}
-
-    public void sendPlayerMessage(Player player, ChatMessageType chatMessageType, String message){
-        player.spigot().sendMessage(chatMessageType,new TextComponent(ChatColor.translateAlternateColorCodes('&',message)));
+    public BukkitPlayerUtil() {
     }
 
-    public void sendPlayerMessage(Player player, PlayerMessageType playerMessageType, String message){
-        player.spigot().sendMessage(ChatMessageType.valueOf(playerMessageType.name()),new TextComponent(ChatColor.translateAlternateColorCodes('&',message)));
+    public void sendPlayerMessage(Player player, ChatMessageType chatMessageType, String message) {
+        player.spigot().sendMessage(chatMessageType, new TextComponent(ChatColor.translateAlternateColorCodes('&', message)));
     }
 
-    public String serializePotionEffect(PotionEffect potionEffect){
+    public void sendPlayerMessage(Player player, PlayerMessageType playerMessageType, String message) {
+        player.spigot().sendMessage(ChatMessageType.valueOf(playerMessageType.name()), new TextComponent(ChatColor.translateAlternateColorCodes('&', message)));
+    }
+
+    public String serializePotionEffect(PotionEffect potionEffect) {
         int amplifier = potionEffect.getAmplifier();
         int duration = potionEffect.getDuration();
         String type = potionEffect.getType().getName();
-        return type+";"+duration+";"+amplifier;
+        return type + ";" + duration + ";" + amplifier;
     }
 
-    public PotionEffect deSerializePotionEffect(String serialized){
+    public PotionEffect deSerializePotionEffect(String serialized) {
         String[] split = serialized.split(";");
-        if(split.length != 3)
-            throw new IllegalArgumentException("Wrong format of: "+serialized);
+        if (split.length != 3)
+            throw new IllegalArgumentException("Wrong format of: " + serialized);
         PotionEffectType potionEffectType = PotionEffectType.getByName(split[0]);
-        if(potionEffectType == null)
-            throw new IllegalArgumentException("Unknown potion Effect Type: "+split[0]);
+        if (potionEffectType == null)
+            throw new IllegalArgumentException("Unknown potion Effect Type: " + split[0]);
         int duration = Integer.parseInt(split[1]);
         int amplifier = Integer.parseInt(split[2]);
         return new PotionEffect(potionEffectType, duration, amplifier);
     }
 
-    public Set<ChunkKey> getChunksInServerViewDistance(Player player){
+    public Set<ChunkKey> getChunksInServerViewDistance(Player player) {
         Set<ChunkKey> set = new HashSet<>();
         Chunk chunk = player.getLocation().getChunk();
         int chunkX = chunk.getX();
@@ -59,9 +60,9 @@ public class BukkitPlayerUtil {
         int viewDistance = Bukkit.getServer().getViewDistance();
         int viewDistanceInBlocks = viewDistance * 16;
 
-        for(int x = chunkX-viewDistanceInBlocks; x <= chunkX+viewDistanceInBlocks; x+=16){
-            for(int z = chunkZ-viewDistanceInBlocks; z <= chunkZ+viewDistanceInBlocks; z+=16){
-                set.add(new ChunkKey(new WorldChunk(player.getLocation().getWorld().getName(),x,z)));
+        for (int x = chunkX - viewDistanceInBlocks; x <= chunkX + viewDistanceInBlocks; x += 16) {
+            for (int z = chunkZ - viewDistanceInBlocks; z <= chunkZ + viewDistanceInBlocks; z += 16) {
+                set.add(new ChunkKey(new WorldChunk(player.getLocation().getWorld().getName(), x, z)));
             }
         }
         return set;
@@ -72,19 +73,20 @@ public class BukkitPlayerUtil {
     }
 
     public Collection<Chunk> getChunksAround(Location location) {
-        int[] offset = {-1,0,1};
+        int[] offset = {-1, 0, 1};
 
         World world = location.getWorld();
         int baseX = location.getChunk().getX();
         int baseZ = location.getChunk().getZ();
 
         Collection<Chunk> chunksAroundPlayer = new HashSet<>();
-        for(int x : offset) {
-            for(int z : offset) {
+        for (int x : offset) {
+            for (int z : offset) {
                 Chunk chunk = world.getChunkAt(baseX + x, baseZ + z);
                 chunksAroundPlayer.add(chunk);
             }
-        } return chunksAroundPlayer;
+        }
+        return chunksAroundPlayer;
     }
 
     public double getFacingRotation(Player player) {
@@ -108,7 +110,7 @@ public class BukkitPlayerUtil {
         return 0d;
     }
 
-    public DirectionEnum getDirection(Location location){
+    public DirectionEnum getDirection(Location location) {
         float yaw = location.getYaw();
         if (yaw < 0) {
             yaw += 360;
@@ -129,13 +131,17 @@ public class BukkitPlayerUtil {
         return DirectionEnum.NORTH;
     }
 
-    public double rotateOffsetX(Location location, double offsetX, double offsetZ){
+    public double rotateOffsetX(Location location, double offsetX, double offsetZ) {
         DirectionEnum direction = getDirection(location);
-        switch (direction){
-            case EAST: return offsetZ;
-            case WEST: return -offsetZ;
-            case SOUTH: return -offsetX;
-            default: return offsetX;
+        switch (direction) {
+            case EAST:
+                return offsetZ;
+            case WEST:
+                return -offsetZ;
+            case SOUTH:
+                return -offsetX;
+            default:
+                return offsetX;
         }
     }
 

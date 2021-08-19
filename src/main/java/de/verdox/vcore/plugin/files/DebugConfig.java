@@ -7,10 +7,6 @@ package de.verdox.vcore.plugin.files;
 import de.verdox.vcore.plugin.VCorePlugin;
 import de.verdox.vcore.plugin.files.config.VCoreYAMLConfig;
 
-import java.nio.charset.StandardCharsets;
-import java.util.Locale;
-import java.util.UUID;
-
 /**
  * @version 1.0
  * @Author: Lukas Jonsson (Verdox)
@@ -28,17 +24,17 @@ public class DebugConfig extends VCoreYAMLConfig {
 
     @Override
     public void setupConfig() {
-        config.addDefault("isDebugMode",true);
+        config.addDefault("isDebugMode", true);
         config.options().copyDefaults(true);
         save();
     }
 
-    public void setDebugMode(boolean value){
-        config.set("isDebugMode",value);
+    public void setDebugMode(boolean value) {
+        config.set("isDebugMode", value);
         save();
     }
 
-    public boolean debugMode(){
+    public boolean debugMode() {
         return config.getBoolean("isDebugMode");
     }
 }

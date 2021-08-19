@@ -5,7 +5,6 @@
 package de.verdox.vcore.synchronization.messaging.instructions.update;
 
 import de.verdox.vcore.synchronization.messaging.instructions.InstructionResponder;
-import de.verdox.vcore.synchronization.messaging.instructions.MessagingInstruction;
 import de.verdox.vcore.synchronization.messaging.instructions.annotations.InstructionInfo;
 import de.verdox.vcore.synchronization.messaging.instructions.query.Query;
 
@@ -41,10 +40,13 @@ public abstract class Update extends Query<Boolean> implements InstructionRespon
     @Override
     public final Object[] respondToInstruction(Object[] instructionData) {
         UpdateCompletion updateCompletion = executeUpdate(instructionData);
-        switch (updateCompletion){
-            case TRUE: return new Object[]{true};
-            case FALSE: return new Object[]{false};
-            default: return null;
+        switch (updateCompletion) {
+            case TRUE:
+                return new Object[]{true};
+            case FALSE:
+                return new Object[]{false};
+            default:
+                return null;
         }
     }
 

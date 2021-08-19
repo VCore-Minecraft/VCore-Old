@@ -14,15 +14,15 @@ import de.verdox.vcore.synchronization.pipeline.datatypes.serializables.referenc
  * @date 25.06.2021 23:55
  */
 public class SerializableJsonVector extends VCoreSerializableJson {
-    public VCoreDataReference<Double> getXReference(){
+    public VCoreDataReference<Double> getXReference() {
         return new DoubleBsonReference(this, "x");
     }
 
-    public VCoreDataReference<Double> getYReference(){
+    public VCoreDataReference<Double> getYReference() {
         return new DoubleBsonReference(this, "y");
     }
 
-    public VCoreDataReference<Double> getZReference(){
+    public VCoreDataReference<Double> getZReference() {
         return new DoubleBsonReference(this, "z");
     }
 }

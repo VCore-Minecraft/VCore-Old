@@ -4,9 +4,8 @@
 
 package de.verdox.vcore.plugin.wrapper;
 
-import de.verdox.vcore.plugin.wrapper.spigot.SpigotPlatform;
 import de.verdox.vcore.plugin.wrapper.bungeecord.BungeePlatform;
-import de.verdox.vcore.synchronization.networkmanager.player.VCorePlayer;
+import de.verdox.vcore.plugin.wrapper.spigot.SpigotPlatform;
 
 import javax.annotation.Nonnull;
 import java.net.InetSocketAddress;
@@ -19,8 +18,12 @@ import java.util.UUID;
  */
 public interface PlatformWrapper {
     boolean isPlayerOnline(@Nonnull UUID playerUUID);
+
     boolean isPrimaryThread();
+
     InetSocketAddress getPlayerAddress(@Nonnull UUID playerUUID);
+
     SpigotPlatform getSpigotPlatform();
+
     BungeePlatform getBungeePlatform();
 }

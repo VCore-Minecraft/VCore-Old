@@ -4,7 +4,6 @@
 
 package de.verdox.vcore.synchronization.pipeline.parts.cache;
 
-import de.verdox.vcore.synchronization.pipeline.annotations.VCoreDataProperties;
 import de.verdox.vcore.synchronization.pipeline.datatypes.VCoreData;
 import de.verdox.vcore.synchronization.pipeline.interfaces.DataManipulator;
 import de.verdox.vcore.synchronization.pipeline.parts.DataProvider;
@@ -22,13 +21,16 @@ import java.util.UUID;
 public interface GlobalCache extends DataProvider {
 
     Map<String, Object> getObjectCache(Class<? extends VCoreData> dataClass, UUID objectUUID);
+
     Set<Map<String, Object>> getCacheList(Class<? extends VCoreData> dataClass);
+
     Set<String> getKeys(Class<? extends VCoreData> dataClass);
+
     Map<String, Object> getGlobalCacheMap(String name);
 
     boolean dataExist(@Nonnull Class<? extends VCoreData> dataClass, @Nonnull UUID objectUUID);
 
-    default DataManipulator constructDataManipulator(VCoreData vCoreData){
+    default DataManipulator constructDataManipulator(VCoreData vCoreData) {
         return new DataManipulator() {
             @Override
             public void cleanUp() {

@@ -4,11 +4,11 @@
 
 package de.verdox.vcore.synchronization.messaging.redis;
 
+import de.verdox.vcore.plugin.VCorePlugin;
 import de.verdox.vcore.synchronization.messaging.MessagingService;
 import de.verdox.vcore.synchronization.messaging.event.MessageEvent;
 import de.verdox.vcore.synchronization.messaging.instructions.InstructionService;
 import de.verdox.vcore.synchronization.messaging.messages.Message;
-import de.verdox.vcore.plugin.VCorePlugin;
 import de.verdox.vcore.synchronization.redisson.RedisConnection;
 import org.redisson.api.RTopic;
 import org.redisson.api.listener.MessageListener;
@@ -35,10 +35,10 @@ public class RedisMessaging extends RedisConnection implements MessagingService<
         globalMessagingChannel = redissonClient.getTopic("VCoreMessagingChannel", new SerializationCodec());
 
         this.messageListener = (channel, msg) -> {
-            if(!(msg instanceof SimpleRedisMessage))
+            if (!(msg instanceof SimpleRedisMessage))
                 return;
             // Own Messages won't throw an event
-            if(isOwnMessage(msg))
+            if (isOwnMessage(msg))
                 return;
             plugin.getServices().eventBus.post(new MessageEvent(msg));
         };
@@ -49,13 +49,13 @@ public class RedisMessaging extends RedisConnection implements MessagingService<
     }
 
     @Override
-    public void setupPrivateMessagingChannel(){
+    public void setupPrivateMessagingChannel() {
         privateMessagingChannel = getServerMessagingChannel(plugin.getCoreInstance().getServerName());
         privateMessagingChannel.addListener(Message.class, messageListener);
     }
 
-    private RTopic getServerMessagingChannel(String serverName){
-        return redissonClient.getTopic("ServerMessagingChannel_"+serverName.toLowerCase(), new SerializationCodec());
+    private RTopic getServerMessagingChannel(String serverName) {
+        return redissonClient.getTopic("ServerMessagingChannel_" + serverName.toLowerCase(), new SerializationCodec());
     }
 
     @Override
@@ -70,7 +70,7 @@ public class RedisMessaging extends RedisConnection implements MessagingService<
 
     @Override
     public void sendMessage(Message message, String... serverNames) {
-        if(serverNames == null || serverNames.length == 0)
+        if (serverNames == null || serverNames.length == 0)
             return;
         for (String serverName : serverNames) {
             if (serverName.equals(plugin.getCoreInstance().getServerName()))
@@ -86,7 +86,7 @@ public class RedisMessaging extends RedisConnection implements MessagingService<
 
     @Override
     public String getSenderName() {
-        return plugin.getCoreInstance().getServerName()+"_"+plugin.getPluginName();
+        return plugin.getCoreInstance().getServerName() + "_" + plugin.getPluginName();
     }
 
     @Override
@@ -101,8 +101,8 @@ public class RedisMessaging extends RedisConnection implements MessagingService<
 
     @Override
     public void shutdown() {
-        plugin.consoleMessage("&eShutting down Redis Messenger",false);
+        plugin.consoleMessage("&eShutting down Redis Messenger", false);
         globalMessagingChannel.removeListener(messageListener);
-        plugin.consoleMessage("&eRedis Messenger shut down successfully",false);
+        plugin.consoleMessage("&eRedis Messenger shut down successfully", false);
     }
 }

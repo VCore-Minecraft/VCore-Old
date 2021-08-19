@@ -13,7 +13,7 @@ import java.util.UUID;
  * @Author: Lukas Jonsson (Verdox)
  * @date 01.08.2021 19:12
  */
-public abstract class NetworkData extends VCoreData{
+public abstract class NetworkData extends VCoreData {
     public NetworkData(VCorePlugin<?, ?> plugin, UUID objectUUID) {
         super(plugin, objectUUID);
     }

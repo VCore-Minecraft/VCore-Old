@@ -16,7 +16,7 @@ public enum MySQLLogicalOperator {
     ;
     private final String operator;
 
-    MySQLLogicalOperator(String operator){
+    MySQLLogicalOperator(String operator) {
         this.operator = operator;
     }
 

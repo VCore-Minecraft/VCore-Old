@@ -22,7 +22,7 @@ public class SimpleRedisMessage implements Message {
     private final String[] parameters;
     private final Object[] dataToSend;
 
-    SimpleRedisMessage(@Nonnull UUID sender, @Nonnull String senderIdentifier, @Nonnull String[] parameters, @Nonnull Object[] dataToSend){
+    SimpleRedisMessage(@Nonnull UUID sender, @Nonnull String senderIdentifier, @Nonnull String[] parameters, @Nonnull Object[] dataToSend) {
         this.sender = sender;
         this.senderIdentifier = senderIdentifier;
         this.parameters = parameters;

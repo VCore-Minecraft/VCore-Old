@@ -13,13 +13,13 @@ import de.verdox.vcore.old.lowlevel.mysql.operators.MySQLLogicalOperator;
  * @date 10.06.2021 13:36
  */
 public class Where extends MysqlFormat {
-    public Where(String columnName, MySQLComparator mysqlComparator, Object value){
+    public Where(String columnName, MySQLComparator mysqlComparator, Object value) {
         stringBuilder.append("WHERE ");
         stringBuilder.append(new WherePart(columnName, mysqlComparator, value).toMySQLCommand());
     }
 
-    public Where addWhereStatement(MySQLLogicalOperator mySQLLogicalOperator, String columnName, MySQLComparator mysqlComparator, Object value){
-        stringBuilder.append(" "+mySQLLogicalOperator.getOperator()+" "+new WherePart(columnName, mysqlComparator, value).toMySQLCommand());
+    public Where addWhereStatement(MySQLLogicalOperator mySQLLogicalOperator, String columnName, MySQLComparator mysqlComparator, Object value) {
+        stringBuilder.append(" " + mySQLLogicalOperator.getOperator() + " " + new WherePart(columnName, mysqlComparator, value).toMySQLCommand());
         return this;
     }
 
@@ -34,7 +34,7 @@ public class Where extends MysqlFormat {
         private final MySQLComparator mysqlComparator;
         private final Object value;
 
-        public WherePart(String columnName, MySQLComparator mysqlComparator, Object value){
+        public WherePart(String columnName, MySQLComparator mysqlComparator, Object value) {
             this.columnName = columnName;
             this.mysqlComparator = mysqlComparator;
             this.value = value;
@@ -42,7 +42,7 @@ public class Where extends MysqlFormat {
 
         @Override
         public String toMySQLCommand() {
-            return columnName+" "+mysqlComparator.getComparatorChar()+" "+value;
+            return columnName + " " + mysqlComparator.getComparatorChar() + " " + value;
         }
     }
 }

@@ -3,6 +3,7 @@
  */
 
 package de.verdox.vcore.synchronization.pipeline.datatypes.serializables;
+
 import java.util.HashMap;
 
 /**
@@ -11,5 +12,6 @@ import java.util.HashMap;
  * @date 25.06.2021 23:54
  */
 public abstract class VCoreSerializableJson extends HashMap<String, Object> {
-    public VCoreSerializableJson(){}
+    public VCoreSerializableJson() {
+    }
 }

@@ -27,17 +27,17 @@ public class RedisDataManipulator implements DataManipulator {
     private final MessageListener<UpdateDataBlock> messageListener;
     private final UUID senderUUID = UUID.randomUUID();
 
-    RedisDataManipulator(@Nonnull RedisCache redisCache, VCoreData vCoreData){
+    RedisDataManipulator(@Nonnull RedisCache redisCache, VCoreData vCoreData) {
         this.redisCache = redisCache;
         this.dataTopic = this.redisCache.getTopic(vCoreData.getClass(), vCoreData.getObjectUUID());
         this.messageListener = (channel, updateDataBlock) -> {
-            if(updateDataBlock.senderUUID.equals(senderUUID))
+            if (updateDataBlock.senderUUID.equals(senderUUID))
                 return;
-            vCoreData.getPlugin().consoleMessage("&eReceived Redis Sync &b"+vCoreData.getObjectUUID()+" &8[&e"+vCoreData.getClass().getSimpleName()+"&8] &b"+System.currentTimeMillis(),true);
+            vCoreData.getPlugin().consoleMessage("&eReceived Redis Sync &b" + vCoreData.getObjectUUID() + " &8[&e" + vCoreData.getClass().getSimpleName() + "&8] &b" + System.currentTimeMillis(), true);
             vCoreData.onSync(vCoreData.deserialize(updateDataBlock.dataToUpdate));
-            vCoreData.getPlugin().consoleMessage("&eRedis Sync complete &b"+System.currentTimeMillis(),true);
+            vCoreData.getPlugin().consoleMessage("&eRedis Sync complete &b" + System.currentTimeMillis(), true);
         };
-        dataTopic.addListener(UpdateDataBlock.class,messageListener);
+        dataTopic.addListener(UpdateDataBlock.class, messageListener);
     }
 
     @Override
@@ -50,9 +50,9 @@ public class RedisDataManipulator implements DataManipulator {
         doPush(vCoreData, callback);
     }
 
-    private void doPush(VCoreData vCoreData, Runnable callback){
-        dataTopic.publish(new UpdateDataBlock(senderUUID,vCoreData.serialize()));
-        vCoreData.getPlugin().consoleMessage("&ePush Success&7: &b"+System.currentTimeMillis(),true);
+    private void doPush(VCoreData vCoreData, Runnable callback) {
+        dataTopic.publish(new UpdateDataBlock(senderUUID, vCoreData.serialize()));
+        vCoreData.getPlugin().consoleMessage("&ePush Success&7: &b" + System.currentTimeMillis(), true);
         vCoreData.getPlugin().getServices().getPipeline().getSynchronizer().synchronize(DataSynchronizer.DataSourceType.LOCAL, DataSynchronizer.DataSourceType.GLOBAL_CACHE, vCoreData.getClass(), vCoreData.getObjectUUID());
         callback.run();
     }
@@ -61,7 +61,7 @@ public class RedisDataManipulator implements DataManipulator {
         private final UUID senderUUID;
         private final Map<String, Object> dataToUpdate;
 
-        UpdateDataBlock(@Nonnull UUID senderUUID, @Nonnull Map<String, Object> dataToUpdate){
+        UpdateDataBlock(@Nonnull UUID senderUUID, @Nonnull Map<String, Object> dataToUpdate) {
             this.senderUUID = senderUUID;
             this.dataToUpdate = dataToUpdate;
         }

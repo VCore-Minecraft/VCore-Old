@@ -1,34 +1,31 @@
 package de.verdox.vcore.plugin.files.config;
 
 import de.verdox.vcore.plugin.VCorePlugin;
-import de.verdox.vcore.plugin.subsystem.VCoreSubsystem;
 import de.verdox.vcore.plugin.files.config.bukkit.VCoreBukkitConfig;
 import de.verdox.vcore.plugin.files.config.bungeecord.VCoreBungeeConfig;
 import de.verdox.vcore.plugin.files.config.serialization.VCoreDeserializer;
 import de.verdox.vcore.plugin.files.config.serialization.VCoreSerializable;
-import de.verdox.vcore.synchronization.pipeline.datatypes.VCoreData;
 import org.apache.commons.io.FilenameUtils;
-import org.bukkit.inventory.ItemStack;
 
 import java.io.File;
 
-public abstract class VCoreConfig <T> {
-    protected final VCorePlugin<?,?> plugin;
+public abstract class VCoreConfig<T> {
+    protected final VCorePlugin<?, ?> plugin;
     protected String fileName;
     protected String pluginDirectory;
     protected File file;
     protected T config;
     protected boolean initialized = false;
 
-    public VCoreConfig(VCorePlugin<?,?> plugin, File file) {
+    public VCoreConfig(VCorePlugin<?, ?> plugin, File file) {
         this.plugin = plugin;
         this.file = file;
         this.fileName = FilenameUtils.removeExtension(file.getName());
         String[] split = file.getPath().split(plugin.getPluginDataFolder().getPath());
-        this.pluginDirectory = split[split.length-1];
+        this.pluginDirectory = split[split.length - 1];
     }
 
-    public VCoreConfig(VCorePlugin<?,?> plugin, String fileName, String pluginDirectory) {
+    public VCoreConfig(VCorePlugin<?, ?> plugin, String fileName, String pluginDirectory) {
         this.plugin = plugin;
         this.file = new File(plugin.getPluginDataFolder() + pluginDirectory, fileName);
         this.fileName = fileName;
@@ -40,23 +37,29 @@ public abstract class VCoreConfig <T> {
     }
 
     public abstract T getConfig();
+
     public abstract void save();
+
     public abstract void delete();
 
     public abstract void saveSerializable(String path, VCoreSerializable vCoreSerializable);
+
     public abstract <S extends VCoreSerializable> S getSerializable(Class<S> serializableClass, String path, VCoreDeserializer<? extends S> vCoreDeserializer);
 
     public void init() {
         this.config = create();
-        if(initialized)
+        if (initialized)
             return;
         setupConfig();
         save();
         onInit();
         initialized = true;
     }
+
     public abstract T create();
+
     public abstract void onInit();
+
     public abstract void setupConfig();
 
     public VCorePlugin<?, ?> getPlugin() {
@@ -67,16 +70,20 @@ public abstract class VCoreConfig <T> {
         public Bukkit(VCorePlugin.Minecraft plugin, File file) {
             super(plugin, file);
         }
+
         public Bukkit(VCorePlugin.Minecraft plugin, String fileName, String pluginDirectory) {
-            super(plugin,fileName,pluginDirectory);
+            super(plugin, fileName, pluginDirectory);
         }
     }
 
     public abstract static class BungeeCord extends VCoreBungeeConfig {
         public BungeeCord(VCorePlugin.BungeeCord plugin, File file) {
-            super(plugin,file);
+            super(plugin, file);
         }
-        public BungeeCord(VCorePlugin.BungeeCord plugin, String fileName, String pluginDirectory) { super(plugin,fileName,pluginDirectory); }
+
+        public BungeeCord(VCorePlugin.BungeeCord plugin, String fileName, String pluginDirectory) {
+            super(plugin, fileName, pluginDirectory);
+        }
     }
 
 }

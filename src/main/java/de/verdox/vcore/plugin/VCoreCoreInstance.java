@@ -15,15 +15,18 @@ import org.bukkit.plugin.java.JavaPlugin;
  * @Author: Lukas Jonsson (Verdox)
  * @date 03.08.2021 20:28
  */
-public interface VCoreCoreInstance <T, R extends VCoreSubsystem<?>> extends VCorePlugin<T,R> {
+public interface VCoreCoreInstance<T, R extends VCoreSubsystem<?>> extends VCorePlugin<T, R> {
     VCorePlayerAPI getPlayerAPI();
-    <X extends VCorePlugin<T,R>> NetworkManager<X> getNetworkManager();
+
+    <X extends VCorePlugin<T, R>> NetworkManager<X> getNetworkManager();
+
     String getServerName();
 
-    abstract class Minecraft extends VCorePlugin.Minecraft implements VCoreCoreInstance<JavaPlugin,VCoreSubsystem.Bukkit>{
+    abstract class Minecraft extends VCorePlugin.Minecraft implements VCoreCoreInstance<JavaPlugin, VCoreSubsystem.Bukkit> {
 
     }
-    abstract class BungeeCord extends VCorePlugin.BungeeCord implements VCoreCoreInstance<Plugin,VCoreSubsystem.BungeeCord>{
+
+    abstract class BungeeCord extends VCorePlugin.BungeeCord implements VCoreCoreInstance<Plugin, VCoreSubsystem.BungeeCord> {
 
     }
 }

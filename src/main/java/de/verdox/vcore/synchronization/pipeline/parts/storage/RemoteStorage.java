@@ -12,5 +12,6 @@ package de.verdox.vcore.synchronization.pipeline.parts.storage;
 public interface RemoteStorage {
 
     void connect();
+
     void disconnect();
 }

@@ -5,21 +5,21 @@ import org.bukkit.Location;
 
 import java.util.Objects;
 
-public class LocationKey extends VCoreKey{
+public class LocationKey extends VCoreKey {
 
     private final String worldName;
     private final int x;
     private final int y;
     private final int z;
 
-    public LocationKey(Location location){
+    public LocationKey(Location location) {
         this.worldName = location.getWorld().getName();
         this.x = location.getBlockX();
         this.y = location.getBlockY();
         this.z = location.getBlockZ();
     }
 
-    public LocationKey(String key){
+    public LocationKey(String key) {
         String[] split = key.split("_");
         this.worldName = split[0];
         this.x = Integer.parseInt(split[1]);
@@ -27,17 +27,17 @@ public class LocationKey extends VCoreKey{
         this.z = Integer.parseInt(split[3]);
     }
 
-    public Location getLocation(){
-        return new Location(Bukkit.getWorld(worldName),x,y,z);
+    public Location getLocation() {
+        return new Location(Bukkit.getWorld(worldName), x, y, z);
     }
 
     @Override
     public String toString() {
-        return worldName+"_"+toStringWithoutWorld();
+        return worldName + "_" + toStringWithoutWorld();
     }
 
-    public String toStringWithoutWorld(){
-        return x+"_"+y+"_"+z;
+    public String toStringWithoutWorld() {
+        return x + "_" + y + "_" + z;
     }
 
     @Override

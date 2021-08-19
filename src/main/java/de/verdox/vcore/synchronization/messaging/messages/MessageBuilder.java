@@ -17,17 +17,17 @@ public abstract class MessageBuilder {
     protected String[] parameters;
     protected Object[] dataToSend;
 
-    public MessageBuilder(UUID sender, String senderIdentifier){
+    public MessageBuilder(UUID sender, String senderIdentifier) {
         this.sender = sender;
         this.senderIdentifier = senderIdentifier;
     }
 
-    public MessageBuilder withParameters(String... parameters){
+    public MessageBuilder withParameters(String... parameters) {
         this.parameters = parameters;
         return this;
     }
 
-    public MessageBuilder withData(Object... dataToSend){
+    public MessageBuilder withData(Object... dataToSend) {
         this.dataToSend = dataToSend;
         return this;
     }

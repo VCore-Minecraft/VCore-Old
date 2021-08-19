@@ -1,7 +1,6 @@
 package de.verdox.vcore.plugin.files.config.bukkit;
 
 import de.verdox.vcore.plugin.VCorePlugin;
-import de.verdox.vcore.plugin.subsystem.VCoreSubsystem;
 import de.verdox.vcore.plugin.files.config.VCoreConfig;
 import de.verdox.vcore.plugin.files.config.serialization.VCoreDeserializer;
 import de.verdox.vcore.plugin.files.config.serialization.VCoreSerializable;
@@ -16,11 +15,11 @@ import java.util.Map;
 
 public abstract class VCoreBukkitConfig extends VCoreConfig<FileConfiguration> {
     public VCoreBukkitConfig(VCorePlugin.Minecraft plugin, File file) {
-        super(plugin,file);
+        super(plugin, file);
     }
 
     public VCoreBukkitConfig(VCorePlugin.Minecraft plugin, String fileName, String pluginDirectory) {
-        super(plugin,fileName,pluginDirectory);
+        super(plugin, fileName, pluginDirectory);
     }
 
     @Override
@@ -35,11 +34,11 @@ public abstract class VCoreBukkitConfig extends VCoreConfig<FileConfiguration> {
 
     @Override
     public void saveSerializable(String path, VCoreSerializable vCoreSerializable) {
-        config.set(path,null);
+        config.set(path, null);
         Map<String, Object> data = vCoreSerializable.serialize();
 
         data.keySet().forEach(key -> {
-            config.set(path+"."+key,data.get(key));
+            config.set(path + "." + key, data.get(key));
         });
         save();
     }
@@ -47,11 +46,11 @@ public abstract class VCoreBukkitConfig extends VCoreConfig<FileConfiguration> {
     @Override
     public <S extends VCoreSerializable> S getSerializable(Class<S> serializableClass, String path, VCoreDeserializer<? extends S> vCoreDeserializer) {
         Map<String, Object> data = new HashMap<>();
-        if(!config.isConfigurationSection(path))
+        if (!config.isConfigurationSection(path))
             return null;
 
         config.getConfigurationSection(path).getKeys(false).forEach(key -> {
-            data.put(key,config.get(path+"."+key));
+            data.put(key, config.get(path + "." + key));
         });
         return vCoreDeserializer.deSerialize(data);
     }
@@ -68,6 +67,10 @@ public abstract class VCoreBukkitConfig extends VCoreConfig<FileConfiguration> {
 
     @Override
     public void delete() {
-        try { FileUtils.forceDelete(file); } catch (IOException e) { e.printStackTrace(); }
+        try {
+            FileUtils.forceDelete(file);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }

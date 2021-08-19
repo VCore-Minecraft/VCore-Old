@@ -22,90 +22,106 @@ public class InGameMessageProvider {
     private final Map<String, InGameMessage> messages = new ConcurrentHashMap<>();
     private String prefix;
 
-    public InGameMessageProvider(@Nonnull VCorePlugin<?,?> vCorePlugin){
+    public InGameMessageProvider(@Nonnull VCorePlugin<?, ?> vCorePlugin) {
         this.vCorePlugin = vCorePlugin;
-        prefix = "&8[&6"+vCorePlugin.getPluginName()+"&8] &f";
+        prefix = "&8[&6" + vCorePlugin.getPluginName() + "&8] &f";
         for (Language value : Language.values()) {
-            LanguageConfig languageConfig  = new LanguageConfig(vCorePlugin, value.getAbbreviation()+".yml","lang", value);
+            LanguageConfig languageConfig = new LanguageConfig(vCorePlugin, value.getAbbreviation() + ".yml", "lang", value);
             languageConfig.init();
             languagesConfigs.put(value, languageConfig);
         }
         registerStandardMessages();
     }
 
-    public void setPrefix(@Nonnull String prefix){
+    public void setPrefix(@Nonnull String prefix) {
         this.prefix = prefix;
     }
 
-    public void registerMessage(@Nonnull String messageIdentifier, @Nonnull InGameMessage inGameMessage){
-        if(messages.containsKey(messageIdentifier))
-            throw new IllegalStateException("messageIdentifier "+messageIdentifier+" already taken");
+    public void registerMessage(@Nonnull String messageIdentifier, @Nonnull InGameMessage inGameMessage) {
+        if (messages.containsKey(messageIdentifier))
+            throw new IllegalStateException("messageIdentifier " + messageIdentifier + " already taken");
         messages.put(messageIdentifier, inGameMessage);
         languagesConfigs.forEach((language, languageConfig) -> {
-            languageConfig.getConfig().set(messageIdentifier,inGameMessage.getTranslatedMessage(language));
+            languageConfig.getConfig().set(messageIdentifier, inGameMessage.getTranslatedMessage(language));
             languageConfig.save();
         });
     }
 
-    public String getMessage(@Nonnull String messageIdentifier, @Nonnull Language language){
-        if(!messages.containsKey(messageIdentifier))
-            throw new IllegalStateException("messageIdentifier "+messageIdentifier+" not found!");
+    public String getMessage(@Nonnull String messageIdentifier, @Nonnull Language language) {
+        if (!messages.containsKey(messageIdentifier))
+            throw new IllegalStateException("messageIdentifier " + messageIdentifier + " not found!");
         LanguageConfig languageConfig = languagesConfigs.get(language);
         String message;
-        if(languageConfig.getConfig().isSet(messageIdentifier))
+        if (languageConfig.getConfig().isSet(messageIdentifier))
             message = languagesConfigs.get(language).getConfig().getString(messageIdentifier);
         else
             message = messages.get(messageIdentifier).getTranslatedMessage(language);
-        return prefix+message;
+        return prefix + message;
     }
 
-    private void registerStandardMessages(){
+    private void registerStandardMessages() {
         registerMessage("Player.noPermission", language -> {
-            switch (language){
-                case GERMAN: return "&cKeine Rechte&7!";
-                default: return "&cNo Permissions&7!";
+            switch (language) {
+                case GERMAN:
+                    return "&cKeine Rechte&7!";
+                default:
+                    return "&cNo Permissions&7!";
             }
         });
         registerMessage("Player.notOnline", language -> {
-            switch (language){
-                case GERMAN: return "&cDieser Spieler ist nicht online&7!";
-                default: return "&cThis player is not online&7!";
+            switch (language) {
+                case GERMAN:
+                    return "&cDieser Spieler ist nicht online&7!";
+                default:
+                    return "&cThis player is not online&7!";
             }
         });
         registerMessage("Command.onlyConsole", language -> {
-            switch (language){
-                case GERMAN: return "&cDieser Befehl ist nur für die Konsole&7!";
-                default: return "&cThis command is for console only&7!";
+            switch (language) {
+                case GERMAN:
+                    return "&cDieser Befehl ist nur für die Konsole&7!";
+                default:
+                    return "&cThis command is for console only&7!";
             }
         });
         registerMessage("Command.onlyNumbers", language -> {
-            switch (language){
-                case GERMAN: return "&cBitte gib eine Zahl ein&7!";
-                default: return "&cPlease provide a number&7!";
+            switch (language) {
+                case GERMAN:
+                    return "&cBitte gib eine Zahl ein&7!";
+                default:
+                    return "&cPlease provide a number&7!";
             }
         });
         registerMessage("Command.onlyNumbersPositive", language -> {
-            switch (language){
-                case GERMAN: return "&cBitte gib eine positive Zahl ein&7!";
-                default: return "&cPlease provide a positive number&7!";
+            switch (language) {
+                case GERMAN:
+                    return "&cBitte gib eine positive Zahl ein&7!";
+                default:
+                    return "&cPlease provide a positive number&7!";
             }
         });
         registerMessage("Command.onlyNumbersPositiveAndZero", language -> {
-            switch (language){
-                case GERMAN: return "&cBitte gib eine positive Zahl oder 0 ein&7!";
-                default: return "&cPlease provide a positive number or 0&7!";
+            switch (language) {
+                case GERMAN:
+                    return "&cBitte gib eine positive Zahl oder 0 ein&7!";
+                default:
+                    return "&cPlease provide a positive number or 0&7!";
             }
         });
         registerMessage("Command.onlyNumbersNegative", language -> {
-            switch (language){
-                case GERMAN: return "&cBitte gib eine negative Zahl ein&7!";
-                default: return "&cPlease provide a negative number&7!";
+            switch (language) {
+                case GERMAN:
+                    return "&cBitte gib eine negative Zahl ein&7!";
+                default:
+                    return "&cPlease provide a negative number&7!";
             }
         });
         registerMessage("Command.onlyNumbersNegativeAndZero", language -> {
-            switch (language){
-                case GERMAN: return "&cBitte gib eine negative Zahl oder 0 ein&7!";
-                default: return "&cPlease provide a negative number or 0&7!";
+            switch (language) {
+                case GERMAN:
+                    return "&cBitte gib eine negative Zahl oder 0 ein&7!";
+                default:
+                    return "&cPlease provide a negative number or 0&7!";
             }
         });
     }

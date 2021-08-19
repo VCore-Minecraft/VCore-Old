@@ -12,6 +12,7 @@ package de.verdox.vcore.plugin;
 public interface SystemLoadable {
 
     boolean isLoaded();
+
     void shutdown();
 
 }

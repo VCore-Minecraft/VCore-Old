@@ -14,7 +14,7 @@ import de.verdox.vcore.synchronization.messaging.messages.Message;
 public class MessageEvent {
     private final Message message;
 
-    public MessageEvent(Message message){
+    public MessageEvent(Message message) {
         this.message = message;
     }
 

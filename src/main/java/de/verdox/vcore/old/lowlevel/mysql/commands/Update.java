@@ -15,15 +15,15 @@ public class Update extends MysqlFormat {
 
     private String tableName;
 
-    public Update(String tableName, Set set){
+    public Update(String tableName, Set set) {
         this.tableName = tableName;
-        stringBuilder.append("UPDATE "+tableName);
-        stringBuilder.append(" "+set.toString());
+        stringBuilder.append("UPDATE " + tableName);
+        stringBuilder.append(" " + set.toString());
     }
 
     @Override
     public String toMySQLCommand() {
-        return stringBuilder+";";
+        return stringBuilder + ";";
     }
 
     public static class Set extends MysqlFormat {
@@ -31,19 +31,19 @@ public class Update extends MysqlFormat {
         private String columnName;
         private Object value;
 
-        public Set(String columnName, Object value){
+        public Set(String columnName, Object value) {
             this.columnName = columnName;
             this.value = value;
-            stringBuilder.append("SET "+columnName+" "+ MySQLComparator.EQUALITY+" "+value);
+            stringBuilder.append("SET " + columnName + " " + MySQLComparator.EQUALITY + " " + value);
         }
 
-        public Set addSet(String columnName, Object value){
-            stringBuilder.append(", "+columnName+" "+ MySQLComparator.EQUALITY+" "+value);
+        public Set addSet(String columnName, Object value) {
+            stringBuilder.append(", " + columnName + " " + MySQLComparator.EQUALITY + " " + value);
             return this;
         }
 
-        public Set setWhere(Where where){
-            stringBuilder.append(" " +where.toMySQLCommand());
+        public Set setWhere(Where where) {
+            stringBuilder.append(" " + where.toMySQLCommand());
             return this;
         }
 

@@ -19,8 +19,8 @@ public class ServerLocation extends GameLocation {
         this.serverName = serverName;
     }
 
-    public ServerLocation withServerName(@Nonnull String serverName){
-        return new ServerLocation(serverName,worldName,x,y,z);
+    public ServerLocation withServerName(@Nonnull String serverName) {
+        return new ServerLocation(serverName, worldName, x, y, z);
     }
 
     @Override

@@ -19,31 +19,30 @@ import javax.annotation.Nonnull;
  * @date 25.06.2021 22:05
  */
 public abstract class RedisConnection {
-    protected final VCorePlugin<?,?> plugin;
+    protected final VCorePlugin<?, ?> plugin;
     protected final RedissonClient redissonClient;
 
-    public RedisConnection (@Nonnull VCorePlugin<?,?> plugin, boolean clusterMode, @Nonnull String[] addressArray, String redisPassword){
+    public RedisConnection(@Nonnull VCorePlugin<?, ?> plugin, boolean clusterMode, @Nonnull String[] addressArray, String redisPassword) {
         this.plugin = plugin;
-        if(addressArray.length == 0)
+        if (addressArray.length == 0)
             throw new IllegalArgumentException("Address Array empty");
         Config config = new Config();
-        if(clusterMode){
+        if (clusterMode) {
             ClusterServersConfig clusterServersConfig = config.useClusterServers();
             clusterServersConfig.addNodeAddress(addressArray);
 
-            if(redisPassword != null && !redisPassword.isEmpty())
+            if (redisPassword != null && !redisPassword.isEmpty())
                 clusterServersConfig.addNodeAddress(addressArray).setPassword(redisPassword);
             else
                 clusterServersConfig.addNodeAddress(addressArray);
-        }
-        else {
+        } else {
             String address = addressArray[0];
-            if(address == null)
+            if (address == null)
                 throw new IllegalArgumentException("Single Server Adress can't be null!");
             SingleServerConfig singleServerConfig = config.useSingleServer();
             singleServerConfig.setSubscriptionsPerConnection(30);
 
-            if(redisPassword != null && !redisPassword.isEmpty())
+            if (redisPassword != null && !redisPassword.isEmpty())
                 singleServerConfig.setAddress(addressArray[0]).setPassword(redisPassword);
             else
                 singleServerConfig.setAddress(addressArray[0]);

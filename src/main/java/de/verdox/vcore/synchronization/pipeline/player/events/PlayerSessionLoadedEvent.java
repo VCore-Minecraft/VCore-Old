@@ -16,7 +16,7 @@ public class PlayerSessionLoadedEvent {
     private final UUID playerUUID;
     private final long timeStamp;
 
-    public PlayerSessionLoadedEvent(@Nonnull UUID playerUUID, long timeStamp){
+    public PlayerSessionLoadedEvent(@Nonnull UUID playerUUID, long timeStamp) {
         this.playerUUID = playerUUID;
         this.timeStamp = timeStamp;
     }

@@ -8,6 +8,7 @@ import java.util.List;
 
 /**
  * Command Suggestion callback used for suggest commands
+ *
  * @param <R> Type of Sender
  */
 

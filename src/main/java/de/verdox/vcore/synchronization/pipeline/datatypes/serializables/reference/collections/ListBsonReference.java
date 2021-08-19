@@ -19,21 +19,21 @@ import java.util.Map;
 public class ListBsonReference<T> extends VCoreDataReference<List<T>> {
     public ListBsonReference(@Nonnull Map<String, Object> data, @Nonnull String fieldName) {
         super(data, fieldName);
-        if(!isFieldSet())
+        if (!isFieldSet())
             setValue(new ArrayList<>());
     }
 
-    public void addData(T object, boolean allowDuplicates){
-        if(allowDuplicates && getValue().contains(object))
+    public void addData(T object, boolean allowDuplicates) {
+        if (allowDuplicates && getValue().contains(object))
             return;
         getValue().add(object);
     }
 
-    public boolean exist(T object){
+    public boolean exist(T object) {
         return getValue().contains(object);
     }
 
-    public void remove(T object){
+    public void remove(T object) {
         getValue().remove(object);
     }
 

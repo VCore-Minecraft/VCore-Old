@@ -13,20 +13,20 @@ public class Delete extends MysqlFormat {
     private final String tableName;
     private Where where;
 
-    public Delete(String tableName){
+    public Delete(String tableName) {
         this.tableName = tableName;
-        stringBuilder.append("DELETE FROM "+tableName);
+        stringBuilder.append("DELETE FROM " + tableName);
     }
 
-    public Delete setWhere(Where where){
+    public Delete setWhere(Where where) {
         this.where = where;
         return this;
     }
-    
+
     @Override
     public String toMySQLCommand() {
-        if(where != null)
-            stringBuilder.append(" "+where.toMySQLCommand());
+        if (where != null)
+            stringBuilder.append(" " + where.toMySQLCommand());
         stringBuilder.append(";");
         return stringBuilder.toString();
     }

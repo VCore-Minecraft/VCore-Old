@@ -4,10 +4,10 @@
 
 package de.verdox.vcore.synchronization.pipeline.datatypes;
 
+import de.verdox.vcore.plugin.VCorePlugin;
 import de.verdox.vcore.synchronization.pipeline.annotations.VCoreDataProperties;
 import de.verdox.vcore.synchronization.pipeline.interfaces.DataManipulator;
 import de.verdox.vcore.synchronization.pipeline.interfaces.VCoreSerializable;
-import de.verdox.vcore.plugin.VCorePlugin;
 import de.verdox.vcore.synchronization.pipeline.parts.DataSynchronizer;
 import de.verdox.vcore.util.global.AnnotationResolver;
 
@@ -26,14 +26,14 @@ public abstract class VCoreData implements VCoreSerializable {
     private final VCorePlugin<?, ?> plugin;
     private final UUID objectUUID;
     private final DataManipulator dataManipulator;
-    private long lastUse = System.currentTimeMillis();
     private final long cleanTime;
     private final TimeUnit cleanTimeUnit;
+    private long lastUse = System.currentTimeMillis();
 
-    public VCoreData(VCorePlugin<?,?> plugin, UUID objectUUID){
+    public VCoreData(VCorePlugin<?, ?> plugin, UUID objectUUID) {
         this.plugin = plugin;
         this.objectUUID = objectUUID;
-        if(this.plugin.getServices().getPipeline().getGlobalCache() != null)
+        if (this.plugin.getServices().getPipeline().getGlobalCache() != null)
             this.dataManipulator = this.plugin.getServices().getPipeline().getGlobalCache().constructDataManipulator(this);
         else
             this.dataManipulator = new DataManipulator() {
@@ -52,7 +52,6 @@ public abstract class VCoreData implements VCoreSerializable {
         this.cleanTimeUnit = dataContext.timeUnit();
     }
 
-    //TODO: Potenziell Fehleranfällig
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -70,20 +69,19 @@ public abstract class VCoreData implements VCoreSerializable {
         return objectUUID;
     }
 
-    public void save(boolean saveToGlobalStorage){
+    public void save(boolean saveToGlobalStorage) {
         updateLastUse();
-        if(this.dataManipulator == null)
+        if (this.dataManipulator == null)
             return;
         this.dataManipulator.pushUpdate(this, () -> {
-            if(!saveToGlobalStorage)
+            if (!saveToGlobalStorage)
                 return;
             plugin.getServices().getPipeline().getSynchronizer().synchronize(DataSynchronizer.DataSourceType.LOCAL, DataSynchronizer.DataSourceType.GLOBAL_STORAGE, getClass(), getObjectUUID());
         });
     }
 
 
-
-    public void cleanUp(){
+    public void cleanUp() {
         this.dataManipulator.cleanUp();
         onCleanUp();
         plugin.async(dataManipulator::cleanUp);
@@ -95,42 +93,48 @@ public abstract class VCoreData implements VCoreSerializable {
 
     /**
      * Executed after a DataManipulator synced the object
+     *
      * @param dataBeforeSync The data the object had before syncing
      */
-    public void onSync(Map<String, Object> dataBeforeSync){}
+    public void onSync(Map<String, Object> dataBeforeSync) {
+    }
 
     /**
      * Executed after instantiation of the Object
      * Executed before Object is put into LocalCache
      */
-    public  void onCreate(){}
+    public void onCreate() {
+    }
 
     /**
      * Executed after the object was deleted from local cache. Only it was deleted successfully
      */
-    public void onDelete(){}
+    public void onDelete() {
+    }
 
     /**
      * Executed after Data was loaded from Pipeline. Not if it was found in LocalCache
      */
-    public void onLoad(){}
+    public void onLoad() {
+    }
 
     /**
      * Executed before Data is cleared from LocalCache
      */
-    public void onCleanUp(){}
+    public void onCleanUp() {
+    }
 
-    public void debugToConsole(){
+    public void debugToConsole() {
         serialize().forEach((s, o) -> {
-            getPlugin().consoleMessage("&e"+s+"&7: &b"+o.toString(),2,true);
+            getPlugin().consoleMessage("&e" + s + "&7: &b" + o.toString(), 2, true);
         });
     }
 
-    public final boolean isExpired(){
+    public final boolean isExpired() {
         return (System.currentTimeMillis() - lastUse) > cleanTimeUnit.toMillis(cleanTime);
     }
 
-    public void updateLastUse(){
+    public void updateLastUse() {
         this.lastUse = System.currentTimeMillis();
     }
 

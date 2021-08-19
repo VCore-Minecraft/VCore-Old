@@ -14,9 +14,9 @@ import org.bukkit.event.Event;
  * @date 18.08.2021 01:47
  */
 public class BukkitServerUtil {
-    public boolean callCancellable(Cancellable cancellable){
-        if(!(cancellable instanceof Event))
-            throw new IllegalStateException(cancellable+" not instance of Event");
+    public boolean callCancellable(Cancellable cancellable) {
+        if (!(cancellable instanceof Event))
+            throw new IllegalStateException(cancellable + " not instance of Event");
         Bukkit.getPluginManager().callEvent((Event) cancellable);
         return !cancellable.isCancelled();
     }

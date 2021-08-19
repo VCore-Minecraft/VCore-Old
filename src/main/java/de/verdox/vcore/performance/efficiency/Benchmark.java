@@ -9,20 +9,21 @@ public class Benchmark {
 
     /**
      * Returns time since last log
+     *
      * @return
      */
-    public long logTime(){
+    public long logTime() {
         long timeStamp = System.currentTimeMillis();
         long lastTimeStamp = getLastTimeStamp();
         timeStamps.add(timeStamp);
         return timeStamp - lastTimeStamp;
     }
 
-    public long getLastTimeStamp(){
-        if(timeStamps.size() == 0)
+    public long getLastTimeStamp() {
+        if (timeStamps.size() == 0)
             return System.currentTimeMillis();
         else
-            return timeStamps.get(timeStamps.size()-1);
+            return timeStamps.get(timeStamps.size() - 1);
     }
 
 }

@@ -21,7 +21,7 @@ public enum MySQLComparator {
     ;
     private String comparatorChar;
 
-    MySQLComparator(String comparatorChar){
+    MySQLComparator(String comparatorChar) {
         this.comparatorChar = comparatorChar;
     }
 

@@ -21,45 +21,48 @@ public class AnnotationResolver {
     /**
      * Searches for DataStorageIdentifier and returns the identifier specified in the Annotation
      * This value is used for VCore Storage implementations to identify data.
+     *
      * @param customClass Class to search Annotation for
      * @return The Data Identifier of the class
      */
 
     @Nonnull
-    public static String getDataStorageIdentifier(Class<?> customClass){
+    public static String getDataStorageIdentifier(Class<?> customClass) {
         DataStorageIdentifier dataStorageIdentifier = customClass.getAnnotation(DataStorageIdentifier.class);
-        if(dataStorageIdentifier == null)
-            throw new NullPointerException("DataStorageIdentifier not set for class: "+customClass);
+        if (dataStorageIdentifier == null)
+            throw new NullPointerException("DataStorageIdentifier not set for class: " + customClass);
         return dataStorageIdentifier.identifier();
     }
 
     /**
      * Searches for RequiredSubSystemInfo Annotation and returns the class specified in the Annotation
+     *
      * @param classType VCoreClassType to check annotation for
-     * @throws RuntimeException when no Annotation was found
      * @return The VCoreSubsystem Class specified
+     * @throws RuntimeException when no Annotation was found
      */
 
     @Nonnull
-    public static Class<? extends VCoreSubsystem<?>> findDependSubsystemClass(Class<? extends VCoreData> classType){
+    public static Class<? extends VCoreSubsystem<?>> findDependSubsystemClass(Class<? extends VCoreData> classType) {
         RequiredSubsystemInfo requiredSubsystemInfo = classType.getAnnotation(RequiredSubsystemInfo.class);
-        if(requiredSubsystemInfo == null)
-            throw new RuntimeException(classType.getName()+" does not have RequiredSubsystemInfo Annotation set");
+        if (requiredSubsystemInfo == null)
+            throw new RuntimeException(classType.getName() + " does not have RequiredSubsystemInfo Annotation set");
         return requiredSubsystemInfo.parentSubSystem();
     }
 
     /**
      * Searches for VCoreDataProperties Annotation of a class and returns it.
+     *
      * @param classType The VCoreDataTypeClass to check
-     * @throws RuntimeException when no Annotation was found
      * @return The Found VCoreDataProperties Instance if exists
+     * @throws RuntimeException when no Annotation was found
      */
 
     @Nonnull
-    public static VCoreDataProperties getDataProperties(Class<? extends VCoreData> classType){
+    public static VCoreDataProperties getDataProperties(Class<? extends VCoreData> classType) {
         VCoreDataProperties vCoreDataProperties = classType.getAnnotation(VCoreDataProperties.class);
-        if(vCoreDataProperties == null)
-            throw new RuntimeException(classType.getName()+" does not have VCoreDataProperties Annotation set");
+        if (vCoreDataProperties == null)
+            throw new RuntimeException(classType.getName() + " does not have VCoreDataProperties Annotation set");
         return vCoreDataProperties;
     }
 }

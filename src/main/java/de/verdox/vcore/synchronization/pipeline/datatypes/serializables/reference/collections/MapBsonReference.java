@@ -15,7 +15,7 @@ import java.util.Map;
  * @Author: Lukas Jonsson (Verdox)
  * @date 30.06.2021 23:38
  */
-public class MapBsonReference<K,V> extends VCoreDataReference<Map<K,V>> {
+public class MapBsonReference<K, V> extends VCoreDataReference<Map<K, V>> {
     public MapBsonReference(@Nonnull Map<String, Object> data, @Nonnull String fieldName) {
         super(data, fieldName);
     }

@@ -25,19 +25,19 @@ public class WorldRegion {
     public final int regionZ;
     private final Set<WorldChunk> chunks = new HashSet<>();
 
-    public WorldRegion(WorldChunk worldChunk){
+    public WorldRegion(WorldChunk worldChunk) {
         this.worldName = worldChunk.worldName;
         this.regionX = worldChunk.x >> 5;
-        this.regionZ= worldChunk.z >> 5;
+        this.regionZ = worldChunk.z >> 5;
     }
 
-    public Set<WorldChunk> getChunks(){
-        if(chunks.isEmpty()){
+    public Set<WorldChunk> getChunks() {
+        if (chunks.isEmpty()) {
             int minChunkX = regionX << 5;
             int minChunkZ = regionZ << 5;
 
-            for(int chunkIndex = 0; chunkIndex < 32; chunkIndex++){
-                chunks.add(new WorldChunk(worldName,minChunkX+chunkIndex,minChunkZ+chunkIndex));
+            for (int chunkIndex = 0; chunkIndex < 32; chunkIndex++) {
+                chunks.add(new WorldChunk(worldName, minChunkX + chunkIndex, minChunkZ + chunkIndex));
             }
         }
         return chunks;
@@ -45,11 +45,11 @@ public class WorldRegion {
 
     @Override
     public String toString() {
-        return worldName+"_"+toStringWithoutWorld();
+        return worldName + "_" + toStringWithoutWorld();
     }
 
-    public String toStringWithoutWorld(){
-        return "region_"+regionX+"_"+regionZ;
+    public String toStringWithoutWorld() {
+        return "region_" + regionX + "_" + regionZ;
     }
 
     @Override

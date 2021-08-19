@@ -4,15 +4,16 @@
 
 package de.verdox.vcore.synchronization.pipeline.parts.cache.redis;
 
+import de.verdox.vcore.plugin.VCorePlugin;
 import de.verdox.vcore.synchronization.pipeline.datatypes.NetworkData;
 import de.verdox.vcore.synchronization.pipeline.datatypes.VCoreData;
 import de.verdox.vcore.synchronization.pipeline.interfaces.DataManipulator;
 import de.verdox.vcore.synchronization.pipeline.interfaces.VCoreSerializable;
 import de.verdox.vcore.synchronization.pipeline.parts.cache.GlobalCache;
-import de.verdox.vcore.plugin.VCorePlugin;
 import de.verdox.vcore.synchronization.redisson.RedisConnection;
 import de.verdox.vcore.util.global.AnnotationResolver;
-import org.redisson.api.*;
+import org.redisson.api.RMap;
+import org.redisson.api.RTopic;
 import org.redisson.codec.SerializationCodec;
 
 import javax.annotation.Nonnull;
@@ -28,16 +29,15 @@ import java.util.stream.Collectors;
 public class RedisCache extends RedisConnection implements GlobalCache {
     public RedisCache(@Nonnull VCorePlugin<?, ?> plugin, boolean clusterMode, @Nonnull String[] addressArray, String redisPassword) {
         super(plugin, clusterMode, addressArray, redisPassword);
-        plugin.consoleMessage("&eRedis Manager started",true);
+        plugin.consoleMessage("&eRedis Manager started", true);
     }
 
     @Override
     public Map<String, Object> loadData(@Nonnull Class<? extends VCoreData> dataClass, @Nonnull UUID objectUUID) {
-        try{
-            return new HashMap<>(getObjectCache(dataClass,objectUUID));
-        }
-        catch (Exception e){
-            plugin.consoleMessage("&cError while loading &b"+dataClass+" &cwith uuid &e"+objectUUID +" &7-> &4removing &7...",false);
+        try {
+            return new HashMap<>(getObjectCache(dataClass, objectUUID));
+        } catch (Exception e) {
+            plugin.consoleMessage("&cError while loading &b" + dataClass + " &cwith uuid &e" + objectUUID + " &7-> &4removing &7...", false);
             remove(dataClass, objectUUID);
             return null;
         }
@@ -45,12 +45,12 @@ public class RedisCache extends RedisConnection implements GlobalCache {
 
     @Override
     public void save(@Nonnull Class<? extends VCoreData> dataClass, @Nonnull UUID objectUUID, @Nonnull Map<String, Object> dataToSave) {
-        Map<String, Object> objectCache = getObjectCache(dataClass,objectUUID);
+        Map<String, Object> objectCache = getObjectCache(dataClass, objectUUID);
         dataToSave.forEach((key, value) -> {
-            if(value == null)
+            if (value == null)
                 objectCache.remove(key);
             else
-                objectCache.put(key,value);
+                objectCache.put(key, value);
         });
     }
 
@@ -63,8 +63,8 @@ public class RedisCache extends RedisConnection implements GlobalCache {
     @Override
     public Map<String, Object> getObjectCache(Class<? extends VCoreData> dataClass, UUID objectUUID) {
         RMap<String, Object> objectCache;
-        if(NetworkData.class.isAssignableFrom(dataClass))
-            objectCache = redissonClient.getMap("VCoreCache:"+objectUUID+":"+ AnnotationResolver.getDataStorageIdentifier(dataClass));
+        if (NetworkData.class.isAssignableFrom(dataClass))
+            objectCache = redissonClient.getMap("VCoreCache:" + objectUUID + ":" + AnnotationResolver.getDataStorageIdentifier(dataClass));
         else {
             objectCache = redissonClient.getMap(plugin.getPluginName() + "Cache:" + objectUUID + ":" + AnnotationResolver.getDataStorageIdentifier(dataClass));
             objectCache.expire(12, TimeUnit.HOURS);
@@ -92,8 +92,8 @@ public class RedisCache extends RedisConnection implements GlobalCache {
 
     @Override
     public Map<String, Object> getGlobalCacheMap(String name) {
-        RMap<String, Object> objectCache = redissonClient.getMap("InternalVCoreData:"+name);
-        objectCache.expire(1,TimeUnit.HOURS);
+        RMap<String, Object> objectCache = redissonClient.getMap("InternalVCoreData:" + name);
+        objectCache.expire(1, TimeUnit.HOURS);
         return objectCache;
     }
 
@@ -117,19 +117,19 @@ public class RedisCache extends RedisConnection implements GlobalCache {
     }
 
     private Set<String> getObjectDataKeys(Class<? extends VCoreData> vCoreDataClass, UUID uuid) {
-        if(uuid == null)
+        if (uuid == null)
             return new HashSet<>();
-        if(VCoreSerializable.getPersistentDataFieldNames(vCoreDataClass) == null)
-            throw new NullPointerException(VCoreData.class.getSimpleName()+" does not provide RedisDataKeys");
+        if (VCoreSerializable.getPersistentDataFieldNames(vCoreDataClass) == null)
+            throw new NullPointerException(VCoreData.class.getSimpleName() + " does not provide RedisDataKeys");
         return VCoreSerializable.getPersistentDataFieldNames(vCoreDataClass);
     }
 
-    public RTopic getTopic(Class<? extends VCoreData> dataClass, UUID objectUUID){
-        if(dataClass == null)
+    public RTopic getTopic(Class<? extends VCoreData> dataClass, UUID objectUUID) {
+        if (dataClass == null)
             throw new NullPointerException("DataClass is null");
-        if(objectUUID == null)
+        if (objectUUID == null)
             throw new NullPointerException("objectUUID is null");
-        String key = plugin.getPluginName()+"DataTopic:"+ AnnotationResolver.getDataStorageIdentifier(dataClass)+":"+objectUUID;
+        String key = plugin.getPluginName() + "DataTopic:" + AnnotationResolver.getDataStorageIdentifier(dataClass) + ":" + objectUUID;
         return redissonClient.getTopic(key, new SerializationCodec());
     }
 }

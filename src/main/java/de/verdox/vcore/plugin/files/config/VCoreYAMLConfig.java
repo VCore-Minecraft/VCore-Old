@@ -25,7 +25,7 @@ public class VCoreYAMLConfig extends VCoreConfig<YamlFile> {
 
     @Override
     public YamlFile create() {
-        YamlFile yamlFile = new YamlFile(getPlugin().getPluginDataFolder()+"//"+pluginDirectory+"//"+fileName);
+        YamlFile yamlFile = new YamlFile(getPlugin().getPluginDataFolder() + "//" + pluginDirectory + "//" + fileName);
         try {
             yamlFile.createOrLoadWithComments();
         } catch (InvalidConfigurationException | IOException e) {

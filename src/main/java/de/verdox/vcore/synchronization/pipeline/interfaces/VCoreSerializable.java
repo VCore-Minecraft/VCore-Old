@@ -18,76 +18,73 @@ import java.util.stream.Collectors;
  * @date 25.06.2021 00:48
  */
 public interface VCoreSerializable {
-    static Set<String> getPersistentDataFieldNames(Class<? extends VCoreSerializable> vCoreDataClass){
+    static Set<String> getPersistentDataFieldNames(Class<? extends VCoreSerializable> vCoreDataClass) {
         return Arrays.stream(vCoreDataClass.getDeclaredFields())
                 .filter(field -> field.getAnnotation(VCorePersistentData.class) != null)
                 .map(Field::getName)
                 .collect(Collectors.toSet());
     }
 
-    static Set<Field> getPersistentDataFields(Class<? extends VCoreSerializable> vCoreDataClass){
+    static Set<Field> getPersistentDataFields(Class<? extends VCoreSerializable> vCoreDataClass) {
         return Arrays.stream(vCoreDataClass.getDeclaredFields())
                 .filter(field -> field.getAnnotation(VCorePersistentData.class) != null)
                 .collect(Collectors.toSet());
     }
 
-    default Map<String, Object> serialize(){
+    default Map<String, Object> serialize() {
         Map<String, Object> serializedData = new HashMap<>();
         getPersistentDataFieldNames(getClass()).forEach(dataKey -> {
             try {
                 Field field = getClass().getDeclaredField(dataKey);
                 field.setAccessible(true);
                 Object data = field.get(this);
-                if(data instanceof Collection<?>) {
+                if (data instanceof Collection<?>) {
                     Collection<?> collection = (Collection<?>) data;
                     serializedData.put(field.getName(), new ArrayList<>(collection));
-                }
-                else
+                } else
                     serializedData.put(field.getName(), field.get(this));
-            } catch (NoSuchFieldException | IllegalAccessException e) { e.printStackTrace(); }
+            } catch (NoSuchFieldException | IllegalAccessException e) {
+                e.printStackTrace();
+            }
         });
         serializedData.remove("_id");
         return serializedData;
     }
 
     /**
-     *
      * @param serializedData Data to update
      * @return Map containing data that was changed with values before the change
      */
-    default Map<String, Object> deserialize(Map<String, Object> serializedData){
+    default Map<String, Object> deserialize(Map<String, Object> serializedData) {
         Map<String, Object> dataBeforeDeserialization = new HashMap<>();
         serializedData.forEach((key, value) -> {
-            if(key.equals("objectUUID"))
+            if (key.equals("objectUUID"))
                 return;
-            if(key.equals("_id"))
+            if (key.equals("_id"))
                 return;
-            if(value == null)
+            if (value == null)
                 return;
 
             try {
                 Field field = getClass().getDeclaredField(key);
                 field.setAccessible(true);
-                dataBeforeDeserialization.put(key,field.get(this));
-                if(!field.getType().isPrimitive()){
-                    if(Collection.class.isAssignableFrom(field.getType())){
+                dataBeforeDeserialization.put(key, field.get(this));
+                if (!field.getType().isPrimitive()) {
+                    if (Collection.class.isAssignableFrom(field.getType())) {
                         // Instantiation of Collection if value is null in the first place
-                        if(field.get(this) == null)
-                            field.set(field.getType().getConstructor().newInstance(),this);
+                        if (field.get(this) == null)
+                            field.set(field.getType().getConstructor().newInstance(), this);
                         Collection<?> fieldCollection = (Collection<?>) field.get(this);
                         fieldCollection.clear();
                         fieldCollection.addAll((Collection) value);
-                    }
-                    else {
-                        try{
-                            field.set(this, VCoreUtil.getTypeUtil().castData(value,field.getType()));
-                        }
-                        catch (ClassCastException e){
-                            field.set(this,value);
+                    } else {
+                        try {
+                            field.set(this, VCoreUtil.getTypeUtil().castData(value, field.getType()));
+                        } catch (ClassCastException e) {
+                            field.set(this, value);
                         }
                     }
-                }
-                else
+                } else
                     field.set(this, value);
             } catch (IllegalAccessException | NoSuchMethodException | InstantiationException | InvocationTargetException e) {
                 e.printStackTrace();

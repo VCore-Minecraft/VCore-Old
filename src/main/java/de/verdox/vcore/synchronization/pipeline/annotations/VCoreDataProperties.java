@@ -14,8 +14,12 @@ import java.util.concurrent.TimeUnit;
 @Target(ElementType.TYPE)
 public @interface VCoreDataProperties {
     DataContext dataContext();
+
     PreloadStrategy preloadStrategy();
+
     boolean cleanOnNoUse() default true;
+
     long time() default 20L;
+
     TimeUnit timeUnit() default TimeUnit.MINUTES;
 }

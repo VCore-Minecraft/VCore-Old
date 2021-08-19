@@ -14,7 +14,7 @@ import java.util.UUID;
 public class PlayerPreSessionUnloadEvent {
     private final UUID playerUUID;
 
-    public PlayerPreSessionUnloadEvent(UUID playerUUID){
+    public PlayerPreSessionUnloadEvent(UUID playerUUID) {
         this.playerUUID = playerUUID;
     }
 

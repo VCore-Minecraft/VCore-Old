@@ -18,8 +18,12 @@ import java.util.UUID;
  */
 public interface DataProvider {
     Map<String, Object> loadData(@Nonnull Class<? extends VCoreData> dataClass, @Nonnull UUID objectUUID);
+
     boolean dataExist(@Nonnull Class<? extends VCoreData> dataClass, @Nonnull UUID objectUUID);
+
     void save(@Nonnull Class<? extends VCoreData> dataClass, @Nonnull UUID objectUUID, @Nonnull Map<String, Object> dataToSave);
+
     boolean remove(@Nonnull Class<? extends VCoreData> dataClass, @Nonnull UUID objectUUID);
+
     Set<UUID> getSavedUUIDs(@Nonnull Class<? extends VCoreData> dataClass);
 }

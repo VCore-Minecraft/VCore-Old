@@ -12,8 +12,8 @@ import de.verdox.vcore.synchronization.messaging.MessagingConfig;
 import de.verdox.vcore.synchronization.messaging.MessagingService;
 import de.verdox.vcore.synchronization.pipeline.PipelineConfig;
 import de.verdox.vcore.synchronization.pipeline.PipelineManager;
-import de.verdox.vcore.synchronization.pipeline.player.PlayerDataManager;
 import de.verdox.vcore.synchronization.pipeline.parts.Pipeline;
+import de.verdox.vcore.synchronization.pipeline.player.PlayerDataManager;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.connection.Connection;
 
@@ -22,28 +22,27 @@ import net.md_5.bungee.api.connection.Connection;
  * @Author: Lukas Jonsson (Verdox)
  * @date 29.06.2021 23:21
  */
-public abstract class PluginServiceParts <T extends VCorePlugin<?,S>, S extends VCoreSubsystem<T>> implements SystemLoadable {
+public abstract class PluginServiceParts<T extends VCorePlugin<?, S>, S extends VCoreSubsystem<T>> implements SystemLoadable {
 
+    public final EventBus eventBus;
     protected final T plugin;
     protected final PipelineConfig pipelineConfig;
     protected final MessagingConfig messagingConfig;
     private final DebugConfig debugConfig;
-
     protected VCoreScheduler vCoreScheduler;
-    public final EventBus eventBus;
     protected Pipeline pipeline;
     protected MessagingService<?> messagingService;
 
     protected boolean loaded;
 
-    PluginServiceParts(T plugin){
+    PluginServiceParts(T plugin) {
         this.plugin = plugin;
         debugConfig = new DebugConfig(plugin);
         debugConfig.init();
         this.eventBus = new EventBus();
-        this.pipelineConfig = new PipelineConfig(plugin, "PipelineSettings.yml","//pipeline");
+        this.pipelineConfig = new PipelineConfig(plugin, "PipelineSettings.yml", "//pipeline");
         this.pipelineConfig.init();
-        this.messagingConfig = new MessagingConfig(plugin,"messagingConfig.yml","//messaging");
+        this.messagingConfig = new MessagingConfig(plugin, "messagingConfig.yml", "//messaging");
         this.messagingConfig.init();
     }
 
@@ -51,13 +50,13 @@ public abstract class PluginServiceParts <T extends VCorePlugin<?,S>, S extends 
         return debugConfig;
     }
 
-    public void enableBefore(){
+    public void enableBefore() {
         this.vCoreScheduler = new VCoreScheduler(plugin);
         this.pipeline = pipelineConfig.constructPipeline(plugin);
         this.messagingService = messagingConfig.constructMessagingService();
     }
 
-    public void enableAfter(){
+    public void enableAfter() {
         this.messagingService.setupPrivateMessagingChannel();
     }
 
@@ -68,7 +67,7 @@ public abstract class PluginServiceParts <T extends VCorePlugin<?,S>, S extends 
 
     @Override
     public void shutdown() {
-        plugin.consoleMessage("&6Shutting down VCore Parts",false);
+        plugin.consoleMessage("&6Shutting down VCore Parts", false);
         pipeline.saveAllData();
         vCoreScheduler.waitUntilShutdown();
 
@@ -94,12 +93,13 @@ public abstract class PluginServiceParts <T extends VCorePlugin<?,S>, S extends 
         return messagingService;
     }
 
-    public abstract VCoreSubsystemManager<T,S> getSubsystemManager();
+    public abstract VCoreSubsystemManager<T, S> getSubsystemManager();
+
     public abstract PlayerDataManager getPlayerDataManager();
 
-    public static class Bukkit extends PluginServiceParts<VCorePlugin.Minecraft,VCoreSubsystem.Bukkit>{
+    public static class Bukkit extends PluginServiceParts<VCorePlugin.Minecraft, VCoreSubsystem.Bukkit> {
 
-        private VCoreSubsystemManager<VCorePlugin.Minecraft,VCoreSubsystem.Bukkit> subsystemManager;
+        private VCoreSubsystemManager<VCorePlugin.Minecraft, VCoreSubsystem.Bukkit> subsystemManager;
         private PlayerDataManager playerDataManager;
 
         Bukkit(VCorePlugin.Minecraft plugin) {
@@ -134,9 +134,9 @@ public abstract class PluginServiceParts <T extends VCorePlugin<?,S>, S extends 
         }
     }
 
-    public static class BungeeCord extends PluginServiceParts<VCorePlugin.BungeeCord,VCoreSubsystem.BungeeCord>{
+    public static class BungeeCord extends PluginServiceParts<VCorePlugin.BungeeCord, VCoreSubsystem.BungeeCord> {
 
-        private VCoreSubsystemManager<VCorePlugin.BungeeCord,VCoreSubsystem.BungeeCord> subsystemManager;
+        private VCoreSubsystemManager<VCorePlugin.BungeeCord, VCoreSubsystem.BungeeCord> subsystemManager;
         private PlayerDataManager playerDataManager;
 
         BungeeCord(VCorePlugin.BungeeCord plugin) {

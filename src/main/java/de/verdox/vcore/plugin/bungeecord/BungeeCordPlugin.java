@@ -26,22 +26,22 @@ public abstract class BungeeCordPlugin extends Plugin implements VCorePlugin<Plu
 
     @Override
     public void consoleMessage(String message, boolean debug) {
-        if(debug && !debug())
+        if (debug && !debug())
             return;
-        consoleMessage(message,0,debug);
+        consoleMessage(message, 0, debug);
     }
 
     @Override
     public void consoleMessage(String message, int tabSize, boolean debug) {
-        if(debug && !debug())
+        if (debug && !debug())
             return;
         StringBuilder newMessageBuilder = new StringBuilder();
-        for(int i = 0; i < tabSize; i++)
+        for (int i = 0; i < tabSize; i++)
             newMessageBuilder.append("\t");
-        if(tabSize >= 1)
+        if (tabSize >= 1)
             newMessageBuilder.append("&7>> &f");
         newMessageBuilder.append(message);
-        getPlugin().getProxy().getConsole().sendMessage(ChatColor.translateAlternateColorCodes('&',"&8[&c"+getPluginName()+"&8] "+newMessageBuilder));
+        getPlugin().getProxy().getConsole().sendMessage(ChatColor.translateAlternateColorCodes('&', "&8[&c" + getPluginName() + "&8] " + newMessageBuilder));
 
     }
 }

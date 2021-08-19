@@ -4,7 +4,6 @@
 
 package de.verdox.vcore.synchronization.pipeline.parts.storage;
 
-import de.verdox.vcore.synchronization.pipeline.annotations.DataStorageIdentifier;
 import de.verdox.vcore.synchronization.pipeline.parts.DataProvider;
 
 /**
