@@ -29,8 +29,6 @@ public class CustomEntityListener extends VCoreListener.VCoreBukkitListener {
         Entity entity = e.getRightClicked();
         VCoreEntity vCoreEntity = VCorePaper.getInstance().getCustomEntityManager().wrap(VCoreEntity.class, entity);
 
-        System.out.println(vCoreEntity.getCustomDataKeys());
-
         vCoreEntity.getCustomDataKeys()
                 .stream()
                 .map(key -> VCorePaper.getInstance().getCustomEntityManager().getDataType(key))

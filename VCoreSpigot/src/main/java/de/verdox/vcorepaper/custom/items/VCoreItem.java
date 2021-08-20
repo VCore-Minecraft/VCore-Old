@@ -27,6 +27,16 @@ public class VCoreItem extends CustomDataHolder<ItemStack, NBTItemHolder, Custom
             throw new NullPointerException("Stack can't be null or air!");
     }
 
+    /**
+     * Same as ItemStack is similar
+     *
+     * @param vCoreItem
+     * @return
+     */
+    public boolean isSimilar(VCoreItem vCoreItem) {
+        return getDataHolder().isSimilar(vCoreItem.getDataHolder());
+    }
+
     public VCoreItem copy() {
         return VCorePaper.getInstance().getCustomItemManager().wrap(getClass(), getDataHolder().clone());
     }

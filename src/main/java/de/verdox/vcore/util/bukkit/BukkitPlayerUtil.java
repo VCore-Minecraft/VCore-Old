@@ -11,10 +11,13 @@ import de.verdox.vcore.util.global.DirectionEnum;
 import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.*;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
+import org.bukkit.util.RayTraceResult;
 
+import javax.annotation.Nonnull;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
@@ -26,6 +29,10 @@ public class BukkitPlayerUtil {
 
     public void sendPlayerMessage(Player player, ChatMessageType chatMessageType, String message) {
         player.spigot().sendMessage(chatMessageType, new TextComponent(ChatColor.translateAlternateColorCodes('&', message)));
+    }
+
+    public RayTraceResult rayTraceEntities(@Nonnull Player player, double maxDistance) {
+        return player.getWorld().rayTraceEntities(player.getEyeLocation(), player.getLocation().getDirection(), maxDistance, entity -> !entity.getType().equals(EntityType.PLAYER));
     }
 
     public void sendPlayerMessage(Player player, PlayerMessageType playerMessageType, String message) {

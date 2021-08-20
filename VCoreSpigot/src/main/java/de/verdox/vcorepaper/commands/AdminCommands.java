@@ -12,9 +12,11 @@ import de.verdox.vcorepaper.VCorePaper;
 import de.verdox.vcorepaper.custom.block.VBlock;
 import de.verdox.vcorepaper.custom.block.data.debug.BlockDebugData;
 import de.verdox.vcorepaper.custom.entities.VCoreEntity;
+import de.verdox.vcorepaper.custom.items.VCoreItem;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Chunk;
+import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
@@ -91,6 +93,7 @@ public class AdminCommands extends VCoreCommand.VCoreBukkitCommand {
                         commandSender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&b" + pluginName + " &edebugMode&7: &c" + false));
                 });
         addCommandCallback("debugBlock")
+                .withPermission("vcore.debug")
                 .addCommandPath("addDebugInfo")
                 .setExecutor(VCommandCallback.CommandExecutorType.PLAYER)
                 .commandCallback((commandSender, commandParameters) -> {
@@ -109,6 +112,7 @@ public class AdminCommands extends VCoreCommand.VCoreBukkitCommand {
                     vBlock.storeCustomData(BlockDebugData.class, System.currentTimeMillis(), null);
                 });
         addCommandCallback("debugBlock")
+                .withPermission("vcore.debug")
                 .setExecutor(VCommandCallback.CommandExecutorType.PLAYER)
                 .commandCallback((commandSender, commandParameters) -> {
                     Player player = (Player) commandSender;
@@ -129,6 +133,7 @@ public class AdminCommands extends VCoreCommand.VCoreBukkitCommand {
                     });
                 });
         addCommandCallback("debugEntity")
+                .withPermission("vcore.debug")
                 .setExecutor(VCommandCallback.CommandExecutorType.PLAYER)
                 .commandCallback((commandSender, commandParameters) -> {
                     Player player = (Player) commandSender;
@@ -152,6 +157,7 @@ public class AdminCommands extends VCoreCommand.VCoreBukkitCommand {
                     });
                 });
         addCommandCallback("debugChunk")
+                .withPermission("vcore.debug")
                 .setExecutor(VCommandCallback.CommandExecutorType.PLAYER)
                 .commandCallback((commandSender, commandParameters) -> {
                     Player player = (Player) commandSender;
@@ -162,6 +168,21 @@ public class AdminCommands extends VCoreCommand.VCoreBukkitCommand {
                     player.sendMessage(ChatColor.translateAlternateColorCodes('&', "&bWorldChunk&7: &e" + worldChunk));
                     player.sendMessage(ChatColor.translateAlternateColorCodes('&', "&bWorldRegion&7: &e" + worldChunk.getRegion()));
                     player.sendMessage("");
+                });
+
+        addCommandCallback("testItem")
+                .withPermission("vcore.debug")
+                .setExecutor(VCommandCallback.CommandExecutorType.PLAYER)
+                .commandCallback((commandSender, commandParameters) -> {
+                    Player player = (Player) commandSender;
+
+                    VCoreItem vCoreItem = VCorePaper.getInstance().getCustomItemManager()
+                            .createItemBuilder(Material.GOLD_INGOT)
+                            .displayName(ChatColor.translateAlternateColorCodes('&', "&eTest Debug Item"))
+                            .lore("", "&eZeile 1", "&fZeile 2")
+                            .buildItem();
+                    vCoreItem.getNBTCompound().setObject("debugNBT", true);
+                    player.getInventory().addItem(vCoreItem.getDataHolder());
                 });
     }
 }

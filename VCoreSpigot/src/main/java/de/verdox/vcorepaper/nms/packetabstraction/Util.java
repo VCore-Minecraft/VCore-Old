@@ -15,8 +15,6 @@ import java.lang.reflect.Field;
  */
 public class Util {
     public static void debugPacketContainer(PacketContainer packetContainer) {
-        System.out.println();
-        System.out.println(packetContainer.getHandle().getClass().getSimpleName());
         for (Field field : packetContainer.getHandle().getClass().getDeclaredFields()) {
             try {
                 field.setAccessible(true);

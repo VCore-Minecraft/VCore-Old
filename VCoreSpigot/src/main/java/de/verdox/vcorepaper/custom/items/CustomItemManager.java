@@ -125,7 +125,7 @@ public class CustomItemManager extends CustomDataManager<ItemStack, ItemCustomDa
         private List<EnchantmentInfo> enchantments;
         private Set<ItemFlag> itemFlags;
         private ItemMeta meta;
-        private Map<String, Object> nbtData;
+        private Map<String, Object> nbtData = new HashMap<>();
 
         VCoreItemBuilder(CustomItemManager customItemManager) {
             this.customItemManager = customItemManager;
@@ -150,7 +150,7 @@ public class CustomItemManager extends CustomDataManager<ItemStack, ItemCustomDa
         }
 
         VCoreItemBuilder(CustomItemManager customItemManager, ItemStack stack) {
-            this(customItemManager, stack, stack.getAmount(), stack.getI18NDisplayName());
+            this(customItemManager, stack, stack.getAmount(), stack.getItemMeta() == null ? "" : stack.getItemMeta().getDisplayName());
         }
 
         VCoreItemBuilder(CustomItemManager customItemManager, ItemStack stack, String displayName) {
@@ -162,6 +162,8 @@ public class CustomItemManager extends CustomDataManager<ItemStack, ItemCustomDa
             this.material = stack.getType();
             this.amount = amount;
             this.displayName = displayName;
+            if (displayName.equals(stack.getI18NDisplayName()) && stack.getItemMeta() != null && !stack.getItemMeta().getDisplayName().isEmpty())
+                this.displayName = stack.getItemMeta().getDisplayName();
             this.lore = stack.getLore();
             this.itemFlags = stack.getItemFlags();
             this.meta = stack.getItemMeta();
@@ -179,13 +181,6 @@ public class CustomItemManager extends CustomDataManager<ItemStack, ItemCustomDa
 
         public VCoreItemBuilder displayName(String displayName) {
             this.displayName = displayName;
-            return this;
-        }
-
-        public VCoreItemBuilder appendItemLore() {
-            if (this.meta == null || !this.meta.hasLore() || meta.getLore() == null)
-                return this;
-            this.lore.addAll(meta.getLore());
             return this;
         }
 

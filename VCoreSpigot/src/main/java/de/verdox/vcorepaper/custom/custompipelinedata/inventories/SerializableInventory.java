@@ -13,8 +13,8 @@ import org.jetbrains.annotations.NotNull;
 import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.io.Serializable;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @version 1.0
@@ -23,15 +23,16 @@ import java.util.Map;
  */
 public class SerializableInventory implements Serializable, CustomPipelineData {
 
-    protected final Map<String, Object> data = new HashMap<>();
+    protected final Map<String, Object> data;
 
     public SerializableInventory(@Nonnull String id, @Nonnull ItemStack[] storageContents) {
+        this.data = new ConcurrentHashMap<>();
         new StringBsonReference(data, "id").setValue(id);
         saveStorageContents(storageContents);
     }
 
     public SerializableInventory(Map<String, Object> data) {
-        this.data.putAll(data);
+        this.data = data;
     }
 
     public final String getID() {
