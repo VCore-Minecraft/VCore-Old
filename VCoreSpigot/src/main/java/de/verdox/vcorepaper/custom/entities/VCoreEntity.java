@@ -8,6 +8,7 @@ import de.verdox.vcorepaper.VCorePaper;
 import de.verdox.vcorepaper.custom.CustomData;
 import de.verdox.vcorepaper.custom.CustomDataHolder;
 import de.verdox.vcorepaper.custom.nbtholders.NBTEntityHolder;
+import de.verdox.vcorepaper.custom.nbtholders.NBTHolder;
 import org.bukkit.entity.Entity;
 
 import javax.annotation.Nonnull;
@@ -40,4 +41,10 @@ public class VCoreEntity extends CustomDataHolder<Entity, NBTEntityHolder, Custo
     public NBTEntityHolder getNBTCompound() {
         return new NBTEntityHolder(getDataHolder());
     }
+
+    public NBTHolder getVanillaCompound() {
+        return getNBTCompound().getVanillaCompound();
+    }
+
+
 }

@@ -7,6 +7,7 @@ package de.verdox.vcore.util.bukkit;
 import de.verdox.vcore.plugin.wrapper.types.GameLocation;
 import de.verdox.vcore.plugin.wrapper.types.WorldChunk;
 import de.verdox.vcore.plugin.wrapper.types.WorldRegion;
+import io.papermc.lib.PaperLib;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -140,7 +141,7 @@ public class BukkitWorldUtil {
                 }
             }
         }
-        set.add((Chest) otherChestLocation.getBlock().getState());
+        set.add((Chest) PaperLib.getBlockState(otherChestLocation.getBlock(), false).getState());
         return set;
     }
 }

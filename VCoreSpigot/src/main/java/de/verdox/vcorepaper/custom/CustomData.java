@@ -33,6 +33,13 @@ public abstract class CustomData<T> {
         customDataHolder.getNBTCompound().setObject(getNBTKey(), data);
     }
 
+    public boolean deleteData(CustomDataHolder<?, ?, ?> customDataHolder) {
+        if (!customDataHolder.getNBTCompound().hasKey(getNBTKey()))
+            return false;
+        customDataHolder.getNBTCompound().removeKey(getNBTKey());
+        return true;
+    }
+
     @Nonnull
     public abstract Class<T> getTypeClass();
 

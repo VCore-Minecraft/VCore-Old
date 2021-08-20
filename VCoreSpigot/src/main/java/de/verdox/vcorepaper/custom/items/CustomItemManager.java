@@ -109,6 +109,12 @@ public class CustomItemManager extends CustomDataManager<ItemStack, ItemCustomDa
             e.setCancelled(true);
     }
 
+    public VCoreItem getGuiBorderItem() {
+        return VCorePaper.getInstance()
+                .getCustomItemManager()
+                .createItemBuilder(Material.BLACK_STAINED_GLASS_PANE, 1, "&8").buildItem();
+    }
+
     public static class VCoreItemBuilder {
 
         private final CustomItemManager customItemManager;
@@ -177,9 +183,7 @@ public class CustomItemManager extends CustomDataManager<ItemStack, ItemCustomDa
         }
 
         public VCoreItemBuilder appendItemLore() {
-            if (this.meta == null)
-                return this;
-            if (!this.meta.hasLore())
+            if (this.meta == null || !this.meta.hasLore() || meta.getLore() == null)
                 return this;
             this.lore.addAll(meta.getLore());
             return this;
@@ -189,7 +193,10 @@ public class CustomItemManager extends CustomDataManager<ItemStack, ItemCustomDa
             List<String> loreList = new ArrayList<>();
             for (String s : lore)
                 loreList.add(ChatColor.translateAlternateColorCodes('&', s));
-            this.lore = loreList;
+            if (this.lore == null)
+                this.lore = loreList;
+            else
+                this.lore.addAll(loreList);
             return this;
         }
 

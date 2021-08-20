@@ -109,7 +109,6 @@ public class CustomDataListener extends VCoreListener.VCoreBukkitListener {
                     .filter(Objects::nonNull)
                     .filter(vBlockCustomData -> vBlockCustomData instanceof BlockPlaceCallback)
                     .forEach(vBlockCustomData -> ((BlockPlaceCallback) vBlockCustomData).blockCallback(player, Action.RIGHT_CLICK_BLOCK, finalVCoreItem, vBlock, EventBlockCallback.CallbackType.PLACE_BLOCK));
-
         });
     }
 

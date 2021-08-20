@@ -4,12 +4,6 @@
 
 package de.verdox.vcore.plugin.wrapper.types;
 
-/**
- * @version 1.0
- * @Author: Lukas Jonsson (Verdox)
- * @date 10.08.2021 17:41
- */
-
 
 import java.util.HashSet;
 import java.util.Objects;

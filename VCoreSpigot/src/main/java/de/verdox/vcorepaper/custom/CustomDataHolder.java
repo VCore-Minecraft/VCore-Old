@@ -7,6 +7,7 @@ package de.verdox.vcorepaper.custom;
 import de.verdox.vcorepaper.custom.nbtholders.NBTHolder;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.Consumer;
@@ -29,14 +30,12 @@ public abstract class CustomDataHolder<S, N extends NBTHolder, C extends CustomD
     protected abstract <T, R extends CustomData<T>> void onStoreData(Class<? extends R> customDataType, T value);
 
     @Nonnull
-    public final <T, R extends CustomData<T>> CustomDataHolder<S, N, C> storeCustomData(Class<? extends R> customDataType, T value, Consumer<R> callback) {
+    public final <T, R extends CustomData<T>> CustomDataHolder<S, N, C> storeCustomData(@Nullable Class<? extends R> customDataType, @Nonnull T value, @Nullable Consumer<R> callback) {
         R customData = instantiateData(customDataType);
         if (customData == null)
             throw new NullPointerException("CustomData could not be instantiated");
         if (!customDataManager.exists(customData.getNBTKey()))
             throw new IllegalStateException("CustomDataClass " + customDataType + " has not yet been registered in your plugin!");
-        if (value == null)
-            throw new NullPointerException("Can't store value null to dataHolder");
         customData.storeCustomData(this, value);
         onStoreData(customDataType, value);
         if (callback == null)
@@ -45,7 +44,30 @@ public abstract class CustomDataHolder<S, N extends NBTHolder, C extends CustomD
         return this;
     }
 
+
+    public final <T, R extends CustomData<T>> boolean deleteCustomData(@Nullable Class<? extends R> customDataType, @Nullable Runnable callback) {
+        if (!containsCustomData(customDataType))
+            return false;
+        R customData = instantiateData(customDataType);
+        if (customData == null)
+            throw new NullPointerException("CustomData could not be instantiated");
+        if (!customDataManager.exists(customData.getNBTKey()))
+            throw new IllegalStateException("CustomDataClass " + customDataType + " has not yet been registered in your plugin!");
+        boolean result = customData.deleteData(this);
+        if (callback != null)
+            callback.run();
+        return result;
+    }
+
+    public final <T, R extends CustomData<T>> boolean deleteCustomData(@Nullable Class<? extends R> customDataType) {
+        return deleteCustomData(customDataType, null);
+    }
+
     @Nonnull
+    public final <T, R extends CustomData<T>> CustomDataHolder<S, N, C> storeCustomData(@Nullable Class<? extends R> customDataType, @Nonnull T value) {
+        return storeCustomData(customDataType, value, null);
+    }
+
     public final <T, R extends CustomData<T>> T getCustomData(Class<? extends R> customDataClass) {
         R customData = instantiateData(customDataClass);
         if (customData == null)

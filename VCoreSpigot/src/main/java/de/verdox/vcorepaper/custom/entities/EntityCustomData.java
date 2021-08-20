@@ -5,8 +5,9 @@
 package de.verdox.vcorepaper.custom.entities;
 
 import de.verdox.vcorepaper.custom.CustomData;
-import org.bukkit.block.Block;
-import org.bukkit.entity.Entity;
+import org.bukkit.event.player.PlayerInteractAtEntityEvent;
+
+import javax.annotation.Nonnull;
 
 public abstract class EntityCustomData<T> extends CustomData<T> {
 
@@ -14,19 +15,6 @@ public abstract class EntityCustomData<T> extends CustomData<T> {
         super();
     }
 
-    public boolean onDeath(Entity entity) {
-        return false;
-    }
-
-    public boolean onDamageReceive(Entity entity) {
-        return false;
-    }
-
-    public boolean onDamageEntity(Entity entity) {
-        return false;
-    }
-
-    public boolean onPhysicalInteraction(Entity entity, Block block) {
-        return false;
+    public void onPlayerRightClick(@Nonnull PlayerInteractAtEntityEvent event, @Nonnull VCoreEntity vCoreEntity) {
     }
 }

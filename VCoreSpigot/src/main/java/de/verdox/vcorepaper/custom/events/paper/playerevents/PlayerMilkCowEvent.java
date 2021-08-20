@@ -2,7 +2,7 @@
  * Copyright (c) 2021. Lukas Jonsson
  */
 
-package de.verdox.vcorepaper.custom.events.paper;
+package de.verdox.vcorepaper.custom.events.paper.playerevents;
 
 import org.bukkit.entity.Cow;
 import org.bukkit.entity.Entity;

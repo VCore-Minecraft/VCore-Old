@@ -17,6 +17,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.Chunk;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.util.RayTraceResult;
@@ -132,7 +133,7 @@ public class AdminCommands extends VCoreCommand.VCoreBukkitCommand {
                 .commandCallback((commandSender, commandParameters) -> {
                     Player player = (Player) commandSender;
                     vCorePlugin.sync(() -> {
-                        RayTraceResult rayTraceResult = player.getWorld().rayTraceEntities(player.getEyeLocation().clone().add(0, 1, 0), player.getLocation().getDirection(), 7);
+                        RayTraceResult rayTraceResult = player.getWorld().rayTraceEntities(player.getEyeLocation(), player.getLocation().getDirection(), 7, entity -> !entity.getType().equals(EntityType.PLAYER));
                         if (rayTraceResult == null) {
                             commandSender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&cBitte schaue ein Entity an&7!"));
                             return;

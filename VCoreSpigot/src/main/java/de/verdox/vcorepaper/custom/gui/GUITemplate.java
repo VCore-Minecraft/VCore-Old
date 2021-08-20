@@ -113,35 +113,35 @@ public class GUITemplate {
         private final int rows;
         private final int guiSize;
         private final String title;
-        private List<T> objectList;
+        private Collection<T> objectList;
         private int page;
-        private Supplier<List<T>> listUpdater;
+        private Supplier<Collection<T>> listUpdater;
         private String pattern;
         private Function<T, String> toStringFunc;
         private Function<VCoreGUI.VCoreGUIClick<T>, VCoreGUI.Response<?, ?>> clickCallback;
         private Runnable backCallback;
 
-        public SelectionGUI(@Nonnull String title, @Nonnull List<T> objectList, @Nonnull BukkitPlugin bukkitPlugin, @Positive int page, @Positive int rows, @Nonnull Function<T, ItemStack> objectToItemStack) {
+        public SelectionGUI(@Nonnull String title, @Nonnull Collection<T> objectList, @Nonnull BukkitPlugin bukkitPlugin, @Positive int page, @Positive int rows, @Nonnull Function<T, ItemStack> objectToItemStack) {
             this.title = title;
             this.objectList = objectList;
             this.bukkitPlugin = bukkitPlugin;
             this.objectToItemStack = objectToItemStack;
             this.page = page;
             this.rows = rows;
-            if (rows > 5)
-                rows = 5;
-            guiSize = (rows * 9) + 9;
+            if (rows > 4)
+                rows = 4;
+            guiSize = (rows * 9) + 9 + 9;
         }
 
-        public SelectionGUI(@Nonnull String title, @Nonnull List<T> objectList, @Nonnull BukkitPlugin bukkitPlugin, @Nonnull Function<T, ItemStack> objectToItemStack) {
-            this(title, objectList, bukkitPlugin, 1, 5, objectToItemStack);
+        public SelectionGUI(@Nonnull String title, @Nonnull Collection<T> objectList, @Nonnull BukkitPlugin bukkitPlugin, @Nonnull Function<T, ItemStack> objectToItemStack) {
+            this(title, objectList, bukkitPlugin, 1, 4, objectToItemStack);
         }
 
-        public SelectionGUI(@Nonnull String title, @Nonnull List<T> objectList, @Nonnull BukkitPlugin bukkitPlugin, @Positive int rows, @Nonnull Function<T, ItemStack> objectToItemStack) {
+        public SelectionGUI(@Nonnull String title, @Nonnull Collection<T> objectList, @Nonnull BukkitPlugin bukkitPlugin, @Positive int rows, @Nonnull Function<T, ItemStack> objectToItemStack) {
             this(title, objectList, bukkitPlugin, 1, rows, objectToItemStack);
         }
 
-        public SelectionGUI<T> updateList(Supplier<List<T>> listUpdater) {
+        public SelectionGUI<T> updateList(Supplier<Collection<T>> listUpdater) {
             this.listUpdater = listUpdater;
             return this;
         }
@@ -152,7 +152,7 @@ public class GUITemplate {
             if (clickCallback == null)
                 throw new NullPointerException("clickCallback can't be null!");
             if (slot > guiSize)
-                slot = (rows * 9 + (slot % 9));
+                slot = (rows * 9 + (slot % 9)) + 9;
             vCoreItem.getNBTCompound().setObject("vcore_gui_slot", slot);
             additionalItems.put(vCoreItem, clickCallback);
             return this;
@@ -218,7 +218,7 @@ public class GUITemplate {
             VCoreItem nextPage = VCorePaper.getInstance().getCustomItemManager().createItemBuilder(Material.PAPER, 1, "&aNext page").buildItem();
             VCoreItem search = VCorePaper.getInstance().getCustomItemManager().createItemBuilder(Material.WRITTEN_BOOK, 1, "&eSearch").buildItem();
             VCoreItem lastPage = VCorePaper.getInstance().getCustomItemManager().createItemBuilder(Material.PAPER, 1, "&cLast page").buildItem();
-            VCoreItem back = VCorePaper.getInstance().getCustomItemManager().createItemBuilder(Material.RED_STAINED_GLASS_PANE, 1, "&cBack").buildItem();
+            VCoreItem back = VCorePaper.getInstance().getCustomItemManager().createItemBuilder(Material.BARRIER, 1, "&cBack").buildItem();
 
             new VCoreGUI.Builder<T>()
                     .plugin(bukkitPlugin)
@@ -229,6 +229,9 @@ public class GUITemplate {
                     .content(contentBuilder -> {
                         if (listUpdater != null)
                             objectList = listUpdater.get();
+
+                        for (int i = 0; i < 9; i++)
+                            contentBuilder.addContent(i, border, null);
 
                         AtomicInteger counter = new AtomicInteger(0);
                         filterWithPattern()
@@ -243,30 +246,37 @@ public class GUITemplate {
                                     if (stack.getType().isEmpty())
                                         return;
                                     VCoreItem vCoreItem = VCorePaper.getInstance().getCustomItemManager().wrap(VCoreItem.class, stack);
-                                    contentBuilder.addContent(counter.getAndIncrement(), vCoreItem, t);
+                                    contentBuilder.addContent(counter.getAndIncrement() + 9, vCoreItem, t);
                                 });
 
-                        if (page > 1)
-                            contentBuilder.addContent((rows * 9), lastPage, null);
-                        else
-                            contentBuilder.addContent((rows * 9), border, null);
-                        contentBuilder.addContent((rows * 9) + 1, border, null);
+
                         if (backCallback != null)
-                            contentBuilder.addContent((rows * 9) + 2, back, null);
+                            contentBuilder.addContent((rows * 9) + 9, back, null);
                         else
-                            contentBuilder.addContent((rows * 9) + 2, border, null);
-                        contentBuilder.addContent((rows * 9) + 3, border, null);
-                        contentBuilder.addContent((rows * 9) + 4, border, null);
-                        contentBuilder.addContent((rows * 9) + 5, border, null);
+                            contentBuilder.addContent((rows * 9) + 9, border, null);
+
+                        contentBuilder.addContent((rows * 9) + 10, border, null);
+
+                        if (page > 1)
+                            contentBuilder.addContent((rows * 9) + 11, lastPage, null);
+                        else
+                            contentBuilder.addContent((rows * 9) + 11, border, null);
+
+                        contentBuilder.addContent((rows * 9) + 12, border, null);
+                        contentBuilder.addContent((rows * 9) + 13, border, null);
+                        contentBuilder.addContent((rows * 9) + 14, border, null);
+
+                        if (((page) * ((rows * 9) + 9)) + 1 < objectList.size() || counter.get() >= (rows * 9) - 1)
+                            contentBuilder.addContent((rows * 9) + 15, nextPage, null);
+                        else
+                            contentBuilder.addContent((rows * 9) + 15, border, null);
+
+                        contentBuilder.addContent((rows * 9) + 16, border, null);
+
                         if (this.toStringFunc != null)
-                            contentBuilder.addContent((rows * 9) + 6, search, null);
+                            contentBuilder.addContent((rows * 9) + 17, search, null);
                         else
-                            contentBuilder.addContent((rows * 9) + 6, border, null);
-                        contentBuilder.addContent((rows * 9) + 7, border, null);
-                        if (((page) * ((rows * 9))) + 1 < objectList.size() || counter.get() >= (rows * 9) - 1)
-                            contentBuilder.addContent((rows * 9) + 8, nextPage, null);
-                        else
-                            contentBuilder.addContent((rows * 9) + 8, border, null);
+                            contentBuilder.addContent((rows * 9) + 17, border, null);
 
 
                         additionalItems.forEach((vCoreItem, vCoreItemResponseFunction) -> {

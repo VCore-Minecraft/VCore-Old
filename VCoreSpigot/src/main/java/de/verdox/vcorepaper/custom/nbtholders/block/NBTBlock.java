@@ -112,6 +112,8 @@ public class NBTBlock implements NBTHolder {
 
     @Override
     public boolean hasKey(String key) {
+        if (key == null)
+            return false;
         return blockCompound.hasKey(key);
     }
 

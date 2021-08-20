@@ -277,6 +277,7 @@ public class VCoreGUI<T> {
     public static class ContentBuilder<T> {
         private final Map<Integer, InventoryContent<T>> itemCache = new ConcurrentHashMap<>();
 
+        //TODO: Direkt Consumer für Click Callback einfügen
         public ContentBuilder<T> addContent(int slot, VCoreItem stack, T object) {
             Validate.notNull(stack, "Stack cannot be null");
             stack.getNBTCompound().setObject("vcore_gui_slot", slot);

@@ -2,7 +2,7 @@
  * Copyright (c) 2021. Lukas Jonsson
  */
 
-package de.verdox.vcorepaper.custom.events.paper;
+package de.verdox.vcorepaper.custom.events.paper.blockevents;
 
 import org.bukkit.block.Block;
 import org.bukkit.event.HandlerList;

@@ -1,7 +1,10 @@
+/*
+ * Copyright (c) 2021. Lukas Jonsson
+ */
+
 package de.verdox.vcore.plugin.subsystem;
 
 import de.verdox.vcore.plugin.VCorePlugin;
-import de.verdox.vcore.plugin.subsystem.exceptions.SubsystemDeactivatedException;
 import de.verdox.vcore.synchronization.pipeline.datatypes.PlayerData;
 import de.verdox.vcore.synchronization.pipeline.datatypes.ServerData;
 import de.verdox.vcore.util.global.AnnotationResolver;
@@ -17,13 +20,6 @@ public abstract class VCoreSubsystem<S extends VCorePlugin<?, ?>> {
     public VCoreSubsystem(S vCorePlugin) {
         this.vCorePlugin = vCorePlugin;
         uuid = UUID.nameUUIDFromBytes(AnnotationResolver.getDataStorageIdentifier(this.getClass()).getBytes());
-    }
-
-    public static void checkSubsystem(VCoreSubsystem<?> subsystem) throws SubsystemDeactivatedException {
-        if (subsystem == null)
-            return;
-        if (!subsystem.isActivated())
-            throw new SubsystemDeactivatedException("Subsystem " + subsystem.getClass().getName() + " is not activated!");
     }
 
     public abstract boolean isActivated();
