@@ -7,7 +7,7 @@ package de.verdox.vcorepaper.custom.items;
 import de.verdox.vcorepaper.VCorePaper;
 import de.verdox.vcorepaper.custom.CustomData;
 import de.verdox.vcorepaper.custom.CustomDataHolder;
-import de.verdox.vcorepaper.custom.nbtholders.NBTItemHolder;
+import de.verdox.vcorepaper.custom.nbtholders.item.NBTItemHolder;
 import org.bukkit.ChatColor;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;

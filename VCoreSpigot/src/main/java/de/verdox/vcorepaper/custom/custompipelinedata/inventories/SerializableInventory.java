@@ -13,6 +13,7 @@ import org.jetbrains.annotations.NotNull;
 import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -62,5 +63,10 @@ public class SerializableInventory implements Serializable, CustomPipelineData {
     @Override
     public final Map<String, Object> getUnderlyingMap() {
         return data;
+    }
+
+    @Override
+    public String toString() {
+        return "SerializableInventory{storageContents=" + Arrays.toString(deSerializeStorageContents()) + "}";
     }
 }

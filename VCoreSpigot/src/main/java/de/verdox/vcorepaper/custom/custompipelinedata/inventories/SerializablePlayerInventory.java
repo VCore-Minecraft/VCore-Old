@@ -22,6 +22,7 @@ import org.jetbrains.annotations.NotNull;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -36,7 +37,7 @@ public class SerializablePlayerInventory extends SerializableInventory {
 
     public SerializablePlayerInventory(@Nonnull String id, @Nonnull GameMode gameMode, @Nonnull ItemStack[] storageContents, @Nonnull ItemStack[] armorContents, @Nonnull ItemStack[] enderChest, @Nullable ItemStack offHand, double health, int foodLevel, int level, float exp, @Nonnull Set<PotionEffect> potionEffects) {
         super(id, storageContents);
-        saveStorageContents(armorContents);
+        saveArmorContents(armorContents);
         saveEnderChest(enderChest);
         saveOffHand(offHand);
         saveHealth(health);
@@ -202,5 +203,21 @@ public class SerializablePlayerInventory extends SerializableInventory {
 
     public int getFoodLevel() {
         return new IntegerBsonReference(data, "food").orElse(20);
+    }
+
+    @Override
+    public String toString() {
+        return "SerializablePlayerInventory{" +
+                "id=" + getID() + "" +
+                ", storageContents=" + Arrays.toString(deSerializeStorageContents()) + "" +
+                ", armor=" + Arrays.toString(deSerializeArmorContents()) +
+                ", enderChest=" + Arrays.toString(deSerializeEnderChest()) +
+                ", offHand=" + deSerializeOffHand() +
+                ", exp=" + getExp() +
+                ", foodLevel=" + getFoodLevel() +
+                ", level=" + getLevel() +
+                ", Health=" + getHealth() +
+                ", gameMode=" + getGameMode() +
+                "}";
     }
 }

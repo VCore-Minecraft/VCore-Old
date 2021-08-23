@@ -17,6 +17,7 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
@@ -113,6 +114,12 @@ public class CustomItemManager extends CustomDataManager<ItemStack, ItemCustomDa
         return VCorePaper.getInstance()
                 .getCustomItemManager()
                 .createItemBuilder(Material.BLACK_STAINED_GLASS_PANE, 1, "&8").buildItem();
+    }
+
+    public VCoreItem getHelpItem(@NotNull String title) {
+        return VCorePaper.getInstance()
+                .getCustomItemManager()
+                .createItemBuilder(Material.WRITTEN_BOOK, 1, title).buildItem();
     }
 
     public static class VCoreItemBuilder {

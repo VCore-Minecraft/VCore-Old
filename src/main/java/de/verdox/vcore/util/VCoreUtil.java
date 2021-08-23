@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2021. Lukas Jonsson
+ */
+
 package de.verdox.vcore.util;
 
 import de.verdox.vcore.util.bukkit.*;
@@ -46,6 +50,10 @@ public class VCoreUtil {
 
         public static BukkitServerUtil getBukkitServerUtil() {
             return new BukkitServerUtil();
+        }
+
+        public static BukkitInventoryUtil getBukkitInventoryUtil() {
+            return new BukkitInventoryUtil();
         }
     }
 

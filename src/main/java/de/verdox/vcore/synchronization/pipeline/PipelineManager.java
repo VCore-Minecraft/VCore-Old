@@ -47,8 +47,8 @@ public class PipelineManager implements Pipeline {
     private final VCorePlugin<?, ?> plugin;
     private final PipelineDataSynchronizer pipelineDataSynchronizer;
     private final PipelineTaskScheduler pipelineTaskScheduler;
-    private ExecutorService executorService;
-    private boolean loaded;
+    private final ExecutorService executorService;
+    private final boolean loaded;
 
     public PipelineManager(VCorePlugin<?, ?> plugin, @Nonnull LocalCache localCache, @Nullable GlobalCache globalCache, @Nullable GlobalStorage globalStorage) {
         this.plugin = plugin;
@@ -167,6 +167,7 @@ public class PipelineManager implements Pipeline {
         return data;
     }
 
+    @Nonnull
     @Override
     public <T extends VCoreData> CompletableFuture<T> loadAsync(@Nonnull Class<? extends T> type, @Nonnull UUID uuid, @Nonnull LoadingStrategy loadingStrategy, boolean createIfNotExist, @org.jetbrains.annotations.Nullable Consumer<T> callback) {
         CompletableFuture<T> completableFuture = new CompletableFuture<>();
@@ -174,6 +175,7 @@ public class PipelineManager implements Pipeline {
         return completableFuture;
     }
 
+    @Nonnull
     @Override
     public <T extends VCoreData> Set<T> loadAllData(@Nonnull Class<? extends T> type, @Nonnull LoadingStrategy loadingStrategy) {
         Set<T> set = new HashSet<>();
@@ -185,6 +187,7 @@ public class PipelineManager implements Pipeline {
         return set;
     }
 
+    @Nonnull
     @Override
     public <T extends VCoreData> CompletableFuture<Set<T>> loadAllDataAsync(@Nonnull Class<? extends T> type, @Nonnull LoadingStrategy loadingStrategy) {
         CompletableFuture<Set<T>> completableFuture = new CompletableFuture<>();
@@ -281,6 +284,7 @@ public class PipelineManager implements Pipeline {
 
     @Override
     public void saveAllData() {
+        plugin.consoleMessage("&eSaving all data&7...", false);
         // getLocalCache().getSavedUUIDs()
         plugin.getServices().getSubsystemManager().getActiveServerDataClasses()
                 .forEach(aClass -> getLocalCache().getSavedUUIDs(aClass).forEach(uuid -> {

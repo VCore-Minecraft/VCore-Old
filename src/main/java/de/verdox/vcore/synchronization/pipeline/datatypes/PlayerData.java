@@ -18,9 +18,19 @@ public abstract class PlayerData extends VCoreData {
         super(plugin, objectUUID);
     }
 
+    /**
+     * Is called async when player disconnects
+     *
+     * @param playerUUID PlayerUUID
+     */
     public void onDisconnect(UUID playerUUID) {
     }
 
+    /**
+     * Is called async when player disconnects
+     *
+     * @param playerUUID PlayerUUID
+     */
     public void onConnect(UUID playerUUID) {
     }
 }

@@ -6,20 +6,24 @@ package de.verdox.vcorepaper.custom.nbtholders.block;
 
 import de.tr7zw.changeme.nbtapi.NBTCompound;
 import de.tr7zw.changeme.nbtapi.NBTFile;
+import de.tr7zw.changeme.nbtapi.NBTTileEntity;
 import de.verdox.vcore.plugin.wrapper.types.WorldChunk;
 import de.verdox.vcore.util.bukkit.keys.ChunkKey;
 import de.verdox.vcore.util.bukkit.keys.LocationKey;
 import de.verdox.vcore.util.bukkit.keys.SplitChunkKey;
 import de.verdox.vcorepaper.VCorePaper;
 import de.verdox.vcorepaper.custom.nbtholders.NBTHolder;
+import de.verdox.vcorepaper.custom.nbtholders.NBTHolderImpl;
 import de.verdox.vcorepaper.custom.nbtholders.block.event.NBTBlockDeleteEvent;
+import io.papermc.lib.PaperLib;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
-import org.bukkit.inventory.ItemStack;
+import org.bukkit.block.BlockState;
+import org.bukkit.block.TileState;
 
+import javax.annotation.Nullable;
 import java.io.IOException;
-import java.util.Set;
-import java.util.UUID;
+import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -29,120 +33,115 @@ import java.util.concurrent.TimeoutException;
  * @Author: Lukas Jonsson (Verdox)
  * @date 10.08.2021 13:33
  */
-public class NBTBlock implements NBTHolder {
+public class NBTBlock extends NBTHolderImpl<Location> {
 
-    private final Location location;
-    private final NBTFile nbtFile;
-    private final NBTCompound chunkCompound;
-    private final NBTCompound splitChunkCompound;
-    private final NBTCompound blockCompound;
+    private final int chunkY;
+    private final int chunkX;
+    private final int chunkZ;
+    private final WorldChunk worldChunk;
+    private final SplitChunkKey splitChunkKey;
+
+    private NBTFile nbtFile;
+    private NBTCompound chunkCompound;
+    private NBTCompound splitChunkCompound;
+    private NBTCompound blockCompound;
 
     public NBTBlock(Location location) {
-        this.location = location;
+        super(location);
+        chunkY = dataHolder.getBlockY() / 16;
+        chunkX = dataHolder.getBlockX() >> 4;
+        chunkZ = dataHolder.getBlockZ() >> 4;
 
-        int chunkY = location.getBlockY() / 16;
-        int chunkX = location.getBlockX() >> 4;
-        int chunkZ = location.getBlockZ() >> 4;
+        worldChunk = new WorldChunk(dataHolder.getWorld().getName(), chunkX, chunkZ);
+        splitChunkKey = new SplitChunkKey(worldChunk, chunkY);
+    }
 
-        WorldChunk worldChunk = new WorldChunk(location.getWorld().getName(), chunkX, chunkZ);
-        SplitChunkKey splitChunkKey = new SplitChunkKey(worldChunk, chunkY);
-
-        try {
-            this.nbtFile = VCorePaper.getInstance().getBlockFileStorage().loadNBTFile(worldChunk).get(10, TimeUnit.SECONDS);
-        } catch (InterruptedException | ExecutionException | TimeoutException e) {
-            VCorePaper.getInstance().consoleMessage("&cCould not load NBT File for: " + location, true);
-            e.printStackTrace();
-            throw new IllegalStateException();
+    @Override
+    protected NBTCompound getNbtCompound() {
+        if (Objects.isNull(this.nbtFile)) {
+            try {
+                this.nbtFile = VCorePaper.getInstance().getBlockFileStorage().loadNBTFile(worldChunk).get(10, TimeUnit.SECONDS);
+            } catch (InterruptedException | ExecutionException | TimeoutException e) {
+                VCorePaper.getInstance().consoleMessage("&cCould not load NBT File for: " + dataHolder, true);
+                e.printStackTrace();
+                throw new IllegalStateException();
+            }
         }
-
-        this.chunkCompound = this.nbtFile.getOrCreateCompound(((ChunkKey) splitChunkKey).toString());
-        this.splitChunkCompound = this.chunkCompound.getOrCreateCompound(splitChunkKey.toString());
-        this.blockCompound = this.splitChunkCompound.getOrCreateCompound(new LocationKey(this.location).toStringWithoutWorld());
-    }
-
-    @Override
-    public Boolean getBoolean(String key) {
-        return blockCompound.getBoolean(key);
-    }
-
-    @Override
-    public Integer getInteger(String key) {
-        return blockCompound.getInteger(key);
-    }
-
-    @Override
-    public Double getDouble(String key) {
-        return blockCompound.getDouble(key);
-    }
-
-    @Override
-    public String getString(String key) {
-        return blockCompound.getString(key);
-    }
-
-    @Override
-    public UUID getUUID(String key) {
-        return blockCompound.getUUID(key);
-    }
-
-    @Override
-    public Long getLong(String key) {
-        return blockCompound.getLong(key);
-    }
-
-    @Override
-    public ItemStack getItemStack(String key) {
-        return blockCompound.getItemStack(key);
-    }
-
-    @Override
-    public <T> T getObject(String key, Class<T> type) {
-        return blockCompound.getObject(key, type);
-    }
-
-    @Override
-    public void setObject(String key, Object value) {
-        blockCompound.setObject(key, value);
-    }
-
-    @Override
-    public Set<String> getKeys() {
-        return blockCompound.getKeys();
-    }
-
-    @Override
-    public boolean hasKey(String key) {
-        if (key == null)
-            return false;
-        return blockCompound.hasKey(key);
+        if (Objects.isNull(this.chunkCompound))
+            this.chunkCompound = this.nbtFile.getOrCreateCompound(((ChunkKey) splitChunkKey).toString());
+        if (Objects.isNull(this.splitChunkCompound))
+            this.splitChunkCompound = this.chunkCompound.getOrCreateCompound(splitChunkKey.toString());
+        if (Objects.isNull(this.blockCompound))
+            this.blockCompound = this.splitChunkCompound.getOrCreateCompound(new LocationKey(this.dataHolder).toStringWithoutWorld());
+        return this.blockCompound;
     }
 
     @Override
     public void removeKey(String key) {
         blockCompound.removeKey(key);
+        clearGarbage();
+    }
+
+    /**
+     * Not usable right now -> Object references must be declared new if compounds are cleared
+     */
+    private void clearGarbage() {
+        if (blockCompound.getKeys().isEmpty()) {
+            splitChunkCompound.removeKey(blockCompound.getName());
+            this.blockCompound = null;
+        }
+        if (splitChunkCompound.getKeys().isEmpty()) {
+            chunkCompound.removeKey(splitChunkCompound.getName());
+            this.splitChunkCompound = null;
+        }
+        if (chunkCompound.getKeys().isEmpty()) {
+            nbtFile.removeKey(chunkCompound.getName());
+            this.nbtFile = null;
+        }
     }
 
     @Override
     public void save() {
         try {
-            String key = new LocationKey(this.location).toStringWithoutWorld();
-            if (splitChunkCompound.hasKey(key))
-                if (splitChunkCompound.getCompound(key).getKeys().isEmpty())
-                    splitChunkCompound.removeKey(key);
+            clearGarbage();
             nbtFile.save();
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
+    /**
+     * Returns the NBT Storage of a Tile Entity if the BlockState of the block at the specified location is instance of TileState
+     * Note that in order to make this function work it is probably needed for the chunk to be loaded where the block is located at
+     * <p>
+     * This function is not thread safe in every server software (e.g. Spigot)
+     *
+     * @return Vanilla Compound of the block if exists
+     */
+    @Nullable
+    @Override
+    public NBTHolder getVanillaCompound() {
+        BlockState blockState = PaperLib.getBlockState(dataHolder.getBlock(), true).getState();
+        if (!(blockState instanceof TileState))
+            return null;
+        return new NBTHolderImpl<>(blockState) {
+            @Override
+            protected NBTCompound getNbtCompound() {
+                return new NBTTileEntity(dataHolder);
+            }
+
+            @Override
+            public NBTHolder getVanillaCompound() {
+                return this;
+            }
+        };
+    }
+
+    @Override
     public void delete() {
         NBTBlockDeleteEvent NBTBlockDeleteEvent = new NBTBlockDeleteEvent(this);
         Bukkit.getPluginManager().callEvent(NBTBlockDeleteEvent);
         if (!NBTBlockDeleteEvent.isCancelled())
-            splitChunkCompound.removeKey(new LocationKey(this.location).toStringWithoutWorld());
-    }
-
-    public Location getLocation() {
-        return location;
+            splitChunkCompound.removeKey(new LocationKey(this.dataHolder).toStringWithoutWorld());
     }
 }

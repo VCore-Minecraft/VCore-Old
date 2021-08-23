@@ -81,7 +81,7 @@ public class VCorePaper extends VCoreCoreInstance.Minecraft {
             consoleMessage("&cThe ServerName &e" + getServerName() + " &cis already online in this VCore Network &7(&bExists in Global Cache&7)", false);
             consoleMessage("", false);
             consoleMessage("&4<> ============================================= <>", false);
-            this.shutdown();
+            getServer().shutdown();
         }
         networkManager.getServerPingManager().sendOnlinePing();
         getCustomBlockManager().registerData(BlockDebugData.class);

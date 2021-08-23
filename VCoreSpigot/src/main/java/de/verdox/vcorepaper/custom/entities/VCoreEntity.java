@@ -7,8 +7,8 @@ package de.verdox.vcorepaper.custom.entities;
 import de.verdox.vcorepaper.VCorePaper;
 import de.verdox.vcorepaper.custom.CustomData;
 import de.verdox.vcorepaper.custom.CustomDataHolder;
-import de.verdox.vcorepaper.custom.nbtholders.NBTEntityHolder;
 import de.verdox.vcorepaper.custom.nbtholders.NBTHolder;
+import de.verdox.vcorepaper.custom.nbtholders.entity.NBTEntityHolder;
 import org.bukkit.entity.Entity;
 
 import javax.annotation.Nonnull;

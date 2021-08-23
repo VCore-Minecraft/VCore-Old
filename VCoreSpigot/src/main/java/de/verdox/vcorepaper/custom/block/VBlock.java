@@ -12,6 +12,9 @@ import org.bukkit.Location;
 
 import javax.annotation.Nonnull;
 import java.lang.reflect.InvocationTargetException;
+import java.util.Arrays;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * @version 1.0
@@ -24,13 +27,18 @@ public class VBlock extends CustomDataHolder<Location, NBTBlock, CustomBlockMana
     }
 
     public boolean isFlagSet(VBlockFlag flag) {
-        if (!getNBTCompound().hasKey(flag.getNbtTag()))
+        if (!getNBTCompound().hasKey(flag.getNbtTag())) {
             return false;
+        }
         return getNBTCompound().getBoolean(flag.getNbtTag());
     }
 
     public void setBlockFlag(VBlockFlag flag, boolean allowed) {
         getNBTCompound().setObject(flag.getNbtTag(), allowed);
+    }
+
+    public Set<VBlockFlag> getSetBlockFlags() {
+        return Arrays.stream(VBlockFlag.values()).filter(this::isFlagSet).collect(Collectors.toSet());
     }
 
     @Override

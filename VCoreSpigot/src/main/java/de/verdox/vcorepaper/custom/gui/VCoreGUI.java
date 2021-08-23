@@ -42,6 +42,7 @@ public class VCoreGUI<T> {
     private final BiFunction<Player, List<VCoreItem>, Response<?, ?>> completeFunction;
     private final boolean updater;
     private final Consumer<ContentBuilder<T>> consumer;
+    private final boolean enableDoubleClick;
     private final boolean preventClose;
     private final VCoreGUIListener listener;
     private final String inventoryTitle;
@@ -63,11 +64,13 @@ public class VCoreGUI<T> {
             , Function<VCoreGUIClick<T>, Response<?, ?>> onItemClick
             , Function<GUIClick, Response<?, ?>> onPlayerInventoryClick, BiFunction<Player, List<VCoreItem>, Response<?, ?>> completeFunction
             , boolean updater
-            , Consumer<ContentBuilder<T>> consumer) {
+            , Consumer<ContentBuilder<T>> consumer
+            , boolean enableDoubleClick) {
         this.onPlayerInventoryClick = onPlayerInventoryClick;
         this.completeFunction = completeFunction;
         this.updater = updater;
         this.consumer = consumer;
+        this.enableDoubleClick = enableDoubleClick;
         this.listener = new VCoreGUIListener();
         this.plugin = plugin;
         this.player = player;
@@ -108,7 +111,7 @@ public class VCoreGUI<T> {
         }
     }
 
-    public void updateGUI() {
+    public synchronized void updateGUI() {
         if (inventory.getViewers().size() <= 0)
             guiUpdater.cancel();
 
@@ -150,7 +153,8 @@ public class VCoreGUI<T> {
                 , onItemClick
                 , onPlayerInventoryClick, completeFunction
                 , updater
-                , consumer);
+                , consumer
+                , enableDoubleClick);
     }
 
     private void closeInventory() {
@@ -195,9 +199,15 @@ public class VCoreGUI<T> {
         private int size = 0;
         private InventoryType inventoryType;
         private boolean update;
+        private boolean enableDoubleClick;
 
         public Builder<T> update() {
             this.update = true;
+            return this;
+        }
+
+        public Builder<T> enableDoubleClick() {
+            this.enableDoubleClick = true;
             return this;
         }
 
@@ -250,6 +260,8 @@ public class VCoreGUI<T> {
             return this;
         }
 
+        //TODO: Close if predicate reached -> Falls Objekte in der Zeit gelöscht werden
+
         public Builder<T> type(InventoryType inventoryType) {
             Validate.notNull(inventoryType, "inventoryType cannot be null");
             this.inventoryType = inventoryType;
@@ -269,7 +281,7 @@ public class VCoreGUI<T> {
                 Validate.notNull(consumer, "Content must be set!");
             if (inventoryType == null && size <= 0)
                 size = 9;
-            return new VCoreGUI<T>(plugin, player, title, size, inventoryType, preventClose, itemCache, closeListener, onItemClick, onPlayerInventoryClick, completeFunction, update, consumer);
+            return new VCoreGUI<T>(plugin, player, title, size, inventoryType, preventClose, itemCache, closeListener, onItemClick, onPlayerInventoryClick, completeFunction, update, consumer, enableDoubleClick);
         }
 
     }
@@ -410,6 +422,8 @@ public class VCoreGUI<T> {
                 return;
             e.setCancelled(true);
             player.updateInventory();
+            if (!enableDoubleClick && e.getClick().equals(ClickType.DOUBLE_CLICK))
+                return;
             if (e.getCurrentItem() == null || e.getCurrentItem().equals(Material.AIR))
                 return;
             VCoreItem clickedItem = VCorePaper.getInstance().getCustomItemManager().wrap(VCoreItem.class, e.getCurrentItem());
