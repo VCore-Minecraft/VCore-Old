@@ -2,10 +2,10 @@
  * Copyright (c) 2021. Lukas Jonsson
  */
 
-package de.verdox.vcorepaper.custom.nbtholders.block.event;
+package de.verdox.vcorepaper.custom.nbtholders.location.event.nbtlocation;
 
 import de.verdox.vcorepaper.custom.events.VCoreHybridEvent;
-import de.verdox.vcorepaper.custom.nbtholders.block.NBTBlock;
+import de.verdox.vcorepaper.custom.nbtholders.location.NBTLocation;
 
 /**
  * @version 1.0
@@ -14,15 +14,15 @@ import de.verdox.vcorepaper.custom.nbtholders.block.NBTBlock;
  */
 public abstract class NBTBlockEvent extends VCoreHybridEvent {
 
-    private final NBTBlock nbtBlock;
+    private final NBTLocation nbtLocation;
     private boolean cancelled;
 
-    public NBTBlockEvent(NBTBlock nbtBlock) {
-        this.nbtBlock = nbtBlock;
+    public NBTBlockEvent(NBTLocation nbtLocation) {
+        this.nbtLocation = nbtLocation;
     }
 
-    public NBTBlock getNbtBlock() {
-        return nbtBlock;
+    public NBTLocation getNbtBlock() {
+        return nbtLocation;
     }
 
     public boolean isCancelled() {

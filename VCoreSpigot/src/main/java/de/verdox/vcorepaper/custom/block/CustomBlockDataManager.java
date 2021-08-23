@@ -8,33 +8,28 @@ import de.verdox.vcore.plugin.SystemLoadable;
 import de.verdox.vcorepaper.VCorePaper;
 import de.verdox.vcorepaper.custom.CustomDataManager;
 import de.verdox.vcorepaper.custom.block.data.VBlockCustomData;
-import io.netty.util.concurrent.DefaultThreadFactory;
-import org.bukkit.Location;
+import org.bukkit.block.Block;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
 
 /**
  * @version 1.0
  * @Author: Lukas Jonsson (Verdox)
- * @date 10.08.2021 22:12
+ * @date 23.08.2021 15:16
  */
-public class CustomBlockManager extends CustomDataManager<Location, VBlockCustomData<?>, de.verdox.vcorepaper.custom.block.VBlock> implements SystemLoadable {
-    private final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor(new DefaultThreadFactory("VBlock - Ticking Thread"));
-
-    public CustomBlockManager(VCorePaper vCorePaper) {
+public class CustomBlockDataManager extends CustomDataManager<Block, VBlockCustomData<?>, VBlock.BlockBased> implements SystemLoadable {
+    public CustomBlockDataManager(VCorePaper vCorePaper) {
         super(vCorePaper);
     }
 
-    public VBlock getVBlock(Location location) {
-        return wrap(VBlock.class, location);
+    public VBlock.BlockBased getVBlock(Block block) {
+        return wrap(VBlock.BlockBased.class, block);
     }
 
     @Override
-    public <U extends VBlock> U wrap(Class<? extends U> type, Location inputObject) {
+    public <U extends VBlock.BlockBased> U wrap(Class<? extends U> type, Block inputObject) {
         try {
-            return type.getDeclaredConstructor(Location.class, CustomBlockManager.class).newInstance(inputObject, this);
+            return type.getDeclaredConstructor(Block.class, CustomBlockDataManager.class).newInstance(inputObject, this);
         } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
             e.printStackTrace();
             return null;
@@ -42,9 +37,9 @@ public class CustomBlockManager extends CustomDataManager<Location, VBlockCustom
     }
 
     @Override
-    public <U extends VBlock> U convertTo(Class<? extends U> type, VBlock customData) {
+    public <U extends VBlock.BlockBased> U convertTo(Class<? extends U> type, VBlock.BlockBased customData) {
         try {
-            return type.getDeclaredConstructor(Location.class, CustomBlockManager.class).newInstance(customData.getDataHolder(), this);
+            return type.getDeclaredConstructor(Block.class, CustomBlockDataManager.class).newInstance(customData.getDataHolder(), this);
         } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
             e.printStackTrace();
             return null;
@@ -68,6 +63,6 @@ public class CustomBlockManager extends CustomDataManager<Location, VBlockCustom
 
     @Override
     public void shutdown() {
-        executor.shutdown();
+
     }
 }

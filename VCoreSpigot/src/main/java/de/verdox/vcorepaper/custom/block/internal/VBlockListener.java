@@ -9,8 +9,8 @@ import de.verdox.vcore.plugin.listener.VCoreListener;
 import de.verdox.vcorepaper.VCorePaper;
 import de.verdox.vcorepaper.custom.block.VBlock;
 import de.verdox.vcorepaper.custom.block.flags.VBlockFlag;
-import de.verdox.vcorepaper.custom.nbtholders.block.NBTBlock;
-import de.verdox.vcorepaper.custom.nbtholders.block.event.NBTBlockDeleteEvent;
+import de.verdox.vcorepaper.custom.nbtholders.location.NBTLocation;
+import de.verdox.vcorepaper.custom.nbtholders.location.event.nbtlocation.NBTBlockDeleteEvent;
 import org.bukkit.block.Block;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.EventHandler;
@@ -35,7 +35,7 @@ public class VBlockListener extends VCoreListener.VCoreBukkitListener {
             return false;
         if (block == null)
             return false;
-        VBlock vBlock = VCorePaper.getInstance().getCustomBlockManager().getVBlock(block.getLocation());
+        VBlock.BlockBased vBlock = VCorePaper.getInstance().getCustomBlockManager().getBlockDataManager().getVBlock(block);
         if (vBlock == null)
             return false;
         plugin.consoleMessage("&8[&eVBlockListener&8] &bFlag&7: &a" + vBlockFlag, 2, true);
@@ -48,10 +48,10 @@ public class VBlockListener extends VCoreListener.VCoreBukkitListener {
 
     @EventHandler
     public void onDelete(NBTBlockDeleteEvent e) {
-        NBTBlock nbtBlock = e.getNbtBlock();
-        if (!nbtBlock.hasKey(VBlockFlag.PRESERVE_DATA_ON_BREAK.getNbtTag()))
+        NBTLocation nbtLocation = e.getNbtBlock();
+        if (!nbtLocation.hasKey(VBlockFlag.PRESERVE_DATA_ON_BREAK.getNbtTag()))
             return;
-        e.setCancelled(nbtBlock.getBoolean(VBlockFlag.PRESERVE_DATA_ON_BREAK.getNbtTag()));
+        e.setCancelled(nbtLocation.getBoolean(VBlockFlag.PRESERVE_DATA_ON_BREAK.getNbtTag()));
     }
 
     @EventHandler

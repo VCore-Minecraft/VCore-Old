@@ -5,8 +5,12 @@
 package de.verdox.vcorepaper.custom.nbtholders;
 
 import de.tr7zw.changeme.nbtapi.NBTCompound;
+import de.tr7zw.changeme.nbtapi.NBTType;
+import org.apache.commons.lang.ArrayUtils;
 import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.NotNull;
 
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 
@@ -26,138 +30,180 @@ public abstract class NBTHolderImpl<T> implements NBTHolder {
     protected abstract NBTCompound getNbtCompound();
 
     @Override
-    public ItemStack getItemStack(String key) {
-        return getNbtCompound().getItemStack(key);
+    public ItemStack getItemStack(@NotNull String key) {
+        return Objects.requireNonNull(getNbtCompound()).getItemStack(key);
     }
 
     @Override
-    public <T> T getObject(String key, Class<T> type) {
-        return getNbtCompound().getObject(key, type);
+    public <V> V getObject(@NotNull String key, @NotNull Class<V> type) {
+        if (type.equals(UUID.class)) {
+            return type.cast(getUUID(key));
+        }
+        if (type.equals(ItemStack.class))
+            return type.cast(getItemStack(key));
+        if (type.equals(Long.class) || getNbtCompound().getType(key).equals(NBTType.NBTTagLong))
+            return type.cast(getLong(key));
+        if (type.equals(String.class) || getNbtCompound().getType(key).equals(NBTType.NBTTagString))
+            return type.cast(getString(key));
+        if (type.equals(Double.class) || getNbtCompound().getType(key).equals(NBTType.NBTTagDouble))
+            return type.cast(getDouble(key));
+        if (type.equals(Integer.class) || getNbtCompound().getType(key).equals(NBTType.NBTTagInt))
+            return type.cast(getInteger(key));
+        if (type.equals(Boolean.class))
+            return type.cast(getBoolean(key));
+        if (type.equals(Byte.class) || getNbtCompound().getType(key).equals(NBTType.NBTTagByte))
+            return type.cast(getByte(key));
+        if (type.equals(Byte[].class) || getNbtCompound().getType(key).equals(NBTType.NBTTagByteArray))
+            return type.cast(getByteArray(key));
+        if (type.equals(Float.class) || getNbtCompound().getType(key).equals(NBTType.NBTTagFloat))
+            return type.cast(getFloat(key));
+        return Objects.requireNonNull(getNbtCompound()).getObject(key, type);
     }
 
     @Override
-    public UUID getUUID(String key) {
-        return getNbtCompound().getUUID(key);
+    public UUID getUUID(@NotNull String key) {
+        return Objects.requireNonNull(getNbtCompound()).getUUID(key);
     }
 
     @Override
-    public Long getLong(String key) {
-        return getNbtCompound().getLong(key);
+    public Long getLong(@NotNull String key) {
+        return Objects.requireNonNull(getNbtCompound()).getLong(key);
     }
 
     @Override
-    public String getString(String key) {
-        return getNbtCompound().getString(key);
+    public String getString(@NotNull String key) {
+        return Objects.requireNonNull(getNbtCompound()).getString(key);
     }
 
     @Override
-    public Double getDouble(String key) {
-        return getNbtCompound().getDouble(key);
+    public Double getDouble(@NotNull String key) {
+        return Objects.requireNonNull(getNbtCompound()).getDouble(key);
     }
 
     @Override
-    public Integer getInteger(String key) {
-        return getNbtCompound().getInteger(key);
+    public Integer getInteger(@NotNull String key) {
+        return Objects.requireNonNull(getNbtCompound()).getInteger(key);
     }
 
     @Override
-    public Boolean getBoolean(String key) {
-        return getNbtCompound().getBoolean(key);
+    public Boolean getBoolean(@NotNull String key) {
+        return Objects.requireNonNull(getNbtCompound()).getBoolean(key);
     }
 
     @Override
-    public Byte getByte(String key) {
-        return getNbtCompound().getByte(key);
+    public Byte getByte(@NotNull String key) {
+        return Objects.requireNonNull(getNbtCompound()).getByte(key);
     }
 
     @Override
-    public byte[] getByteArray(String key) {
-        return getNbtCompound().getByteArray(key);
+    public byte[] getByteArray(@NotNull String key) {
+        return Objects.requireNonNull(getNbtCompound()).getByteArray(key);
     }
 
     @Override
-    public Float getFloat(String key) {
-        return getNbtCompound().getFloat(key);
+    public Float getFloat(@NotNull String key) {
+        return Objects.requireNonNull(getNbtCompound()).getFloat(key);
     }
 
     @Override
-    public void setObject(String key, Object value) {
-        getNbtCompound().setObject(key, value);
+    public void setObject(@NotNull String key, Object value) {
+        if (value instanceof UUID)
+            setUUID(key, (UUID) value);
+        else if (value instanceof ItemStack)
+            setItemStack(key, (ItemStack) value);
+        else if (value instanceof Long)
+            setLong(key, (Long) value);
+        else if (value instanceof String)
+            setString(key, (String) value);
+        else if (value instanceof Double)
+            setDouble(key, (Double) value);
+        else if (value instanceof Integer)
+            setInteger(key, (Integer) value);
+        else if (value instanceof Boolean)
+            setBoolean(key, (Boolean) value);
+        else if (value instanceof Byte)
+            setByte(key, (Byte) value);
+        else if (value instanceof Byte[])
+            setByteArray(key, (Byte[]) value);
+        else if (value instanceof Float)
+            setFloat(key, (Float) value);
+        else
+            Objects.requireNonNull(getNbtCompound()).setObject(key, value);
     }
 
     @Override
-    public void setBoolean(String key, boolean value) {
-        getNbtCompound().setBoolean(key, value);
+    public void setBoolean(@NotNull String key, boolean value) {
+        Objects.requireNonNull(getNbtCompound()).setBoolean(key, value);
     }
 
     @Override
-    public void setInteger(String key, int value) {
-        getNbtCompound().setInteger(key, value);
+    public void setInteger(@NotNull String key, int value) {
+        Objects.requireNonNull(getNbtCompound()).setInteger(key, value);
     }
 
     @Override
-    public void setByte(String key, byte value) {
-        getNbtCompound().setByte(key, value);
+    public void setByte(@NotNull String key, byte value) {
+        Objects.requireNonNull(getNbtCompound()).setByte(key, value);
     }
 
     @Override
-    public void setDouble(String key, double value) {
-        getNbtCompound().setDouble(key, value);
+    public void setDouble(@NotNull String key, double value) {
+        Objects.requireNonNull(getNbtCompound()).setDouble(key, value);
     }
 
     @Override
-    public void setByteArray(String key, byte[] value) {
-        getNbtCompound().setByteArray(key, value);
+    public void setByteArray(@NotNull String key, Byte[] value) {
+        Objects.requireNonNull(getNbtCompound()).setByteArray(key, ArrayUtils.toPrimitive(value));
     }
 
     @Override
-    public void setFloat(String key, float value) {
-        getNbtCompound().setFloat(key, value);
+    public void setFloat(@NotNull String key, float value) {
+        Objects.requireNonNull(getNbtCompound()).setFloat(key, value);
     }
 
     @Override
-    public void setIntArray(String key, int[] value) {
-        getNbtCompound().setIntArray(key, value);
+    public void setIntArray(@NotNull String key, int[] value) {
+        Objects.requireNonNull(getNbtCompound()).setIntArray(key, value);
     }
 
     @Override
-    public void setItemStack(String key, ItemStack value) {
-        getNbtCompound().setItemStack(key, value);
+    public void setItemStack(@NotNull String key, @NotNull ItemStack value) {
+        Objects.requireNonNull(getNbtCompound()).setItemStack(key, value);
     }
 
     @Override
-    public void setLong(String key, long value) {
-        getNbtCompound().setLong(key, value);
+    public void setLong(@NotNull String key, long value) {
+        Objects.requireNonNull(getNbtCompound()).setLong(key, value);
     }
 
     @Override
-    public void setShort(String key, short value) {
-        getNbtCompound().setShort(key, value);
+    public void setShort(@NotNull String key, short value) {
+        Objects.requireNonNull(getNbtCompound()).setShort(key, value);
     }
 
     @Override
-    public void setString(String key, String value) {
-        getNbtCompound().setString(key, value);
+    public void setString(@NotNull String key, @NotNull String value) {
+        Objects.requireNonNull(getNbtCompound()).setString(key, value);
     }
 
     @Override
-    public void setUUID(String key, UUID value) {
-        getNbtCompound().setUUID(key, value);
+    public void setUUID(@NotNull String key, UUID value) {
+        Objects.requireNonNull(getNbtCompound()).setUUID(key, value);
     }
 
     @Override
     public Set<String> getKeys() {
-        return getNbtCompound().getKeys();
+        return Objects.requireNonNull(getNbtCompound()).getKeys();
     }
 
     @Override
-    public boolean hasKey(String key) {
-        return getNbtCompound().hasKey(key);
+    public boolean hasKey(@NotNull String key) {
+        return Objects.requireNonNull(getNbtCompound()).hasKey(key);
     }
 
     @Override
-    public void removeKey(String key) {
-        getNbtCompound().removeKey(key);
+    public void removeKey(@NotNull String key) {
+        Objects.requireNonNull(getNbtCompound()).removeKey(key);
     }
 
     @Override
@@ -167,8 +213,8 @@ public abstract class NBTHolderImpl<T> implements NBTHolder {
 
     @Override
     public void delete() {
-        for (String key : getNbtCompound().getKeys()) {
-            getNbtCompound().removeKey(key);
+        for (String key : Objects.requireNonNull(getNbtCompound()).getKeys()) {
+            Objects.requireNonNull(getNbtCompound()).removeKey(key);
         }
     }
 }

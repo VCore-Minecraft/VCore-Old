@@ -2,20 +2,20 @@
  * Copyright (c) 2021. Lukas Jonsson
  */
 
-package de.verdox.vcorepaper.custom.nbtholders.block;
+package de.verdox.vcorepaper.custom.nbtholders.chunk;
 
 import de.tr7zw.changeme.nbtapi.NBTCompound;
 import de.verdox.vcorepaper.custom.nbtholders.NBTHolder;
 import de.verdox.vcorepaper.custom.nbtholders.NBTHolderImpl;
-import org.bukkit.block.Block;
+import org.bukkit.Chunk;
 
 /**
  * @version 1.0
  * @Author: Lukas Jonsson (Verdox)
- * @date 23.08.2021 15:00
+ * @date 23.08.2021 15:02
  */
-public class NBTBlock extends NBTHolderImpl<Block> {
-    public NBTBlock(Block dataHolder) {
+public class NBTChunk extends NBTHolderImpl<Chunk> {
+    public NBTChunk(Chunk dataHolder) {
         super(dataHolder);
     }
 
@@ -26,6 +26,6 @@ public class NBTBlock extends NBTHolderImpl<Block> {
 
     @Override
     protected NBTCompound getNbtCompound() {
-        return new de.tr7zw.changeme.nbtapi.NBTBlock(dataHolder).getData();
+        return new de.tr7zw.changeme.nbtapi.NBTChunk(dataHolder).getPersistentDataContainer();
     }
 }

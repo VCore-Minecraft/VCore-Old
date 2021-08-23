@@ -2,7 +2,7 @@
  * Copyright (c) 2021. Lukas Jonsson
  */
 
-package de.verdox.vcorepaper.custom.nbtholders.block;
+package de.verdox.vcorepaper.custom.nbtholders.location;
 
 import de.tr7zw.changeme.nbtapi.NBTFile;
 import de.verdox.vcore.plugin.wrapper.types.WorldRegion;

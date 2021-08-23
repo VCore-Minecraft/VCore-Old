@@ -2,7 +2,7 @@
  * Copyright (c) 2021. Lukas Jonsson
  */
 
-package de.verdox.vcorepaper.custom.nbtholders.block;
+package de.verdox.vcorepaper.custom.nbtholders.location;
 
 import de.tr7zw.changeme.nbtapi.NBTFile;
 import de.verdox.vcore.plugin.SystemLoadable;
@@ -30,11 +30,11 @@ import java.util.concurrent.*;
  * @Author: Lukas Jonsson (Verdox)
  * @date 10.08.2021 14:33
  */
-public class BlockFileStorage extends VCoreListener.VCoreBukkitListener implements SystemLoadable {
+public class LocationNBTFileStorage extends VCoreListener.VCoreBukkitListener implements SystemLoadable {
     private final ExecutorService executor = Executors.newSingleThreadExecutor(new DefaultThreadFactory("NBTBlock IO Loader"));
     private final Map<String, WorldStorage> fileCache = new ConcurrentHashMap<>();
 
-    public BlockFileStorage(VCorePlugin.Minecraft plugin) {
+    public LocationNBTFileStorage(VCorePlugin.Minecraft plugin) {
         super(plugin);
     }
 
@@ -58,6 +58,7 @@ public class BlockFileStorage extends VCoreListener.VCoreBukkitListener implemen
         try {
             if (fileCache.containsKey(worldChunk.worldName) && fileCache.get(worldChunk.worldName).getFileCache().containsKey(worldRegion))
                 return fileCache.get(worldChunk.worldName).getFileCache().get(worldRegion);
+
             NBTFile nbtFile = new NBTFile(new File(worldDirectory.getAbsolutePath() + "//VBlocks//" + worldRegion.toStringWithoutWorld() + ".nbt"));
             if (!fileCache.containsKey(worldChunk.worldName))
                 fileCache.put(worldRegion.worldName, new WorldStorage(worldChunk.worldName));

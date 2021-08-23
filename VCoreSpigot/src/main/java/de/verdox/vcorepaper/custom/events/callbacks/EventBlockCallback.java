@@ -10,7 +10,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.block.Action;
 
 public interface EventBlockCallback {
-    void blockCallback(Player placer, Action action, VCoreItem itemInHand, VBlock vBlock, CallbackType callbackType);
+    void blockCallback(Player placer, Action action, VCoreItem itemInHand, VBlock<?, ?, ?> vBlock, CallbackType callbackType);
 
     enum CallbackType {
         BREAK_BLOCK,

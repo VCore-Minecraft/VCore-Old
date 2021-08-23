@@ -5,6 +5,8 @@
 package de.verdox.vcorepaper.custom;
 
 import de.verdox.vcorepaper.custom.nbtholders.NBTHolder;
+import org.bukkit.ChatColor;
+import org.bukkit.command.CommandSender;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -19,8 +21,8 @@ import java.util.stream.Collectors;
  */
 public abstract class CustomDataHolder<S, N extends NBTHolder, C extends CustomDataManager<S, ?, ?>> {
 
-    private final S dataHolder;
-    private final C customDataManager;
+    protected final S dataHolder;
+    protected final C customDataManager;
 
     public CustomDataHolder(@Nonnull S dataHolder, @Nonnull C customDataManager) {
         this.dataHolder = dataHolder;
@@ -90,6 +92,22 @@ public abstract class CustomDataHolder<S, N extends NBTHolder, C extends CustomD
     }
 
     protected abstract <T, R extends CustomData<T>> R instantiateData(Class<? extends R> customDataType);
+
+    public final void sendDebugInformation(CommandSender commandSender) {
+        commandSender.sendMessage("");
+        commandSender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&eDebugging &7:"));
+        for (String customDataKey : getCustomDataKeys()) {
+            //Class<? extends CustomData<?>> type = customDataManager.getDataTypeClass(customDataKey);
+            //Object foundObject;
+            //if(type != null){
+            //    foundObject = getCustomData(type);
+            //}
+            //else {
+            Object foundObject = getNBTCompound().getObject(customDataKey, Object.class);
+            //}
+            commandSender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&7>> &e" + customDataKey + "&7: " + (foundObject != null ? foundObject.toString() : "####")));
+        }
+    }
 
     @Nonnull
     public S getDataHolder() {

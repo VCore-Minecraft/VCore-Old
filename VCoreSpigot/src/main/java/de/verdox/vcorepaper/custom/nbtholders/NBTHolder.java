@@ -5,6 +5,7 @@
 package de.verdox.vcorepaper.custom.nbtholders;
 
 import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Set;
 import java.util.UUID;
@@ -42,7 +43,7 @@ public interface NBTHolder {
 
     void setDouble(String key, double value);
 
-    void setByteArray(String key, byte[] value);
+    void setByteArray(@NotNull String key, Byte[] value);
 
     void setFloat(String key, float value);
 
@@ -69,4 +70,6 @@ public interface NBTHolder {
     void delete();
 
     NBTHolder getVanillaCompound();
+
+
 }

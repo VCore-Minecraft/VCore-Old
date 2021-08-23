@@ -17,14 +17,16 @@ import de.verdox.vcorepaper.commands.AdminCommands;
 import de.verdox.vcorepaper.commands.NMSCommand;
 import de.verdox.vcorepaper.commands.PlayerAPICommands;
 import de.verdox.vcorepaper.custom.CustomDataListener;
-import de.verdox.vcorepaper.custom.block.CustomBlockManager;
+import de.verdox.vcorepaper.custom.block.CustomBlockDataManager;
+import de.verdox.vcorepaper.custom.block.CustomBlockProvider;
+import de.verdox.vcorepaper.custom.block.CustomLocationDataManager;
 import de.verdox.vcorepaper.custom.block.data.debug.BlockDebugData;
 import de.verdox.vcorepaper.custom.block.internal.VBlockListener;
 import de.verdox.vcorepaper.custom.entities.CustomEntityListener;
 import de.verdox.vcorepaper.custom.entities.CustomEntityManager;
 import de.verdox.vcorepaper.custom.events.paper.CustomPaperEventListener;
 import de.verdox.vcorepaper.custom.items.CustomItemManager;
-import de.verdox.vcorepaper.custom.nbtholders.block.BlockFileStorage;
+import de.verdox.vcorepaper.custom.nbtholders.location.LocationNBTFileStorage;
 import de.verdox.vcorepaper.nms.NMSManager;
 import org.bukkit.Bukkit;
 
@@ -39,11 +41,15 @@ public class VCorePaper extends VCoreCoreInstance.Minecraft {
 
     private CustomEntityManager customEntityManager;
     private CustomItemManager customItemManager;
-    private CustomBlockManager customBlockManager;
+
+    private CustomBlockProvider customBlockProvider;
+    private CustomBlockDataManager customBlockDataManager;
+    private CustomLocationDataManager customLocationDataManager;
+
     private ProtocolManager protocolManager;
     private VCorePlayerAPI vCorePlayerAPI;
 
-    private BlockFileStorage blockFileStorage;
+    private LocationNBTFileStorage locationNBTFileStorage;
 
     public static VCorePaper getInstance() {
         return instance;
@@ -57,14 +63,18 @@ public class VCorePaper extends VCoreCoreInstance.Minecraft {
 
         this.customEntityManager = new CustomEntityManager(this);
         this.customItemManager = new CustomItemManager(this);
-        this.customBlockManager = new CustomBlockManager(this);
+
+        this.customBlockProvider = new CustomBlockProvider(this);
+        this.customBlockDataManager = customBlockProvider.getBlockDataManager();
+        this.customLocationDataManager = customBlockProvider.getLocationDataManager();
+
+        this.locationNBTFileStorage = new LocationNBTFileStorage(this);
 
         new CustomDataListener(this);
         new CustomEntityListener(this);
         new VBlockListener(this);
         new CustomPaperEventListener(this);
 
-        this.blockFileStorage = new BlockFileStorage(this);
 
         new AdminCommands(this, "debug");
         new NMSCommand(this, "nms");
@@ -84,7 +94,7 @@ public class VCorePaper extends VCoreCoreInstance.Minecraft {
             getServer().shutdown();
         }
         networkManager.getServerPingManager().sendOnlinePing();
-        getCustomBlockManager().registerData(BlockDebugData.class);
+        getCustomLocationDataManager().registerData(BlockDebugData.class);
     }
 
     public ProtocolManager getProtocolManager() {
@@ -95,7 +105,7 @@ public class VCorePaper extends VCoreCoreInstance.Minecraft {
 
     @Override
     public void onPluginDisable() {
-        blockFileStorage.shutdown();
+        locationNBTFileStorage.shutdown();
         networkManager.shutdown();
     }
 
@@ -112,8 +122,16 @@ public class VCorePaper extends VCoreCoreInstance.Minecraft {
         return customItemManager;
     }
 
-    public CustomBlockManager getCustomBlockManager() {
-        return customBlockManager;
+    public CustomBlockProvider getCustomBlockManager() {
+        return customBlockProvider;
+    }
+
+    public CustomLocationDataManager getCustomLocationDataManager() {
+        return customLocationDataManager;
+    }
+
+    public CustomBlockDataManager getCustomBlockDataManager() {
+        return customBlockDataManager;
     }
 
     public void asyncThenSync(Runnable asyncTask, Runnable syncTask) {
@@ -154,7 +172,7 @@ public class VCorePaper extends VCoreCoreInstance.Minecraft {
         return getNetworkManager().getServerPingManager().getServerName();
     }
 
-    public BlockFileStorage getBlockFileStorage() {
-        return blockFileStorage;
+    public LocationNBTFileStorage getBlockFileStorage() {
+        return locationNBTFileStorage;
     }
 }

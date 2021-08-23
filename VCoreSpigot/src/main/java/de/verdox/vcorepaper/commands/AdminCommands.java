@@ -21,6 +21,7 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.util.RayTraceResult;
 
@@ -92,12 +93,35 @@ public class AdminCommands extends VCoreCommand.VCoreBukkitCommand {
                     else
                         commandSender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&b" + pluginName + " &edebugMode&7: &c" + false));
                 });
-        addCommandCallback("debugBlock")
+        addCommandCallback("debugItem")
                 .withPermission("vcore.debug")
-                .addCommandPath("addDebugInfo")
                 .setExecutor(VCommandCallback.CommandExecutorType.PLAYER)
                 .commandCallback((commandSender, commandParameters) -> {
                     Player player = (Player) commandSender;
+                    ItemStack stack = player.getInventory().getItemInMainHand();
+                    if (stack.getType().isAir()) {
+                        player.sendMessage(ChatColor.translateAlternateColorCodes('&', "&cHold an item in your main hand&7!"));
+                        return;
+                    }
+                    VCoreItem vCoreItem = VCorePaper.getInstance().getCustomItemManager().wrap(VCoreItem.class, stack);
+                    vCoreItem.sendDebugInformation(player);
+                });
+
+        addCommandCallback("debugBlock")
+                .withPermission("vcore.debug")
+                .setExecutor(VCommandCallback.CommandExecutorType.PLAYER)
+                .askFor("SavingTechnique", VCommandCallback.CommandAskType.STRING, "&cTechnique unknown", "LocationBased", "BlockBased", "ALL")
+                .addCommandPath("addDebugInfo")
+                .commandCallback((commandSender, commandParameters) -> {
+                    Player player = (Player) commandSender;
+                    String technique = commandParameters.getObject(0, String.class);
+
+                    if (!technique.equalsIgnoreCase("LocationBased") && !technique.equalsIgnoreCase("BlockBased") && !technique.equalsIgnoreCase("ALL")) {
+                        player.sendMessage(ChatColor.translateAlternateColorCodes('&', "&cTechnique unknown"));
+                        return;
+                    }
+
+
                     RayTraceResult rayTraceResult = player.rayTraceBlocks(7);
                     if (rayTraceResult == null) {
                         commandSender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&cBitte schaue einen Block an&7!"));
@@ -108,14 +132,29 @@ public class AdminCommands extends VCoreCommand.VCoreBukkitCommand {
                         commandSender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&cBitte schaue einen Block an&7!"));
                         return;
                     }
-                    VBlock vBlock = VCorePaper.getInstance().getCustomBlockManager().wrap(VBlock.class, hitBlock.getLocation());
-                    vBlock.storeCustomData(BlockDebugData.class, System.currentTimeMillis(), null);
+
+                    if (technique.equalsIgnoreCase("BlockBased") || technique.equalsIgnoreCase("ALL")) {
+                        VBlock.BlockBased vBlock = VCorePaper.getInstance().getCustomBlockDataManager().wrap(VBlock.BlockBased.class, hitBlock);
+                        vBlock.storeCustomData(BlockDebugData.class, System.currentTimeMillis(), null);
+                    }
+                    if (technique.equalsIgnoreCase("LocationBased") || technique.equalsIgnoreCase("ALL")) {
+                        VBlock.LocationBased vBlock = VCorePaper.getInstance().getCustomLocationDataManager().wrap(VBlock.LocationBased.class, hitBlock.getLocation());
+                        vBlock.storeCustomData(BlockDebugData.class, System.currentTimeMillis(), null);
+                    }
                 });
         addCommandCallback("debugBlock")
                 .withPermission("vcore.debug")
                 .setExecutor(VCommandCallback.CommandExecutorType.PLAYER)
+                .askFor("SavingTechnique", VCommandCallback.CommandAskType.STRING, "&cTechnique unknown", "LocationBased", "BlockBased", "ALL")
                 .commandCallback((commandSender, commandParameters) -> {
                     Player player = (Player) commandSender;
+                    String technique = commandParameters.getObject(0, String.class);
+
+                    if (!technique.equalsIgnoreCase("LocationBased") && !technique.equalsIgnoreCase("BlockBased") && !technique.equalsIgnoreCase("ALL")) {
+                        player.sendMessage(ChatColor.translateAlternateColorCodes('&', "&cTechnique unknown"));
+                        return;
+                    }
+
                     RayTraceResult rayTraceResult = player.rayTraceBlocks(7);
                     if (rayTraceResult == null) {
                         commandSender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&cBitte schaue einen Block an&7!"));
@@ -126,12 +165,19 @@ public class AdminCommands extends VCoreCommand.VCoreBukkitCommand {
                         commandSender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&cBitte schaue einen Block an&7!"));
                         return;
                     }
-                    VBlock vBlock = VCorePaper.getInstance().getCustomBlockManager().wrap(VBlock.class, hitBlock.getLocation());
-                    commandSender.sendMessage("");
-                    vBlock.getNBTCompound().getKeys().forEach(s -> {
-                        commandSender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&7>> &e" + s + "&7: " + vBlock.getNBTCompound().getObject(s, Object.class).toString()));
+
+                    vCorePlugin.sync(() -> {
+                        if (technique.equalsIgnoreCase("BlockBased") || technique.equalsIgnoreCase("ALL")) {
+                            VBlock.BlockBased vBlock = VCorePaper.getInstance().getCustomBlockDataManager().wrap(VBlock.BlockBased.class, hitBlock);
+                            vBlock.sendDebugInformation(player);
+                        }
+                        if (technique.equalsIgnoreCase("LocationBased") || technique.equalsIgnoreCase("ALL")) {
+                            VBlock.LocationBased vBlock = VCorePaper.getInstance().getCustomLocationDataManager().wrap(VBlock.LocationBased.class, hitBlock.getLocation());
+                            vBlock.sendDebugInformation(player);
+                        }
                     });
                 });
+
         addCommandCallback("debugEntity")
                 .withPermission("vcore.debug")
                 .setExecutor(VCommandCallback.CommandExecutorType.PLAYER)
@@ -149,11 +195,7 @@ public class AdminCommands extends VCoreCommand.VCoreBukkitCommand {
                             return;
                         }
                         VCoreEntity vCoreEntity = VCorePaper.getInstance().getCustomEntityManager().wrap(VCoreEntity.class, hitEntity);
-                        commandSender.sendMessage("");
-                        commandSender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&eDebugging &7: " + hitEntity));
-                        vCoreEntity.getNBTCompound().getKeys().forEach(s -> {
-                            commandSender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&7>> &e" + s + "&7: " + vCoreEntity.getNBTCompound().getObject(s, Object.class)));
-                        });
+                        vCoreEntity.sendDebugInformation(player);
                     });
                 });
         addCommandCallback("debugChunk")

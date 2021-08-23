@@ -28,6 +28,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public class VCoreGUI<T> {
@@ -43,6 +44,7 @@ public class VCoreGUI<T> {
     private final boolean updater;
     private final Consumer<ContentBuilder<T>> consumer;
     private final boolean enableDoubleClick;
+    private final Predicate<Player> openPredicate;
     private final boolean preventClose;
     private final VCoreGUIListener listener;
     private final String inventoryTitle;
@@ -65,12 +67,15 @@ public class VCoreGUI<T> {
             , Function<GUIClick, Response<?, ?>> onPlayerInventoryClick, BiFunction<Player, List<VCoreItem>, Response<?, ?>> completeFunction
             , boolean updater
             , Consumer<ContentBuilder<T>> consumer
-            , boolean enableDoubleClick) {
+            , boolean enableDoubleClick
+            , Predicate<Player> openPredicate
+    ) {
         this.onPlayerInventoryClick = onPlayerInventoryClick;
         this.completeFunction = completeFunction;
         this.updater = updater;
         this.consumer = consumer;
         this.enableDoubleClick = enableDoubleClick;
+        this.openPredicate = openPredicate;
         this.listener = new VCoreGUIListener();
         this.plugin = plugin;
         this.player = player;
@@ -139,6 +144,8 @@ public class VCoreGUI<T> {
             itemCache.put(itemSlot, inventoryContent);
             inventory.setItem(inventoryContent.slot, inventoryContent.stack.getDataHolder());
         });
+        if (openPredicate != null && !openPredicate.test(player))
+            Bukkit.getScheduler().runTask(plugin, this::closeInventory);
     }
 
     private VCoreGUI<T> copy() {
@@ -154,7 +161,9 @@ public class VCoreGUI<T> {
                 , onPlayerInventoryClick, completeFunction
                 , updater
                 , consumer
-                , enableDoubleClick);
+                , enableDoubleClick
+                , openPredicate
+        );
     }
 
     private void closeInventory() {
@@ -200,9 +209,15 @@ public class VCoreGUI<T> {
         private InventoryType inventoryType;
         private boolean update;
         private boolean enableDoubleClick;
+        private Predicate<Player> openPredicate;
 
         public Builder<T> update() {
             this.update = true;
+            return this;
+        }
+
+        public Builder<T> openCondition(Predicate<Player> predicate) {
+            this.openPredicate = predicate;
             return this;
         }
 
@@ -281,7 +296,7 @@ public class VCoreGUI<T> {
                 Validate.notNull(consumer, "Content must be set!");
             if (inventoryType == null && size <= 0)
                 size = 9;
-            return new VCoreGUI<T>(plugin, player, title, size, inventoryType, preventClose, itemCache, closeListener, onItemClick, onPlayerInventoryClick, completeFunction, update, consumer, enableDoubleClick);
+            return new VCoreGUI<>(plugin, player, title, size, inventoryType, preventClose, itemCache, closeListener, onItemClick, onPlayerInventoryClick, completeFunction, update, consumer, enableDoubleClick, openPredicate);
         }
 
     }
