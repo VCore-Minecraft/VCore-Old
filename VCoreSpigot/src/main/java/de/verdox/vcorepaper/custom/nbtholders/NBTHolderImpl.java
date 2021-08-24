@@ -147,6 +147,11 @@ public abstract class NBTHolderImpl<T> implements NBTHolder {
     }
 
     @Override
+    public void addNBTCompound(String key, NBTHolder nbtHolder) {
+
+    }
+
+    @Override
     public void setDouble(@NotNull String key, double value) {
         Objects.requireNonNull(getNbtCompound()).setDouble(key, value);
     }
@@ -189,6 +194,11 @@ public abstract class NBTHolderImpl<T> implements NBTHolder {
     @Override
     public void setUUID(@NotNull String key, UUID value) {
         Objects.requireNonNull(getNbtCompound()).setUUID(key, value);
+    }
+
+    @Override
+    public NBTHolder getNBTCompound(String key) {
+        return null;
     }
 
     @Override

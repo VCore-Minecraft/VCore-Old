@@ -79,31 +79,17 @@
     </repositories>
 
     <dependencies>
-        <!---  PaperSpigot Dependency -->
-        <dependency>
-            <groupId>com.destroystokyo.paper</groupId>
-            <artifactId>paper-api</artifactId>
-            <version>1.16.5-R0.1-SNAPSHOT</version>
-            <scope>provided</scope>
-        </dependency>
         <!---  VCoreParent Dependency -->
         <dependency>
             <groupId>de.verdox</groupId>
             <artifactId>VCore</artifactId>
             <version>1.0</version>
         </dependency>
-        <!---  Vault Dependency -->
-        <dependency>
-            <groupId>com.github.MilkBowl</groupId>
-            <artifactId>VaultAPI</artifactId>
-            <version>1.7</version>
-            <scope>provided</scope>
-        </dependency>
         <!---  NBT API Dependency -->
         <dependency>
             <groupId>de.tr7zw</groupId>
             <artifactId>item-nbt-api</artifactId>
-            <version>2.7.1</version>
+            <version>2.8.0</version>
         </dependency>
         <!---  PlayerInput Dependency -->
         <dependency>
@@ -116,6 +102,26 @@
             <groupId>net.wesjd</groupId>
             <artifactId>anvilgui</artifactId>
             <version>1.4.0-SNAPSHOT</version>
+        </dependency>
+        <!-- SkullCreator -->
+        <dependency>
+            <groupId>dev.dbassett</groupId>
+            <artifactId>skullcreator</artifactId>
+            <version>3.0.1</version>
+        </dependency>
+        <!---  PaperSpigot Dependency -->
+        <dependency>
+            <groupId>com.destroystokyo.paper</groupId>
+            <artifactId>paper-api</artifactId>
+            <version>1.16.5-R0.1-SNAPSHOT</version>
+            <scope>provided</scope>
+        </dependency>
+        <!---  Vault Dependency -->
+        <dependency>
+            <groupId>com.github.MilkBowl</groupId>
+            <artifactId>VaultAPI</artifactId>
+            <version>1.7</version>
+            <scope>provided</scope>
         </dependency>
         <!-- Holographic Displays API -->
         <dependency>
@@ -130,13 +136,6 @@
             <artifactId>ProtocolLib</artifactId>
             <version>4.6.0</version>
             <scope>provided</scope>
-        </dependency>
-        <!-- SkullCreator -->
-        <dependency>
-            <groupId>dev.dbassett</groupId>
-            <artifactId>skullcreator</artifactId>
-            <version>3.0.1</version>
-            <scope>compile</scope>
         </dependency>
         <!-- Paper -->
         <dependency>
@@ -179,12 +178,22 @@
                             <relocations>
                                 <relocation>
                                     <pattern>de.tr7zw.changeme.nbtapi</pattern>
-                                    <shadedPattern>de.verdox.vcore.dependencies.nbtapi</shadedPattern>
+                                    <shadedPattern>de.verdox.vcorepaper.dependencies.nbtapi</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>dev.dbassett.skullcreator</pattern>
+                                    <shadedPattern>de.verdox.vcorepaper.dependencies.skullcreator</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>me.nemo_64.spigotutilities.playerinputs</pattern>
+                                    <shadedPattern>de.verdox.vcorepaper.dependencies.playerinputs</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>net.wesjd.anvilgui</pattern>
+                                    <shadedPattern>de.verdox.vcorepaper.dependencies.anvilgui</shadedPattern>
                                 </relocation>
                             </relocations>
                             <createDependencyReducedPom>true</createDependencyReducedPom>
-                            <shadedArtifactAttached>true</shadedArtifactAttached>
-                            <shadedClassifierName>shaded</shadedClassifierName>
                         </configuration>
                     </execution>
                 </executions>
