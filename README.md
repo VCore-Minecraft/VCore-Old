@@ -1,5 +1,5 @@
 
-# VCore
+# VCore (Beta)
 
 VCore is a platform-independent Minecraft server plug-in library that was primarily designed for real-time
 synchronization with multiproxy networks via a global Redis cache. In addition to this framework, it offers
