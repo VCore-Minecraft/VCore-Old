@@ -10,7 +10,9 @@ import de.verdox.vcore.synchronization.pipeline.datatypes.NetworkData;
 
 import javax.annotation.Nonnull;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @version 1.0
@@ -31,6 +33,8 @@ public class ServerInstance extends NetworkData {
     //TODO: VersionTag als Info hinzufügen
     @VCorePersistentData
     private String serverType;
+    @VCorePersistentData
+    private final Set<String> infoTags = ConcurrentHashMap.newKeySet();
 
     public ServerInstance(VCorePlugin<?, ?> plugin, UUID objectUUID) {
         super(plugin, objectUUID);
@@ -64,5 +68,9 @@ public class ServerInstance extends NetworkData {
     @Override
     public void onCleanUp() {
 
+    }
+
+    public Set<String> getInfoTags() {
+        return infoTags;
     }
 }
