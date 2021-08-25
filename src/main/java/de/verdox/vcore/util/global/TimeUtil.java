@@ -75,13 +75,13 @@ public class TimeUtil {
             for (int i = 0; i < valueArray.length && counter < visibleFormats; i++) {
                 long value = valueArray[i];
                 String singular = translationArray[i];
-                String plural = translationArray[i + 1];
+                String plural = translationArray[i * 2];
 
                 if (value != 0) {
                     if (value == 1)
-                        stringBuilder.append(value + " " + singular);
+                        stringBuilder.append(value).append(" ").append(singular).append(" ");
                     else
-                        stringBuilder.append(value + " " + plural);
+                        stringBuilder.append(value).append(" ").append(plural).append(" ");
                     counter++;
                 }
             }
