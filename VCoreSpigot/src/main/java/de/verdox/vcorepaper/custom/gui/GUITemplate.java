@@ -128,6 +128,7 @@ public class GUITemplate {
         private Function<T, String> toStringFunc;
         private Function<VCoreGUI.VCoreGUIClick<T>, VCoreGUI.Response<?, ?>> clickCallback;
         private Runnable backCallback;
+        private VCoreGUI.Builder<T> builder;
 
         public SelectionGUI(@Nonnull String title, @Nonnull Collection<T> objectList, @Nonnull BukkitPlugin bukkitPlugin, @Positive int page, @Positive int rows, @Nonnull Function<T, ItemStack> objectToItemStack) {
             this.title = title;
@@ -222,13 +223,15 @@ public class GUITemplate {
         }
 
         public VCoreGUI.Builder<T> createBuilder() {
+            if (builder != null)
+                return builder;
             VCoreItem border = VCorePaper.getInstance().getCustomItemManager().createItemBuilder(Material.BLACK_STAINED_GLASS_PANE, 1, "&8").buildItem();
             VCoreItem nextPage = VCorePaper.getInstance().getCustomItemManager().createItemBuilder(Material.PAPER, 1, "&aNext page").buildItem();
             VCoreItem search = VCorePaper.getInstance().getCustomItemManager().createItemBuilder(Material.WRITTEN_BOOK, 1, "&eSearch").buildItem();
             VCoreItem lastPage = VCorePaper.getInstance().getCustomItemManager().createItemBuilder(Material.PAPER, 1, "&cLast page").buildItem();
             VCoreItem back = VCorePaper.getInstance().getCustomItemManager().createItemBuilder(Material.BARRIER, 1, "&cBack").buildItem();
 
-            return new VCoreGUI.Builder<T>()
+            this.builder = new VCoreGUI.Builder<T>()
                     .plugin(bukkitPlugin)
                     .update()
                     .title(ChatColor.translateAlternateColorCodes('&', title))
@@ -318,6 +321,7 @@ public class GUITemplate {
                         else
                             return VCoreGUI.Response.nothing();
                     });
+            return builder;
         }
 
         public void open(Player player) {
