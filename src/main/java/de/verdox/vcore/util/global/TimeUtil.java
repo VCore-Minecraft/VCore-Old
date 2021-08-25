@@ -72,10 +72,10 @@ public class TimeUtil {
             };
 
             int counter = 0;
-            for (int i = 0; i < valueArray.length && counter < visibleFormats; i++) {
+            for (int i = 0, j = 0; i < valueArray.length && counter < visibleFormats && j < translationArray.length; i++, j += 2) {
                 long value = valueArray[i];
-                String singular = translationArray[i];
-                String plural = translationArray[i * 2];
+                String singular = translationArray[j];
+                String plural = translationArray[j + 1];
 
                 if (value != 0) {
                     if (value == 1)
