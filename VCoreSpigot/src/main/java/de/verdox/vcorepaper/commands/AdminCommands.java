@@ -223,7 +223,7 @@ public class AdminCommands extends VCoreCommand.VCoreBukkitCommand {
                             .displayName(ChatColor.translateAlternateColorCodes('&', "&eTest Debug Item"))
                             .lore("", "&eZeile 1", "&fZeile 2")
                             .buildItem();
-                    vCoreItem.getNBTCompound().setObject("debugNBT", true);
+                    vCoreItem.toNBTHolder().getPersistentDataContainer().setObject("debugNBT", true);
                     player.getInventory().addItem(vCoreItem.getDataHolder());
                 });
     }

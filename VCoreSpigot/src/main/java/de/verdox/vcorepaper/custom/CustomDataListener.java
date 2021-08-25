@@ -172,7 +172,7 @@ public class CustomDataListener extends VCoreListener.VCoreBukkitListener {
                         .forEach(vBlockCustomData -> ((BlockDestroyCallback) vBlockCustomData).blockCallback(player, Action.LEFT_CLICK_BLOCK, finalVCoreItem, vBlockLocBased, EventBlockCallback.CallbackType.BREAK_BLOCK));
             } finally {
                 if (!vBlock.isFlagSet(VBlockFlag.PRESERVE_DATA_ON_BREAK))
-                    vBlock.getNBTCompound().delete();
+                    vBlock.toNBTHolder().delete();
             }
         });
     }

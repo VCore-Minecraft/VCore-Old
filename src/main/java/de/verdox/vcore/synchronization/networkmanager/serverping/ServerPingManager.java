@@ -61,8 +61,11 @@ public class ServerPingManager<T extends VCorePlugin<?, ?>> implements SystemLoa
 
     @Override
     public void shutdown() {
-        //TODO: Wirft eine Exception wegen Cancellation
-        keepAlivePing.cancel(false);
+        //TODO: Klappt manchmal nicht so ganz
+        try {
+            keepAlivePing.cancel(true);
+        } catch (Exception ignored) {
+        }
         sendOfflinePing();
     }
 }

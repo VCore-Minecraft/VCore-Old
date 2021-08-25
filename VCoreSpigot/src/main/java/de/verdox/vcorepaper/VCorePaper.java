@@ -28,12 +28,15 @@ import de.verdox.vcorepaper.custom.events.paper.CustomPaperEventListener;
 import de.verdox.vcorepaper.custom.items.CustomItemManager;
 import de.verdox.vcorepaper.custom.nbtholders.location.LocationNBTFileStorage;
 import de.verdox.vcorepaper.nms.NMSManager;
+import net.roxeez.advancement.AdvancementManager;
 import org.bukkit.Bukkit;
 
 import java.util.List;
 
 public class VCorePaper extends VCoreCoreInstance.Minecraft {
     public static VCorePaper instance;
+
+    private final AdvancementManager manager = new AdvancementManager(this);
 
     private NMSManager nmsManager;
 
@@ -170,6 +173,10 @@ public class VCorePaper extends VCoreCoreInstance.Minecraft {
     public String getServerName() {
 
         return getNetworkManager().getServerPingManager().getServerName();
+    }
+
+    public AdvancementManager getAdvancementManager() {
+        return manager;
     }
 
     public LocationNBTFileStorage getBlockFileStorage() {

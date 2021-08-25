@@ -4,10 +4,8 @@
 
 package de.verdox.vcorepaper.custom.entities;
 
-import de.verdox.vcorepaper.VCorePaper;
 import de.verdox.vcorepaper.custom.CustomData;
 import de.verdox.vcorepaper.custom.CustomDataHolder;
-import de.verdox.vcorepaper.custom.nbtholders.NBTHolder;
 import de.verdox.vcorepaper.custom.nbtholders.entity.NBTEntityHolder;
 import org.bukkit.entity.Entity;
 
@@ -22,8 +20,7 @@ public class VCoreEntity extends CustomDataHolder<Entity, NBTEntityHolder, Custo
 
     @Override
     protected <T, R extends CustomData<T>> void onStoreData(Class<? extends R> customDataType, T value) {
-        VCorePaper.getInstance().consoleMessage("&eStoring&7 &a" + customDataType + ": &b" + value, true);
-        getNBTCompound().getKeys().forEach(s -> VCorePaper.getInstance().consoleMessage(s, 2, true));
+
     }
 
     @Override
@@ -38,13 +35,7 @@ public class VCoreEntity extends CustomDataHolder<Entity, NBTEntityHolder, Custo
 
     @Nonnull
     @Override
-    public NBTEntityHolder getNBTCompound() {
+    public NBTEntityHolder toNBTHolder() {
         return new NBTEntityHolder(getDataHolder());
     }
-
-    public NBTHolder getVanillaCompound() {
-        return getNBTCompound().getVanillaCompound();
-    }
-
-
 }

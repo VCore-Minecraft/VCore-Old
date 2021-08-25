@@ -22,21 +22,21 @@ public abstract class CustomData<T> {
 
     public T findInDataHolder(CustomDataHolder<?, ?, ?> customDataHolder) {
         String nbtKey = getNBTKey();
-        if (!customDataHolder.getNBTCompound().hasKey(nbtKey))
+        if (!customDataHolder.toNBTHolder().getPersistentDataContainer().hasKey(nbtKey))
             return defaultValue();
         if (getTypeClass() == null)
             throw new NullPointerException("Can't return null!");
-        return customDataHolder.getNBTCompound().getObject(nbtKey, getTypeClass());
+        return customDataHolder.toNBTHolder().getPersistentDataContainer().getObject(nbtKey, getTypeClass());
     }
 
     public void storeCustomData(CustomDataHolder<?, ?, ?> customDataHolder, T data) {
-        customDataHolder.getNBTCompound().setObject(getNBTKey(), data);
+        customDataHolder.toNBTHolder().getPersistentDataContainer().setObject(getNBTKey(), data);
     }
 
     public boolean deleteData(CustomDataHolder<?, ?, ?> customDataHolder) {
-        if (!customDataHolder.getNBTCompound().hasKey(getNBTKey()))
+        if (!customDataHolder.toNBTHolder().getPersistentDataContainer().hasKey(getNBTKey()))
             return false;
-        customDataHolder.getNBTCompound().removeKey(getNBTKey());
+        customDataHolder.toNBTHolder().getPersistentDataContainer().removeKey(getNBTKey());
         return true;
     }
 

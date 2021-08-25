@@ -6,12 +6,12 @@ package de.verdox.vcorepaper.custom.nbtholders;
 
 import de.tr7zw.changeme.nbtapi.NBTCompound;
 
-public interface NBTHolder {
+public interface NBTHolder<C extends NBTCompound> {
     void save();
 
     void delete();
 
-    NBTCompound getPersistentDataContainer();
+    C getPersistentDataContainer();
 
     NBTCompound getVanillaCompound();
 }

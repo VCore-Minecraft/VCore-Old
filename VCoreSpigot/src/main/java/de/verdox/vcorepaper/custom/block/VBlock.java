@@ -10,7 +10,7 @@ import de.verdox.vcorepaper.custom.CustomDataHolder;
 import de.verdox.vcorepaper.custom.CustomDataManager;
 import de.verdox.vcorepaper.custom.block.flags.VBlockFlag;
 import de.verdox.vcorepaper.custom.nbtholders.NBTHolder;
-import de.verdox.vcorepaper.custom.nbtholders.block.NBTBlock;
+import de.verdox.vcorepaper.custom.nbtholders.block.NBTBlockHolder;
 import de.verdox.vcorepaper.custom.nbtholders.location.NBTLocation;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
@@ -26,7 +26,7 @@ import java.util.stream.Collectors;
  * @Author: Lukas Jonsson (Verdox)
  * @date 10.08.2021 22:11
  */
-public abstract class VBlock<D, N extends NBTHolder, M extends CustomDataManager<D, ?, ?>> extends CustomDataHolder<D, N, M> {
+public abstract class VBlock<D, N extends NBTHolder<?>, M extends CustomDataManager<D, ?, ?>> extends CustomDataHolder<D, N, M> {
     public VBlock(@Nonnull D dataHolder, @Nonnull M customDataManager) {
         super(dataHolder, customDataManager);
     }
@@ -86,21 +86,21 @@ public abstract class VBlock<D, N extends NBTHolder, M extends CustomDataManager
 
         @Nonnull
         @Override
-        public NBTLocation getNBTCompound() {
+        public NBTLocation toNBTHolder() {
             return nbtLocation;
         }
     }
 
-    public static class BlockBased extends VBlock<Block, NBTBlock, CustomBlockDataManager> {
+    public static class BlockBased extends VBlock<Block, NBTBlockHolder, CustomBlockDataManager> {
 
         @Nonnull
         private final Block block;
-        private final NBTBlock nbtBlock;
+        private final NBTBlockHolder nbtBlockHolder;
 
         public BlockBased(@Nonnull Block block, @Nonnull CustomBlockDataManager customDataManager) {
             super(block, customDataManager);
             this.block = block;
-            this.nbtBlock = new NBTBlock(block);
+            this.nbtBlockHolder = new NBTBlockHolder(block);
         }
 
         @Override
@@ -115,15 +115,15 @@ public abstract class VBlock<D, N extends NBTHolder, M extends CustomDataManager
 
         @Nonnull
         @Override
-        public NBTBlock getNBTCompound() {
-            return nbtBlock;
+        public NBTBlockHolder toNBTHolder() {
+            return nbtBlockHolder;
         }
 
         public boolean isFlagSet(VBlockFlag flag) {
-            if (!getNBTCompound().hasKey(flag.getNbtTag())) {
+            if (!toNBTHolder().getPersistentDataContainer().hasKey(flag.getNbtTag())) {
                 return false;
             }
-            return getNBTCompound().getBoolean(flag.getNbtTag());
+            return toNBTHolder().getPersistentDataContainer().getBoolean(flag.getNbtTag());
         }
 
         /**
@@ -131,7 +131,7 @@ public abstract class VBlock<D, N extends NBTHolder, M extends CustomDataManager
          * @param state If state = true the flag will be denied
          */
         public void setBlockFlag(VBlockFlag flag, boolean state) {
-            getNBTCompound().setObject(flag.getNbtTag(), state);
+            toNBTHolder().getPersistentDataContainer().setObject(flag.getNbtTag(), state);
         }
 
         public Set<VBlockFlag> getSetBlockFlags() {

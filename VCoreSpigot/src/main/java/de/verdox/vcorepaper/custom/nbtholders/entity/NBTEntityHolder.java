@@ -6,36 +6,27 @@ package de.verdox.vcorepaper.custom.nbtholders.entity;
 
 import de.tr7zw.changeme.nbtapi.NBTCompound;
 import de.tr7zw.changeme.nbtapi.NBTEntity;
-import de.verdox.vcorepaper.custom.nbtholders.NBTHolder;
 import de.verdox.vcorepaper.custom.nbtholders.NBTHolderImpl;
 import org.bukkit.entity.Entity;
 import org.jetbrains.annotations.NotNull;
 
-public class NBTEntityHolder extends NBTHolderImpl<Entity> {
+public class NBTEntityHolder extends NBTHolderImpl<Entity, NBTCompound> {
+    private final NBTEntity nbtEntity;
 
     public NBTEntityHolder(Entity entity) {
         super(entity);
+        this.nbtEntity = new NBTEntity(dataHolder);
 
     }
 
     @Override
-    protected NBTCompound getNbtCompound() {
-        return new NBTEntity(dataHolder).getPersistentDataContainer();
+    public NBTCompound getPersistentDataContainer() {
+        return nbtEntity.getPersistentDataContainer();
     }
 
     @NotNull
     @Override
-    public NBTHolder getVanillaCompound() {
-        return new NBTHolderImpl<>(dataHolder) {
-            @Override
-            protected NBTCompound getNbtCompound() {
-                return new NBTEntity(dataHolder);
-            }
-
-            @Override
-            public NBTHolder getVanillaCompound() {
-                return this;
-            }
-        };
+    public NBTCompound getVanillaCompound() {
+        return nbtEntity;
     }
 }

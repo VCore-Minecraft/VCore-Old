@@ -108,7 +108,7 @@ public class VCoreItem extends CustomDataHolder<ItemStack, NBTItemHolder, Custom
 
     @Nonnull
     @Override
-    public NBTItemHolder getNBTCompound() {
+    public NBTItemHolder toNBTHolder() {
         return new NBTItemHolder(getDataHolder(), true);
     }
 

@@ -11,14 +11,11 @@ import de.verdox.vcore.util.bukkit.keys.ChunkKey;
 import de.verdox.vcore.util.bukkit.keys.LocationKey;
 import de.verdox.vcore.util.bukkit.keys.SplitChunkKey;
 import de.verdox.vcorepaper.VCorePaper;
-import de.verdox.vcorepaper.custom.nbtholders.NBTHolder;
 import de.verdox.vcorepaper.custom.nbtholders.NBTHolderImpl;
 import de.verdox.vcorepaper.custom.nbtholders.location.event.nbtlocation.NBTBlockDeleteEvent;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.io.IOException;
 import java.util.Objects;
 import java.util.concurrent.ExecutionException;
@@ -30,7 +27,7 @@ import java.util.concurrent.TimeoutException;
  * @Author: Lukas Jonsson (Verdox)
  * @date 10.08.2021 13:33
  */
-public class NBTLocation extends NBTHolderImpl<Location> {
+public class NBTLocation extends NBTHolderImpl<Location, NBTCompound> {
 
     private final int chunkY;
     private final int chunkX;
@@ -53,8 +50,8 @@ public class NBTLocation extends NBTHolderImpl<Location> {
         splitChunkKey = new SplitChunkKey(worldChunk, chunkY);
     }
 
-    @Override
-    protected NBTCompound getNbtCompound() {
+
+    protected NBTCompound getOrLoadLocationCompound() {
         if (Objects.isNull(this.nbtFile)) {
             try {
                 this.nbtFile = VCorePaper.getInstance().getBlockFileStorage().loadNBTFile(worldChunk).get(10, TimeUnit.SECONDS);
@@ -71,12 +68,6 @@ public class NBTLocation extends NBTHolderImpl<Location> {
         if (Objects.isNull(this.blockCompound))
             this.blockCompound = this.splitChunkCompound.getOrCreateCompound(new LocationKey(this.dataHolder).toStringWithoutWorld());
         return this.blockCompound;
-    }
-
-    @Override
-    public void removeKey(@Nonnull String key) {
-        blockCompound.removeKey(key);
-        clearGarbage();
     }
 
     /**
@@ -107,6 +98,7 @@ public class NBTLocation extends NBTHolderImpl<Location> {
         }
     }
 
+
     /**
      * Returns the NBT Storage of a Tile Entity if the BlockState of the block at the specified location is instance of TileState
      * Note that in order to make this function work it is probably needed for the chunk to be loaded where the block is located at
@@ -115,10 +107,14 @@ public class NBTLocation extends NBTHolderImpl<Location> {
      *
      * @return Vanilla Compound of the block if exists
      */
-    @Nullable
     @Override
-    public NBTHolder getVanillaCompound() {
-        return this;
+    public NBTCompound getVanillaCompound() {
+        return getOrLoadLocationCompound();
+    }
+
+    @Override
+    public NBTCompound getPersistentDataContainer() {
+        return getOrLoadLocationCompound();
     }
 
     @Override
