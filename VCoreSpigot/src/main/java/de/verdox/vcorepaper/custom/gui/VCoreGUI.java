@@ -91,6 +91,8 @@ public class VCoreGUI<T> implements CustomGUI {
     }
 
     public void openInventory() {
+        if (this.openPredicate != null && !openPredicate.test(player))
+            return;
         Bukkit.getPluginManager().registerEvents(this.listener, this.plugin);
         if (this.size == 0) {
             if (inventoryType == null)
