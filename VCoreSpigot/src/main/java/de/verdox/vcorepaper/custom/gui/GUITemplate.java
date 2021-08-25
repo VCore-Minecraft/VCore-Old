@@ -29,7 +29,7 @@ import java.util.stream.Stream;
 public class GUITemplate {
     //TODO: Callbacks ans Ende der Function
 
-    public static AnvilGUI.Builder createStringInput(BukkitPlugin bukkitPlugin, Player player, String title, String notValidNumber, Function<String, AnvilGUI.Response> callback) {
+    public static AnvilGUI.Builder createStringInput(BukkitPlugin bukkitPlugin, Player player, String title, Function<String, AnvilGUI.Response> callback) {
         return new AnvilGUI.Builder()
                 .plugin(bukkitPlugin)
                 .title(ChatColor.translateAlternateColorCodes('&', title))
