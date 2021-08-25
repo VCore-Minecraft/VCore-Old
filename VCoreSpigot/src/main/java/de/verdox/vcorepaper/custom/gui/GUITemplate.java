@@ -29,6 +29,14 @@ import java.util.stream.Stream;
 public class GUITemplate {
     //TODO: Callbacks ans Ende der Function
 
+    public static AnvilGUI.Builder createStringInput(BukkitPlugin bukkitPlugin, Player player, String title, String notValidNumber, Function<String, AnvilGUI.Response> callback) {
+        return new AnvilGUI.Builder()
+                .plugin(bukkitPlugin)
+                .title(ChatColor.translateAlternateColorCodes('&', title))
+                .itemLeft(new ItemStack(Material.GOLD_INGOT))
+                .onComplete((player1, s) -> callback.apply(s));
+    }
+
     public static AnvilGUI.Builder createIntegerInputGUI(BukkitPlugin bukkitPlugin, Player player, String title, String notValidNumber, Function<Integer, AnvilGUI.Response> callback) {
         return new AnvilGUI.Builder()
                 .plugin(bukkitPlugin)
