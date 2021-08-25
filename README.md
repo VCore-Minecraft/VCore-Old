@@ -8,7 +8,8 @@ platform-dependent library code that can relieve some of the work for e.g. Spigo
 This project is currently under heavy development. When there is a first stable version I will let you guys know.
 
 ### Note: This Page is under heavy construction at the moment.
-I am also working on a wiki right now but the api will get big changes so use it at your own risk!
+I am also working on a wiki right! 
+The api will get big changes so use it at your own risk!
 
 ## Importing the API using Maven
 
