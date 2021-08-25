@@ -221,15 +221,14 @@ public class GUITemplate {
             });
         }
 
-        public void open(Player player) {
-
+        public VCoreGUI.Builder<T> createBuilder() {
             VCoreItem border = VCorePaper.getInstance().getCustomItemManager().createItemBuilder(Material.BLACK_STAINED_GLASS_PANE, 1, "&8").buildItem();
             VCoreItem nextPage = VCorePaper.getInstance().getCustomItemManager().createItemBuilder(Material.PAPER, 1, "&aNext page").buildItem();
             VCoreItem search = VCorePaper.getInstance().getCustomItemManager().createItemBuilder(Material.WRITTEN_BOOK, 1, "&eSearch").buildItem();
             VCoreItem lastPage = VCorePaper.getInstance().getCustomItemManager().createItemBuilder(Material.PAPER, 1, "&cLast page").buildItem();
             VCoreItem back = VCorePaper.getInstance().getCustomItemManager().createItemBuilder(Material.BARRIER, 1, "&cBack").buildItem();
 
-            new VCoreGUI.Builder<T>()
+            return new VCoreGUI.Builder<T>()
                     .plugin(bukkitPlugin)
                     .update()
                     .title(ChatColor.translateAlternateColorCodes('&', title))
@@ -318,7 +317,11 @@ public class GUITemplate {
                             return clickCallback.apply(vCoreGUIClick);
                         else
                             return VCoreGUI.Response.nothing();
-                    }).open(player);
+                    });
+        }
+
+        public void open(Player player) {
+            createBuilder().open(player);
         }
     }
 }
