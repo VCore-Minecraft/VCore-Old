@@ -344,7 +344,7 @@ public class VCoreGUI<T> {
             fillRowWithItem(rows - 1, vCoreItem, object);
 
             for (int i = 1; i < rows - 1; i++)
-                fillLeftRightItem(i * 9, vCoreItem, object);
+                fillLeftRightItem(i, vCoreItem, object);
             return this;
         }
 
