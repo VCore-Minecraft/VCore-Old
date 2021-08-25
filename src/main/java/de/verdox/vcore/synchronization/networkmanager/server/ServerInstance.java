@@ -10,7 +10,6 @@ import de.verdox.vcore.synchronization.pipeline.datatypes.NetworkData;
 
 import javax.annotation.Nonnull;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -34,7 +33,7 @@ public class ServerInstance extends NetworkData {
     @VCorePersistentData
     private String serverType;
     @VCorePersistentData
-    private final Set<String> infoTags = ConcurrentHashMap.newKeySet();
+    private final Map<String, String> infoTags = new ConcurrentHashMap<>();
 
     public ServerInstance(VCorePlugin<?, ?> plugin, UUID objectUUID) {
         super(plugin, objectUUID);
@@ -70,7 +69,7 @@ public class ServerInstance extends NetworkData {
 
     }
 
-    public Set<String> getInfoTags() {
+    public Map<String, String> getInfoTags() {
         return infoTags;
     }
 }
