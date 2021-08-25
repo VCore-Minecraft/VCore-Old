@@ -116,7 +116,7 @@ public class VCoreGUI<T> {
         }
     }
 
-    public synchronized void updateGUI() {
+    private synchronized void executeGUIUpdate() {
         if (inventory.getViewers().size() <= 0)
             guiUpdater.cancel();
 
@@ -146,6 +146,13 @@ public class VCoreGUI<T> {
         });
         if (openPredicate != null && !openPredicate.test(player))
             Bukkit.getScheduler().runTask(plugin, this::closeInventory);
+    }
+
+    public void updateGUI() {
+        //if(Bukkit.isPrimaryThread())
+        //    VCorePaper.getInstance().async(this::executeGUIUpdate);
+        //else
+        executeGUIUpdate();
     }
 
     private VCoreGUI<T> copy() {
@@ -307,7 +314,7 @@ public class VCoreGUI<T> {
         //TODO: Direkt Consumer für Click Callback einfügen
         public ContentBuilder<T> addContent(int slot, VCoreItem stack, T object) {
             Validate.notNull(stack, "Stack cannot be null");
-            stack.getNBTCompound().setObject("vcore_gui_slot", slot);
+            stack.toNBTHolder().getPersistentDataContainer().setInteger("vcore_gui_slot", slot);
             itemCache.put(slot, new InventoryContent<>(stack, slot, object));
             return this;
         }
@@ -316,6 +323,35 @@ public class VCoreGUI<T> {
             itemCache.remove(slot);
             return this;
         }
+
+        public ContentBuilder<T> fillRowWithItem(int row, VCoreItem vCoreItem, T object) {
+            for (int i = row * 9; i < (row * 9) + 9; i++)
+                addContent(i, vCoreItem, object);
+            return this;
+        }
+
+        public ContentBuilder<T> fillLeftRightItem(int row, VCoreItem vCoreItem, T object) {
+            int rowIndex = row * 9;
+            addContent(rowIndex, vCoreItem, object);
+            addContent(rowIndex + 8, vCoreItem, object);
+            return this;
+        }
+
+        public ContentBuilder<T> createBorder(int size, VCoreItem vCoreItem, T object) {
+            int rows = size / 9;
+
+            fillRowWithItem(0, vCoreItem, object);
+            fillRowWithItem(rows - 1, vCoreItem, object);
+
+            for (int i = 1; i < rows - 1; i++)
+                fillLeftRightItem(i * 9, vCoreItem, object);
+            return this;
+        }
+
+        public ContentBuilder<T> createBorder(int size) {
+            return createBorder(size, VCorePaper.getInstance().getCustomItemManager().getGuiBorderItem(), null);
+        }
+
 
         Map<Integer, InventoryContent<T>> getItemCache() {
             return itemCache;

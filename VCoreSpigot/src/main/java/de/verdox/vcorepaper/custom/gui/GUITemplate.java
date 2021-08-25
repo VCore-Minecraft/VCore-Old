@@ -153,7 +153,8 @@ public class GUITemplate {
                 throw new NullPointerException("clickCallback can't be null!");
             if (slot > guiSize)
                 slot = (rows * 9 + (slot % 9)) + 9;
-            vCoreItem.getNBTCompound().setObject("vcore_gui_slot", slot);
+
+            vCoreItem.toNBTHolder().getPersistentDataContainer().setInteger("vcore_gui_slot", slot);
             additionalItems.put(vCoreItem, clickCallback);
             return this;
         }
@@ -280,9 +281,9 @@ public class GUITemplate {
 
 
                         additionalItems.forEach((vCoreItem, vCoreItemResponseFunction) -> {
-                            if (!vCoreItem.getNBTCompound().hasKey("vcore_gui_slot"))
+                            if (!vCoreItem.toNBTHolder().getPersistentDataContainer().hasKey("vcore_gui_slot"))
                                 return;
-                            int slot = vCoreItem.getNBTCompound().getInteger("vcore_gui_slot");
+                            int slot = vCoreItem.toNBTHolder().getPersistentDataContainer().getInteger("vcore_gui_slot");
                             contentBuilder.removeItem(slot);
                             contentBuilder.addContent(slot, vCoreItem, null);
                         });

@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
  * @param <S> DataHolder Class (e.g. ItemStack, Entity)
  * @param <N> NBTCompound (e.g. NBTItem, NBTEntity)
  */
-public abstract class CustomDataHolder<S, N extends NBTHolder, C extends CustomDataManager<S, ?, ?>> {
+public abstract class CustomDataHolder<S, N extends NBTHolder<?>, C extends CustomDataManager<S, ?, ?>> {
 
     protected final S dataHolder;
     protected final C customDataManager;
@@ -83,12 +83,12 @@ public abstract class CustomDataHolder<S, N extends NBTHolder, C extends CustomD
 
     public <T, R extends CustomData<T>> boolean containsCustomData(Class<? extends R> customDataClass) {
         String nbtKey = customDataManager.getNBTKey(customDataClass);
-        return getNBTCompound().hasKey(nbtKey);
+        return toNBTHolder().getPersistentDataContainer().hasKey(nbtKey);
     }
 
     @Nonnull
     public Set<String> getCustomDataKeys() {
-        return getNBTCompound().getKeys().parallelStream().collect(Collectors.toSet());
+        return toNBTHolder().getPersistentDataContainer().getKeys().parallelStream().collect(Collectors.toSet());
     }
 
     protected abstract <T, R extends CustomData<T>> R instantiateData(Class<? extends R> customDataType);
@@ -103,7 +103,7 @@ public abstract class CustomDataHolder<S, N extends NBTHolder, C extends CustomD
             //    foundObject = getCustomData(type);
             //}
             //else {
-            Object foundObject = getNBTCompound().getObject(customDataKey, Object.class);
+            Object foundObject = toNBTHolder().getPersistentDataContainer().getObject(customDataKey, Object.class);
             //}
             commandSender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&7>> &e" + customDataKey + "&7: " + (foundObject != null ? foundObject.toString() : "####")));
         }
@@ -115,7 +115,7 @@ public abstract class CustomDataHolder<S, N extends NBTHolder, C extends CustomD
     }
 
     @Nonnull
-    public abstract N getNBTCompound();
+    public abstract N toNBTHolder();
 
     @Nonnull
     public C getCustomDataManager() {

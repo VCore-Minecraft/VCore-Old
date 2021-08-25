@@ -49,9 +49,9 @@ public class VBlockListener extends VCoreListener.VCoreBukkitListener {
     @EventHandler
     public void onDelete(NBTBlockDeleteEvent e) {
         NBTLocation nbtLocation = e.getNbtBlock();
-        if (!nbtLocation.hasKey(VBlockFlag.PRESERVE_DATA_ON_BREAK.getNbtTag()))
+        if (!nbtLocation.getPersistentDataContainer().hasKey(VBlockFlag.PRESERVE_DATA_ON_BREAK.getNbtTag()))
             return;
-        e.setCancelled(nbtLocation.getBoolean(VBlockFlag.PRESERVE_DATA_ON_BREAK.getNbtTag()));
+        e.setCancelled(nbtLocation.getPersistentDataContainer().getBoolean(VBlockFlag.PRESERVE_DATA_ON_BREAK.getNbtTag()));
     }
 
     @EventHandler

@@ -9,6 +9,7 @@ import de.verdox.vcore.synchronization.pipeline.parts.Pipeline;
 import de.verdox.vcore.synchronization.pipeline.parts.storage.PipelineTaskScheduler;
 
 import javax.annotation.Nonnull;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -79,6 +80,7 @@ public class PipelineTaskSchedulerImpl implements PipelineTaskScheduler {
                 try {
                     pipelineTask.getCompletableFuture().get(1, TimeUnit.SECONDS);
                 } catch (InterruptedException | ExecutionException | TimeoutException e) {
+                    pipelineManager.getPlugin().consoleMessage("&cPipeline Task took too long for type: &b" + Arrays.toString(pipelineTask.getCompletableFuture().getClass().getGenericInterfaces()), false);
                     e.printStackTrace();
                 }
             });
