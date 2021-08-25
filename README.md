@@ -9,6 +9,23 @@ This project is currently under heavy development. When there is a first stable 
 
 ### Note: This Page is under heavy construction at the moment.
 
+## Importing the API using Maven
+
+[Choose latest Tag on Jitpack](https://jitpack.io/#derverdox/VCore)
+
+	<repositories>
+		<repository>
+		    <id>jitpack.io</id>
+		    <url>https://jitpack.io</url>
+		</repository>
+	</repositories>
+ 
+ 	<dependency>
+	    <groupId>com.github.derverdox</groupId>
+	    <artifactId>VCore</artifactId>
+	    <version>Tag</version>
+	</dependency>
+
 ## Contributions:
 
  - ([MIT License](https://github.com/tr7zw/Item-NBT-API/blob/master/LICENSE)) - [tr7zw - NBT API](https://github.com/tr7zw/Item-NBT-API)
