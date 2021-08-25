@@ -35,7 +35,7 @@ import java.util.concurrent.TimeUnit;
 public class PlayerDataManager implements SystemLoadable {
     protected final VCorePlugin<?, ?> plugin;
     private final PipelineManager pipelineManager;
-    private boolean loaded;
+    private final boolean loaded;
 
     public PlayerDataManager(PipelineManager pipelineManager) {
         this.pipelineManager = pipelineManager;
@@ -48,6 +48,7 @@ public class PlayerDataManager implements SystemLoadable {
         plugin.getServices().eventBus.post(new PlayerPreSessionLoadEvent(player));
         plugin.createTaskBatch().wait(400, TimeUnit.MILLISECONDS).doAsync(() -> {
             plugin.getServices().getSubsystemManager().getActivePlayerDataClasses()
+                    .parallelStream()
                     .forEach(aClass -> {
                         PlayerData playerData = pipelineManager.load(aClass, player, Pipeline.LoadingStrategy.LOAD_PIPELINE, true);
                         playerData.onConnect(player);
@@ -60,6 +61,7 @@ public class PlayerDataManager implements SystemLoadable {
         plugin.createTaskBatch()
                 .doAsync(() -> {
                     plugin.getServices().getSubsystemManager().getActivePlayerDataClasses()
+                            .parallelStream()
                             .forEach(aClass -> {
                                 PlayerData data = pipelineManager.getLocalCache().getData(aClass, player);
                                 data.onDisconnect(player);
