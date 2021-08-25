@@ -89,6 +89,7 @@ public class VCorePaper extends VCoreCoreInstance.Minecraft {
         networkManager = new NetworkManager<>(ServerType.GAME_SERVER, this);
         new PlayerBukkitListener(networkManager);
         if (networkManager.getServerCache().isServerNameTaken(getServerName())) {
+            //TODO: Remote Shutdown des Servers anordnen
             consoleMessage("&4<> ============================================= <>", false);
             consoleMessage("", false);
             consoleMessage("&cThe ServerName &e" + getServerName() + " &cis already online in this VCore Network &7(&bExists in Global Cache&7)", false);

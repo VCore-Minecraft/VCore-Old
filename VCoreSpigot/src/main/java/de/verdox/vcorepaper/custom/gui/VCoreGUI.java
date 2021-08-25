@@ -31,7 +31,7 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-public class VCoreGUI<T> {
+public class VCoreGUI<T> implements CustomGUI {
 
     private final BukkitPlugin plugin;
     private final Player player;
