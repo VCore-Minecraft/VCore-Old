@@ -17,4 +17,5 @@ public interface DataManipulator {
 
     void pushUpdate(VCoreData vCoreData, Runnable callback);
 
+    void pushRemoval(VCoreData vCoreData, Runnable callback);
 }

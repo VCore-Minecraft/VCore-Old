@@ -41,6 +41,12 @@ public interface GlobalCache extends DataProvider {
             public void pushUpdate(VCoreData vCoreData, Runnable callback) {
 
             }
+
+            @Override
+            public void pushRemoval(VCoreData vCoreData, Runnable callback) {
+
+
+            }
         };
     }
 

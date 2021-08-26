@@ -121,11 +121,15 @@ public class PipelineManager implements Pipeline {
         plugin.consoleMessage("&8[&e" + loadingStrategy + "&8] &bLoading data from pipeline &a" + type.getSimpleName() + " &b" + uuid, true);
         PipelineTaskScheduler.PipelineTask<T> pipelineTask = pipelineTaskScheduler.schedulePipelineTask(PipelineTaskScheduler.PipelineAction.LOAD, loadingStrategy, type, uuid);
 
+        // Subsystem Check
         if (!NetworkData.class.isAssignableFrom(type)) {
             VCoreSubsystem<?> subsystem = plugin.findDependSubsystem(type);
-            if (subsystem == null)
-                throw new NullPointerException("Subsystem of " + type + " could not be found in plugin" + plugin.getPluginName());
+            if (subsystem == null) {
+                plugin.consoleMessage("&4You are trying to load &e" + type + " &4with a Pipeline that does not know this type. Choose the Plugin that knows the subsystem of this dataType to prevent this error.", false);
+                throw new IllegalStateException("Subsystem of " + type + " could not be found in plugin" + plugin.getPluginName());
+            }
         }
+
         if (!loadingStrategy.equals(LoadingStrategy.LOAD_PIPELINE)) {
             if (!localCache.dataExist(type, uuid)) {
                 if (loadingStrategy.equals(LoadingStrategy.LOAD_LOCAL))
@@ -152,11 +156,11 @@ public class PipelineManager implements Pipeline {
             plugin.consoleMessage("&8[&e" + loadingStrategy + "&8] &eCompleted with&7: &b " + data, true);
             return data;
         }
+        // Loaded via pipeline but found in Local Cache
         if (localCache.dataExist(type, uuid)) {
             T data = localCache.getData(type, uuid);
             data.updateLastUse();
             pipelineTask.getCompletableFuture().complete(data);
-            plugin.consoleMessage("&8[&e" + loadingStrategy + "&8] &eCompleted with&7: &b " + data, true);
             if (callback != null)
                 callback.accept(data);
             return data;
@@ -229,28 +233,32 @@ public class PipelineManager implements Pipeline {
     }
 
     @Override
-    public <T extends VCoreData> boolean delete(@Nonnull Class<? extends T> type, @Nonnull UUID uuid) {
+    public <T extends VCoreData> boolean delete(@Nonnull Class<? extends T> type, @Nonnull UUID uuid, boolean notifyOthers, @Nonnull QueryStrategy... strategies) {
+        Set<QueryStrategy> strategySet = Arrays.stream(strategies).collect(Collectors.toSet());
         plugin.consoleMessage("&eDeleting&7: &b" + type.getSimpleName() + " &ewith uuid &a" + uuid, true);
-        if (getLocalCache() != null) {
+        if (getLocalCache() != null && (strategySet.contains(QueryStrategy.ALL) || strategySet.contains(QueryStrategy.LOCAL))) {
             T data = getLocalCache().getData(type, uuid);
             if (!getLocalCache().remove(type, uuid))
                 plugin.consoleMessage("&8[&eLocalCache&8] &cCould not delete&7: &b" + type.getSimpleName() + " &ewith uuid &a" + uuid, true);
-            else if (data != null)
+            else if (data != null) {
+                if (notifyOthers)
+                    data.getDataManipulator().pushRemoval(data, null);
                 data.onDelete();
+            }
         }
-        if (getGlobalCache() != null)
+        if (getGlobalCache() != null && (strategySet.contains(QueryStrategy.ALL) || strategySet.contains(QueryStrategy.GLOBAL_CACHE)))
             if (!getGlobalCache().remove(type, uuid))
                 plugin.consoleMessage("&8[&eGlobalCache&8] &cCould not delete&7: &b" + type.getSimpleName() + " &ewith uuid &a" + uuid, true);
-        if (getGlobalStorage() != null)
+        if (getGlobalStorage() != null && (strategySet.contains(QueryStrategy.ALL) || strategySet.contains(QueryStrategy.GLOBAL_STORAGE)))
             if (!getGlobalStorage().remove(type, uuid))
                 plugin.consoleMessage("&8[&eGlobalStorage&8] &cCould not delete&7: &b" + type.getSimpleName() + " &ewith uuid &a" + uuid, true);
         return true;
     }
 
     @Override
-    public <T extends VCoreData> CompletableFuture<Boolean> deleteAsync(@Nonnull Class<? extends T> type, @Nonnull UUID uuid) {
+    public <T extends VCoreData> CompletableFuture<Boolean> deleteAsync(@Nonnull Class<? extends T> type, @Nonnull UUID uuid, boolean notifyOthers, @Nonnull QueryStrategy... strategies) {
         CompletableFuture<Boolean> completableFuture = new CompletableFuture<>();
-        executorService.submit(new CatchingRunnable(() -> completableFuture.complete(delete(type, uuid))));
+        executorService.submit(new CatchingRunnable(() -> completableFuture.complete(delete(type, uuid, notifyOthers, strategies))));
         return completableFuture;
     }
 

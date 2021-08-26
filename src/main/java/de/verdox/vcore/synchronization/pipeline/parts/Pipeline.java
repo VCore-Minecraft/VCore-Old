@@ -68,10 +68,39 @@ public interface Pipeline extends SystemLoadable {
 
     <T extends VCoreData> CompletableFuture<Boolean> existAsync(@Nonnull Class<? extends T> type, @Nonnull UUID uuid, @Nonnull QueryStrategy... strategies);
 
-    //TODO: Bei nem delete muss eine Redis Message geschickt werden, damit alle Serverinstanzen das Objekt aus dem lokalen Cache entfernt können!
-    <T extends VCoreData> boolean delete(@Nonnull Class<? extends T> type, @Nonnull UUID uuid);
 
-    <T extends VCoreData> CompletableFuture<Boolean> deleteAsync(@Nonnull Class<? extends T> type, @Nonnull UUID uuid);
+    /**
+     * @param type
+     * @param uuid
+     * @param notifyOthers When true the Data Manipulator will send a removal message that will remove this instance from all local caches that contain this data
+     * @param strategies
+     * @param <T>
+     * @return
+     */
+    <T extends VCoreData> boolean delete(@Nonnull Class<? extends T> type, @Nonnull UUID uuid, boolean notifyOthers, @Nonnull QueryStrategy... strategies);
+
+    default <T extends VCoreData> boolean delete(@Nonnull Class<? extends T> type, @Nonnull UUID uuid, @Nonnull QueryStrategy... strategies) {
+        return delete(type, uuid, false, strategies);
+    }
+
+    default <T extends VCoreData> boolean delete(@Nonnull Class<? extends T> type, @Nonnull UUID uuid, boolean notifyOthers) {
+        return delete(type, uuid, notifyOthers, QueryStrategy.ALL);
+    }
+
+    default <T extends VCoreData> boolean delete(@Nonnull Class<? extends T> type, @Nonnull UUID uuid) {
+        return delete(type, uuid, false, QueryStrategy.ALL);
+    }
+
+    <T extends VCoreData> CompletableFuture<Boolean> deleteAsync(@Nonnull Class<? extends T> type, @Nonnull UUID uuid, boolean notifyOthers, @Nonnull QueryStrategy... strategies);
+
+    default <T extends VCoreData> CompletableFuture<Boolean> deleteAsync(@Nonnull Class<? extends T> type, boolean notifyOthers, @Nonnull UUID uuid) {
+        return deleteAsync(type, uuid, notifyOthers, QueryStrategy.ALL);
+    }
+
+    default <T extends VCoreData> CompletableFuture<Boolean> deleteAsync(@Nonnull Class<? extends T> type, @Nonnull UUID uuid) {
+        return deleteAsync(type, uuid, false, QueryStrategy.ALL);
+    }
+
 
     LocalCache getLocalCache();
 
@@ -95,8 +124,13 @@ public interface Pipeline extends SystemLoadable {
     }
 
     enum QueryStrategy {
+        // Instruction will be executed for Local Cache
         LOCAL,
+        // Instruction will be executed for Global Cache
         GLOBAL_CACHE,
+        // Instruction will be executed for Global Storage
         GLOBAL_STORAGE,
+        // Instruction will be executed for all
+        ALL
     }
 }
