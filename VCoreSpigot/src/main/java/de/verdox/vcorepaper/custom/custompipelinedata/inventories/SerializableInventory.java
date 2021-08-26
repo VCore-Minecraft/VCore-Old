@@ -10,7 +10,6 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
-import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.Arrays;
@@ -26,7 +25,7 @@ public class SerializableInventory implements Serializable, CustomPipelineData {
 
     protected final Map<String, Object> data;
 
-    public SerializableInventory(@Nonnull String id, @Nonnull ItemStack[] storageContents) {
+    public SerializableInventory(@NotNull String id, @NotNull ItemStack[] storageContents) {
         this.data = new ConcurrentHashMap<>();
         new StringBsonReference(data, "id").setValue(id);
         saveStorageContents(storageContents);

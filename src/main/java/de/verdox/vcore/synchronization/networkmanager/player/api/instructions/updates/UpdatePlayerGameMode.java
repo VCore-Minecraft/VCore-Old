@@ -7,8 +7,8 @@ package de.verdox.vcore.synchronization.networkmanager.player.api.instructions.u
 import de.verdox.vcore.plugin.wrapper.types.enums.PlayerGameMode;
 import de.verdox.vcore.synchronization.messaging.instructions.update.CleverUpdate;
 import de.verdox.vcore.synchronization.networkmanager.player.api.VCorePlayerAPI;
+import org.jetbrains.annotations.NotNull;
 
-import javax.annotation.Nonnull;
 import java.util.List;
 import java.util.UUID;
 
@@ -22,7 +22,7 @@ public class UpdatePlayerGameMode extends CleverUpdate {
         super(uuid);
     }
 
-    @Nonnull
+    @NotNull
     @Override
     public UpdateCompletion executeUpdate(Object[] instructionData) {
         UUID target = (UUID) instructionData[0];

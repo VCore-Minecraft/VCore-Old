@@ -25,8 +25,8 @@ import org.bukkit.entity.EnderDragon;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.checkerframework.checker.index.qual.NonNegative;
+import org.jetbrains.annotations.NotNull;
 
-import javax.annotation.Nonnull;
 import java.util.Arrays;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
@@ -64,7 +64,7 @@ public class WorldHandler_V1_16_R3 implements NMSWorldHandler {
     }
 
     @Override
-    public void refreshChunk(@Nonnull Player player, @Nonnull Chunk chunk, Runnable callback) {
+    public void refreshChunk(@NotNull Player player, @NotNull Chunk chunk, Runnable callback) {
         VCorePaper.getInstance().createTaskBatch().doAsync(() -> {
             PacketPlayOutMapChunk packetPlayOutMapChunk = new PacketPlayOutMapChunk(((CraftChunk) chunk).getHandle(), 65535, true);
             ((CraftPlayer) player).getHandle().playerConnection.sendPacket(packetPlayOutMapChunk);
@@ -73,7 +73,7 @@ public class WorldHandler_V1_16_R3 implements NMSWorldHandler {
     }
 
     @Override
-    public void sendFakeBiome(@Nonnull Player player, @Nonnull Chunk chunk, @Nonnull Biome biome, Runnable callback) {
+    public void sendFakeBiome(@NotNull Player player, @NotNull Chunk chunk, @NotNull Biome biome, Runnable callback) {
         VCorePaper.getInstance().createTaskBatch().doAsync(() -> {
             ChunkPacketWrapper.V_1_16_R3 chunkPacketWrapper = new ChunkPacketWrapper.V_1_16_R3(chunk, 65535, true);
             int[] biomeArray = chunkPacketWrapper.biomes.readField();
@@ -84,7 +84,7 @@ public class WorldHandler_V1_16_R3 implements NMSWorldHandler {
     }
 
     @Override
-    public void sendFakeDimension(@Nonnull Player player, @Nonnull org.bukkit.World.Environment environment, Runnable callback) {
+    public void sendFakeDimension(@NotNull Player player, @NotNull org.bukkit.World.Environment environment, Runnable callback) {
         Location location = player.getLocation().clone();
         boolean flag = !location.getWorld().getEnvironment().equals(environment);
         CraftPlayer craftPlayer = (CraftPlayer) player;
@@ -193,7 +193,7 @@ public class WorldHandler_V1_16_R3 implements NMSWorldHandler {
     }
 
     @Override
-    public void sendFakeWorldBorder(@Nonnull Player player, @Nonnull Location center, @NonNegative double size, Runnable callback) {
+    public void sendFakeWorldBorder(@NotNull Player player, @NotNull Location center, @NonNegative double size, Runnable callback) {
         WorldBorderPacketWrapper.V_1_16_R3 worldBorderPacketWrapper = new WorldBorderPacketWrapper.V_1_16_R3();
         VCorePaper.getInstance()
                 .createTaskBatch()
@@ -216,7 +216,7 @@ public class WorldHandler_V1_16_R3 implements NMSWorldHandler {
     }
 
     @Override
-    public void refreshWorldBorder(@Nonnull Player player, Runnable callback) {
+    public void refreshWorldBorder(@NotNull Player player, Runnable callback) {
         VCorePaper.getInstance()
                 .createTaskBatch()
                 .doAsync(() -> {
@@ -227,7 +227,7 @@ public class WorldHandler_V1_16_R3 implements NMSWorldHandler {
     }
 
     @Override
-    public DragonBattle createDragonBattle(@Nonnull Location dragonSpawnLoc, @Nonnull Location exitPortalLoc) {
+    public DragonBattle createDragonBattle(@NotNull Location dragonSpawnLoc, @NotNull Location exitPortalLoc) {
         WorldServer worldServer = ((CraftWorld) dragonSpawnLoc.getWorld()).getHandle();
 
         NBTTagCompound nbtTagCompound = new NBTTagCompound();

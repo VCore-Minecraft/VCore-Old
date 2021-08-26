@@ -7,8 +7,8 @@ package de.verdox.vcore.synchronization.networkmanager.server;
 import de.verdox.vcore.plugin.VCorePlugin;
 import de.verdox.vcore.synchronization.pipeline.annotations.*;
 import de.verdox.vcore.synchronization.pipeline.datatypes.NetworkData;
+import org.jetbrains.annotations.NotNull;
 
-import javax.annotation.Nonnull;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -45,7 +45,7 @@ public class ServerInstance extends NetworkData {
         return ServerType.valueOf(serverType);
     }
 
-    public void setServerType(@Nonnull ServerType serverType) {
+    public void setServerType(@NotNull ServerType serverType) {
         this.serverType = serverType.name();
     }
 

@@ -12,7 +12,6 @@ import org.jetbrains.annotations.NotNull;
 import org.redisson.api.RTopic;
 import org.redisson.api.listener.MessageListener;
 
-import javax.annotation.Nonnull;
 import java.io.Serializable;
 import java.util.Map;
 import java.util.UUID;
@@ -29,7 +28,7 @@ public class RedisDataManipulator implements DataManipulator {
     private final MessageListener<DataBlock> messageListener;
     private final UUID senderUUID = UUID.randomUUID();
 
-    RedisDataManipulator(@Nonnull RedisCache redisCache, VCoreData vCoreData) {
+    RedisDataManipulator(@NotNull RedisCache redisCache, VCoreData vCoreData) {
         this.redisCache = redisCache;
         this.dataTopic = this.redisCache.getTopic(vCoreData.getClass(), vCoreData.getObjectUUID());
         this.messageListener = (channel, dataBlock) -> {
@@ -97,7 +96,7 @@ public class RedisDataManipulator implements DataManipulator {
     public static class UpdateDataBlock extends DataBlock {
         private final Map<String, Object> dataToUpdate;
 
-        UpdateDataBlock(@Nonnull UUID senderUUID, @Nonnull Map<String, Object> dataToUpdate) {
+        UpdateDataBlock(@NotNull UUID senderUUID, @NotNull Map<String, Object> dataToUpdate) {
             super(senderUUID);
             this.dataToUpdate = dataToUpdate;
         }

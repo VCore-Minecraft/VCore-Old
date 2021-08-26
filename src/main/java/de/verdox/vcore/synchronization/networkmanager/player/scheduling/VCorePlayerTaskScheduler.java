@@ -10,7 +10,6 @@ import de.verdox.vcore.plugin.VCorePlugin;
 import de.verdox.vcore.synchronization.networkmanager.player.api.PlayerTask;
 import org.jetbrains.annotations.NotNull;
 
-import javax.annotation.Nonnull;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -47,11 +46,11 @@ public final class VCorePlayerTaskScheduler implements SystemLoadable {
         }
     }
 
-    public void schedulePlayerTask(@Nonnull UUID playerUUID, @Nonnull Runnable runnable, int maxWaitTime, @Nonnull TimeUnit timeUnit) {
+    public void schedulePlayerTask(@NotNull UUID playerUUID, @NotNull Runnable runnable, int maxWaitTime, @NotNull TimeUnit timeUnit) {
         schedulePlayerTask(playerUUID, UUID.randomUUID(), runnable, maxWaitTime, timeUnit);
     }
 
-    public void schedulePlayerTask(@Nonnull UUID playerUUID, @NotNull UUID taskUUID, @Nonnull Runnable runnable, int maxWaitTime, @Nonnull TimeUnit timeUnit) {
+    public void schedulePlayerTask(@NotNull UUID playerUUID, @NotNull UUID taskUUID, @NotNull Runnable runnable, int maxWaitTime, @NotNull TimeUnit timeUnit) {
         plugin.consoleMessage("&eScheduling Task", false);
         executor.submit(new CatchingRunnable(() -> {
             if (plugin.getPlatformWrapper().isPlayerOnline(playerUUID)) {
@@ -71,7 +70,7 @@ public final class VCorePlayerTaskScheduler implements SystemLoadable {
         }));
     }
 
-    private void removePlayerTask(@Nonnull UUID playerUUID, @Nonnull PlayerTask playerTask) {
+    private void removePlayerTask(@NotNull UUID playerUUID, @NotNull PlayerTask playerTask) {
         if (!scheduledTasks.containsKey(playerUUID))
             return;
         Set<PlayerTask> playerTasks = scheduledTasks.get(playerUUID);
@@ -80,7 +79,7 @@ public final class VCorePlayerTaskScheduler implements SystemLoadable {
             scheduledTasks.remove(playerUUID);
     }
 
-    public CompletableFuture<Set<Runnable>> getAllTasks(@Nonnull UUID playerUUID) {
+    public CompletableFuture<Set<Runnable>> getAllTasks(@NotNull UUID playerUUID) {
         CompletableFuture<Set<Runnable>> future = new CompletableFuture<>();
         executor.submit(new CatchingRunnable(() -> {
             if (!scheduledTasks.containsKey(playerUUID)) {

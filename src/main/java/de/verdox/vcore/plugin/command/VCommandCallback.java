@@ -18,8 +18,8 @@ import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.checkerframework.checker.index.qual.NonNegative;
+import org.jetbrains.annotations.NotNull;
 
-import javax.annotation.Nonnull;
 import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
@@ -41,14 +41,14 @@ public class VCommandCallback {
 
     //TODO: Im Command Callback eine Möglichkeit dem Spieler vorzeitig die Error Message zu senden
 
-    public VCommandCallback(@Nonnull VCorePlugin<?, ?> plugin, @Nonnull String... commandPath) {
+    public VCommandCallback(@NotNull VCorePlugin<?, ?> plugin, @NotNull String... commandPath) {
         this.plugin = plugin;
         this.commandPath = commandPath;
         for (String s : commandPath)
             addCommandPath(s);
     }
 
-    public VCommandCallback addCommandPath(@Nonnull String commandPath) {
+    public VCommandCallback addCommandPath(@NotNull String commandPath) {
         if (commandPath.isEmpty())
             return this;
         int index = callbackInfos.size();
@@ -56,7 +56,7 @@ public class VCommandCallback {
         return this;
     }
 
-    public VCommandCallback askFor(@Nonnull String name, @Nonnull CommandAskType commandAskType, @Nonnull String errorMessage, @Nonnull String... suggested) {
+    public VCommandCallback askFor(@NotNull String name, @NotNull CommandAskType commandAskType, @NotNull String errorMessage, @NotNull String... suggested) {
         int index = callbackInfos.size();
         callbackInfos.add(new CommandAskParameter(plugin, index, name, commandAskType, errorMessage, Arrays.asList(suggested)));
         if (commandAskType.equals(CommandAskType.REST_OF_INPUT))
@@ -64,17 +64,17 @@ public class VCommandCallback {
         return this;
     }
 
-    public VCommandCallback withPermission(@Nonnull String permission) {
+    public VCommandCallback withPermission(@NotNull String permission) {
         this.neededPermission = permission;
         return this;
     }
 
-    public VCommandCallback setExecutor(@Nonnull CommandExecutorType commandExecutorType) {
+    public VCommandCallback setExecutor(@NotNull CommandExecutorType commandExecutorType) {
         this.commandExecutorType = commandExecutorType;
         return this;
     }
 
-    public VCommandCallback commandCallback(@Nonnull BiConsumer<CommandSender, CommandParameters> providedArguments) {
+    public VCommandCallback commandCallback(@NotNull BiConsumer<CommandSender, CommandParameters> providedArguments) {
         this.providedArguments = providedArguments;
         return this;
     }
@@ -277,7 +277,7 @@ public class VCommandCallback {
             this.parameters = parameters;
         }
 
-        public <T> T getObject(@NonNegative int index, @Nonnull Class<? extends T> type) {
+        public <T> T getObject(@NonNegative int index, @NotNull Class<? extends T> type) {
             return type.cast(parameters.get(index));
         }
 
@@ -343,7 +343,7 @@ public class VCommandCallback {
         private final String errorMessage;
         private final List<String> suggested;
 
-        CommandAskParameter(VCorePlugin<?, ?> plugin, int index, @Nonnull String name, @Nonnull CommandAskType commandAskType, @Nonnull String errorMessage, @Nonnull List<String> suggested) {
+        CommandAskParameter(VCorePlugin<?, ?> plugin, int index, @NotNull String name, @NotNull CommandAskType commandAskType, @NotNull String errorMessage, @NotNull List<String> suggested) {
             super(plugin, index);
             this.name = name;
             this.commandAskType = commandAskType;

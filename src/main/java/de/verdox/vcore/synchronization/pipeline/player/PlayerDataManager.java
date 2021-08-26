@@ -23,8 +23,8 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerKickEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.jetbrains.annotations.NotNull;
 
-import javax.annotation.Nonnull;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -44,7 +44,7 @@ public class PlayerDataManager implements SystemLoadable {
         loaded = true;
     }
 
-    protected final void loginPipeline(@Nonnull UUID player) {
+    protected final void loginPipeline(@NotNull UUID player) {
         if (plugin instanceof VCoreCoreInstance)
             plugin.consoleMessage("&eHandling Player Join &b" + player, false);
         plugin.getServices().eventBus.post(new PlayerPreSessionLoadEvent(plugin, player));
@@ -58,7 +58,7 @@ public class PlayerDataManager implements SystemLoadable {
         }).doSync(() -> plugin.getServices().eventBus.post(new PlayerSessionLoadedEvent(plugin, player, System.currentTimeMillis()))).executeBatch();
     }
 
-    protected final void logoutPipeline(@Nonnull UUID player) {
+    protected final void logoutPipeline(@NotNull UUID player) {
         plugin.getServices().eventBus.post(new PlayerPreSessionUnloadEvent(plugin, player));
         plugin.createTaskBatch()
                 .doAsync(() -> {

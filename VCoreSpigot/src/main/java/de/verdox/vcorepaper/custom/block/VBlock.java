@@ -14,8 +14,8 @@ import de.verdox.vcorepaper.custom.nbtholders.block.NBTBlockHolder;
 import de.verdox.vcorepaper.custom.nbtholders.location.NBTLocation;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
+import org.jetbrains.annotations.NotNull;
 
-import javax.annotation.Nonnull;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.Set;
@@ -27,7 +27,7 @@ import java.util.stream.Collectors;
  * @date 10.08.2021 22:11
  */
 public abstract class VBlock<D, N extends NBTHolder<?>, M extends CustomDataManager<D, ?, ?>> extends CustomDataHolder<D, N, M> {
-    public VBlock(@Nonnull D dataHolder, @Nonnull M customDataManager) {
+    public VBlock(@NotNull D dataHolder, @NotNull M customDataManager) {
         super(dataHolder, customDataManager);
     }
 
@@ -69,7 +69,7 @@ public abstract class VBlock<D, N extends NBTHolder<?>, M extends CustomDataMana
     public static class LocationBased extends VBlock<Location, NBTLocation, CustomLocationDataManager> {
         private final NBTLocation nbtLocation;
 
-        public LocationBased(@Nonnull Location dataHolder, @Nonnull CustomLocationDataManager customDataManager) {
+        public LocationBased(@NotNull Location dataHolder, @NotNull CustomLocationDataManager customDataManager) {
             super(dataHolder, customDataManager);
             nbtLocation = new NBTLocation(getDataHolder());
         }
@@ -84,7 +84,7 @@ public abstract class VBlock<D, N extends NBTHolder<?>, M extends CustomDataMana
             return this;
         }
 
-        @Nonnull
+        @NotNull
         @Override
         public NBTLocation toNBTHolder() {
             return nbtLocation;
@@ -93,11 +93,11 @@ public abstract class VBlock<D, N extends NBTHolder<?>, M extends CustomDataMana
 
     public static class BlockBased extends VBlock<Block, NBTBlockHolder, CustomBlockDataManager> {
 
-        @Nonnull
+        @NotNull
         private final Block block;
         private final NBTBlockHolder nbtBlockHolder;
 
-        public BlockBased(@Nonnull Block block, @Nonnull CustomBlockDataManager customDataManager) {
+        public BlockBased(@NotNull Block block, @NotNull CustomBlockDataManager customDataManager) {
             super(block, customDataManager);
             this.block = block;
             this.nbtBlockHolder = new NBTBlockHolder(block);
@@ -113,7 +113,7 @@ public abstract class VBlock<D, N extends NBTHolder<?>, M extends CustomDataMana
             return VCorePaper.getInstance().getCustomLocationDataManager().getVBlock(block.getLocation());
         }
 
-        @Nonnull
+        @NotNull
         @Override
         public NBTBlockHolder toNBTHolder() {
             return nbtBlockHolder;

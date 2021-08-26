@@ -17,8 +17,8 @@ import org.bukkit.command.TabExecutor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.jetbrains.annotations.NotNull;
 
-import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -39,13 +39,13 @@ public abstract class VCoreCommand<T extends VCorePlugin<?, ?>, R> {
     protected final List<VCommandCallback> vCommandCallbacks = new ArrayList<>();
     protected VCoreSubsystem<T> vCoreSubsystem;
 
-    public VCoreCommand(@Nonnull T vCorePlugin, String commandName) {
+    public VCoreCommand(@NotNull T vCorePlugin, String commandName) {
         this.vCorePlugin = vCorePlugin;
         this.commandName = commandName;
         registerCommand();
     }
 
-    public VCoreCommand(@Nonnull VCoreSubsystem<T> vCoreSubsystem, String commandName) {
+    public VCoreCommand(@NotNull VCoreSubsystem<T> vCoreSubsystem, String commandName) {
         this.vCorePlugin = vCoreSubsystem.getVCorePlugin();
         this.vCoreSubsystem = vCoreSubsystem;
         this.commandName = commandName;

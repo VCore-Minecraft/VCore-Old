@@ -5,8 +5,8 @@
 package de.verdox.vcore.synchronization.pipeline.player.events;
 
 import de.verdox.vcore.plugin.VCorePlugin;
+import org.jetbrains.annotations.NotNull;
 
-import javax.annotation.Nonnull;
 import java.util.UUID;
 
 /**
@@ -19,7 +19,7 @@ public class PlayerSessionLoadedEvent {
     private final UUID playerUUID;
     private final long timeStamp;
 
-    public PlayerSessionLoadedEvent(@Nonnull VCorePlugin<?, ?> plugin, @Nonnull UUID playerUUID, long timeStamp) {
+    public PlayerSessionLoadedEvent(@NotNull VCorePlugin<?, ?> plugin, @NotNull UUID playerUUID, long timeStamp) {
         this.plugin = plugin;
         this.playerUUID = playerUUID;
         this.timeStamp = timeStamp;

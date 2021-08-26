@@ -9,9 +9,8 @@ import com.comphenix.protocol.events.ListenerPriority;
 import com.comphenix.protocol.events.PacketAdapter;
 import com.comphenix.protocol.events.PacketEvent;
 import de.verdox.vcorepaper.VCorePaper;
-import reactor.util.annotation.NonNull;
+import org.jetbrains.annotations.NotNull;
 
-import javax.annotation.Nonnull;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.UUID;
@@ -80,7 +79,7 @@ public abstract class PacketListener {
         private final UUID playerUUID;
         private final Object[] instructionData;
 
-        public PacketInstruction(@Nonnull UUID playerUUID, @NonNull Object... instructionData) {
+        public PacketInstruction(@NotNull UUID playerUUID, @NotNull Object... instructionData) {
             this.playerUUID = playerUUID;
             this.instructionData = instructionData;
         }

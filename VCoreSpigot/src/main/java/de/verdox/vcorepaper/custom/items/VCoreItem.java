@@ -11,8 +11,8 @@ import de.verdox.vcorepaper.custom.nbtholders.item.NBTItemHolder;
 import org.bukkit.ChatColor;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.jetbrains.annotations.NotNull;
 
-import javax.annotation.Nonnull;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
@@ -106,7 +106,7 @@ public class VCoreItem extends CustomDataHolder<ItemStack, NBTItemHolder, Custom
     }
 
 
-    @Nonnull
+    @NotNull
     @Override
     public NBTItemHolder toNBTHolder() {
         return new NBTItemHolder(getDataHolder(), true);

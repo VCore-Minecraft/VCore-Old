@@ -7,8 +7,8 @@ package de.verdox.vcore.synchronization.messaging.instructions.update;
 import de.verdox.vcore.synchronization.messaging.instructions.InstructionResponder;
 import de.verdox.vcore.synchronization.messaging.instructions.annotations.InstructionInfo;
 import de.verdox.vcore.synchronization.messaging.instructions.query.Query;
+import org.jetbrains.annotations.NotNull;
 
-import javax.annotation.Nonnull;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
@@ -24,7 +24,7 @@ public abstract class Update extends Query<Boolean> implements InstructionRespon
         super(uuid);
     }
 
-    @Nonnull
+    @NotNull
     protected abstract UpdateCompletion executeUpdate(Object[] instructionData);
 
     protected boolean onSend(Object[] instructionData, CompletableFuture<Boolean> future) {

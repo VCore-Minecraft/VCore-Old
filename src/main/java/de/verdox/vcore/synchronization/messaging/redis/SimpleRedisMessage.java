@@ -5,8 +5,8 @@
 package de.verdox.vcore.synchronization.messaging.redis;
 
 import de.verdox.vcore.synchronization.messaging.messages.Message;
+import org.jetbrains.annotations.NotNull;
 
-import javax.annotation.Nonnull;
 import java.util.Arrays;
 import java.util.UUID;
 
@@ -22,7 +22,7 @@ public class SimpleRedisMessage implements Message {
     private final String[] parameters;
     private final Object[] dataToSend;
 
-    SimpleRedisMessage(@Nonnull UUID sender, @Nonnull String senderIdentifier, @Nonnull String[] parameters, @Nonnull Object[] dataToSend) {
+    SimpleRedisMessage(@NotNull UUID sender, @NotNull String senderIdentifier, @NotNull String[] parameters, @NotNull Object[] dataToSend) {
         this.sender = sender;
         this.senderIdentifier = senderIdentifier;
         this.parameters = parameters;

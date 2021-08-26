@@ -8,8 +8,8 @@ import de.verdox.vcore.plugin.SystemLoadable;
 import de.verdox.vcore.plugin.VCorePlugin;
 import de.verdox.vcore.synchronization.pipeline.datatypes.VCoreData;
 import de.verdox.vcore.synchronization.pipeline.parts.Pipeline;
+import org.jetbrains.annotations.NotNull;
 
-import javax.annotation.Nonnull;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
@@ -20,11 +20,11 @@ import java.util.concurrent.CompletableFuture;
  */
 public interface PipelineTaskScheduler extends SystemLoadable {
 
-    <T extends VCoreData> PipelineTask<T> schedulePipelineTask(@Nonnull PipelineAction pipelineAction, @Nonnull Pipeline.LoadingStrategy loadingStrategy, @Nonnull Class<? extends T> type, @Nonnull UUID uuid);
+    <T extends VCoreData> PipelineTask<T> schedulePipelineTask(@NotNull PipelineAction pipelineAction, @NotNull Pipeline.LoadingStrategy loadingStrategy, @NotNull Class<? extends T> type, @NotNull UUID uuid);
 
-    <T extends VCoreData> PipelineTask<T> getExistingPipelineTask(@Nonnull Class<? extends T> type, @Nonnull UUID uuid);
+    <T extends VCoreData> PipelineTask<T> getExistingPipelineTask(@NotNull Class<? extends T> type, @NotNull UUID uuid);
 
-    <T extends VCoreData> void removePipelineTask(@Nonnull Class<? extends T> type, @Nonnull UUID uuid);
+    <T extends VCoreData> void removePipelineTask(@NotNull Class<? extends T> type, @NotNull UUID uuid);
 
     enum PipelineAction {
         LOAD
@@ -36,7 +36,7 @@ public interface PipelineTaskScheduler extends SystemLoadable {
         private final UUID uuid;
         private final CompletableFuture<T> completableFuture;
         private final UUID taskUUID = UUID.randomUUID();
-        private long start = System.currentTimeMillis();
+        private final long start = System.currentTimeMillis();
 
         public PipelineTask(VCorePlugin<?, ?> plugin, PipelineTaskScheduler pipelineTaskScheduler, PipelineAction pipelineAction, Class<? extends T> type, UUID uuid, Runnable onComplete) {
             this.pipelineAction = pipelineAction;

@@ -4,7 +4,8 @@
 
 package de.verdox.vcore.plugin.wrapper.types;
 
-import javax.annotation.Nonnull;
+import org.jetbrains.annotations.NotNull;
+
 import java.util.Objects;
 
 /**
@@ -19,7 +20,7 @@ public class WorldChunk {
     public final int globalSpaceX;
     public final int globalSpaceZ;
 
-    public WorldChunk(@Nonnull String worldName, int x, int z) {
+    public WorldChunk(@NotNull String worldName, int x, int z) {
         this.worldName = worldName;
         this.x = x;
         this.z = z;

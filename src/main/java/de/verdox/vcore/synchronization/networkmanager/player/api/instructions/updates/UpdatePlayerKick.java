@@ -6,8 +6,8 @@ package de.verdox.vcore.synchronization.networkmanager.player.api.instructions.u
 
 import de.verdox.vcore.synchronization.messaging.instructions.update.CleverUpdate;
 import de.verdox.vcore.synchronization.networkmanager.player.api.VCorePlayerAPI;
+import org.jetbrains.annotations.NotNull;
 
-import javax.annotation.Nonnull;
 import java.util.List;
 import java.util.UUID;
 
@@ -21,7 +21,7 @@ public class UpdatePlayerKick extends CleverUpdate {
         super(uuid);
     }
 
-    @Nonnull
+    @NotNull
     @Override
     public UpdateCompletion executeUpdate(Object[] instructionData) {
         UUID targetUUID = (UUID) instructionData[0];

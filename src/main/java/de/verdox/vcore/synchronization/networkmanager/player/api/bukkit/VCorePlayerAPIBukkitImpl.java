@@ -16,6 +16,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nonnull;
 import java.util.Set;
@@ -36,7 +37,7 @@ public class VCorePlayerAPIBukkitImpl extends VCorePlayerAPIImpl implements List
     }
 
     @Override
-    public CompletableFuture<ServerLocation> getServerLocation(@Nonnull VCorePlayer vCorePlayer) {
+    public CompletableFuture<ServerLocation> getServerLocation(@Nonnull @NotNull VCorePlayer vCorePlayer) {
         Player player = Bukkit.getPlayer(vCorePlayer.getObjectUUID());
         if (player == null)
             return super.getServerLocation(vCorePlayer);

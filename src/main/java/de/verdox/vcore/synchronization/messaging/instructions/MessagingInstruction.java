@@ -8,8 +8,8 @@ import de.verdox.vcore.plugin.VCorePlugin;
 import de.verdox.vcore.plugin.wrapper.PlatformWrapper;
 import de.verdox.vcore.plugin.wrapper.bungeecord.BungeePlatform;
 import de.verdox.vcore.plugin.wrapper.spigot.SpigotPlatform;
+import org.jetbrains.annotations.NotNull;
 
-import javax.annotation.Nonnull;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
@@ -58,13 +58,13 @@ public abstract class MessagingInstruction<T> implements InstructionSender<T> {
         return this;
     }
 
-    public boolean checkOnlineOnSpigot(@Nonnull UUID playerUUID) {
+    public boolean checkOnlineOnSpigot(@NotNull UUID playerUUID) {
         if (spigotPlatform == null)
             return false;
         return platformWrapper.isPlayerOnline(playerUUID);
     }
 
-    public boolean checkOnlineOnBungeeCord(@Nonnull UUID playerUUID) {
+    public boolean checkOnlineOnBungeeCord(@NotNull UUID playerUUID) {
         if (bungeePlatform == null)
             return false;
         return platformWrapper.isPlayerOnline(playerUUID);

@@ -20,8 +20,8 @@ import de.verdox.vcore.synchronization.pipeline.parts.storage.GlobalStorage;
 import de.verdox.vcore.synchronization.pipeline.parts.storage.PipelineTaskScheduler;
 import de.verdox.vcore.util.global.AnnotationResolver;
 import io.netty.util.concurrent.DefaultThreadFactory;
+import org.jetbrains.annotations.NotNull;
 
-import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -50,7 +50,7 @@ public class PipelineManager implements Pipeline {
     private final ExecutorService executorService;
     private final boolean loaded;
 
-    public PipelineManager(VCorePlugin<?, ?> plugin, @Nonnull LocalCache localCache, @Nullable GlobalCache globalCache, @Nullable GlobalStorage globalStorage) {
+    public PipelineManager(VCorePlugin<?, ?> plugin, @NotNull LocalCache localCache, @Nullable GlobalCache globalCache, @Nullable GlobalStorage globalStorage) {
         this.plugin = plugin;
         this.executorService = Executors.newFixedThreadPool(2, new DefaultThreadFactory(plugin.getPluginName() + "Pipeline"));
         this.globalStorage = globalStorage;
@@ -113,8 +113,10 @@ public class PipelineManager implements Pipeline {
      * @return VCoreDataType
      */
     @Override
-    public final <T extends VCoreData> T load(@Nonnull Class<? extends T> type, @Nonnull UUID uuid, @Nonnull LoadingStrategy loadingStrategy, boolean createIfNotExist, @Nullable Consumer<T> callback) {
+    public final <T extends VCoreData> T load(@NotNull Class<? extends T> type, @NotNull UUID uuid, @NotNull LoadingStrategy loadingStrategy, boolean createIfNotExist, @Nullable Consumer<T> callback) {
         //plugin.consoleMessage("&8[&e" + loadingStrategy + "&8] &bLoading data from pipeline &a" + type.getSimpleName() + " &b" + uuid, true);
+        if (uuid == null)
+            System.out.println(uuid);
         PipelineTaskScheduler.PipelineTask<T> pipelineTask = pipelineTaskScheduler.schedulePipelineTask(PipelineTaskScheduler.PipelineAction.LOAD, loadingStrategy, type, uuid);
 
         // Subsystem Check
@@ -159,17 +161,17 @@ public class PipelineManager implements Pipeline {
         return null;
     }
 
-    @Nonnull
+    @NotNull
     @Override
-    public <T extends VCoreData> CompletableFuture<T> loadAsync(@Nonnull Class<? extends T> type, @Nonnull UUID uuid, @Nonnull LoadingStrategy loadingStrategy, boolean createIfNotExist, @org.jetbrains.annotations.Nullable Consumer<T> callback) {
+    public <T extends VCoreData> CompletableFuture<T> loadAsync(@NotNull Class<? extends T> type, @NotNull UUID uuid, @NotNull LoadingStrategy loadingStrategy, boolean createIfNotExist, @org.jetbrains.annotations.Nullable Consumer<T> callback) {
         CompletableFuture<T> completableFuture = new CompletableFuture<>();
         executorService.submit(new CatchingRunnable(() -> completableFuture.complete(load(type, uuid, loadingStrategy, createIfNotExist, callback))));
         return completableFuture;
     }
 
-    @Nonnull
+    @NotNull
     @Override
-    public <T extends VCoreData> Set<T> loadAllData(@Nonnull Class<? extends T> type, @Nonnull LoadingStrategy loadingStrategy) {
+    public <T extends VCoreData> Set<T> loadAllData(@NotNull Class<? extends T> type, @NotNull LoadingStrategy loadingStrategy) {
         Set<T> set = new HashSet<>();
         if (loadingStrategy.equals(LoadingStrategy.LOAD_PIPELINE))
             synchronizeData(type);
@@ -179,16 +181,16 @@ public class PipelineManager implements Pipeline {
         return set;
     }
 
-    @Nonnull
+    @NotNull
     @Override
-    public <T extends VCoreData> CompletableFuture<Set<T>> loadAllDataAsync(@Nonnull Class<? extends T> type, @Nonnull LoadingStrategy loadingStrategy) {
+    public <T extends VCoreData> CompletableFuture<Set<T>> loadAllDataAsync(@NotNull Class<? extends T> type, @NotNull LoadingStrategy loadingStrategy) {
         CompletableFuture<Set<T>> completableFuture = new CompletableFuture<>();
         executorService.submit(new CatchingRunnable(() -> completableFuture.complete(loadAllData(type, loadingStrategy))));
         return completableFuture;
     }
 
     @Override
-    public <T extends VCoreData> boolean exist(@Nonnull Class<? extends T> type, @Nonnull UUID uuid, @Nonnull QueryStrategy... strategies) {
+    public <T extends VCoreData> boolean exist(@NotNull Class<? extends T> type, @NotNull UUID uuid, @NotNull QueryStrategy... strategies) {
         if (strategies.length == 0)
             return false;
         Set<QueryStrategy> strategySet = Arrays.stream(strategies).collect(Collectors.toSet());
@@ -213,14 +215,14 @@ public class PipelineManager implements Pipeline {
     }
 
     @Override
-    public <T extends VCoreData> CompletableFuture<Boolean> existAsync(@Nonnull Class<? extends T> type, @Nonnull UUID uuid, @Nonnull QueryStrategy... strategies) {
+    public <T extends VCoreData> CompletableFuture<Boolean> existAsync(@NotNull Class<? extends T> type, @NotNull UUID uuid, @NotNull QueryStrategy... strategies) {
         CompletableFuture<Boolean> completableFuture = new CompletableFuture<>();
         executorService.submit(new CatchingRunnable(() -> completableFuture.complete(exist(type, uuid, strategies))));
         return completableFuture;
     }
 
     @Override
-    public <T extends VCoreData> boolean delete(@Nonnull Class<? extends T> type, @Nonnull UUID uuid, boolean notifyOthers, @Nonnull QueryStrategy... strategies) {
+    public <T extends VCoreData> boolean delete(@NotNull Class<? extends T> type, @NotNull UUID uuid, boolean notifyOthers, @NotNull QueryStrategy... strategies) {
         Set<QueryStrategy> strategySet = Arrays.stream(strategies).collect(Collectors.toSet());
         plugin.consoleMessage("&eDeleting&7: &b" + type.getSimpleName() + " &ewith uuid &a" + uuid, true);
         if (getLocalCache() != null && (strategySet.contains(QueryStrategy.ALL) || strategySet.contains(QueryStrategy.LOCAL))) {
@@ -244,13 +246,13 @@ public class PipelineManager implements Pipeline {
     }
 
     @Override
-    public <T extends VCoreData> CompletableFuture<Boolean> deleteAsync(@Nonnull Class<? extends T> type, @Nonnull UUID uuid, boolean notifyOthers, @Nonnull QueryStrategy... strategies) {
+    public <T extends VCoreData> CompletableFuture<Boolean> deleteAsync(@NotNull Class<? extends T> type, @NotNull UUID uuid, boolean notifyOthers, @NotNull QueryStrategy... strategies) {
         CompletableFuture<Boolean> completableFuture = new CompletableFuture<>();
         executorService.submit(new CatchingRunnable(() -> completableFuture.complete(delete(type, uuid, notifyOthers, strategies))));
         return completableFuture;
     }
 
-    private <T extends VCoreData> void synchronizeData(@Nonnull Class<? extends T> type) {
+    private <T extends VCoreData> void synchronizeData(@NotNull Class<? extends T> type) {
         if (getGlobalStorage() != null)
             getGlobalStorage().getSavedUUIDs(type).forEach(uuid -> {
                 if (!localCache.dataExist(type, uuid))
@@ -315,7 +317,7 @@ public class PipelineManager implements Pipeline {
         return pipelineDataSynchronizer;
     }
 
-    private <T extends VCoreData> T loadFromPipeline(@Nonnull Class<? extends T> dataClass, @Nonnull UUID uuid, boolean createIfNotExist) {
+    private <T extends VCoreData> T loadFromPipeline(@NotNull Class<? extends T> dataClass, @NotNull UUID uuid, boolean createIfNotExist) {
         // ExistCheck LocalCache
         if (localCache.dataExist(dataClass, uuid)) {
             plugin.consoleMessage("&eFound Data in Local Cache &8[&b" + dataClass.getSimpleName() + "&8]", 1, true);
@@ -348,7 +350,7 @@ public class PipelineManager implements Pipeline {
         return data;
     }
 
-    private <T extends VCoreData> T createNewData(@Nonnull Class<? extends T> dataClass, @Nonnull UUID uuid) {
+    private <T extends VCoreData> T createNewData(@NotNull Class<? extends T> dataClass, @NotNull UUID uuid) {
         plugin.consoleMessage("&eNo Data was found. Creating new data! &8[&b" + dataClass.getSimpleName() + "&8]", 1, true);
         T vCoreData = localCache.instantiateData(dataClass, uuid);
         vCoreData.onCreate();

@@ -7,6 +7,7 @@ package de.verdox.vcore.synchronization.pipeline.parts.cache;
 import de.verdox.vcore.synchronization.pipeline.datatypes.VCoreData;
 import de.verdox.vcore.synchronization.pipeline.interfaces.DataManipulator;
 import de.verdox.vcore.synchronization.pipeline.parts.DataProvider;
+import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nonnull;
 import java.util.Map;
@@ -28,7 +29,7 @@ public interface GlobalCache extends DataProvider {
 
     Map<String, Object> getGlobalCacheMap(String name);
 
-    boolean dataExist(@Nonnull Class<? extends VCoreData> dataClass, @Nonnull UUID objectUUID);
+    boolean dataExist(@Nonnull @NotNull Class<? extends VCoreData> dataClass, @Nonnull @NotNull UUID objectUUID);
 
     default DataManipulator constructDataManipulator(VCoreData vCoreData) {
         return new DataManipulator() {

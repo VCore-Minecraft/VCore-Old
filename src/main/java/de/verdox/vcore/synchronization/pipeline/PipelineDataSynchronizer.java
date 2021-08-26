@@ -7,8 +7,8 @@ package de.verdox.vcore.synchronization.pipeline;
 import de.verdox.vcore.performance.concurrent.CatchingRunnable;
 import de.verdox.vcore.synchronization.pipeline.datatypes.VCoreData;
 import de.verdox.vcore.synchronization.pipeline.parts.DataSynchronizer;
+import org.jetbrains.annotations.NotNull;
 
-import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Map;
 import java.util.UUID;
@@ -28,12 +28,12 @@ public class PipelineDataSynchronizer implements DataSynchronizer {
     }
 
     @Override
-    public CompletableFuture<Boolean> synchronize(@Nonnull DataSourceType source, @Nonnull DataSourceType destination, @Nonnull Class<? extends VCoreData> dataClass, @Nonnull UUID objectUUID) {
+    public CompletableFuture<Boolean> synchronize(@NotNull DataSourceType source, @NotNull DataSourceType destination, @NotNull Class<? extends VCoreData> dataClass, @NotNull UUID objectUUID) {
         return synchronize(source, destination, dataClass, objectUUID, null);
     }
 
     @Override
-    public synchronized CompletableFuture<Boolean> synchronize(@Nonnull DataSourceType source, @Nonnull DataSourceType destination, @Nonnull Class<? extends VCoreData> dataClass, @Nonnull UUID objectUUID, @Nullable Runnable callback) {
+    public synchronized CompletableFuture<Boolean> synchronize(@NotNull DataSourceType source, @NotNull DataSourceType destination, @NotNull Class<? extends VCoreData> dataClass, @NotNull UUID objectUUID, @Nullable Runnable callback) {
         CompletableFuture<Boolean> future = new CompletableFuture<>();
         pipelineManager.getExecutorService().submit(new CatchingRunnable(() -> {
             future.complete(doSynchronisation(source, destination, dataClass, objectUUID, callback));
@@ -41,7 +41,7 @@ public class PipelineDataSynchronizer implements DataSynchronizer {
         return future;
     }
 
-    public boolean doSynchronisation(@Nonnull DataSourceType source, @Nonnull DataSourceType destination, @Nonnull Class<? extends VCoreData> dataClass, @Nonnull UUID objectUUID, @Nullable Runnable callback) {
+    public boolean doSynchronisation(@NotNull DataSourceType source, @NotNull DataSourceType destination, @NotNull Class<? extends VCoreData> dataClass, @NotNull UUID objectUUID, @Nullable Runnable callback) {
         if (source.equals(destination))
             return false;
         if (pipelineManager.globalCache == null && (source.equals(DataSourceType.GLOBAL_CACHE) || destination.equals(DataSourceType.GLOBAL_CACHE)))

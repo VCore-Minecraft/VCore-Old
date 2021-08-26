@@ -5,8 +5,8 @@
 package de.verdox.vcore.synchronization.networkmanager.server.api.instructions.updates;
 
 import de.verdox.vcore.synchronization.messaging.instructions.update.CleverUpdate;
+import org.jetbrains.annotations.NotNull;
 
-import javax.annotation.Nonnull;
 import java.util.List;
 import java.util.UUID;
 
@@ -30,7 +30,7 @@ public class RemoteServerShutdownUpdate extends CleverUpdate {
         return List.of("ServerAPI", "RemoteShutdown");
     }
 
-    @Nonnull
+    @NotNull
     @Override
     protected UpdateCompletion executeUpdate(Object[] instructionData) {
         String serverName = (String) instructionData[0];

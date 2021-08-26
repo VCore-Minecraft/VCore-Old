@@ -6,7 +6,6 @@ package de.verdox.vcore.synchronization.networkmanager.player.api;
 
 import org.jetbrains.annotations.NotNull;
 
-import javax.annotation.Nonnull;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -20,7 +19,7 @@ public final class PlayerTask {
     private final UUID taskUUID;
     private final Runnable runnable;
 
-    public PlayerTask(@Nonnull UUID uuid, @NotNull UUID taskUUID, @Nonnull Runnable runnable) {
+    public PlayerTask(@NotNull UUID uuid, @NotNull UUID taskUUID, @NotNull Runnable runnable) {
         this.uuid = uuid;
         this.taskUUID = taskUUID;
         this.runnable = runnable;

@@ -12,10 +12,8 @@ import org.bukkit.Location;
 import org.bukkit.boss.DragonBattle;
 import org.bukkit.entity.Player;
 import org.checkerframework.checker.index.qual.NonNegative;
-import reactor.util.annotation.NonNull;
+import org.jetbrains.annotations.NotNull;
 import reactor.util.annotation.Nullable;
-
-import javax.annotation.Nonnull;
 
 /**
  * @version 1.0
@@ -48,9 +46,9 @@ public interface NMSWorldHandler extends NMSHandler {
      * @param player Player to send Chunk to
      * @param chunk  Chunk to send
      */
-    void refreshChunk(@NonNull Player player, @NonNull org.bukkit.Chunk chunk, @Nullable Runnable callback);
+    void refreshChunk(@NotNull Player player, @NotNull org.bukkit.Chunk chunk, @Nullable Runnable callback);
 
-    default void refreshChunk(@NonNull Player player, @NonNull org.bukkit.Chunk chunk) {
+    default void refreshChunk(@NotNull Player player, @NotNull org.bukkit.Chunk chunk) {
         refreshChunk(player, chunk, null);
     }
 
@@ -59,9 +57,9 @@ public interface NMSWorldHandler extends NMSHandler {
      * @param chunk  Chunk to send
      * @param biome  Fake Biome to send
      */
-    void sendFakeBiome(@NonNull Player player, @NonNull org.bukkit.Chunk chunk, @NonNull org.bukkit.block.Biome biome, @Nullable Runnable callback);
+    void sendFakeBiome(@NotNull Player player, @NotNull org.bukkit.Chunk chunk, @NotNull org.bukkit.block.Biome biome, @Nullable Runnable callback);
 
-    default void sendFakeBiome(@NonNull Player player, @NonNull org.bukkit.Chunk chunk, @NonNull org.bukkit.block.Biome biome) {
+    default void sendFakeBiome(@NotNull Player player, @NotNull org.bukkit.Chunk chunk, @NotNull org.bukkit.block.Biome biome) {
         sendFakeBiome(player, chunk, biome, null);
     }
 
@@ -69,31 +67,31 @@ public interface NMSWorldHandler extends NMSHandler {
      * @param player      Player to send Chunk to
      * @param environment Fake DimensionType to send
      */
-    void sendFakeDimension(@NonNull Player player, @NonNull org.bukkit.World.Environment environment, @Nullable Runnable callback);
+    void sendFakeDimension(@NotNull Player player, @NotNull org.bukkit.World.Environment environment, @Nullable Runnable callback);
 
-    default void sendFakeDimension(@NonNull Player player, @NonNull org.bukkit.World.Environment environment) {
+    default void sendFakeDimension(@NotNull Player player, @NotNull org.bukkit.World.Environment environment) {
         sendFakeDimension(player, environment, null);
     }
 
-    default void refreshDimension(@NonNull Player player, @Nullable Runnable callback) {
+    default void refreshDimension(@NotNull Player player, @Nullable Runnable callback) {
         sendFakeDimension(player, player.getWorld().getEnvironment(), callback);
     }
 
-    default void refreshDimension(@NonNull Player player) {
+    default void refreshDimension(@NotNull Player player) {
         refreshDimension(player, null);
     }
 
-    void sendFakeWorldBorder(@NonNull Player player, @NonNull Location center, @NonNegative double size, @Nullable Runnable callback);
+    void sendFakeWorldBorder(@NotNull Player player, @NotNull Location center, @NonNegative double size, @Nullable Runnable callback);
 
-    default void sendFakeWorldBorder(@NonNull Player player, @NonNull Location center, @NonNegative double size) {
+    default void sendFakeWorldBorder(@NotNull Player player, @NotNull Location center, @NonNegative double size) {
         sendFakeWorldBorder(player, center, size, null);
     }
 
-    void refreshWorldBorder(@NonNull Player player, @Nullable Runnable callback);
+    void refreshWorldBorder(@NotNull Player player, @Nullable Runnable callback);
 
-    default void refreshWorldBorder(@NonNull Player player) {
+    default void refreshWorldBorder(@NotNull Player player) {
         refreshWorldBorder(player, null);
     }
 
-    DragonBattle createDragonBattle(@Nonnull Location dragonSpawnLoc, @Nonnull Location exitPortalLoc);
+    DragonBattle createDragonBattle(@NotNull Location dragonSpawnLoc, @NotNull Location exitPortalLoc);
 }

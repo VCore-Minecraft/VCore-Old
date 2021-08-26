@@ -11,8 +11,8 @@ import de.verdox.vcore.synchronization.messaging.instructions.annotations.Instru
 import de.verdox.vcore.synchronization.messaging.messages.Message;
 import de.verdox.vcore.synchronization.messaging.messages.MessageWrapper;
 import org.checkerframework.checker.index.qual.NonNegative;
+import org.jetbrains.annotations.NotNull;
 
-import javax.annotation.Nonnull;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.Map;
@@ -54,7 +54,7 @@ public class InstructionService {
         instructionTypes.put(id, type);
     }
 
-    public void sendInstruction(@Nonnull MessagingInstruction messagingInstruction) {
+    public void sendInstruction(@NotNull MessagingInstruction messagingInstruction) {
         InstructionInfo instructionInfo = getInstructionInfo(messagingInstruction.getClass());
         UUID uuid = messagingInstruction.getUuid();
 
@@ -67,7 +67,7 @@ public class InstructionService {
             pendingInstructions.put(uuid, messagingInstruction);
     }
 
-    public void sendInstruction(@Nonnull MessagingInstruction messagingInstruction, String... serverNames) {
+    public void sendInstruction(@NotNull MessagingInstruction messagingInstruction, String... serverNames) {
         InstructionInfo instructionInfo = getInstructionInfo(messagingInstruction.getClass());
         UUID uuid = messagingInstruction.getUuid();
 
@@ -80,7 +80,7 @@ public class InstructionService {
             pendingInstructions.put(uuid, messagingInstruction);
     }
 
-    private Message constructMessage(@Nonnull MessagingInstruction messagingInstruction) {
+    private Message constructMessage(@NotNull MessagingInstruction messagingInstruction) {
         if (messagingInstruction.getData() == null)
             throw new IllegalStateException("You can't send empty instructions");
         int instructionID = getID(messagingInstruction.getClass());
@@ -127,7 +127,7 @@ public class InstructionService {
     }
 
     //TODO: Satt superclass maybe iwann anders lösen
-    private InstructionInfo getInstructionInfo(@Nonnull Class<? extends MessagingInstruction> type) {
+    private InstructionInfo getInstructionInfo(@NotNull Class<? extends MessagingInstruction> type) {
         boolean found = false;
         int tries = 0;
         Class<?> typeToSearch = type;

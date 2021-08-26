@@ -13,8 +13,8 @@ import de.verdox.vcore.synchronization.networkmanager.server.ServerInstance;
 import de.verdox.vcore.synchronization.networkmanager.server.ServerType;
 import de.verdox.vcore.synchronization.networkmanager.serverping.ServerPingManager;
 import de.verdox.vcore.synchronization.pipeline.parts.Pipeline;
+import org.jetbrains.annotations.NotNull;
 
-import javax.annotation.Nonnull;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
@@ -36,7 +36,7 @@ public class NetworkManager<T extends VCorePlugin<?, ?>> implements SystemLoadab
     private final VCorePlayerCache vCorePlayerCache;
     private final boolean loaded;
 
-    public NetworkManager(@Nonnull ServerType serverType, @Nonnull T plugin) {
+    public NetworkManager(@NotNull ServerType serverType, @NotNull T plugin) {
         plugin.consoleMessage("&eStarting Network Manager&7!", false);
         this.serverType = serverType;
         this.plugin = plugin;

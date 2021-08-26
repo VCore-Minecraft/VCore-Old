@@ -9,6 +9,7 @@ import de.verdox.vcore.plugin.subsystem.VCoreSubsystem;
 import de.verdox.vcore.synchronization.pipeline.datatypes.NetworkData;
 import de.verdox.vcore.synchronization.pipeline.datatypes.VCoreData;
 import de.verdox.vcore.util.global.AnnotationResolver;
+import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nonnull;
 import java.lang.reflect.InvocationTargetException;
@@ -34,7 +35,7 @@ public class LocalCacheImpl implements LocalCache {
     }
 
     @Override
-    public <S extends VCoreData> S getData(@Nonnull Class<? extends S> dataClass, @Nonnull UUID objectUUID) {
+    public <S extends VCoreData> S getData(@Nonnull @NotNull Class<? extends S> dataClass, @Nonnull @NotNull UUID objectUUID) {
         if (!dataExist(dataClass, objectUUID))
             return null;
         S data = dataClass.cast(dataObjects.get(dataClass).get(objectUUID));
@@ -43,12 +44,12 @@ public class LocalCacheImpl implements LocalCache {
     }
 
     @Override
-    public <S extends VCoreData> Set<S> getAllData(@Nonnull Class<? extends S> dataClass) {
+    public <S extends VCoreData> Set<S> getAllData(@Nonnull @NotNull Class<? extends S> dataClass) {
         return getSavedUUIDs(dataClass).stream().map(uuid -> getData(dataClass, uuid)).collect(Collectors.toSet());
     }
 
     @Override
-    public <S extends VCoreData> void save(@Nonnull Class<? extends S> dataClass, @Nonnull S data) {
+    public <S extends VCoreData> void save(@Nonnull @NotNull Class<? extends S> dataClass, @Nonnull @NotNull S data) {
         if (dataExist(dataClass, data.getObjectUUID()))
             return;
         if (!dataObjects.containsKey(dataClass))
@@ -58,14 +59,14 @@ public class LocalCacheImpl implements LocalCache {
     }
 
     @Override
-    public <S extends VCoreData> boolean dataExist(@Nonnull Class<? extends S> dataClass, @Nonnull UUID objectUUID) {
+    public <S extends VCoreData> boolean dataExist(@Nonnull @NotNull Class<? extends S> dataClass, @Nonnull @NotNull UUID objectUUID) {
         if (!dataObjects.containsKey(dataClass))
             return false;
         return dataObjects.get(dataClass).containsKey(objectUUID);
     }
 
     @Override
-    public <S extends VCoreData> boolean remove(@Nonnull Class<? extends S> dataClass, @Nonnull UUID objectUUID) {
+    public <S extends VCoreData> boolean remove(@Nonnull @NotNull Class<? extends S> dataClass, @Nonnull @NotNull UUID objectUUID) {
         if (!dataExist(dataClass, objectUUID))
             return false;
         dataObjects.get(dataClass).remove(objectUUID);
@@ -75,14 +76,14 @@ public class LocalCacheImpl implements LocalCache {
     }
 
     @Override
-    public <S extends VCoreData> Set<UUID> getSavedUUIDs(@Nonnull Class<? extends S> dataClass) {
+    public <S extends VCoreData> Set<UUID> getSavedUUIDs(@Nonnull @NotNull Class<? extends S> dataClass) {
         if (!dataObjects.containsKey(dataClass))
             return new HashSet<>();
         return dataObjects.get(dataClass).keySet();
     }
 
     @Override
-    public <S extends VCoreData> S instantiateData(@Nonnull Class<? extends S> dataClass, @Nonnull UUID objectUUID) {
+    public <S extends VCoreData> S instantiateData(@Nonnull @NotNull Class<? extends S> dataClass, @Nonnull @NotNull UUID objectUUID) {
         // Network Data is not subsystem dependent
         if (!NetworkData.class.isAssignableFrom(dataClass)) {
             if (AnnotationResolver.findDependSubsystemClass(dataClass) == null)

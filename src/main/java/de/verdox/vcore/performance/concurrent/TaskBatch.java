@@ -6,9 +6,9 @@ package de.verdox.vcore.performance.concurrent;
 
 import de.verdox.vcore.plugin.VCorePlugin;
 import io.netty.util.concurrent.DefaultThreadFactory;
+import org.jetbrains.annotations.NotNull;
 import reactor.util.annotation.Nullable;
 
-import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -33,17 +33,17 @@ public abstract class TaskBatch<V extends VCorePlugin<?, ?>> {
         this.plugin = plugin;
     }
 
-    public TaskBatch<V> doSync(@Nonnull Runnable runnable) {
+    public TaskBatch<V> doSync(@NotNull Runnable runnable) {
         addTask(TaskType.SYNC, runnable, 0);
         return this;
     }
 
-    public TaskBatch<V> doAsync(@Nonnull Runnable runnable) {
+    public TaskBatch<V> doAsync(@NotNull Runnable runnable) {
         addTask(TaskType.ASYNC, runnable, 0);
         return this;
     }
 
-    public TaskBatch<V> wait(long delay, @Nonnull TimeUnit timeUnit) {
+    public TaskBatch<V> wait(long delay, @NotNull TimeUnit timeUnit) {
         addTask(TaskType.WAIT, null, timeUnit.toMillis(delay));
         return this;
     }
@@ -86,9 +86,9 @@ public abstract class TaskBatch<V extends VCorePlugin<?, ?>> {
         executor.shutdown();
     }
 
-    protected abstract void runSync(@Nonnull Runnable runnable);
+    protected abstract void runSync(@NotNull Runnable runnable);
 
-    protected abstract void runAsync(@Nonnull Runnable runnable);
+    protected abstract void runAsync(@NotNull Runnable runnable);
 
     protected abstract void onFinishBatch();
 
@@ -96,7 +96,7 @@ public abstract class TaskBatch<V extends VCorePlugin<?, ?>> {
         return plugin;
     }
 
-    private void addTask(@Nonnull TaskType taskType, @Nullable Runnable runnable, long delay) {
+    private void addTask(@NotNull TaskType taskType, @Nullable Runnable runnable, long delay) {
         tasks.add(new TaskInfo(delay, taskType, () -> {
             if (runnable != null)
                 runnable.run();
@@ -113,7 +113,7 @@ public abstract class TaskBatch<V extends VCorePlugin<?, ?>> {
     static class TaskInfo {
         private final TaskType taskType;
         private final Runnable runnable;
-        private long delay;
+        private final long delay;
 
         public TaskInfo(long delay, TaskType taskType, Runnable runnable) {
             this.delay = delay;

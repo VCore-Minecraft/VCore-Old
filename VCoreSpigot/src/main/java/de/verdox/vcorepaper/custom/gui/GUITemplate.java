@@ -16,8 +16,8 @@ import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.ItemStack;
 import org.checkerframework.checker.index.qual.NonNegative;
 import org.checkerframework.checker.index.qual.Positive;
+import org.jetbrains.annotations.NotNull;
 
-import javax.annotation.Nonnull;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.util.*;
@@ -130,7 +130,7 @@ public class GUITemplate {
         private Runnable backCallback;
         private VCoreGUI.Builder<T> builder;
 
-        public SelectionGUI(@Nonnull String title, @Nonnull Collection<T> objectList, @Nonnull BukkitPlugin bukkitPlugin, @Positive int page, @Positive int rows, @Nonnull Function<T, ItemStack> objectToItemStack) {
+        public SelectionGUI(@NotNull String title, @NotNull Collection<T> objectList, @NotNull BukkitPlugin bukkitPlugin, @Positive int page, @Positive int rows, @NotNull Function<T, ItemStack> objectToItemStack) {
             this.title = title;
             this.objectList = objectList;
             this.bukkitPlugin = bukkitPlugin;
@@ -142,11 +142,11 @@ public class GUITemplate {
             guiSize = (rows * 9) + 9 + 9;
         }
 
-        public SelectionGUI(@Nonnull String title, @Nonnull Collection<T> objectList, @Nonnull BukkitPlugin bukkitPlugin, @Nonnull Function<T, ItemStack> objectToItemStack) {
+        public SelectionGUI(@NotNull String title, @NotNull Collection<T> objectList, @NotNull BukkitPlugin bukkitPlugin, @NotNull Function<T, ItemStack> objectToItemStack) {
             this(title, objectList, bukkitPlugin, 1, 4, objectToItemStack);
         }
 
-        public SelectionGUI(@Nonnull String title, @Nonnull Collection<T> objectList, @Nonnull BukkitPlugin bukkitPlugin, @Positive int rows, @Nonnull Function<T, ItemStack> objectToItemStack) {
+        public SelectionGUI(@NotNull String title, @NotNull Collection<T> objectList, @NotNull BukkitPlugin bukkitPlugin, @Positive int rows, @NotNull Function<T, ItemStack> objectToItemStack) {
             this(title, objectList, bukkitPlugin, 1, rows, objectToItemStack);
         }
 

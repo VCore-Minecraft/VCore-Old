@@ -7,7 +7,7 @@ package de.verdox.vcorepaper.nms.reflection.nms;
 import de.verdox.vcorepaper.nms.NMSVersion;
 import de.verdox.vcorepaper.nms.reflection.java.ClassReflection;
 import org.bukkit.Bukkit;
-import reactor.util.annotation.NonNull;
+import org.jetbrains.annotations.NotNull;
 import reactor.util.annotation.Nullable;
 
 /**
@@ -18,7 +18,7 @@ import reactor.util.annotation.Nullable;
 public class MinecraftClassFinder {
     private static final NMSVersion nmsVersion = NMSVersion.findNMSVersion(Bukkit.getServer().getBukkitVersion());
 
-    public static ClassReflection.ReferenceClass findMinecraftClass(@NonNull MinecraftPackage minecraftPackage, @Nullable String classPackage, @NonNull String className) {
+    public static ClassReflection.ReferenceClass findMinecraftClass(@NotNull MinecraftPackage minecraftPackage, @Nullable String classPackage, @NotNull String className) {
         String classPath;
         if (classPackage == null || classPackage.isEmpty())
             classPath = minecraftPackage.getPackageName() + ".v" + nmsVersion.getNmsVersionTag() + "." + className;
