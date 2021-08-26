@@ -13,6 +13,8 @@ import de.verdox.vcore.synchronization.networkmanager.player.api.VCorePlayerAPI;
 import de.verdox.vcore.synchronization.networkmanager.player.api.bukkit.VCorePlayerAPIBukkitImpl;
 import de.verdox.vcore.synchronization.networkmanager.player.listener.PlayerBukkitListener;
 import de.verdox.vcore.synchronization.networkmanager.server.ServerType;
+import de.verdox.vcore.synchronization.networkmanager.server.api.VCoreServerAPI;
+import de.verdox.vcore.synchronization.networkmanager.server.api.VCoreServerAPIImpl;
 import de.verdox.vcorepaper.commands.AdminCommands;
 import de.verdox.vcorepaper.commands.NMSCommand;
 import de.verdox.vcorepaper.commands.PlayerAPICommands;
@@ -50,7 +52,9 @@ public class VCorePaper extends VCoreCoreInstance.Minecraft {
     private CustomLocationDataManager customLocationDataManager;
 
     private ProtocolManager protocolManager;
+
     private VCorePlayerAPI vCorePlayerAPI;
+    private VCoreServerAPI vCoreServerAPI;
 
     private LocationNBTFileStorage locationNBTFileStorage;
 
@@ -62,6 +66,7 @@ public class VCorePaper extends VCoreCoreInstance.Minecraft {
     public void onPluginEnable() {
         instance = this;
         this.vCorePlayerAPI = new VCorePlayerAPIBukkitImpl(this);
+        this.vCoreServerAPI = new VCoreServerAPIImpl(this);
         this.nmsManager = new NMSManager(this);
 
         this.customEntityManager = new CustomEntityManager(this);
@@ -89,13 +94,13 @@ public class VCorePaper extends VCoreCoreInstance.Minecraft {
         networkManager = new NetworkManager<>(ServerType.GAME_SERVER, this);
         new PlayerBukkitListener(networkManager);
         if (networkManager.getServerCache().isServerNameTaken(getServerName())) {
-            //TODO: Remote Shutdown des Servers anordnen
             consoleMessage("&4<> ============================================= <>", false);
             consoleMessage("", false);
-            consoleMessage("&cThe ServerName &e" + getServerName() + " &cis already online in this VCore Network &7(&bExists in Global Cache&7)", false);
+            consoleMessage("&cThe Server &e" + getServerName() + " &cis already online in this VCore Network &7(&bExists in Global Cache&7)", false);
+            consoleMessage("&cShutting down other server&7!", false);
             consoleMessage("", false);
             consoleMessage("&4<> ============================================= <>", false);
-            getServer().shutdown();
+            vCoreServerAPI.remoteShutdown(getServerName(), true);
         }
         networkManager.getServerPingManager().sendOnlinePing();
         getCustomLocationDataManager().registerData(BlockDebugData.class);
@@ -168,6 +173,11 @@ public class VCorePaper extends VCoreCoreInstance.Minecraft {
     @Override
     public VCorePlayerAPI getPlayerAPI() {
         return vCorePlayerAPI;
+    }
+
+    @Override
+    public VCoreServerAPI getServerAPI() {
+        return this.vCoreServerAPI;
     }
 
     @Override

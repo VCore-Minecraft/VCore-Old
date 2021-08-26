@@ -38,6 +38,11 @@ public class BungeePlatformWrapperImpl implements PlatformWrapper {
     }
 
     @Override
+    public void shutdown() {
+        ProxyServer.getInstance().stop();
+    }
+
+    @Override
     public InetSocketAddress getPlayerAddress(@Nonnull UUID playerUUID) {
         ProxiedPlayer proxiedPlayer = ProxyServer.getInstance().getPlayer(playerUUID);
         if (proxiedPlayer == null)

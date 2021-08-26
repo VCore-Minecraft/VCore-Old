@@ -38,6 +38,11 @@ public class BukkitPlatformWrapperImpl implements PlatformWrapper {
     }
 
     @Override
+    public void shutdown() {
+        Bukkit.getServer().shutdown();
+    }
+
+    @Override
     public InetSocketAddress getPlayerAddress(@Nonnull UUID playerUUID) {
         Player player = Bukkit.getPlayer(playerUUID);
         if (player == null)

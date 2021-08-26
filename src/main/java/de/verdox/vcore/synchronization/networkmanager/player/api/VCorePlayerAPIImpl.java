@@ -47,16 +47,17 @@ public abstract class VCorePlayerAPIImpl implements VCorePlayerAPI, SystemLoadab
     }
 
     private void registerStandardInstructions() {
-        plugin.getServices().getMessagingService().getInstructionService().registerInstructionType(0, QueryPlayerPosition.class);
-        plugin.getServices().getMessagingService().getInstructionService().registerInstructionType(1, UpdatePlayerPosition.class);
-        plugin.getServices().getMessagingService().getInstructionService().registerInstructionType(2, UpdatePlayerKick.class);
-        plugin.getServices().getMessagingService().getInstructionService().registerInstructionType(3, UpdatePlayerServer.class);
-        plugin.getServices().getMessagingService().getInstructionService().registerInstructionType(4, UpdatePlayerSendMessage.class);
-        plugin.getServices().getMessagingService().getInstructionService().registerInstructionType(5, UpdatePlayerHealth.class);
-        plugin.getServices().getMessagingService().getInstructionService().registerInstructionType(6, UpdatePlayerFood.class);
-        plugin.getServices().getMessagingService().getInstructionService().registerInstructionType(7, UpdatePlayerGameMode.class);
-        plugin.getServices().getMessagingService().getInstructionService().registerInstructionType(8, UpdateBroadcastMessage.class);
-        plugin.getServices().getMessagingService().getInstructionService().registerInstructionType(9, UpdatePlayerClearInventory.class);
+        instructionService.registerInstructionType(0, QueryPlayerPosition.class);
+        instructionService.registerInstructionType(1, UpdatePlayerPosition.class);
+        instructionService.registerInstructionType(2, UpdatePlayerKick.class);
+        instructionService.registerInstructionType(3, UpdatePlayerServer.class);
+        instructionService.registerInstructionType(4, UpdatePlayerSendMessage.class);
+        instructionService.registerInstructionType(5, UpdatePlayerHealth.class);
+        instructionService.registerInstructionType(6, UpdatePlayerFood.class);
+        instructionService.registerInstructionType(7, UpdatePlayerGameMode.class);
+        instructionService.registerInstructionType(8, UpdateBroadcastMessage.class);
+        instructionService.registerInstructionType(9, UpdatePlayerClearInventory.class);
+
     }
 
     @Override
@@ -119,7 +120,7 @@ public abstract class VCorePlayerAPIImpl implements VCorePlayerAPI, SystemLoadab
     public CompletableFuture<ServerLocation> getServerLocation(@Nonnull VCorePlayer vCorePlayer) {
         QueryPlayerPosition queryPlayerPosition = new QueryPlayerPosition(UUID.randomUUID());
         queryPlayerPosition.withData(vCorePlayer.getObjectUUID());
-        plugin.getServices().getMessagingService().getInstructionService().sendInstruction(queryPlayerPosition);
+        instructionService.sendInstruction(queryPlayerPosition);
         return queryPlayerPosition.getFuture();
     }
 
@@ -161,42 +162,42 @@ public abstract class VCorePlayerAPIImpl implements VCorePlayerAPI, SystemLoadab
     public void kickPlayer(@Nonnull VCorePlayer vCorePlayer, @Nonnull String message) {
         UpdatePlayerKick updatePlayerKick = new UpdatePlayerKick(UUID.randomUUID());
         updatePlayerKick.withData(vCorePlayer.getObjectUUID(), message);
-        plugin.getServices().getMessagingService().getInstructionService().sendInstruction(updatePlayerKick);
+        instructionService.sendInstruction(updatePlayerKick);
     }
 
     @Override
     public void changeServer(@Nonnull VCorePlayer vCorePlayer, @Nonnull String serverName) {
         UpdatePlayerServer updatePlayerServer = new UpdatePlayerServer(UUID.randomUUID());
         updatePlayerServer.withData(vCorePlayer.getObjectUUID(), serverName);
-        plugin.getServices().getMessagingService().getInstructionService().sendInstruction(updatePlayerServer);
+        instructionService.sendInstruction(updatePlayerServer);
     }
 
     @Override
     public void sendMessage(@Nonnull VCorePlayer vCorePlayer, @Nonnull PlayerMessageType playerMessageType, @Nonnull String message) {
         UpdatePlayerSendMessage updatePlayerSendMessage = new UpdatePlayerSendMessage(UUID.randomUUID());
         updatePlayerSendMessage.withData(vCorePlayer.getObjectUUID(), playerMessageType.name(), message);
-        plugin.getServices().getMessagingService().getInstructionService().sendInstruction(updatePlayerSendMessage);
+        instructionService.sendInstruction(updatePlayerSendMessage);
     }
 
     @Override
     public void healPlayer(@Nonnull VCorePlayer vCorePlayer) {
         UpdatePlayerHealth updatePlayerHealth = new UpdatePlayerHealth(UUID.randomUUID());
         updatePlayerHealth.withData(vCorePlayer.getObjectUUID(), 20d);
-        plugin.getServices().getMessagingService().getInstructionService().sendInstruction(updatePlayerHealth);
+        instructionService.sendInstruction(updatePlayerHealth);
     }
 
     @Override
     public void feedPlayer(@Nonnull VCorePlayer vCorePlayer) {
         UpdatePlayerFood updatePlayerFood = new UpdatePlayerFood(UUID.randomUUID());
         updatePlayerFood.withData(vCorePlayer.getObjectUUID(), 10);
-        plugin.getServices().getMessagingService().getInstructionService().sendInstruction(updatePlayerFood);
+        instructionService.sendInstruction(updatePlayerFood);
     }
 
     @Override
     public void setGameMode(@Nonnull VCorePlayer vCorePlayer, @Nonnull PlayerGameMode gameMode) {
         UpdatePlayerGameMode updatePlayerGameMode = new UpdatePlayerGameMode(UUID.randomUUID());
         updatePlayerGameMode.withData(vCorePlayer.getObjectUUID(), gameMode.name());
-        plugin.getServices().getMessagingService().getInstructionService().sendInstruction(updatePlayerGameMode);
+        instructionService.sendInstruction(updatePlayerGameMode);
     }
 
     //TODO: Global Property wird bislang nicht genutzt / Evtl mit Servernamen austauschen?
@@ -204,13 +205,13 @@ public abstract class VCorePlayerAPIImpl implements VCorePlayerAPI, SystemLoadab
     public void broadcastMessage(@Nonnull String message, @Nonnull PlayerMessageType playerMessageType, @Nonnull GlobalProperty globalProperty) {
         UpdateBroadcastMessage updateBroadcastMessage = new UpdateBroadcastMessage(UUID.randomUUID());
         updateBroadcastMessage.withData(playerMessageType.name(), message);
-        plugin.getServices().getMessagingService().getInstructionService().sendInstruction(updateBroadcastMessage);
+        instructionService.sendInstruction(updateBroadcastMessage);
     }
 
     @Override
     public void clearInventory(@Nonnull VCorePlayer vCorePlayer) {
         UpdatePlayerClearInventory updatePlayerClearInventory = new UpdatePlayerClearInventory(UUID.randomUUID());
         updatePlayerClearInventory.withData(vCorePlayer.getObjectUUID());
-        plugin.getServices().getMessagingService().getInstructionService().sendInstruction(updatePlayerClearInventory);
+        instructionService.sendInstruction(updatePlayerClearInventory);
     }
 }

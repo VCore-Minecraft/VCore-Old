@@ -114,7 +114,7 @@ public class PipelineManager implements Pipeline {
      */
     @Override
     public final <T extends VCoreData> T load(@Nonnull Class<? extends T> type, @Nonnull UUID uuid, @Nonnull LoadingStrategy loadingStrategy, boolean createIfNotExist, @Nullable Consumer<T> callback) {
-        plugin.consoleMessage("&8[&e" + loadingStrategy + "&8] &bLoading data from pipeline &a" + type.getSimpleName() + " &b" + uuid, true);
+        //plugin.consoleMessage("&8[&e" + loadingStrategy + "&8] &bLoading data from pipeline &a" + type.getSimpleName() + " &b" + uuid, true);
         PipelineTaskScheduler.PipelineTask<T> pipelineTask = pipelineTaskScheduler.schedulePipelineTask(PipelineTaskScheduler.PipelineAction.LOAD, loadingStrategy, type, uuid);
 
         // Subsystem Check
@@ -132,7 +132,6 @@ public class PipelineManager implements Pipeline {
                 callback.accept(data);
             data.updateLastUse();
             pipelineTask.getCompletableFuture().complete(data);
-            plugin.consoleMessage("&8[&e" + loadingStrategy + "&8] &eCompleted with&7: &b " + data, true);
             return data;
         } else if (loadingStrategy.equals(LoadingStrategy.LOAD_LOCAL)) {
             if (createIfNotExist) {
@@ -231,6 +230,7 @@ public class PipelineManager implements Pipeline {
             else if (data != null) {
                 if (notifyOthers)
                     data.getDataManipulator().pushRemoval(data, null);
+                data.markForRemoval();
                 data.onDelete();
             }
         }

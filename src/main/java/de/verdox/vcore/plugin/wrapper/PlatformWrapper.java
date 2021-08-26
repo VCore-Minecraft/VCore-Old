@@ -21,6 +21,8 @@ public interface PlatformWrapper {
 
     boolean isPrimaryThread();
 
+    void shutdown();
+
     InetSocketAddress getPlayerAddress(@Nonnull UUID playerUUID);
 
     SpigotPlatform getSpigotPlatform();

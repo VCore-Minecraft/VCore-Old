@@ -7,6 +7,7 @@ package de.verdox.vcore.synchronization.pipeline.parts.local;
 import de.verdox.vcore.synchronization.pipeline.datatypes.VCoreData;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.Set;
 import java.util.UUID;
 
@@ -16,6 +17,7 @@ import java.util.UUID;
  * @date 24.06.2021 15:42
  */
 public interface LocalCache {
+    @Nullable
     <S extends VCoreData> S getData(@Nonnull Class<? extends S> dataClass, @Nonnull UUID objectUUID);
 
     <S extends VCoreData> Set<S> getAllData(@Nonnull Class<? extends S> dataClass);

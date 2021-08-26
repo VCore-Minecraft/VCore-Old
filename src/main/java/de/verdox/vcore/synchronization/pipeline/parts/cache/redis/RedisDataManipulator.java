@@ -37,10 +37,10 @@ public class RedisDataManipulator implements DataManipulator {
                 return;
             if (dataBlock instanceof UpdateDataBlock) {
                 UpdateDataBlock updateDataBlock = (UpdateDataBlock) dataBlock;
-                vCoreData.getPlugin().consoleMessage("&eReceived Redis Sync &b" + vCoreData.getObjectUUID() + " &8[&e" + vCoreData.getClass().getSimpleName() + "&8] &b" + System.currentTimeMillis(), true);
+                vCoreData.getPlugin().consoleMessage("&eReceived Sync &b" + vCoreData.getObjectUUID() + " &8[&e" + vCoreData.getClass().getSimpleName() + "&8] &b" + System.currentTimeMillis(), true);
                 vCoreData.onSync(vCoreData.deserialize(updateDataBlock.dataToUpdate));
-                vCoreData.getPlugin().consoleMessage("&eRedis Sync complete &b" + System.currentTimeMillis(), true);
             } else if (dataBlock instanceof RemoveDataBlock) {
+                vCoreData.getPlugin().consoleMessage("&eReceived Removal Instruction &b" + vCoreData.getObjectUUID() + " &8[&e" + vCoreData.getClass().getSimpleName() + "&8] &b" + System.currentTimeMillis(), true);
                 vCoreData.markForRemoval();
                 vCoreData.getPlugin().getServices().getPipeline().delete(vCoreData.getClass(), vCoreData.getObjectUUID(), Pipeline.QueryStrategy.LOCAL);
             }

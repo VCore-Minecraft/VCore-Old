@@ -5,6 +5,7 @@
 package de.verdox.vcore.synchronization.pipeline.player;
 
 import de.verdox.vcore.plugin.SystemLoadable;
+import de.verdox.vcore.plugin.VCoreCoreInstance;
 import de.verdox.vcore.plugin.VCorePlugin;
 import de.verdox.vcore.synchronization.pipeline.PipelineManager;
 import de.verdox.vcore.synchronization.pipeline.datatypes.PlayerData;
@@ -44,8 +45,9 @@ public class PlayerDataManager implements SystemLoadable {
     }
 
     protected final void loginPipeline(@Nonnull UUID player) {
-        plugin.consoleMessage("&eHandling Player Join &b" + player, false);
-        plugin.getServices().eventBus.post(new PlayerPreSessionLoadEvent(player));
+        if (plugin instanceof VCoreCoreInstance)
+            plugin.consoleMessage("&eHandling Player Join &b" + player, false);
+        plugin.getServices().eventBus.post(new PlayerPreSessionLoadEvent(plugin, player));
         plugin.createTaskBatch().wait(400, TimeUnit.MILLISECONDS).doAsync(() -> {
             plugin.getServices().getSubsystemManager().getActivePlayerDataClasses()
                     .parallelStream()
@@ -53,11 +55,11 @@ public class PlayerDataManager implements SystemLoadable {
                         PlayerData playerData = pipelineManager.load(aClass, player, Pipeline.LoadingStrategy.LOAD_PIPELINE, true);
                         playerData.onConnect(player);
                     });
-        }).doSync(() -> plugin.getServices().eventBus.post(new PlayerSessionLoadedEvent(player, System.currentTimeMillis()))).executeBatch();
+        }).doSync(() -> plugin.getServices().eventBus.post(new PlayerSessionLoadedEvent(plugin, player, System.currentTimeMillis()))).executeBatch();
     }
 
     protected final void logoutPipeline(@Nonnull UUID player) {
-        plugin.getServices().eventBus.post(new PlayerPreSessionUnloadEvent(player));
+        plugin.getServices().eventBus.post(new PlayerPreSessionUnloadEvent(plugin, player));
         plugin.createTaskBatch()
                 .doAsync(() -> {
                     plugin.getServices().getSubsystemManager().getActivePlayerDataClasses()

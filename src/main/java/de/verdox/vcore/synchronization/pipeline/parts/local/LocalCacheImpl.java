@@ -36,7 +36,7 @@ public class LocalCacheImpl implements LocalCache {
     @Override
     public <S extends VCoreData> S getData(@Nonnull Class<? extends S> dataClass, @Nonnull UUID objectUUID) {
         if (!dataExist(dataClass, objectUUID))
-            throw new NullPointerException("No data in local cache with type " + dataClass + " and uuid " + objectUUID);
+            return null;
         S data = dataClass.cast(dataObjects.get(dataClass).get(objectUUID));
         data.updateLastUse();
         return data;
