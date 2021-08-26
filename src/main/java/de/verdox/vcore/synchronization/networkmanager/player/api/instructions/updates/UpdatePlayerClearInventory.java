@@ -4,7 +4,7 @@
 
 package de.verdox.vcore.synchronization.networkmanager.player.api.instructions.updates;
 
-import de.verdox.vcore.synchronization.messaging.instructions.update.Update;
+import de.verdox.vcore.synchronization.messaging.instructions.update.CleverUpdate;
 import de.verdox.vcore.synchronization.networkmanager.player.api.VCorePlayerAPI;
 
 import javax.annotation.Nonnull;
@@ -16,7 +16,7 @@ import java.util.UUID;
  * @Author: Lukas Jonsson (Verdox)
  * @date 14.08.2021 23:30
  */
-public class UpdatePlayerClearInventory extends Update {
+public class UpdatePlayerClearInventory extends CleverUpdate {
     public UpdatePlayerClearInventory(UUID uuid) {
         super(uuid);
     }

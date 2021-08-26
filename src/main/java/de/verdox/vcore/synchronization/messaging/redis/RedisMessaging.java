@@ -27,8 +27,7 @@ public class RedisMessaging extends RedisConnection implements MessagingService<
     private final InstructionService instructionService;
 
     private RTopic privateMessagingChannel;
-    private boolean loaded;
-
+    private final boolean loaded;
 
     public RedisMessaging(@Nonnull VCorePlugin<?, ?> plugin, boolean clusterMode, @Nonnull String[] addressArray, String redisPassword) {
         super(plugin, clusterMode, addressArray, redisPassword);
@@ -40,7 +39,7 @@ public class RedisMessaging extends RedisConnection implements MessagingService<
             // Own Messages won't throw an event
             if (isOwnMessage(msg))
                 return;
-            plugin.getServices().eventBus.post(new MessageEvent(msg));
+            plugin.getServices().eventBus.post(new MessageEvent(channel.toString(), msg));
         };
         globalMessagingChannel.addListener(Message.class, messageListener);
 

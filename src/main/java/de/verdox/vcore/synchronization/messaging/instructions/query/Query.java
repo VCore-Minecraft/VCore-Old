@@ -19,7 +19,7 @@ import java.util.concurrent.CompletableFuture;
  */
 
 @InstructionInfo(awaitsResponse = true)
-public abstract class Query<T> extends MessagingInstruction implements InstructionResponder, ResponseProcessor<T> {
+public abstract class Query<T> extends MessagingInstruction<T> implements InstructionResponder, ResponseProcessor<T> {
     private final CompletableFuture<T> future = new CompletableFuture<>();
 
     public Query(UUID uuid) {
@@ -32,7 +32,7 @@ public abstract class Query<T> extends MessagingInstruction implements Instructi
     }
 
     @Override
-    public boolean onSend(Object[] instructionData) {
+    public boolean onSend(CompletableFuture<T> future, Object[] queryData) {
         return true;
     }
 }

@@ -38,11 +38,6 @@ public class QueryPlayerPosition extends Query<ServerLocation> {
     }
 
     @Override
-    public boolean onSend(Object[] queryData) {
-        return true;
-    }
-
-    @Override
     public void onResponse(CompletableFuture<ServerLocation> future, Object[] queryData, Object[] responseData) {
         ServerLocation serverLocation = new ServerLocation((String) responseData[0], (String) responseData[1], (double) responseData[2], (double) responseData[3], (double) responseData[4]);
         future.complete(serverLocation);
@@ -63,5 +58,10 @@ public class QueryPlayerPosition extends Query<ServerLocation> {
         if (gameLocation == null)
             return null;
         return new Object[]{plugin.getCoreInstance().getServerName(), gameLocation.worldName, gameLocation.x, gameLocation.y, gameLocation.z};
+    }
+
+    @Override
+    public boolean respondToItself() {
+        return false;
     }
 }

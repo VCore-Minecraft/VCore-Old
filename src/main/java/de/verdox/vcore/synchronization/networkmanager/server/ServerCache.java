@@ -60,7 +60,7 @@ public class ServerCache {
                 if (!networkManager.getPlugin().getServices().getPipeline().exist(ServerInstance.class, serverUUID, Pipeline.QueryStrategy.LOCAL)) {
                     ServerInstance serverInstance = networkManager.getPlugin().getServices().getPipeline().load(ServerInstance.class, serverUUID, Pipeline.LoadingStrategy.LOAD_PIPELINE, true);
 
-                    serverInstance.serverName = serverName;
+                    serverInstance.setServerName(serverName);
                     serverInstance.serverAddress = serverAddress;
                     serverInstance.serverPort = serverPort;
                     serverInstance.setServerType(ServerType.valueOf(serverType));

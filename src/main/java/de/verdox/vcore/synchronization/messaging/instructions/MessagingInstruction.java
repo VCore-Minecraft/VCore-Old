@@ -10,6 +10,7 @@ import de.verdox.vcore.plugin.wrapper.bungeecord.BungeePlatform;
 import de.verdox.vcore.plugin.wrapper.spigot.SpigotPlatform;
 
 import javax.annotation.Nonnull;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
@@ -18,7 +19,7 @@ import java.util.UUID;
  * @Author: Lukas Jonsson (Verdox)
  * @date 05.08.2021 21:33
  */
-public abstract class MessagingInstruction {
+public abstract class MessagingInstruction<T> implements InstructionSender<T> {
     protected final String[] parameters;
     protected final List<Class<?>> types;
     protected final UUID uuid;
@@ -43,7 +44,7 @@ public abstract class MessagingInstruction {
         this.bungeePlatform = plugin.getPlatformWrapper().getBungeePlatform();
     }
 
-    public MessagingInstruction withData(Object... data) {
+    public MessagingInstruction<T> withData(Object... data) {
         if (data.length != types.size())
             throw new IllegalStateException("Wrong Input Parameter Length for " + getClass().getSimpleName() + " [" + dataTypes().size() + "]");
         for (int i = 0; i < types.size(); i++) {
@@ -89,5 +90,18 @@ public abstract class MessagingInstruction {
 
     protected abstract List<String> parameters();
 
-    public abstract boolean onSend(Object[] instructionData);
+    @Override
+    public String toString() {
+        return "MessagingInstruction{" +
+                "parameters=" + Arrays.toString(parameters) +
+                ", types=" + types +
+                ", uuid=" + uuid +
+                ", creationTimeStamp=" + creationTimeStamp +
+                ", plugin=" + plugin +
+                ", spigotPlatform=" + spigotPlatform +
+                ", bungeePlatform=" + bungeePlatform +
+                ", platformWrapper=" + platformWrapper +
+                ", data=" + Arrays.toString(data) +
+                '}';
+    }
 }

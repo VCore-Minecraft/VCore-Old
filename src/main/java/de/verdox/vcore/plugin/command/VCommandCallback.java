@@ -33,7 +33,7 @@ import java.util.stream.Collectors;
 public class VCommandCallback {
     private final VCorePlugin<?, ?> plugin;
     private final List<CommandCallbackInfo> callbackInfos = new ArrayList<>();
-    private String[] commandPath;
+    private final String[] commandPath;
     private String neededPermission;
     private CommandExecutorType commandExecutorType;
     private BiConsumer<CommandSender, CommandParameters> providedArguments;
@@ -340,8 +340,8 @@ public class VCommandCallback {
     public static class CommandAskParameter extends CommandCallbackInfo {
         protected final String name;
         protected final CommandAskType commandAskType;
-        private String errorMessage;
-        private List<String> suggested;
+        private final String errorMessage;
+        private final List<String> suggested;
 
         CommandAskParameter(VCorePlugin<?, ?> plugin, int index, @Nonnull String name, @Nonnull CommandAskType commandAskType, @Nonnull String errorMessage, @Nonnull List<String> suggested) {
             super(plugin, index);
@@ -382,7 +382,7 @@ public class VCommandCallback {
                     return List.of(VCoreUtil.getRandomUtil().randomInt(1, 100) + "");
             }
             if (commandAskType.equals(CommandAskType.VCORE_GAMESERVER))
-                return plugin.getCoreInstance().getServices().getPipeline().getLocalCache().getAllData(ServerInstance.class).stream().filter(serverInstance -> serverInstance.getServerType().equals(ServerType.GAME_SERVER)).map(serverInstance -> serverInstance.serverName).collect(Collectors.toList());
+                return plugin.getCoreInstance().getServices().getPipeline().getLocalCache().getAllData(ServerInstance.class).stream().filter(serverInstance -> serverInstance.getServerType().equals(ServerType.GAME_SERVER)).map(ServerInstance::getServerName).collect(Collectors.toList());
             return suggested;
         }
 

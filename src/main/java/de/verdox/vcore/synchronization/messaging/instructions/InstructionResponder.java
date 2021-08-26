@@ -11,4 +11,6 @@ package de.verdox.vcore.synchronization.messaging.instructions;
  */
 public interface InstructionResponder {
     Object[] respondToInstruction(Object[] instructionData);
+
+    boolean respondToItself();
 }

@@ -65,11 +65,13 @@ public abstract class CustomDataHolder<S, N extends NBTHolder<?>, C extends Cust
         return deleteCustomData(customDataType, null);
     }
 
+    //TODO: Auf NBT typen zurückgreifen für Integer, UUID, ItemStack usw
     @Nonnull
     public final <T, R extends CustomData<T>> CustomDataHolder<S, N, C> storeCustomData(@Nullable Class<? extends R> customDataType, @Nonnull T value) {
         return storeCustomData(customDataType, value, null);
     }
 
+    //TODO: Auf NBT typen zurückgreifen für Integer, UUID, ItemStack usw
     public final <T, R extends CustomData<T>> T getCustomData(Class<? extends R> customDataClass) {
         R customData = instantiateData(customDataClass);
         if (customData == null)

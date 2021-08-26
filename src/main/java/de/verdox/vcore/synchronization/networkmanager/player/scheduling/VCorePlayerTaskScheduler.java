@@ -8,6 +8,7 @@ import de.verdox.vcore.performance.concurrent.CatchingRunnable;
 import de.verdox.vcore.plugin.SystemLoadable;
 import de.verdox.vcore.plugin.VCorePlugin;
 import de.verdox.vcore.synchronization.networkmanager.player.api.PlayerTask;
+import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nonnull;
 import java.util.HashSet;
@@ -47,12 +48,18 @@ public final class VCorePlayerTaskScheduler implements SystemLoadable {
     }
 
     public void schedulePlayerTask(@Nonnull UUID playerUUID, @Nonnull Runnable runnable, int maxWaitTime, @Nonnull TimeUnit timeUnit) {
+        schedulePlayerTask(playerUUID, UUID.randomUUID(), runnable, maxWaitTime, timeUnit);
+    }
+
+    public void schedulePlayerTask(@Nonnull UUID playerUUID, @NotNull UUID taskUUID, @Nonnull Runnable runnable, int maxWaitTime, @Nonnull TimeUnit timeUnit) {
+        plugin.consoleMessage("&eScheduling Task", false);
         executor.submit(new CatchingRunnable(() -> {
             if (plugin.getPlatformWrapper().isPlayerOnline(playerUUID)) {
+                plugin.consoleMessage("&eExecuting Task", false);
                 plugin.sync(runnable);
                 return;
             }
-            PlayerTask playerTask = new PlayerTask(playerUUID, runnable);
+            PlayerTask playerTask = new PlayerTask(playerUUID, taskUUID, runnable);
             if (!scheduledTasks.containsKey(playerUUID))
                 scheduledTasks.put(playerUUID, new HashSet<>());
             scheduledTasks.get(playerUUID).add(playerTask);

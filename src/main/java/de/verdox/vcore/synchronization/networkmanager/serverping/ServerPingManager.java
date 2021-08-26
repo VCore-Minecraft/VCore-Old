@@ -27,7 +27,7 @@ public class ServerPingManager<T extends VCorePlugin<?, ?>> implements SystemLoa
         this.networkManager = networkManager;
         this.serverPingConfig = new ServerPingConfig(networkManager.getPlugin(), "serverInfo.yml", "//settings");
         this.serverPingConfig.init();
-        keepAlivePing = networkManager.getPlugin().getServices().getVCoreScheduler().asyncInterval(this::sendOnlinePing, 20L * 60, 20L * 10);
+        keepAlivePing = networkManager.getPlugin().getServices().getVCoreScheduler().asyncInterval(this::sendOnlinePing, 20L, 20L * 5);
     }
 
     public void sendOnlinePing() {

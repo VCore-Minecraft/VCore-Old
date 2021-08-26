@@ -67,9 +67,9 @@ public class VCorePlayerCache {
                     return;
                 }
                 if (serverInstance.getServerType().equals(ServerType.GAME_SERVER)) {
-                    vCorePlayer.currentGameServer = serverInstance.serverName;
+                    vCorePlayer.currentGameServer = serverInstance.getServerName();
                 } else if (serverInstance.getServerType().equals(ServerType.PROXY)) {
-                    vCorePlayer.currentProxyServer = serverInstance.serverName;
+                    vCorePlayer.currentProxyServer = serverInstance.getServerName();
                 }
                 vCorePlayer.save(false);
             } else {

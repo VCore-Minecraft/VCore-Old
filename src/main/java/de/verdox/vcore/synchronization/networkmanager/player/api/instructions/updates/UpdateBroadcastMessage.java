@@ -36,6 +36,7 @@ public class UpdateBroadcastMessage extends Update {
         return UpdateCompletion.TRUE;
     }
 
+
     @Override
     protected List<Class<?>> dataTypes() {
         return List.of(String.class, String.class);
@@ -44,5 +45,10 @@ public class UpdateBroadcastMessage extends Update {
     @Override
     protected List<String> parameters() {
         return List.of(VCorePlayerAPI.APIParameters.UPDATE_BROADCASTMESSAGE.name());
+    }
+
+    @Override
+    public boolean respondToItself() {
+        return true;
     }
 }

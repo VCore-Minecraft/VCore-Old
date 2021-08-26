@@ -24,7 +24,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class ServerInstance extends NetworkData {
 
     @VCorePersistentData
-    public String serverName;
+    private String serverName;
     @VCorePersistentData
     public String serverAddress;
     @VCorePersistentData
@@ -67,6 +67,14 @@ public class ServerInstance extends NetworkData {
     @Override
     public void onCleanUp() {
 
+    }
+
+    public String getServerName() {
+        return serverName.toLowerCase();
+    }
+
+    void setServerName(String serverName) {
+        this.serverName = serverName;
     }
 
     public Map<String, String> getInfoTags() {

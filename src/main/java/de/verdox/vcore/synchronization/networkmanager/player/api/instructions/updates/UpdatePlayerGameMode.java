@@ -5,7 +5,7 @@
 package de.verdox.vcore.synchronization.networkmanager.player.api.instructions.updates;
 
 import de.verdox.vcore.plugin.wrapper.types.enums.PlayerGameMode;
-import de.verdox.vcore.synchronization.messaging.instructions.update.Update;
+import de.verdox.vcore.synchronization.messaging.instructions.update.CleverUpdate;
 import de.verdox.vcore.synchronization.networkmanager.player.api.VCorePlayerAPI;
 
 import javax.annotation.Nonnull;
@@ -17,7 +17,7 @@ import java.util.UUID;
  * @Author: Lukas Jonsson (Verdox)
  * @date 05.08.2021 22:30
  */
-public class UpdatePlayerGameMode extends Update {
+public class UpdatePlayerGameMode extends CleverUpdate {
     public UpdatePlayerGameMode(UUID uuid) {
         super(uuid);
     }

@@ -27,8 +27,7 @@ public abstract class Update extends Query<Boolean> implements InstructionRespon
     @Nonnull
     protected abstract UpdateCompletion executeUpdate(Object[] instructionData);
 
-    @Override
-    public boolean onSend(Object[] instructionData) {
+    protected boolean onSend(Object[] instructionData, CompletableFuture<Boolean> future) {
         return true;
     }
 
@@ -50,9 +49,24 @@ public abstract class Update extends Query<Boolean> implements InstructionRespon
         }
     }
 
+    @Override
+    public final boolean onSend(CompletableFuture<Boolean> future, Object[] queryData) {
+        return onSend(queryData, future);
+    }
+
     public enum UpdateCompletion {
-        TRUE,
-        FALSE,
-        NOTHING,
+        TRUE(true),
+        FALSE(false),
+        NOTHING(false),
+        ;
+        private final boolean value;
+
+        UpdateCompletion(boolean value) {
+            this.value = value;
+        }
+
+        public boolean toValue() {
+            return value;
+        }
     }
 }
