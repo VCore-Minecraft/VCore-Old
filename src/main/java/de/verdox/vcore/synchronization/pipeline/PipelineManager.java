@@ -65,8 +65,6 @@ public class PipelineManager implements Pipeline {
         plugin.getServices().getVCoreScheduler().asyncInterval(() -> {
             plugin.getServices().getSubsystemManager().getRegisteredPlayerDataClasses().forEach(aClass -> {
                 VCoreDataProperties vCoreDataProperties = AnnotationResolver.getDataProperties(aClass);
-                if (vCoreDataProperties == null)
-                    return;
                 if (!vCoreDataProperties.cleanOnNoUse())
                     return;
                 Set<UUID> cachedUUIDs = localCache.getSavedUUIDs(aClass);
@@ -87,8 +85,6 @@ public class PipelineManager implements Pipeline {
             });
             plugin.getServices().getSubsystemManager().getRegisteredServerDataClasses().forEach(aClass -> {
                 VCoreDataProperties vCoreDataProperties = AnnotationResolver.getDataProperties(aClass);
-                if (vCoreDataProperties == null)
-                    return;
                 if (!vCoreDataProperties.cleanOnNoUse())
                     return;
                 Set<UUID> cachedUUIDs = localCache.getSavedUUIDs(aClass);
@@ -130,24 +126,7 @@ public class PipelineManager implements Pipeline {
             }
         }
 
-        if (!loadingStrategy.equals(LoadingStrategy.LOAD_PIPELINE)) {
-            if (!localCache.dataExist(type, uuid)) {
-                if (loadingStrategy.equals(LoadingStrategy.LOAD_LOCAL))
-                    throw new NullPointerException(type + " with uuid " + uuid + " does not exist in local!");
-                else {
-                    // LOAD_LOCAL_ELSE_LOAD
-                    executorService.submit(new CatchingRunnable(() -> {
-                        T data = loadFromPipeline(type, uuid, createIfNotExist);
-                        pipelineTask.getCompletableFuture().complete(data);
-                        plugin.consoleMessage("&8[&e" + loadingStrategy + "&8] &eCompleted with&7: &b " + data, true);
-                        if (callback != null)
-                            callback.accept(data);
-                    }));
-                }
-            }
-            if (!localCache.dataExist(type, uuid)) {
-                throw new IllegalStateException("Does not exist in Local Cache");
-            }
+        if (localCache.dataExist(type, uuid)) {
             T data = localCache.getData(type, uuid);
             if (callback != null)
                 callback.accept(data);
@@ -155,20 +134,30 @@ public class PipelineManager implements Pipeline {
             pipelineTask.getCompletableFuture().complete(data);
             plugin.consoleMessage("&8[&e" + loadingStrategy + "&8] &eCompleted with&7: &b " + data, true);
             return data;
-        }
-        // Loaded via pipeline but found in Local Cache
-        if (localCache.dataExist(type, uuid)) {
-            T data = localCache.getData(type, uuid);
-            data.updateLastUse();
+        } else if (loadingStrategy.equals(LoadingStrategy.LOAD_LOCAL)) {
+            if (createIfNotExist) {
+                T data = createNewData(type, uuid);
+                data.updateLastUse();
+                pipelineTask.getCompletableFuture().complete(data);
+                return data;
+            }
+            throw new NullPointerException(type + " with uuid " + uuid + " does not exist in local!");
+        } else if (loadingStrategy.equals(LoadingStrategy.LOAD_LOCAL_ELSE_LOAD)) {
+            executorService.submit(new CatchingRunnable(() -> {
+                T data = loadFromPipeline(type, uuid, createIfNotExist);
+                pipelineTask.getCompletableFuture().complete(data);
+                plugin.consoleMessage("&8[&e" + loadingStrategy + "&8] &eCompleted with&7: &b " + data, true);
+                if (callback != null)
+                    callback.accept(data);
+            }));
+            return null;
+        } else if (loadingStrategy.equals(LoadingStrategy.LOAD_PIPELINE)) {
+            T data = loadFromPipeline(type, uuid, createIfNotExist);
             pipelineTask.getCompletableFuture().complete(data);
-            if (callback != null)
-                callback.accept(data);
+            plugin.consoleMessage("&8[&e" + loadingStrategy + "&8] &eCompleted with&7: &b " + data, true);
             return data;
         }
-        T data = loadFromPipeline(type, uuid, createIfNotExist);
-        pipelineTask.getCompletableFuture().complete(data);
-        plugin.consoleMessage("&8[&e" + loadingStrategy + "&8] &eCompleted with&7: &b " + data, true);
-        return data;
+        return null;
     }
 
     @Nonnull
@@ -203,24 +192,23 @@ public class PipelineManager implements Pipeline {
     public <T extends VCoreData> boolean exist(@Nonnull Class<? extends T> type, @Nonnull UUID uuid, @Nonnull QueryStrategy... strategies) {
         if (strategies.length == 0)
             return false;
-        for (QueryStrategy queryStrategy : Arrays.stream(strategies).collect(Collectors.toSet())) {
-            if (queryStrategy.equals(QueryStrategy.LOCAL)) {
-                boolean localExist = getLocalCache().dataExist(type, uuid);
-                if (localExist)
-                    return true;
-            } else if (queryStrategy.equals(QueryStrategy.GLOBAL_CACHE)) {
-                if (getGlobalCache() == null)
-                    continue;
+        Set<QueryStrategy> strategySet = Arrays.stream(strategies).collect(Collectors.toSet());
+
+        if (strategySet.contains(QueryStrategy.ALL) || strategySet.contains(QueryStrategy.LOCAL)) {
+            boolean localExist = getLocalCache().dataExist(type, uuid);
+            if (localExist)
+                return true;
+        }
+        if (strategySet.contains(QueryStrategy.ALL) || strategySet.contains(QueryStrategy.GLOBAL_CACHE)) {
+            if (getGlobalCache() != null) {
                 boolean globalCacheExists = getGlobalCache().dataExist(type, uuid);
                 if (globalCacheExists)
                     return true;
-            } else if (queryStrategy.equals(QueryStrategy.GLOBAL_STORAGE)) {
-                if (getGlobalStorage() == null)
-                    continue;
-                boolean globalStorageExists = getGlobalStorage().dataExist(type, uuid);
-                if (globalStorageExists)
-                    return true;
             }
+        }
+        if (strategySet.contains(QueryStrategy.ALL) || strategySet.contains(QueryStrategy.GLOBAL_STORAGE)) {
+            if (getGlobalStorage() != null)
+                return getGlobalStorage().dataExist(type, uuid);
         }
         return false;
     }
@@ -327,7 +315,7 @@ public class PipelineManager implements Pipeline {
         return pipelineDataSynchronizer;
     }
 
-    <T extends VCoreData> T loadFromPipeline(@Nonnull Class<? extends T> dataClass, @Nonnull UUID uuid, boolean createIfNotExist) {
+    private <T extends VCoreData> T loadFromPipeline(@Nonnull Class<? extends T> dataClass, @Nonnull UUID uuid, boolean createIfNotExist) {
         // ExistCheck LocalCache
         if (localCache.dataExist(dataClass, uuid)) {
             plugin.consoleMessage("&eFound Data in Local Cache &8[&b" + dataClass.getSimpleName() + "&8]", 1, true);
@@ -350,15 +338,7 @@ public class PipelineManager implements Pipeline {
         } else {
             if (!createIfNotExist)
                 return null;
-            plugin.consoleMessage("&eNo Data was found. Creating new data! &8[&b" + dataClass.getSimpleName() + "&8]", 1, true);
-            T vCoreData = localCache.instantiateData(dataClass, uuid);
-            vCoreData.onCreate();
-            localCache.save(dataClass, vCoreData);
-            //getLocalDataHandler().localToRedis(vCoreData,dataClass,vCoreData.getUUID());
-            pipelineDataSynchronizer.synchronize(DataSynchronizer.DataSourceType.LOCAL, DataSynchronizer.DataSourceType.GLOBAL_CACHE, dataClass, uuid);
-
-            if (!NetworkData.class.isAssignableFrom(dataClass))
-                pipelineDataSynchronizer.synchronize(DataSynchronizer.DataSourceType.LOCAL, DataSynchronizer.DataSourceType.GLOBAL_STORAGE, dataClass, uuid);
+            return createNewData(dataClass, uuid);
         }
         plugin.consoleMessage("&eLoaded &a" + dataClass.getSimpleName() + " &ewith uuid&7: " + uuid, 1, true);
         if (!localCache.dataExist(dataClass, uuid))
@@ -368,11 +348,23 @@ public class PipelineManager implements Pipeline {
         return data;
     }
 
+    private <T extends VCoreData> T createNewData(@Nonnull Class<? extends T> dataClass, @Nonnull UUID uuid) {
+        plugin.consoleMessage("&eNo Data was found. Creating new data! &8[&b" + dataClass.getSimpleName() + "&8]", 1, true);
+        T vCoreData = localCache.instantiateData(dataClass, uuid);
+        vCoreData.onCreate();
+        localCache.save(dataClass, vCoreData);
+
+        pipelineDataSynchronizer.synchronize(DataSynchronizer.DataSourceType.LOCAL, DataSynchronizer.DataSourceType.GLOBAL_CACHE, dataClass, uuid);
+
+        if (!NetworkData.class.isAssignableFrom(dataClass))
+            pipelineDataSynchronizer.synchronize(DataSynchronizer.DataSourceType.LOCAL, DataSynchronizer.DataSourceType.GLOBAL_STORAGE, dataClass, uuid);
+        return vCoreData;
+    }
+
     private <S extends VCoreData> void preloadData(Class<? extends S> type) {
         VCoreDataProperties vCoreDataProperties = AnnotationResolver.getDataProperties(type);
-        if (vCoreDataProperties == null)
-            return;
         PreloadStrategy preloadStrategy = vCoreDataProperties.preloadStrategy();
+        // Data will only be preloaded if it is declared properly
         if (!preloadStrategy.equals(PreloadStrategy.LOAD_BEFORE))
             return;
         plugin.consoleMessage("&ePreloading &b" + type.getSimpleName(), true);

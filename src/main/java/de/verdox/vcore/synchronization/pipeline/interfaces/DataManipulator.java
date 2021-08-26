@@ -13,9 +13,18 @@ import de.verdox.vcore.synchronization.pipeline.datatypes.VCoreData;
  */
 public interface DataManipulator {
 
+    /**
+     * Cleanup Function triggered when data is removed from cache
+     */
     void cleanUp();
 
+    /**
+     * Pushes the local data to Pipeline
+     */
     void pushUpdate(VCoreData vCoreData, Runnable callback);
 
+    /**
+     * Notifies other Servers that hold this data to delete it from local Cache
+     */
     void pushRemoval(VCoreData vCoreData, Runnable callback);
 }
