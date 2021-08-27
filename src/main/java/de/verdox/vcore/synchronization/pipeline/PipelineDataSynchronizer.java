@@ -41,7 +41,7 @@ public class PipelineDataSynchronizer implements DataSynchronizer {
         return future;
     }
 
-    public boolean doSynchronisation(@NotNull DataSourceType source, @NotNull DataSourceType destination, @NotNull Class<? extends VCoreData> dataClass, @NotNull UUID objectUUID, @Nullable Runnable callback) {
+    public synchronized boolean doSynchronisation(@NotNull DataSourceType source, @NotNull DataSourceType destination, @NotNull Class<? extends VCoreData> dataClass, @NotNull UUID objectUUID, @Nullable Runnable callback) {
         if (source.equals(destination))
             return false;
         if (pipelineManager.globalCache == null && (source.equals(DataSourceType.GLOBAL_CACHE) || destination.equals(DataSourceType.GLOBAL_CACHE)))

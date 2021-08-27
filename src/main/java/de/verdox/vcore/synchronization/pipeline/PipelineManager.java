@@ -357,7 +357,7 @@ public class PipelineManager implements Pipeline {
         } else {
             if (!createIfNotExist)
                 return null;
-            return createNewData(dataClass, uuid);
+            createNewData(dataClass, uuid);
         }
         plugin.consoleMessage("&eLoaded &a" + dataClass.getSimpleName() + " &ewith uuid&7: " + uuid, 1, true);
         if (!localCache.dataExist(dataClass, uuid))

@@ -89,7 +89,7 @@ public interface VCoreSerializable {
             } catch (IllegalAccessException | NoSuchMethodException | InstantiationException | InvocationTargetException e) {
                 e.printStackTrace();
             } catch (NoSuchFieldException e) {
-                System.err.println("Field e not found. Cleanup Task for missing fields will be implemented in a future release");
+                //System.err.println("Field " + key + " not found. Cleanup Task for missing fields will be implemented in a future release");
             }
         });
         return dataBeforeDeserialization;
