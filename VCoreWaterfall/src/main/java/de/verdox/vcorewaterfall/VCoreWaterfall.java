@@ -30,7 +30,6 @@ public class VCoreWaterfall extends VCoreCoreInstance.BungeeCord {
     public void onPluginEnable() {
         networkManager = new NetworkManager<>(ServerType.PROXY, this);
         new PlayerProxyListener(networkManager);
-        networkManager.getServerPingManager().sendOnlinePing();
 
         getServices().eventBus.register(new ServerPingListener());
         this.vCorePlayerAPI = new VCorePlayerBungeeImpl(this);
@@ -45,6 +44,7 @@ public class VCoreWaterfall extends VCoreCoreInstance.BungeeCord {
             consoleMessage("&4<> ============================================= <>", false);
             vCoreServerAPI.remoteShutdown(getServerName(), true);
         }
+        networkManager.getServerPingManager().sendOnlinePing();
     }
 
     @Override

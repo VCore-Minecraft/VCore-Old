@@ -49,7 +49,7 @@ public class PipelineDataSynchronizer implements DataSynchronizer {
         if (pipelineManager.globalStorage == null && (source.equals(DataSourceType.GLOBAL_STORAGE) || destination.equals(DataSourceType.GLOBAL_STORAGE)))
             return false;
 
-        pipelineManager.getPlugin().consoleMessage("&eSyncing &b" + dataClass.getSimpleName() + " &ewith uuid &6" + objectUUID + " &8[&a" + source + " &7-> &b" + destination + "&8] &b" + System.currentTimeMillis(), true);
+        //pipelineManager.getPlugin().consoleMessage("&eSyncing &b" + dataClass.getSimpleName() + " &ewith uuid &6" + objectUUID + " &8[&a" + source + " &7-> &b" + destination + "&8] &b" + System.currentTimeMillis(), true);
 
         if (source.equals(DataSourceType.LOCAL)) {
 
@@ -81,6 +81,7 @@ public class PipelineDataSynchronizer implements DataSynchronizer {
                     pipelineManager.localCache.save(dataClass, pipelineManager.localCache.instantiateData(dataClass, objectUUID));
                 VCoreData data = pipelineManager.localCache.getData(dataClass, objectUUID);
                 data.deserialize(globalCachedData);
+                data.loadDependentData();
                 data.onLoad();
             } else if (destination.equals(DataSourceType.GLOBAL_STORAGE))
                 pipelineManager.globalStorage.save(dataClass, objectUUID, globalCachedData);
@@ -96,11 +97,12 @@ public class PipelineDataSynchronizer implements DataSynchronizer {
                     pipelineManager.localCache.save(dataClass, pipelineManager.localCache.instantiateData(dataClass, objectUUID));
                 VCoreData data = pipelineManager.localCache.getData(dataClass, objectUUID);
                 data.deserialize(globalSavedData);
+                data.loadDependentData();
                 data.onLoad();
             } else if (destination.equals(DataSourceType.GLOBAL_CACHE))
                 pipelineManager.globalCache.save(dataClass, objectUUID, globalSavedData);
         }
-        pipelineManager.getPlugin().consoleMessage("&eDone syncing &b" + System.currentTimeMillis(), true);
+        //pipelineManager.getPlugin().consoleMessage("&eDone syncing &b" + System.currentTimeMillis(), true);
         if (callback != null)
             callback.run();
         return true;

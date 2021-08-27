@@ -41,7 +41,7 @@ public class RedisDataManipulator implements DataManipulator {
             } else if (dataBlock instanceof RemoveDataBlock) {
                 vCoreData.getPlugin().consoleMessage("&eReceived Removal Instruction &b" + vCoreData.getObjectUUID() + " &8[&e" + vCoreData.getClass().getSimpleName() + "&8] &b" + System.currentTimeMillis(), true);
                 vCoreData.markForRemoval();
-                vCoreData.getPlugin().getServices().getPipeline().delete(vCoreData.getClass(), vCoreData.getObjectUUID(), Pipeline.QueryStrategy.LOCAL);
+                vCoreData.getPlugin().getServices().getPipeline().delete(vCoreData.getClass(), vCoreData.getObjectUUID(), false, Pipeline.QueryStrategy.LOCAL);
             }
         };
         dataTopic.addListener(DataBlock.class, messageListener);
@@ -68,11 +68,11 @@ public class RedisDataManipulator implements DataManipulator {
 
     private void doPush(VCoreData vCoreData, Runnable callback) {
         if (vCoreData.isMarkedForRemoval()) {
-            vCoreData.getPlugin().consoleMessage("&ePush rejected because markedForRemoval", true);
+            vCoreData.getPlugin().consoleMessage("&4Push rejected as it is marked for removal &b" + vCoreData.getObjectUUID() + " &8[&e" + vCoreData.getClass().getSimpleName() + "&8] &b" + System.currentTimeMillis(), true);
             return;
         }
         dataTopic.publish(new UpdateDataBlock(senderUUID, vCoreData.serialize()));
-        vCoreData.getPlugin().consoleMessage("&ePush Success&7: &b" + System.currentTimeMillis(), true);
+        vCoreData.getPlugin().consoleMessage("&ePushing Sync &b" + vCoreData.getObjectUUID() + " &8[&e" + vCoreData.getClass().getSimpleName() + "&8] &b" + System.currentTimeMillis(), true);
         vCoreData.getPlugin().getServices().getPipeline().getSynchronizer().synchronize(DataSynchronizer.DataSourceType.LOCAL, DataSynchronizer.DataSourceType.GLOBAL_CACHE, vCoreData.getClass(), vCoreData.getObjectUUID());
         if (callback != null)
             callback.run();

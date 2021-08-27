@@ -6,7 +6,9 @@ package de.verdox.vcore.synchronization.networkmanager.player.listener;
 
 import de.verdox.vcore.plugin.VCorePlugin;
 import de.verdox.vcore.plugin.listener.VCoreListener;
+import de.verdox.vcore.plugin.wrapper.types.enums.PlayerMessageType;
 import de.verdox.vcore.synchronization.networkmanager.NetworkManager;
+import de.verdox.vcore.synchronization.networkmanager.enums.GlobalProperty;
 import de.verdox.vcore.synchronization.networkmanager.player.VCorePlayer;
 import de.verdox.vcore.synchronization.pipeline.parts.Pipeline;
 import net.md_5.bungee.api.ChatColor;
@@ -61,6 +63,7 @@ public class PlayerProxyListener extends VCoreListener.VCoreBungeeListener imple
                     e.getPlayer().getUniqueId(),
                     e.getPlayer().getName());
         });
+        plugin.getCoreInstance().getPlayerAPI().broadcastMessage("&8[&a+&8] &e" + e.getPlayer().getName(), PlayerMessageType.CHAT, GlobalProperty.NETWORK);
     }
 
     @net.md_5.bungee.event.EventHandler
@@ -72,5 +75,6 @@ public class PlayerProxyListener extends VCoreListener.VCoreBungeeListener imple
                     e.getPlayer().getUniqueId(),
                     e.getPlayer().getName());
         });
+        plugin.getCoreInstance().getPlayerAPI().broadcastMessage("&8[&c-&8] &e" + e.getPlayer().getName(), PlayerMessageType.CHAT, GlobalProperty.NETWORK);
     }
 }

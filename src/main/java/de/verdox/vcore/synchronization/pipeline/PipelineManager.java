@@ -113,10 +113,8 @@ public class PipelineManager implements Pipeline {
      * @return VCoreDataType
      */
     @Override
-    public final <T extends VCoreData> T load(@NotNull Class<? extends T> type, @NotNull UUID uuid, @NotNull LoadingStrategy loadingStrategy, boolean createIfNotExist, @Nullable Consumer<T> callback) {
+    public final <T extends VCoreData> T load(@NotNull Class<? extends T> type, @NotNull(exception = NullPointerException.class) UUID uuid, @NotNull LoadingStrategy loadingStrategy, boolean createIfNotExist, @Nullable Consumer<T> callback) {
         //plugin.consoleMessage("&8[&e" + loadingStrategy + "&8] &bLoading data from pipeline &a" + type.getSimpleName() + " &b" + uuid, true);
-        if (uuid == null)
-            System.out.println(uuid);
         PipelineTaskScheduler.PipelineTask<T> pipelineTask = pipelineTaskScheduler.schedulePipelineTask(PipelineTaskScheduler.PipelineAction.LOAD, loadingStrategy, type, uuid);
 
         // Subsystem Check
@@ -224,24 +222,39 @@ public class PipelineManager implements Pipeline {
     @Override
     public <T extends VCoreData> boolean delete(@NotNull Class<? extends T> type, @NotNull UUID uuid, boolean notifyOthers, @NotNull QueryStrategy... strategies) {
         Set<QueryStrategy> strategySet = Arrays.stream(strategies).collect(Collectors.toSet());
-        plugin.consoleMessage("&eDeleting&7: &b" + type.getSimpleName() + " &ewith uuid &a" + uuid, true);
-        if (getLocalCache() != null && (strategySet.contains(QueryStrategy.ALL) || strategySet.contains(QueryStrategy.LOCAL))) {
+        if (strategySet.isEmpty())
+            strategySet.add(QueryStrategy.ALL);
+        plugin.consoleMessage("&eDeleting&7: &b" + type.getSimpleName() + " &euuid &a" + uuid + "&e" + Arrays.toString(strategies), true);
+        if (strategySet.contains(QueryStrategy.ALL) || strategySet.contains(QueryStrategy.LOCAL)) {
+            plugin.consoleMessage("&eDeleting from Local Cache&7: &b" + type.getSimpleName() + " &euuid &a" + uuid + "&e", true);
             T data = getLocalCache().getData(type, uuid);
+
+            if (data != null)
+                data.onDelete();
+
             if (!getLocalCache().remove(type, uuid))
-                plugin.consoleMessage("&8[&eLocalCache&8] &cCould not delete&7: &b" + type.getSimpleName() + " &ewith uuid &a" + uuid, true);
+                plugin.consoleMessage("&8[&eLocalCache&8] &cCould not delete&7: &b" + type.getSimpleName() + " &euuid &a" + uuid, true);
             else if (data != null) {
                 if (notifyOthers)
                     data.getDataManipulator().pushRemoval(data, null);
                 data.markForRemoval();
-                data.onDelete();
+                plugin.consoleMessage("&8[&eLocalCache&8] &eDeleted&7: &b" + type.getSimpleName() + " &euuid &a" + uuid + "&e" + Arrays.toString(strategies), true);
             }
         }
-        if (getGlobalCache() != null && (strategySet.contains(QueryStrategy.ALL) || strategySet.contains(QueryStrategy.GLOBAL_CACHE)))
+        if (getGlobalCache() != null && (strategySet.contains(QueryStrategy.ALL) || strategySet.contains(QueryStrategy.GLOBAL_CACHE))) {
+            plugin.consoleMessage("&eDeleting from Global Cache&7: &b" + type.getSimpleName() + " &euuid &a" + uuid + "&e", true);
             if (!getGlobalCache().remove(type, uuid))
-                plugin.consoleMessage("&8[&eGlobalCache&8] &cCould not delete&7: &b" + type.getSimpleName() + " &ewith uuid &a" + uuid, true);
-        if (getGlobalStorage() != null && (strategySet.contains(QueryStrategy.ALL) || strategySet.contains(QueryStrategy.GLOBAL_STORAGE)))
+                plugin.consoleMessage("&8[&eGlobalCache&8] &cCould not delete&7: &b" + type.getSimpleName() + " &euuid &a" + uuid, true);
+            else
+                plugin.consoleMessage("&8[&eGlobalCache&8] &eDeleted&7: &b" + type.getSimpleName() + " &euuid &a" + uuid + "&e" + Arrays.toString(strategies), true);
+        }
+        if (getGlobalStorage() != null && (strategySet.contains(QueryStrategy.ALL) || strategySet.contains(QueryStrategy.GLOBAL_STORAGE))) {
+            plugin.consoleMessage("&eDeleting from Global Storage&7: &b" + type.getSimpleName() + " &euuid &a" + uuid + "&e", true);
             if (!getGlobalStorage().remove(type, uuid))
-                plugin.consoleMessage("&8[&eGlobalStorage&8] &cCould not delete&7: &b" + type.getSimpleName() + " &ewith uuid &a" + uuid, true);
+                plugin.consoleMessage("&8[&eGlobalStorage&8] &cCould not delete&7: &b" + type.getSimpleName() + " &euuid &a" + uuid, true);
+            else
+                plugin.consoleMessage("&8[&eGlobalStorage&8] &eDeleted&7: &b" + type.getSimpleName() + " &euuid &a" + uuid + "&e" + Arrays.toString(strategies), true);
+        }
         return true;
     }
 
@@ -287,6 +300,8 @@ public class PipelineManager implements Pipeline {
         plugin.getServices().getSubsystemManager().getActiveServerDataClasses()
                 .forEach(aClass -> getLocalCache().getSavedUUIDs(aClass).forEach(uuid -> {
                     VCoreData vCoreData = getLocalCache().getData(aClass, uuid);
+                    if (vCoreData.isMarkedForRemoval())
+                        return;
                     vCoreData.cleanUp();
                     pipelineDataSynchronizer.doSynchronisation(DataSynchronizer.DataSourceType.LOCAL, DataSynchronizer.DataSourceType.GLOBAL_CACHE, aClass, uuid, null);
                     pipelineDataSynchronizer.doSynchronisation(DataSynchronizer.DataSourceType.LOCAL, DataSynchronizer.DataSourceType.GLOBAL_STORAGE, aClass, uuid, null);
@@ -297,6 +312,8 @@ public class PipelineManager implements Pipeline {
         plugin.getServices().getSubsystemManager().getActivePlayerDataClasses()
                 .forEach(aClass -> getLocalCache().getSavedUUIDs(aClass).forEach(uuid -> {
                     VCoreData vCoreData = getLocalCache().getData(aClass, uuid);
+                    if (vCoreData.isMarkedForRemoval())
+                        return;
                     vCoreData.cleanUp();
                     pipelineDataSynchronizer.doSynchronisation(DataSynchronizer.DataSourceType.LOCAL, DataSynchronizer.DataSourceType.GLOBAL_CACHE, aClass, uuid, null);
                     pipelineDataSynchronizer.doSynchronisation(DataSynchronizer.DataSourceType.LOCAL, DataSynchronizer.DataSourceType.GLOBAL_STORAGE, aClass, uuid, null);
@@ -353,6 +370,7 @@ public class PipelineManager implements Pipeline {
     private <T extends VCoreData> T createNewData(@NotNull Class<? extends T> dataClass, @NotNull UUID uuid) {
         plugin.consoleMessage("&eNo Data was found. Creating new data! &8[&b" + dataClass.getSimpleName() + "&8]", 1, true);
         T vCoreData = localCache.instantiateData(dataClass, uuid);
+        vCoreData.loadDependentData();
         vCoreData.onCreate();
         localCache.save(dataClass, vCoreData);
 

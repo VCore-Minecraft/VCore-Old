@@ -8,10 +8,8 @@ import de.verdox.vcore.plugin.VCorePlugin;
 import de.verdox.vcore.plugin.subsystem.VCoreSubsystem;
 import de.verdox.vcore.synchronization.pipeline.datatypes.NetworkData;
 import de.verdox.vcore.synchronization.pipeline.datatypes.VCoreData;
-import de.verdox.vcore.util.global.AnnotationResolver;
 import org.jetbrains.annotations.NotNull;
 
-import javax.annotation.Nonnull;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashSet;
 import java.util.Map;
@@ -35,7 +33,7 @@ public class LocalCacheImpl implements LocalCache {
     }
 
     @Override
-    public <S extends VCoreData> S getData(@Nonnull @NotNull Class<? extends S> dataClass, @Nonnull @NotNull UUID objectUUID) {
+    public <S extends VCoreData> S getData(@NotNull Class<? extends S> dataClass, @NotNull UUID objectUUID) {
         if (!dataExist(dataClass, objectUUID))
             return null;
         S data = dataClass.cast(dataObjects.get(dataClass).get(objectUUID));
@@ -44,50 +42,50 @@ public class LocalCacheImpl implements LocalCache {
     }
 
     @Override
-    public <S extends VCoreData> Set<S> getAllData(@Nonnull @NotNull Class<? extends S> dataClass) {
+    public <S extends VCoreData> Set<S> getAllData(@NotNull Class<? extends S> dataClass) {
         return getSavedUUIDs(dataClass).stream().map(uuid -> getData(dataClass, uuid)).collect(Collectors.toSet());
     }
 
     @Override
-    public <S extends VCoreData> void save(@Nonnull @NotNull Class<? extends S> dataClass, @Nonnull @NotNull S data) {
+    public <S extends VCoreData> void save(@NotNull Class<? extends S> dataClass, @NotNull S data) {
         if (dataExist(dataClass, data.getObjectUUID()))
             return;
         if (!dataObjects.containsKey(dataClass))
             dataObjects.put(dataClass, new ConcurrentHashMap<>());
         data.updateLastUse();
         dataObjects.get(dataClass).put(data.getObjectUUID(), data);
+        //System.out.println("Saving to Local Cache: "+dataClass.getSimpleName()+" | "+data.getObjectUUID());
     }
 
     @Override
-    public <S extends VCoreData> boolean dataExist(@Nonnull @NotNull Class<? extends S> dataClass, @Nonnull @NotNull UUID objectUUID) {
+    public <S extends VCoreData> boolean dataExist(@NotNull Class<? extends S> dataClass, @NotNull UUID objectUUID) {
         if (!dataObjects.containsKey(dataClass))
             return false;
         return dataObjects.get(dataClass).containsKey(objectUUID);
     }
 
     @Override
-    public <S extends VCoreData> boolean remove(@Nonnull @NotNull Class<? extends S> dataClass, @Nonnull @NotNull UUID objectUUID) {
+    public <S extends VCoreData> boolean remove(@NotNull Class<? extends S> dataClass, @NotNull UUID objectUUID) {
         if (!dataExist(dataClass, objectUUID))
             return false;
         dataObjects.get(dataClass).remove(objectUUID);
         if (dataObjects.get(dataClass).size() == 0)
             dataObjects.remove(dataClass);
+        //System.out.println("Removing from Local Cache: "+dataClass.getSimpleName()+" | "+objectUUID);
         return true;
     }
 
     @Override
-    public <S extends VCoreData> Set<UUID> getSavedUUIDs(@Nonnull @NotNull Class<? extends S> dataClass) {
+    public <S extends VCoreData> Set<UUID> getSavedUUIDs(@NotNull Class<? extends S> dataClass) {
         if (!dataObjects.containsKey(dataClass))
             return new HashSet<>();
         return dataObjects.get(dataClass).keySet();
     }
 
     @Override
-    public <S extends VCoreData> S instantiateData(@Nonnull @NotNull Class<? extends S> dataClass, @Nonnull @NotNull UUID objectUUID) {
+    public <S extends VCoreData> S instantiateData(@NotNull Class<? extends S> dataClass, @NotNull UUID objectUUID) {
         // Network Data is not subsystem dependent
         if (!NetworkData.class.isAssignableFrom(dataClass)) {
-            if (AnnotationResolver.findDependSubsystemClass(dataClass) == null)
-                throw new NullPointerException(dataClass + " does not have RequiredSubsystem Annotation set.");
             VCoreSubsystem<?> subsystem = plugin.findDependSubsystem(dataClass);
             if (subsystem == null)
                 throw new NullPointerException("RequiredSubsystem can't be null");

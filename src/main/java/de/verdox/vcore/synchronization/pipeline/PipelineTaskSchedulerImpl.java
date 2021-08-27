@@ -32,15 +32,14 @@ public class PipelineTaskSchedulerImpl implements PipelineTaskScheduler {
     }
 
     @Override
-    public synchronized <T extends VCoreData> PipelineTask<T> schedulePipelineTask(@NotNull PipelineAction pipelineAction, @NotNull Pipeline.LoadingStrategy loadingStrategy, @NotNull Class<? extends T> type, @NotNull UUID uuid) {
-        System.out.println(uuid);
+    public synchronized <T extends VCoreData> PipelineTask<T> schedulePipelineTask(@NotNull PipelineAction pipelineAction, @NotNull Pipeline.LoadingStrategy loadingStrategy, @NotNull Class<? extends T> type, @NotNull(exception = IllegalArgumentException.class) UUID uuid) {
         PipelineTask<T> existingTask = getExistingPipelineTask(type, uuid);
         if (existingTask != null) {
-            pipelineManager.getPlugin().consoleMessage("&8[&e" + loadingStrategy + "&8] &eFound existing Pipeline Task: " + existingTask, true);
+            //pipelineManager.getPlugin().consoleMessage("&8[&e" + loadingStrategy + "&8] &eFound existing Pipeline Task: " + existingTask, true);
             return existingTask;
         }
         PipelineTask<T> pipelineTask = new PipelineTask<>(pipelineManager.getPlugin(), this, pipelineAction, type, uuid, () -> removePipelineTask(type, uuid));
-        pipelineManager.getPlugin().consoleMessage("&8[&e" + loadingStrategy + "&8] &eScheduling Pipeline Task: " + pipelineTask, true);
+        //pipelineManager.getPlugin().consoleMessage("&8[&e" + loadingStrategy + "&8] &eScheduling Pipeline Task: " + pipelineTask, true);
 
         if (!pendingTasks.containsKey(uuid))
             pendingTasks.put(uuid, new ConcurrentHashMap<>());
@@ -49,8 +48,7 @@ public class PipelineTaskSchedulerImpl implements PipelineTaskScheduler {
     }
 
     @Override
-    public synchronized <T extends VCoreData> PipelineTask<T> getExistingPipelineTask(@NotNull Class<? extends T> type, @NotNull UUID uuid) {
-        System.out.println(uuid);
+    public synchronized <T extends VCoreData> PipelineTask<T> getExistingPipelineTask(@NotNull Class<? extends T> type, @NotNull(exception = IllegalArgumentException.class) UUID uuid) {
         if (!pendingTasks.containsKey(uuid))
             return null;
         Map<Class<? extends VCoreData>, PipelineTask<?>> map = pendingTasks.get(uuid);

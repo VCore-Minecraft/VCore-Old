@@ -75,6 +75,7 @@ public class VCorePaper extends VCoreCoreInstance.Minecraft {
         this.customBlockProvider = new CustomBlockProvider(this);
         this.customBlockDataManager = customBlockProvider.getBlockDataManager();
         this.customLocationDataManager = customBlockProvider.getLocationDataManager();
+        getServices().eventBus.register(new VCorePaperMainListener(this));
 
         this.locationNBTFileStorage = new LocationNBTFileStorage(this);
 

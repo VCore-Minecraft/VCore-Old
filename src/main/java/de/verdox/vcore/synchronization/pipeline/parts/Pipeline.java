@@ -79,7 +79,7 @@ public interface Pipeline extends SystemLoadable {
     <T extends VCoreData> boolean delete(@NotNull Class<? extends T> type, @NotNull UUID uuid, boolean notifyOthers, @NotNull QueryStrategy... strategies);
 
     default <T extends VCoreData> boolean delete(@NotNull Class<? extends T> type, @NotNull UUID uuid, @NotNull QueryStrategy... strategies) {
-        return delete(type, uuid, false, strategies);
+        return delete(type, uuid, true, strategies);
     }
 
     default <T extends VCoreData> boolean delete(@NotNull Class<? extends T> type, @NotNull UUID uuid, boolean notifyOthers) {
@@ -87,17 +87,17 @@ public interface Pipeline extends SystemLoadable {
     }
 
     default <T extends VCoreData> boolean delete(@NotNull Class<? extends T> type, @NotNull UUID uuid) {
-        return delete(type, uuid, false, QueryStrategy.ALL);
+        return delete(type, uuid, true, QueryStrategy.ALL);
     }
 
     <T extends VCoreData> CompletableFuture<Boolean> deleteAsync(@NotNull Class<? extends T> type, @NotNull UUID uuid, boolean notifyOthers, @NotNull QueryStrategy... strategies);
 
-    default <T extends VCoreData> CompletableFuture<Boolean> deleteAsync(@NotNull Class<? extends T> type, boolean notifyOthers, @NotNull UUID uuid) {
+    default <T extends VCoreData> CompletableFuture<Boolean> deleteAsync(@NotNull Class<? extends T> type, @NotNull UUID uuid, boolean notifyOthers) {
         return deleteAsync(type, uuid, notifyOthers, QueryStrategy.ALL);
     }
 
     default <T extends VCoreData> CompletableFuture<Boolean> deleteAsync(@NotNull Class<? extends T> type, @NotNull UUID uuid) {
-        return deleteAsync(type, uuid, false, QueryStrategy.ALL);
+        return deleteAsync(type, uuid, true, QueryStrategy.ALL);
     }
 
 

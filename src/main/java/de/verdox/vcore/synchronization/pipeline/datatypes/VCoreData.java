@@ -113,15 +113,23 @@ public abstract class VCoreData implements VCoreSerializable {
     }
 
     /**
-     * Executed after the object was deleted from local cache. Only it was deleted successfully
+     * Executed before the object is deleted from local cache.
      */
     public void onDelete() {
     }
 
     /**
-     * Executed after Data was loaded from Pipeline. Not if it was found in LocalCache
+     * Executed directly after Data was loaded from Pipeline. Not if it was found in LocalCache
      */
     public void onLoad() {
+
+    }
+
+    /**
+     * Executed before onLoad and before onCreate everytime the data is being loaded into local cache.
+     * You can use this function to load dependent data from pipeline that is directly associated with this data
+     */
+    public void loadDependentData() {
 
     }
 

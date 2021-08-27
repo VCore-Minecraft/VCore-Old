@@ -7,6 +7,7 @@ package de.verdox.vcore.synchronization.pipeline.datatypes.reference;
 import de.verdox.vcore.plugin.VCorePlugin;
 import de.verdox.vcore.synchronization.pipeline.datatypes.VCoreData;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.UUID;
 
@@ -20,16 +21,18 @@ public abstract class VCoreDataReference<T extends VCoreData> {
     protected final VCorePlugin<?, ?> plugin;
     protected final Class<? extends T> type;
 
-    public VCoreDataReference(@NotNull VCorePlugin<?, ?> plugin, @NotNull Class<? extends T> type, @NotNull UUID dataUUID) {
+    public VCoreDataReference(@NotNull VCorePlugin<?, ?> plugin, @NotNull Class<? extends T> type, @Nullable UUID dataUUID) {
         this.plugin = plugin;
         this.type = type;
         this.dataUUID = dataUUID;
     }
 
+    @Nullable
     public UUID getDataUUID() {
         return dataUUID;
     }
 
+    @NotNull
     public Class<? extends T> getType() {
         return type;
     }

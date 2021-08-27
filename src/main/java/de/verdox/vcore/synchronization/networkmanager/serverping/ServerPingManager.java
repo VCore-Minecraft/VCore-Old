@@ -11,6 +11,7 @@ import de.verdox.vcore.synchronization.networkmanager.NetworkManager;
 import de.verdox.vcore.synchronization.networkmanager.serverping.files.ServerPingConfig;
 
 import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * @version 1.0
@@ -22,12 +23,19 @@ public class ServerPingManager<T extends VCorePlugin<?, ?>> implements SystemLoa
     protected final ServerPingConfig serverPingConfig;
     private final NetworkManager<T> networkManager;
     private final ScheduledFuture<?> keepAlivePing;
+    AtomicBoolean loaded = new AtomicBoolean();
 
     public ServerPingManager(NetworkManager<T> networkManager) {
         this.networkManager = networkManager;
         this.serverPingConfig = new ServerPingConfig(networkManager.getPlugin(), "serverInfo.yml", "//settings");
         this.serverPingConfig.init();
-        keepAlivePing = networkManager.getPlugin().getServices().getVCoreScheduler().asyncInterval(this::sendOnlinePing, 20L, 20L * 5);
+        loaded.set(true);
+        keepAlivePing = networkManager.getPlugin().getServices().getVCoreScheduler().asyncInterval(() -> {
+            if (loaded.get())
+                sendOnlinePing();
+            else
+                sendOfflinePing();
+        }, 20L, 20L * 5);
     }
 
     public void sendOnlinePing() {
@@ -56,16 +64,14 @@ public class ServerPingManager<T extends VCorePlugin<?, ?>> implements SystemLoa
 
     @Override
     public boolean isLoaded() {
-        return true;
+        return loaded.get();
     }
 
     @Override
     public void shutdown() {
+        loaded.set(false);
         //TODO: Klappt manchmal nicht so ganz
-        try {
-            keepAlivePing.cancel(true);
-        } catch (Exception ignored) {
-        }
+        keepAlivePing.cancel(false);
         sendOfflinePing();
     }
 }
