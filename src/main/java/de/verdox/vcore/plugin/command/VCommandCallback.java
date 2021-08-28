@@ -19,6 +19,7 @@ import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.checkerframework.checker.index.qual.NonNegative;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.function.BiConsumer;
@@ -48,6 +49,10 @@ public class VCommandCallback {
             addCommandPath(s);
     }
 
+    public String getNeededPermission() {
+        return neededPermission;
+    }
+
     public VCommandCallback addCommandPath(@NotNull String commandPath) {
         if (commandPath.isEmpty())
             return this;
@@ -64,6 +69,7 @@ public class VCommandCallback {
         return this;
     }
 
+    //TODO: Permission in Bukkit registrieren
     public VCommandCallback withPermission(@NotNull String permission) {
         this.neededPermission = permission;
         return this;
@@ -82,9 +88,8 @@ public class VCommandCallback {
     String getSuggested(VCoreCommand<?, ?> command) {
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("&7/&b").append(command.getCommandName()).append(" ");
-        for (CommandCallbackInfo callbackInfo : callbackInfos) {
+        for (CommandCallbackInfo callbackInfo : callbackInfos)
             stringBuilder.append(callbackInfo.commandHelpPlaceholder()).append(" ");
-        }
         return stringBuilder.toString();
     }
 
@@ -112,8 +117,9 @@ public class VCommandCallback {
             return suggested;
         if (neededPermission != null && !neededPermission.isEmpty() && !sender.hasPermission(neededPermission))
             return suggested;
+        String argument = args[currentArgument];
         CommandCallbackInfo info = callbackInfos.get(currentArgument);
-        return info.suggest();
+        return info.suggest(argument);
     }
 
     CallbackResponse onCommand(CommandSender sender, Command command, String label, String[] args) {
@@ -304,7 +310,8 @@ public class VCommandCallback {
             this.index = index;
         }
 
-        public abstract List<String> suggest();
+        @Nullable
+        public abstract List<String> suggest(String argument);
 
         public abstract String commandHelpPlaceholder();
     }
@@ -318,8 +325,10 @@ public class VCommandCallback {
         }
 
         @Override
-        public List<String> suggest() {
-            return List.of(commandPath);
+        public List<String> suggest(String argument) {
+            if (commandPath.contains(argument))
+                return List.of(commandPath);
+            return null;
         }
 
         @Override
@@ -360,7 +369,7 @@ public class VCommandCallback {
         }
 
         @Override
-        public List<String> suggest() {
+        public List<String> suggest(String argument) {
             if (commandAskType.equals(CommandAskType.PLAYER_ONLINE) && suggested.isEmpty())
                 return Bukkit.getOnlinePlayers().stream().map(HumanEntity::getName).collect(Collectors.toList());
             if (commandAskType.equals(CommandAskType.BOOLEAN))
@@ -383,7 +392,8 @@ public class VCommandCallback {
             }
             if (commandAskType.equals(CommandAskType.VCORE_GAMESERVER))
                 return plugin.getCoreInstance().getServices().getPipeline().getLocalCache().getAllData(ServerInstance.class).stream().filter(serverInstance -> serverInstance.getServerType().equals(ServerType.GAME_SERVER)).map(ServerInstance::getServerName).collect(Collectors.toList());
-            return suggested;
+
+            return suggested.stream().filter(s -> s.contains(argument)).collect(Collectors.toList());
         }
 
         @Override

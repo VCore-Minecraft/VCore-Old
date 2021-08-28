@@ -97,7 +97,7 @@ public abstract class VCoreCommand<T extends VCorePlugin<?, ?>, R> {
             String[] args = Arrays.copyOfRange(cmdArgs, 1, cmdArgs.length);
             for (VCommandCallback vCommandCallback : vCommandCallbacks) {
                 List<String> suggested = vCommandCallback.suggest(e.getSender(), cmdArgs[0], args);
-                if (!suggested.isEmpty())
+                if (suggested != null && !suggested.isEmpty())
                     suggest.addAll(suggested);
             }
             e.setCompletions(suggest);
@@ -116,9 +116,13 @@ public abstract class VCoreCommand<T extends VCorePlugin<?, ?>, R> {
                 }
                 if (!errorMessageSent) {
                     sender.sendMessage("");
-                    sender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&8<=========== &6" + commandName + " &8===========>"));
-                    for (VCommandCallback vCommandCallback : vCommandCallbacks)
-                        sender.sendMessage(ChatColor.translateAlternateColorCodes('&', vCommandCallback.getSuggested(this)));
+                    for (VCommandCallback vCommandCallback : vCommandCallbacks) {
+                        if (vCommandCallback.getNeededPermission() != null && !vCommandCallback.getNeededPermission().isEmpty() && !sender.hasPermission(vCommandCallback.getNeededPermission()))
+                            continue;
+                        String suggested = vCommandCallback.getSuggested(this);
+                        if (suggested != null)
+                            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', suggested));
+                    }
                     sender.sendMessage("");
                 }
             });
@@ -130,7 +134,7 @@ public abstract class VCoreCommand<T extends VCorePlugin<?, ?>, R> {
             List<String> suggest = new ArrayList<>();
             for (VCommandCallback vCommandCallback : vCommandCallbacks) {
                 List<String> suggested = vCommandCallback.suggest(sender, alias, args);
-                if (!suggested.isEmpty())
+                if (suggested != null && !suggested.isEmpty())
                     suggest.addAll(suggested);
             }
             return suggest;

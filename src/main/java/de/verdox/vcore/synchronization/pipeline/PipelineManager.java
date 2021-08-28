@@ -298,29 +298,23 @@ public class PipelineManager implements Pipeline {
         plugin.consoleMessage("&eSaving all data&7...", false);
         // getLocalCache().getSavedUUIDs()
         plugin.getServices().getSubsystemManager().getActiveServerDataClasses()
-                .forEach(aClass -> getLocalCache().getSavedUUIDs(aClass).forEach(uuid -> {
-                    VCoreData vCoreData = getLocalCache().getData(aClass, uuid);
-                    if (vCoreData.isMarkedForRemoval())
-                        return;
-                    vCoreData.cleanUp();
-                    pipelineDataSynchronizer.doSynchronisation(DataSynchronizer.DataSourceType.LOCAL, DataSynchronizer.DataSourceType.GLOBAL_CACHE, aClass, uuid, null);
-                    pipelineDataSynchronizer.doSynchronisation(DataSynchronizer.DataSourceType.LOCAL, DataSynchronizer.DataSourceType.GLOBAL_STORAGE, aClass, uuid, null);
-                    vCoreData.save(false);
-                    getLocalCache().remove(aClass, uuid);
-                    plugin.consoleMessage("&aSaved &b" + uuid + " &8[&e" + aClass + "&8]", false);
-                }));
+                .forEach(aClass -> getLocalCache().getSavedUUIDs(aClass).forEach(uuid -> saveData(aClass, uuid)));
         plugin.getServices().getSubsystemManager().getActivePlayerDataClasses()
-                .forEach(aClass -> getLocalCache().getSavedUUIDs(aClass).forEach(uuid -> {
-                    VCoreData vCoreData = getLocalCache().getData(aClass, uuid);
-                    if (vCoreData.isMarkedForRemoval())
-                        return;
-                    vCoreData.cleanUp();
-                    pipelineDataSynchronizer.doSynchronisation(DataSynchronizer.DataSourceType.LOCAL, DataSynchronizer.DataSourceType.GLOBAL_CACHE, aClass, uuid, null);
-                    pipelineDataSynchronizer.doSynchronisation(DataSynchronizer.DataSourceType.LOCAL, DataSynchronizer.DataSourceType.GLOBAL_STORAGE, aClass, uuid, null);
-                    vCoreData.save(false);
-                    plugin.consoleMessage("&aSaved &b" + uuid + " &8[&e" + aClass + "&8]", false);
-                    getLocalCache().remove(aClass, uuid);
-                }));
+                .forEach(aClass -> getLocalCache().getSavedUUIDs(aClass).forEach(uuid -> saveData(aClass, uuid)));
+    }
+
+    private void saveData(@NotNull Class<? extends VCoreData> type, @NotNull UUID uuid) {
+        VCoreData vCoreData = getLocalCache().getData(type, uuid);
+        if (vCoreData == null)
+            return;
+        if (vCoreData.isMarkedForRemoval())
+            return;
+        vCoreData.cleanUp();
+        pipelineDataSynchronizer.doSynchronisation(DataSynchronizer.DataSourceType.LOCAL, DataSynchronizer.DataSourceType.GLOBAL_CACHE, type, uuid, null);
+        pipelineDataSynchronizer.doSynchronisation(DataSynchronizer.DataSourceType.LOCAL, DataSynchronizer.DataSourceType.GLOBAL_STORAGE, type, uuid, null);
+        vCoreData.save(false);
+        plugin.consoleMessage("&aSaved &b" + uuid + " &8[&e" + type + "&8]", false);
+        getLocalCache().remove(type, uuid);
     }
 
     @Override
