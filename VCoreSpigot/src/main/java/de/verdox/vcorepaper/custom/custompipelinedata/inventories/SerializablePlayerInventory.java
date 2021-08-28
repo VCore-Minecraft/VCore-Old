@@ -19,7 +19,6 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 import org.jetbrains.annotations.NotNull;
 
-import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.io.IOException;
 import java.util.Arrays;
@@ -35,7 +34,7 @@ import java.util.stream.Collectors;
  */
 public class SerializablePlayerInventory extends SerializableInventory {
 
-    public SerializablePlayerInventory(@Nonnull String id, @Nonnull GameMode gameMode, @Nonnull ItemStack[] storageContents, @Nonnull ItemStack[] armorContents, @Nonnull ItemStack[] enderChest, @Nullable ItemStack offHand, double health, int foodLevel, int level, float exp, @Nonnull Set<PotionEffect> potionEffects) {
+    public SerializablePlayerInventory(@NotNull String id, @NotNull GameMode gameMode, @NotNull ItemStack[] storageContents, @NotNull ItemStack[] armorContents, @NotNull ItemStack[] enderChest, @Nullable ItemStack offHand, double health, int foodLevel, int level, float exp, @NotNull Set<PotionEffect> potionEffects) {
         super(id, storageContents);
         saveArmorContents(armorContents);
         saveEnderChest(enderChest);
@@ -53,7 +52,7 @@ public class SerializablePlayerInventory extends SerializableInventory {
         super(data);
     }
 
-    public boolean restoreInventory(@Nonnull Player player, @Nullable Runnable callback) {
+    public boolean restoreInventory(@NotNull Player player, @Nullable Runnable callback) {
         VCoreUtil.BukkitUtil.getBukkitPlayerUtil().sendPlayerMessage(player, ChatMessageType.ACTION_BAR, "&eLade Rüstung&7...");
 
         ItemStack[] armorContents = deSerializeArmorContents();
@@ -131,7 +130,7 @@ public class SerializablePlayerInventory extends SerializableInventory {
         return new ItemStack[0];
     }
 
-    public void saveEnderChest(@Nonnull ItemStack[] enderChest) {
+    public void saveEnderChest(@NotNull ItemStack[] enderChest) {
         new StringBsonReference(data, "enderChest").setValue(Serializer.itemStackArrayToBase64(enderChest));
     }
 
@@ -152,7 +151,7 @@ public class SerializablePlayerInventory extends SerializableInventory {
             new StringBsonReference(data, "offHand").setValue(Serializer.itemStackArrayToBase64(new ItemStack[]{offHand}));
     }
 
-    @Nonnull
+    @NotNull
     public ItemStack deSerializeOffHand() {
         try {
             ItemStack[] offHandArray = Serializer.itemStackArrayFromBase64(new StringBsonReference(data, "offHand").orElse(null));
@@ -165,7 +164,7 @@ public class SerializablePlayerInventory extends SerializableInventory {
         }
     }
 
-    public void saveGameMode(@Nonnull GameMode gameMode) {
+    public void saveGameMode(@NotNull GameMode gameMode) {
         new StringBsonReference(data, "gameMode").setValue(gameMode.name());
     }
 

@@ -7,8 +7,8 @@ package de.verdox.vcore.synchronization.networkmanager.player.api.instructions.u
 import de.verdox.vcore.plugin.wrapper.types.enums.PlayerMessageType;
 import de.verdox.vcore.synchronization.messaging.instructions.update.Update;
 import de.verdox.vcore.synchronization.networkmanager.player.api.VCorePlayerAPI;
+import org.jetbrains.annotations.NotNull;
 
-import javax.annotation.Nonnull;
 import java.util.List;
 import java.util.UUID;
 
@@ -22,7 +22,7 @@ public class UpdateBroadcastMessage extends Update {
         super(uuid);
     }
 
-    @Nonnull
+    @NotNull
     @Override
     public UpdateCompletion executeUpdate(Object[] instructionData) {
         if (spigotPlatform == null)
@@ -36,6 +36,7 @@ public class UpdateBroadcastMessage extends Update {
         return UpdateCompletion.TRUE;
     }
 
+
     @Override
     protected List<Class<?>> dataTypes() {
         return List.of(String.class, String.class);
@@ -44,5 +45,10 @@ public class UpdateBroadcastMessage extends Update {
     @Override
     protected List<String> parameters() {
         return List.of(VCorePlayerAPI.APIParameters.UPDATE_BROADCASTMESSAGE.name());
+    }
+
+    @Override
+    public boolean respondToItself() {
+        return true;
     }
 }

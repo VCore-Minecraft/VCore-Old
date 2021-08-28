@@ -4,7 +4,9 @@
 
 package de.verdox.vcore.synchronization.pipeline.player.events;
 
-import javax.annotation.Nonnull;
+import de.verdox.vcore.plugin.VCorePlugin;
+import org.jetbrains.annotations.NotNull;
+
 import java.util.UUID;
 
 /**
@@ -13,10 +15,12 @@ import java.util.UUID;
  * @date 20.06.2021 00:48
  */
 public class PlayerSessionLoadedEvent {
+    private final VCorePlugin<?, ?> plugin;
     private final UUID playerUUID;
     private final long timeStamp;
 
-    public PlayerSessionLoadedEvent(@Nonnull UUID playerUUID, long timeStamp) {
+    public PlayerSessionLoadedEvent(@NotNull VCorePlugin<?, ?> plugin, @NotNull UUID playerUUID, long timeStamp) {
+        this.plugin = plugin;
         this.playerUUID = playerUUID;
         this.timeStamp = timeStamp;
     }
@@ -27,5 +31,9 @@ public class PlayerSessionLoadedEvent {
 
     public UUID getPlayerUUID() {
         return playerUUID;
+    }
+
+    public VCorePlugin<?, ?> getPlugin() {
+        return plugin;
     }
 }

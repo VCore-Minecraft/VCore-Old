@@ -8,8 +8,8 @@ import de.verdox.vcore.plugin.wrapper.Platform;
 import de.verdox.vcore.plugin.wrapper.types.GameLocation;
 import de.verdox.vcore.plugin.wrapper.types.enums.PlayerGameMode;
 import de.verdox.vcore.plugin.wrapper.types.enums.PlayerMessageType;
+import org.jetbrains.annotations.NotNull;
 
-import javax.annotation.Nonnull;
 import java.util.UUID;
 
 /**
@@ -19,25 +19,25 @@ import java.util.UUID;
  */
 public interface SpigotPlatform extends Platform {
 
-    void setPlayerHealth(@Nonnull UUID playerUUID, double health);
+    void setPlayerHealth(@NotNull UUID playerUUID, double health);
 
-    void setPlayerFood(@Nonnull UUID playerUUID, int food);
+    void setPlayerFood(@NotNull UUID playerUUID, int food);
 
-    void teleportPlayer(@Nonnull UUID playerUUID, @Nonnull GameLocation gameLocation);
+    void teleportPlayer(@NotNull UUID playerUUID, @NotNull GameLocation gameLocation);
 
-    void setGameMode(@Nonnull UUID playerUUID, @Nonnull PlayerGameMode playerGameMode);
+    void setGameMode(@NotNull UUID playerUUID, @NotNull PlayerGameMode playerGameMode);
 
-    void sendMessage(@Nonnull UUID playerUUID, @Nonnull String message, @Nonnull PlayerMessageType playerMessageType);
+    void sendMessage(@NotNull UUID playerUUID, @NotNull String message, @NotNull PlayerMessageType playerMessageType);
 
-    void broadcastMessage(@Nonnull String message, @Nonnull PlayerMessageType playerMessageType);
+    void broadcastMessage(@NotNull String message, @NotNull PlayerMessageType playerMessageType);
 
-    void kickPlayer(@Nonnull UUID playerUUID, @Nonnull String kickMessage);
+    void kickPlayer(@NotNull UUID playerUUID, @NotNull String kickMessage);
 
-    void killPlayer(@Nonnull UUID playerUUID);
+    void killPlayer(@NotNull UUID playerUUID);
 
-    void clearInventory(@Nonnull UUID playerUUID);
+    void clearInventory(@NotNull UUID playerUUID);
 
-    GameLocation getLocation(@Nonnull UUID playerUUID);
+    GameLocation getLocation(@NotNull UUID playerUUID);
 
     double getTPS();
 

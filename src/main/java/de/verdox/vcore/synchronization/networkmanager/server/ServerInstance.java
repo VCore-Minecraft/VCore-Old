@@ -7,10 +7,11 @@ package de.verdox.vcore.synchronization.networkmanager.server;
 import de.verdox.vcore.plugin.VCorePlugin;
 import de.verdox.vcore.synchronization.pipeline.annotations.*;
 import de.verdox.vcore.synchronization.pipeline.datatypes.NetworkData;
+import org.jetbrains.annotations.NotNull;
 
-import javax.annotation.Nonnull;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @version 1.0
@@ -23,7 +24,7 @@ import java.util.UUID;
 public class ServerInstance extends NetworkData {
 
     @VCorePersistentData
-    public String serverName;
+    private String serverName;
     @VCorePersistentData
     public String serverAddress;
     @VCorePersistentData
@@ -31,6 +32,8 @@ public class ServerInstance extends NetworkData {
     //TODO: VersionTag als Info hinzufügen
     @VCorePersistentData
     private String serverType;
+    @VCorePersistentData
+    private final Map<String, String> infoTags = new ConcurrentHashMap<>();
 
     public ServerInstance(VCorePlugin<?, ?> plugin, UUID objectUUID) {
         super(plugin, objectUUID);
@@ -42,7 +45,7 @@ public class ServerInstance extends NetworkData {
         return ServerType.valueOf(serverType);
     }
 
-    public void setServerType(@Nonnull ServerType serverType) {
+    public void setServerType(@NotNull ServerType serverType) {
         this.serverType = serverType.name();
     }
 
@@ -64,5 +67,17 @@ public class ServerInstance extends NetworkData {
     @Override
     public void onCleanUp() {
 
+    }
+
+    public String getServerName() {
+        return serverName.toLowerCase();
+    }
+
+    void setServerName(String serverName) {
+        this.serverName = serverName;
+    }
+
+    public Map<String, String> getInfoTags() {
+        return infoTags;
     }
 }

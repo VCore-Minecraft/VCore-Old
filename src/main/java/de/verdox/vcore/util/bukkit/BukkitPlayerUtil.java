@@ -16,8 +16,8 @@ import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.RayTraceResult;
+import org.jetbrains.annotations.NotNull;
 
-import javax.annotation.Nonnull;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
@@ -31,7 +31,7 @@ public class BukkitPlayerUtil {
         player.spigot().sendMessage(chatMessageType, new TextComponent(ChatColor.translateAlternateColorCodes('&', message)));
     }
 
-    public RayTraceResult rayTraceEntities(@Nonnull Player player, double maxDistance) {
+    public RayTraceResult rayTraceEntities(@NotNull Player player, double maxDistance) {
         return player.getWorld().rayTraceEntities(player.getEyeLocation(), player.getLocation().getDirection(), maxDistance, entity -> !entity.getType().equals(EntityType.PLAYER));
     }
 

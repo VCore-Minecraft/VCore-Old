@@ -16,8 +16,8 @@ import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.ItemStack;
 import org.checkerframework.checker.index.qual.NonNegative;
 import org.checkerframework.checker.index.qual.Positive;
+import org.jetbrains.annotations.NotNull;
 
-import javax.annotation.Nonnull;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.util.*;
@@ -28,6 +28,14 @@ import java.util.stream.Stream;
 
 public class GUITemplate {
     //TODO: Callbacks ans Ende der Function
+
+    public static AnvilGUI.Builder createStringInput(BukkitPlugin bukkitPlugin, Player player, String title, Function<String, AnvilGUI.Response> callback) {
+        return new AnvilGUI.Builder()
+                .plugin(bukkitPlugin)
+                .title(ChatColor.translateAlternateColorCodes('&', title))
+                .itemLeft(new ItemStack(Material.GOLD_INGOT))
+                .onComplete((player1, s) -> callback.apply(s));
+    }
 
     public static AnvilGUI.Builder createIntegerInputGUI(BukkitPlugin bukkitPlugin, Player player, String title, String notValidNumber, Function<Integer, AnvilGUI.Response> callback) {
         return new AnvilGUI.Builder()
@@ -120,8 +128,9 @@ public class GUITemplate {
         private Function<T, String> toStringFunc;
         private Function<VCoreGUI.VCoreGUIClick<T>, VCoreGUI.Response<?, ?>> clickCallback;
         private Runnable backCallback;
+        private VCoreGUI.Builder<T> builder;
 
-        public SelectionGUI(@Nonnull String title, @Nonnull Collection<T> objectList, @Nonnull BukkitPlugin bukkitPlugin, @Positive int page, @Positive int rows, @Nonnull Function<T, ItemStack> objectToItemStack) {
+        public SelectionGUI(@NotNull String title, @NotNull Collection<T> objectList, @NotNull BukkitPlugin bukkitPlugin, @Positive int page, @Positive int rows, @NotNull Function<T, ItemStack> objectToItemStack) {
             this.title = title;
             this.objectList = objectList;
             this.bukkitPlugin = bukkitPlugin;
@@ -133,11 +142,11 @@ public class GUITemplate {
             guiSize = (rows * 9) + 9 + 9;
         }
 
-        public SelectionGUI(@Nonnull String title, @Nonnull Collection<T> objectList, @Nonnull BukkitPlugin bukkitPlugin, @Nonnull Function<T, ItemStack> objectToItemStack) {
+        public SelectionGUI(@NotNull String title, @NotNull Collection<T> objectList, @NotNull BukkitPlugin bukkitPlugin, @NotNull Function<T, ItemStack> objectToItemStack) {
             this(title, objectList, bukkitPlugin, 1, 4, objectToItemStack);
         }
 
-        public SelectionGUI(@Nonnull String title, @Nonnull Collection<T> objectList, @Nonnull BukkitPlugin bukkitPlugin, @Positive int rows, @Nonnull Function<T, ItemStack> objectToItemStack) {
+        public SelectionGUI(@NotNull String title, @NotNull Collection<T> objectList, @NotNull BukkitPlugin bukkitPlugin, @Positive int rows, @NotNull Function<T, ItemStack> objectToItemStack) {
             this(title, objectList, bukkitPlugin, 1, rows, objectToItemStack);
         }
 
@@ -213,15 +222,16 @@ public class GUITemplate {
             });
         }
 
-        public void open(Player player) {
-
+        public VCoreGUI.Builder<T> createBuilder() {
+            if (builder != null)
+                return builder;
             VCoreItem border = VCorePaper.getInstance().getCustomItemManager().createItemBuilder(Material.BLACK_STAINED_GLASS_PANE, 1, "&8").buildItem();
             VCoreItem nextPage = VCorePaper.getInstance().getCustomItemManager().createItemBuilder(Material.PAPER, 1, "&aNext page").buildItem();
             VCoreItem search = VCorePaper.getInstance().getCustomItemManager().createItemBuilder(Material.WRITTEN_BOOK, 1, "&eSearch").buildItem();
             VCoreItem lastPage = VCorePaper.getInstance().getCustomItemManager().createItemBuilder(Material.PAPER, 1, "&cLast page").buildItem();
             VCoreItem back = VCorePaper.getInstance().getCustomItemManager().createItemBuilder(Material.BARRIER, 1, "&cBack").buildItem();
 
-            new VCoreGUI.Builder<T>()
+            this.builder = new VCoreGUI.Builder<T>()
                     .plugin(bukkitPlugin)
                     .update()
                     .title(ChatColor.translateAlternateColorCodes('&', title))
@@ -310,7 +320,12 @@ public class GUITemplate {
                             return clickCallback.apply(vCoreGUIClick);
                         else
                             return VCoreGUI.Response.nothing();
-                    }).open(player);
+                    });
+            return builder;
+        }
+
+        public void open(Player player) {
+            createBuilder().open(player);
         }
     }
 }

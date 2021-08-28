@@ -4,7 +4,9 @@
 
 package de.verdox.vcore.synchronization.networkmanager.player.api;
 
-import javax.annotation.Nonnull;
+import org.jetbrains.annotations.NotNull;
+
+import java.util.Objects;
 import java.util.UUID;
 
 /**
@@ -14,10 +16,12 @@ import java.util.UUID;
  */
 public final class PlayerTask {
     private final UUID uuid;
+    private final UUID taskUUID;
     private final Runnable runnable;
 
-    public PlayerTask(@Nonnull UUID uuid, @Nonnull Runnable runnable) {
+    public PlayerTask(@NotNull UUID uuid, @NotNull UUID taskUUID, @NotNull Runnable runnable) {
         this.uuid = uuid;
+        this.taskUUID = taskUUID;
         this.runnable = runnable;
     }
 
@@ -27,5 +31,22 @@ public final class PlayerTask {
 
     public Runnable getRunnable() {
         return runnable;
+    }
+
+    public UUID getTaskUUID() {
+        return taskUUID;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof PlayerTask)) return false;
+        PlayerTask that = (PlayerTask) o;
+        return Objects.equals(getTaskUUID(), that.getTaskUUID());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getTaskUUID());
     }
 }

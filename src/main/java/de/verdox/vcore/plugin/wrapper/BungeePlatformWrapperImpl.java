@@ -12,6 +12,7 @@ import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.config.ServerInfo;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
+import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nonnull;
 import java.net.InetSocketAddress;
@@ -23,12 +24,12 @@ import java.util.UUID;
  * @date 01.08.2021 20:01
  */
 public class BungeePlatformWrapperImpl implements PlatformWrapper {
-    private ProxiedPlayer getPlayer(@Nonnull VCorePlayer vCorePlayer) {
+    private ProxiedPlayer getPlayer(@NotNull VCorePlayer vCorePlayer) {
         return ProxyServer.getInstance().getPlayer(vCorePlayer.getObjectUUID());
     }
 
     @Override
-    public boolean isPlayerOnline(@Nonnull UUID playerUUID) {
+    public boolean isPlayerOnline(@Nonnull @NotNull UUID playerUUID) {
         return ProxyServer.getInstance().getPlayer(playerUUID) != null;
     }
 
@@ -38,7 +39,12 @@ public class BungeePlatformWrapperImpl implements PlatformWrapper {
     }
 
     @Override
-    public InetSocketAddress getPlayerAddress(@Nonnull UUID playerUUID) {
+    public void shutdown() {
+        ProxyServer.getInstance().stop();
+    }
+
+    @Override
+    public InetSocketAddress getPlayerAddress(@Nonnull @NotNull UUID playerUUID) {
         ProxiedPlayer proxiedPlayer = ProxyServer.getInstance().getPlayer(playerUUID);
         if (proxiedPlayer == null)
             return null;
@@ -54,7 +60,7 @@ public class BungeePlatformWrapperImpl implements PlatformWrapper {
     public BungeePlatform getBungeePlatform() {
         return new BungeePlatform() {
             @Override
-            public boolean sendToServer(@Nonnull UUID playerUUID, @Nonnull String serverName) {
+            public boolean sendToServer(@Nonnull @NotNull UUID playerUUID, @Nonnull @NotNull String serverName) {
                 ProxiedPlayer proxiedPlayer = ProxyServer.getInstance().getPlayer(playerUUID);
                 if (proxiedPlayer == null)
                     return false;
@@ -68,7 +74,7 @@ public class BungeePlatformWrapperImpl implements PlatformWrapper {
             }
 
             @Override
-            public boolean kickPlayer(@Nonnull UUID playerUUID, @Nonnull String kickMessage) {
+            public boolean kickPlayer(@Nonnull @NotNull UUID playerUUID, @Nonnull @NotNull String kickMessage) {
                 ProxiedPlayer proxiedPlayer = ProxyServer.getInstance().getPlayer(playerUUID);
                 if (proxiedPlayer == null)
                     return false;

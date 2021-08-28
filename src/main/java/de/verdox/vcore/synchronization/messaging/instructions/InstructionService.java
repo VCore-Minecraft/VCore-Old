@@ -11,8 +11,8 @@ import de.verdox.vcore.synchronization.messaging.instructions.annotations.Instru
 import de.verdox.vcore.synchronization.messaging.messages.Message;
 import de.verdox.vcore.synchronization.messaging.messages.MessageWrapper;
 import org.checkerframework.checker.index.qual.NonNegative;
+import org.jetbrains.annotations.NotNull;
 
-import javax.annotation.Nonnull;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.Map;
@@ -54,33 +54,33 @@ public class InstructionService {
         instructionTypes.put(id, type);
     }
 
-    public void sendInstruction(@Nonnull MessagingInstruction messagingInstruction) {
+    public void sendInstruction(@NotNull MessagingInstruction messagingInstruction) {
         InstructionInfo instructionInfo = getInstructionInfo(messagingInstruction.getClass());
         UUID uuid = messagingInstruction.getUuid();
 
         Message instructionMessage = constructMessage(messagingInstruction);
         if (instructionMessage == null)
             return;
-        plugin.consoleMessage("&eSending Instruction &8[&b" + messagingInstruction.getUuid() + "&8] &7| &eParameters &8[&b" + Arrays.toString(instructionMessage.getParameters()) + "&8] &7| &eInstructionData&8[&e" + Arrays.toString(instructionMessage.dataToSend()) + "&8]", true);
+        plugin.consoleMessage("&eSending Instruction &8[&b" + messagingInstruction.getUuid() + "&8] &7| &eParameters &8[&b" + Arrays.toString(messagingInstruction.getParameters()) + "&8] &7| &eInstructionData&8[&e" + Arrays.toString(instructionMessage.dataToSend()) + "&8]", true);
         plugin.getServices().getMessagingService().publishMessage(instructionMessage);
         if (instructionInfo.awaitsResponse())
             pendingInstructions.put(uuid, messagingInstruction);
     }
 
-    public void sendInstruction(@Nonnull MessagingInstruction messagingInstruction, String... serverNames) {
+    public void sendInstruction(@NotNull MessagingInstruction messagingInstruction, String... serverNames) {
         InstructionInfo instructionInfo = getInstructionInfo(messagingInstruction.getClass());
         UUID uuid = messagingInstruction.getUuid();
 
         Message instructionMessage = constructMessage(messagingInstruction);
         if (instructionMessage == null)
             return;
-        plugin.consoleMessage("&eSending Instruction &8[&b" + messagingInstruction.getUuid() + "&8] &7| &eParameters &8[&b" + Arrays.toString(instructionMessage.getParameters()) + "&8] &7| &eInstructionData&8[&e" + Arrays.toString(instructionMessage.dataToSend()) + "&8]", true);
+        plugin.consoleMessage("&eSending Instruction &8[&b" + messagingInstruction.getUuid() + "&8] &7| &eParameters &8[&b" + Arrays.toString(messagingInstruction.getParameters()) + "&8] &7| &eInstructionData&8[&e" + Arrays.toString(messagingInstruction.getData()) + "&8]", true);
         plugin.getServices().getMessagingService().sendMessage(instructionMessage, serverNames);
         if (instructionInfo.awaitsResponse())
             pendingInstructions.put(uuid, messagingInstruction);
     }
 
-    private Message constructMessage(@Nonnull MessagingInstruction messagingInstruction) {
+    private Message constructMessage(@NotNull MessagingInstruction messagingInstruction) {
         if (messagingInstruction.getData() == null)
             throw new IllegalStateException("You can't send empty instructions");
         int instructionID = getID(messagingInstruction.getClass());
@@ -92,7 +92,7 @@ public class InstructionService {
                 .withParameters("VCoreInstruction")
                 .withData(getSessionUUID(), instructionID, messagingInstruction.getUuid(), messagingInstruction.getParameters(), messagingInstruction.getData())
                 .constructMessage();
-        if (!messagingInstruction.onSend(messagingInstruction.getData())) {
+        if (!messagingInstruction.onSend(messagingInstruction.getFuture(), messagingInstruction.getData())) {
             plugin.consoleMessage("&cCancelled Instruction &8[&b" + messagingInstruction.getUuid() + "&8]", true);
             return null;
         }
@@ -127,8 +127,20 @@ public class InstructionService {
     }
 
     //TODO: Satt superclass maybe iwann anders lösen
-    private InstructionInfo getInstructionInfo(@Nonnull Class<? extends MessagingInstruction> type) {
-        InstructionInfo instructionInfo = type.getSuperclass().getAnnotation(InstructionInfo.class);
+    private InstructionInfo getInstructionInfo(@NotNull Class<? extends MessagingInstruction> type) {
+        boolean found = false;
+        int tries = 0;
+        Class<?> typeToSearch = type;
+        InstructionInfo instructionInfo = null;
+        while (!found) {
+            if (tries == 10)
+                break;
+            instructionInfo = typeToSearch.getSuperclass().getAnnotation(InstructionInfo.class);
+            if (instructionInfo != null)
+                found = true;
+            typeToSearch = typeToSearch.getSuperclass();
+            tries++;
+        }
         if (instructionInfo == null)
             throw new IllegalStateException("Class " + type.getName() + " is missing InstructionInfo Annotation");
         return instructionInfo;
@@ -155,10 +167,14 @@ public class InstructionService {
             if (messageWrapper.parameterContains("VCoreInstruction")) {
                 InstructionInfo instructionInfo = getInstructionInfo(type);
                 MessagingInstruction responseInstruction = instantiateInstruction(type, instructionUUID);
-                plugin.consoleMessage("&eReceived Instruction &8[&b" + instructionUUID + "&8] &7| &eParameters &8[&b" + Arrays.toString(arguments) + "&8] &7| &eInstructionData&8[&e" + Arrays.toString(instructionData) + "&8]", true);
                 if (!(responseInstruction instanceof InstructionResponder))
                     return;
+                plugin.consoleMessage("&b" + senderUUID + " &7-> &eReceived Instruction on &b+" + messageEvent.getChannelName() + " &8[&b" + instructionUUID + "&8] &7| &eParameters &8[&b" + Arrays.toString(arguments) + "&8] &7| &eInstructionData&8[&e" + Arrays.toString(instructionData) + "&8]", true);
                 InstructionResponder instructionResponder = (InstructionResponder) responseInstruction;
+                if (pendingInstructions.containsKey(senderUUID)) {
+                    if (!instructionResponder.respondToItself())
+                        return;
+                }
                 Object[] responseData = instructionResponder.respondToInstruction(instructionData);
                 if (responseData == null || responseData.length == 0)
                     return;
@@ -166,7 +182,7 @@ public class InstructionService {
                     sendResponse(instructionID, instructionUUID, arguments, instructionData, responseData);
             } else if (messageWrapper.parameterContains("VCoreInstructionResponse")) {
                 Object[] responseData = messageEvent.getMessage().getData(5, Object[].class);
-                plugin.consoleMessage("&eReceived Instruction Response &8[&b" + instructionUUID + "&8] &7| &eParameters &8[&b" + Arrays.toString(arguments) + "&8] &7| &eInstructionData&8[&e" + Arrays.toString(instructionData) + "&8]", true);
+                plugin.consoleMessage("&b" + senderUUID + " &7-> &eReceived Instruction Response on&b " + messageEvent.getChannelName() + " &8[&b" + instructionUUID + "&8] &7| &eParameters &8[&b" + Arrays.toString(arguments) + "&8] &7| &eInstructionData&8[&e" + Arrays.toString(instructionData) + "&8]", true);
                 if (!pendingInstructions.containsKey(instructionUUID))
                     return;
                 MessagingInstruction messagingInstruction = pendingInstructions.get(instructionUUID);

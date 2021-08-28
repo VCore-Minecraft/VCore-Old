@@ -11,8 +11,8 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.Damageable;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.jetbrains.annotations.NotNull;
 
-import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 /**
@@ -22,7 +22,7 @@ import javax.annotation.Nullable;
  */
 public class BukkitItemUtil {
 
-    public int applyDamageNaturally(@Nullable ItemStack stack, @Nonnull Material material) {
+    public int applyDamageNaturally(@Nullable ItemStack stack, @NotNull Material material) {
         return applyDamageNaturally(stack, material, null);
     }
 
@@ -33,7 +33,7 @@ public class BukkitItemUtil {
      * @param material Material the Item would break
      * @return damage that was dealt
      */
-    public int applyDamageNaturally(@Nullable ItemStack stack, @Nonnull Material material, @Nullable Player player) {
+    public int applyDamageNaturally(@Nullable ItemStack stack, @NotNull Material material, @Nullable Player player) {
         if (stack == null)
             return 0;
         ItemMeta meta = stack.getItemMeta();
@@ -77,7 +77,7 @@ public class BukkitItemUtil {
      * @param material Material to be checked
      * @return true if it is a tool
      */
-    public boolean isMaterialTool(@Nonnull Material material) {
+    public boolean isMaterialTool(@NotNull Material material) {
         if (material.name().contains("SWORD"))
             return true;
         else if (material.name().contains("PICKAXE"))

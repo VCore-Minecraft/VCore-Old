@@ -5,8 +5,8 @@
 package de.verdox.vcorepaper.custom;
 
 import de.verdox.vcorepaper.custom.annotation.NBTIdentifier;
+import org.jetbrains.annotations.NotNull;
 
-import javax.annotation.Nonnull;
 import java.util.List;
 
 /**
@@ -40,12 +40,12 @@ public abstract class CustomData<T> {
         return true;
     }
 
-    @Nonnull
+    @NotNull
     public abstract Class<T> getTypeClass();
 
     public abstract T defaultValue();
 
-    @Nonnull
+    @NotNull
     public String getNBTKey() {
         NBTIdentifier nbtIdentifier = getClass().getAnnotation(NBTIdentifier.class);
         if (nbtIdentifier == null)

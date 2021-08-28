@@ -12,6 +12,7 @@ import de.verdox.vcore.synchronization.pipeline.interfaces.VCoreSerializable;
 import de.verdox.vcore.synchronization.pipeline.parts.cache.GlobalCache;
 import de.verdox.vcore.synchronization.redisson.RedisConnection;
 import de.verdox.vcore.util.global.AnnotationResolver;
+import org.jetbrains.annotations.NotNull;
 import org.redisson.api.RMap;
 import org.redisson.api.RTopic;
 import org.redisson.codec.SerializationCodec;
@@ -27,13 +28,13 @@ import java.util.stream.Collectors;
  * @date 24.06.2021 15:49
  */
 public class RedisCache extends RedisConnection implements GlobalCache {
-    public RedisCache(@Nonnull VCorePlugin<?, ?> plugin, boolean clusterMode, @Nonnull String[] addressArray, String redisPassword) {
+    public RedisCache(@NotNull VCorePlugin<?, ?> plugin, boolean clusterMode, @NotNull String[] addressArray, String redisPassword) {
         super(plugin, clusterMode, addressArray, redisPassword);
         plugin.consoleMessage("&eRedis Manager started", true);
     }
 
     @Override
-    public Map<String, Object> loadData(@Nonnull Class<? extends VCoreData> dataClass, @Nonnull UUID objectUUID) {
+    public Map<String, Object> loadData(@Nonnull @NotNull Class<? extends VCoreData> dataClass, @Nonnull @NotNull UUID objectUUID) {
         try {
             return new HashMap<>(getObjectCache(dataClass, objectUUID));
         } catch (Exception e) {
@@ -44,7 +45,7 @@ public class RedisCache extends RedisConnection implements GlobalCache {
     }
 
     @Override
-    public void save(@Nonnull Class<? extends VCoreData> dataClass, @Nonnull UUID objectUUID, @Nonnull Map<String, Object> dataToSave) {
+    public void save(@Nonnull @NotNull Class<? extends VCoreData> dataClass, @Nonnull @NotNull UUID objectUUID, @Nonnull @NotNull Map<String, Object> dataToSave) {
         Map<String, Object> objectCache = getObjectCache(dataClass, objectUUID);
         dataToSave.forEach((key, value) -> {
             if (value == null)
@@ -55,7 +56,7 @@ public class RedisCache extends RedisConnection implements GlobalCache {
     }
 
     @Override
-    public boolean remove(@Nonnull Class<? extends VCoreData> dataClass, @Nonnull UUID objectUUID) {
+    public boolean remove(@Nonnull @NotNull Class<? extends VCoreData> dataClass, @Nonnull @NotNull UUID objectUUID) {
         RMap<String, Object> redisMap = (RMap<String, Object>) getObjectCache(dataClass, objectUUID);
         return redisMap.delete();
     }
@@ -98,12 +99,12 @@ public class RedisCache extends RedisConnection implements GlobalCache {
     }
 
     @Override
-    public Set<UUID> getSavedUUIDs(@Nonnull Class<? extends VCoreData> dataClass) {
+    public Set<UUID> getSavedUUIDs(@Nonnull @NotNull Class<? extends VCoreData> dataClass) {
         return getKeys(dataClass).stream().map(s -> UUID.fromString(s.split(":")[1])).collect(Collectors.toSet());
     }
 
     @Override
-    public boolean dataExist(@Nonnull Class<? extends VCoreData> dataClass, @Nonnull UUID objectUUID) {
+    public boolean dataExist(@Nonnull @NotNull Class<? extends VCoreData> dataClass, @Nonnull @NotNull UUID objectUUID) {
         Map<String, Object> cache = getObjectCache(dataClass, objectUUID);
 
         Set<String> redisKeys = getObjectDataKeys(dataClass, objectUUID);

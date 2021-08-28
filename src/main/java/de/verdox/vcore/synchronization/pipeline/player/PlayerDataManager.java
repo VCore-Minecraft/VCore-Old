@@ -5,6 +5,7 @@
 package de.verdox.vcore.synchronization.pipeline.player;
 
 import de.verdox.vcore.plugin.SystemLoadable;
+import de.verdox.vcore.plugin.VCoreCoreInstance;
 import de.verdox.vcore.plugin.VCorePlugin;
 import de.verdox.vcore.synchronization.pipeline.PipelineManager;
 import de.verdox.vcore.synchronization.pipeline.datatypes.PlayerData;
@@ -22,8 +23,8 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerKickEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.jetbrains.annotations.NotNull;
 
-import javax.annotation.Nonnull;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -35,7 +36,7 @@ import java.util.concurrent.TimeUnit;
 public class PlayerDataManager implements SystemLoadable {
     protected final VCorePlugin<?, ?> plugin;
     private final PipelineManager pipelineManager;
-    private boolean loaded;
+    private final boolean loaded;
 
     public PlayerDataManager(PipelineManager pipelineManager) {
         this.pipelineManager = pipelineManager;
@@ -43,23 +44,26 @@ public class PlayerDataManager implements SystemLoadable {
         loaded = true;
     }
 
-    protected final void loginPipeline(@Nonnull UUID player) {
-        plugin.consoleMessage("&eHandling Player Join &b" + player, false);
-        plugin.getServices().eventBus.post(new PlayerPreSessionLoadEvent(player));
+    protected final void loginPipeline(@NotNull UUID player) {
+        if (plugin instanceof VCoreCoreInstance)
+            plugin.consoleMessage("&eHandling Player Join &b" + player, false);
+        plugin.getServices().eventBus.post(new PlayerPreSessionLoadEvent(plugin, player));
         plugin.createTaskBatch().wait(400, TimeUnit.MILLISECONDS).doAsync(() -> {
             plugin.getServices().getSubsystemManager().getActivePlayerDataClasses()
+                    .parallelStream()
                     .forEach(aClass -> {
                         PlayerData playerData = pipelineManager.load(aClass, player, Pipeline.LoadingStrategy.LOAD_PIPELINE, true);
                         playerData.onConnect(player);
                     });
-        }).doSync(() -> plugin.getServices().eventBus.post(new PlayerSessionLoadedEvent(player, System.currentTimeMillis()))).executeBatch();
+        }).doSync(() -> plugin.getServices().eventBus.post(new PlayerSessionLoadedEvent(plugin, player, System.currentTimeMillis()))).executeBatch();
     }
 
-    protected final void logoutPipeline(@Nonnull UUID player) {
-        plugin.getServices().eventBus.post(new PlayerPreSessionUnloadEvent(player));
+    protected final void logoutPipeline(@NotNull UUID player) {
+        plugin.getServices().eventBus.post(new PlayerPreSessionUnloadEvent(plugin, player));
         plugin.createTaskBatch()
                 .doAsync(() -> {
                     plugin.getServices().getSubsystemManager().getActivePlayerDataClasses()
+                            .parallelStream()
                             .forEach(aClass -> {
                                 PlayerData data = pipelineManager.getLocalCache().getData(aClass, player);
                                 data.onDisconnect(player);

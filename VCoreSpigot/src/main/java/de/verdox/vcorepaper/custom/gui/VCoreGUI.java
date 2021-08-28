@@ -31,7 +31,7 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-public class VCoreGUI<T> {
+public class VCoreGUI<T> implements CustomGUI {
 
     private final BukkitPlugin plugin;
     private final Player player;
@@ -91,6 +91,8 @@ public class VCoreGUI<T> {
     }
 
     public void openInventory() {
+        if (this.openPredicate != null && !openPredicate.test(player))
+            return;
         Bukkit.getPluginManager().registerEvents(this.listener, this.plugin);
         if (this.size == 0) {
             if (inventoryType == null)
@@ -344,7 +346,7 @@ public class VCoreGUI<T> {
             fillRowWithItem(rows - 1, vCoreItem, object);
 
             for (int i = 1; i < rows - 1; i++)
-                fillLeftRightItem(i * 9, vCoreItem, object);
+                fillLeftRightItem(i, vCoreItem, object);
             return this;
         }
 

@@ -8,13 +8,13 @@ import de.verdox.vcorepaper.custom.CustomData;
 import de.verdox.vcorepaper.custom.CustomDataHolder;
 import de.verdox.vcorepaper.custom.nbtholders.entity.NBTEntityHolder;
 import org.bukkit.entity.Entity;
+import org.jetbrains.annotations.NotNull;
 
-import javax.annotation.Nonnull;
 import java.lang.reflect.InvocationTargetException;
 
 public class VCoreEntity extends CustomDataHolder<Entity, NBTEntityHolder, CustomEntityManager> {
 
-    public VCoreEntity(@Nonnull Entity entity, @Nonnull CustomEntityManager customEntityManager) {
+    public VCoreEntity(@NotNull Entity entity, @NotNull CustomEntityManager customEntityManager) {
         super(entity, customEntityManager);
     }
 
@@ -33,7 +33,7 @@ public class VCoreEntity extends CustomDataHolder<Entity, NBTEntityHolder, Custo
         }
     }
 
-    @Nonnull
+    @NotNull
     @Override
     public NBTEntityHolder toNBTHolder() {
         return new NBTEntityHolder(getDataHolder());

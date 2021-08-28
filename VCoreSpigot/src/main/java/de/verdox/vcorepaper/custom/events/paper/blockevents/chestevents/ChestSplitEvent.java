@@ -9,8 +9,7 @@ import org.bukkit.block.Chest;
 import org.bukkit.block.DoubleChest;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Cancellable;
-
-import javax.annotation.Nonnull;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * @version 1.0
@@ -25,7 +24,7 @@ public class ChestSplitEvent extends VCoreEvent implements Cancellable {
     private final Chest otherChest;
     private boolean cancelled;
 
-    public ChestSplitEvent(@Nonnull Player splitter, @Nonnull Chest otherChest, @Nonnull Chest brokenChest, @Nonnull DoubleChest doubleChest) {
+    public ChestSplitEvent(@NotNull Player splitter, @NotNull Chest otherChest, @NotNull Chest brokenChest, @NotNull DoubleChest doubleChest) {
         this.splitter = splitter;
         this.otherChest = otherChest;
         this.brokenChest = brokenChest;

@@ -18,9 +18,6 @@ import org.bukkit.Location;
 
 import java.io.IOException;
 import java.util.Objects;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 /**
  * @version 1.0
@@ -53,12 +50,9 @@ public class NBTLocation extends NBTHolderImpl<Location, NBTCompound> {
 
     protected NBTCompound getOrLoadLocationCompound() {
         if (Objects.isNull(this.nbtFile)) {
-            try {
-                this.nbtFile = VCorePaper.getInstance().getBlockFileStorage().loadNBTFile(worldChunk).get(10, TimeUnit.SECONDS);
-            } catch (InterruptedException | ExecutionException | TimeoutException e) {
-                VCorePaper.getInstance().consoleMessage("&cCould not load NBT File for: " + dataHolder, true);
-                e.printStackTrace();
-                throw new IllegalStateException();
+            this.nbtFile = VCorePaper.getInstance().getBlockFileStorage().getWorldStorage(worldChunk.worldName).getNBTFile(WorldChunk.getRegionX(worldChunk.x), WorldChunk.getRegionZ(worldChunk.z));
+            if (this.nbtFile == null) {
+                throw new IllegalStateException("Could not load NBT Location");
             }
         }
         if (Objects.isNull(this.chunkCompound))

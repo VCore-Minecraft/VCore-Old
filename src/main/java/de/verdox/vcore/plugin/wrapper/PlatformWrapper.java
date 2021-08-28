@@ -6,8 +6,8 @@ package de.verdox.vcore.plugin.wrapper;
 
 import de.verdox.vcore.plugin.wrapper.bungeecord.BungeePlatform;
 import de.verdox.vcore.plugin.wrapper.spigot.SpigotPlatform;
+import org.jetbrains.annotations.NotNull;
 
-import javax.annotation.Nonnull;
 import java.net.InetSocketAddress;
 import java.util.UUID;
 
@@ -17,11 +17,13 @@ import java.util.UUID;
  * @date 01.08.2021 20:00
  */
 public interface PlatformWrapper {
-    boolean isPlayerOnline(@Nonnull UUID playerUUID);
+    boolean isPlayerOnline(@NotNull UUID playerUUID);
 
     boolean isPrimaryThread();
 
-    InetSocketAddress getPlayerAddress(@Nonnull UUID playerUUID);
+    void shutdown();
+
+    InetSocketAddress getPlayerAddress(@NotNull UUID playerUUID);
 
     SpigotPlatform getSpigotPlatform();
 

@@ -10,11 +10,10 @@ import de.verdox.vcore.synchronization.messaging.event.MessageEvent;
 import de.verdox.vcore.synchronization.messaging.instructions.InstructionService;
 import de.verdox.vcore.synchronization.messaging.messages.Message;
 import de.verdox.vcore.synchronization.redisson.RedisConnection;
+import org.jetbrains.annotations.NotNull;
 import org.redisson.api.RTopic;
 import org.redisson.api.listener.MessageListener;
 import org.redisson.codec.SerializationCodec;
-
-import javax.annotation.Nonnull;
 
 /**
  * @version 1.0
@@ -27,10 +26,9 @@ public class RedisMessaging extends RedisConnection implements MessagingService<
     private final InstructionService instructionService;
 
     private RTopic privateMessagingChannel;
-    private boolean loaded;
+    private final boolean loaded;
 
-
-    public RedisMessaging(@Nonnull VCorePlugin<?, ?> plugin, boolean clusterMode, @Nonnull String[] addressArray, String redisPassword) {
+    public RedisMessaging(@NotNull VCorePlugin<?, ?> plugin, boolean clusterMode, @NotNull String[] addressArray, String redisPassword) {
         super(plugin, clusterMode, addressArray, redisPassword);
         globalMessagingChannel = redissonClient.getTopic("VCoreMessagingChannel", new SerializationCodec());
 
@@ -40,7 +38,7 @@ public class RedisMessaging extends RedisConnection implements MessagingService<
             // Own Messages won't throw an event
             if (isOwnMessage(msg))
                 return;
-            plugin.getServices().eventBus.post(new MessageEvent(msg));
+            plugin.getServices().eventBus.post(new MessageEvent(channel.toString(), msg));
         };
         globalMessagingChannel.addListener(Message.class, messageListener);
 

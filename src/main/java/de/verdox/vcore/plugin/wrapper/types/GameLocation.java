@@ -4,7 +4,7 @@
 
 package de.verdox.vcore.plugin.wrapper.types;
 
-import javax.annotation.Nonnull;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * @version 1.0
@@ -17,14 +17,14 @@ public class GameLocation {
     public final double y;
     public final double z;
 
-    public GameLocation(@Nonnull String worldName, double x, double y, double z) {
+    public GameLocation(@NotNull String worldName, double x, double y, double z) {
         this.worldName = worldName;
         this.x = x;
         this.y = y;
         this.z = z;
     }
 
-    public GameLocation withWorld(@Nonnull String worldName) {
+    public GameLocation withWorld(@NotNull String worldName) {
         return new GameLocation(worldName, x, y, z);
     }
 

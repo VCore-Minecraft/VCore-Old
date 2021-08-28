@@ -5,10 +5,10 @@
 package de.verdox.vcore.synchronization.networkmanager.player.api.instructions.updates;
 
 import de.verdox.vcore.plugin.wrapper.types.enums.PlayerGameMode;
-import de.verdox.vcore.synchronization.messaging.instructions.update.Update;
+import de.verdox.vcore.synchronization.messaging.instructions.update.CleverUpdate;
 import de.verdox.vcore.synchronization.networkmanager.player.api.VCorePlayerAPI;
+import org.jetbrains.annotations.NotNull;
 
-import javax.annotation.Nonnull;
 import java.util.List;
 import java.util.UUID;
 
@@ -17,12 +17,12 @@ import java.util.UUID;
  * @Author: Lukas Jonsson (Verdox)
  * @date 05.08.2021 22:30
  */
-public class UpdatePlayerGameMode extends Update {
+public class UpdatePlayerGameMode extends CleverUpdate {
     public UpdatePlayerGameMode(UUID uuid) {
         super(uuid);
     }
 
-    @Nonnull
+    @NotNull
     @Override
     public UpdateCompletion executeUpdate(Object[] instructionData) {
         UUID target = (UUID) instructionData[0];

@@ -4,9 +4,9 @@
 
 package de.verdox.vcore.synchronization.pipeline.datatypes.serializables.reference.objects;
 
-import de.verdox.vcore.synchronization.pipeline.datatypes.serializables.reference.VCoreDataReference;
+import de.verdox.vcore.synchronization.pipeline.datatypes.serializables.reference.VCoreFieldReference;
+import org.jetbrains.annotations.NotNull;
 
-import javax.annotation.Nonnull;
 import java.util.Map;
 
 /**
@@ -14,9 +14,9 @@ import java.util.Map;
  * @Author: Lukas Jonsson (Verdox)
  * @date 25.06.2021 23:58
  */
-public class StringBsonReference extends VCoreDataReference<String> {
+public class StringBsonReference extends VCoreFieldReference<String> {
 
-    public StringBsonReference(@Nonnull Map<String, Object> data, @Nonnull String fieldName) {
+    public StringBsonReference(@NotNull Map<String, Object> data, @NotNull String fieldName) {
         super(data, fieldName);
     }
 

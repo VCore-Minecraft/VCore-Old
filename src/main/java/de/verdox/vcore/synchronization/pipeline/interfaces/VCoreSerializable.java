@@ -62,13 +62,13 @@ public interface VCoreSerializable {
                 return;
             if (key.equals("_id"))
                 return;
-            if (value == null)
-                return;
 
             try {
                 Field field = getClass().getDeclaredField(key);
                 field.setAccessible(true);
                 dataBeforeDeserialization.put(key, field.get(this));
+                if (value == null)
+                    field.set(this, null);
                 if (!field.getType().isPrimitive()) {
                     if (Collection.class.isAssignableFrom(field.getType())) {
                         // Instantiation of Collection if value is null in the first place
@@ -89,7 +89,7 @@ public interface VCoreSerializable {
             } catch (IllegalAccessException | NoSuchMethodException | InstantiationException | InvocationTargetException e) {
                 e.printStackTrace();
             } catch (NoSuchFieldException e) {
-                System.err.println("Field e not found. Cleanup Task for missing fields will be implemented in a future release");
+                //System.err.println("Field " + key + " not found. Cleanup Task for missing fields will be implemented in a future release");
             }
         });
         return dataBeforeDeserialization;

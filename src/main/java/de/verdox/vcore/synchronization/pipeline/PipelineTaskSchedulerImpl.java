@@ -7,8 +7,8 @@ package de.verdox.vcore.synchronization.pipeline;
 import de.verdox.vcore.synchronization.pipeline.datatypes.VCoreData;
 import de.verdox.vcore.synchronization.pipeline.parts.Pipeline;
 import de.verdox.vcore.synchronization.pipeline.parts.storage.PipelineTaskScheduler;
+import org.jetbrains.annotations.NotNull;
 
-import javax.annotation.Nonnull;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.UUID;
@@ -32,14 +32,14 @@ public class PipelineTaskSchedulerImpl implements PipelineTaskScheduler {
     }
 
     @Override
-    public <T extends VCoreData> PipelineTask<T> schedulePipelineTask(@Nonnull PipelineAction pipelineAction, @Nonnull Pipeline.LoadingStrategy loadingStrategy, @Nonnull Class<? extends T> type, @Nonnull UUID uuid) {
+    public synchronized <T extends VCoreData> PipelineTask<T> schedulePipelineTask(@NotNull PipelineAction pipelineAction, @NotNull Pipeline.LoadingStrategy loadingStrategy, @NotNull Class<? extends T> type, @NotNull(exception = IllegalArgumentException.class) UUID uuid) {
         PipelineTask<T> existingTask = getExistingPipelineTask(type, uuid);
         if (existingTask != null) {
-            pipelineManager.getPlugin().consoleMessage("&8[&e" + loadingStrategy + "&8] &eFound existing Pipeline Task: " + existingTask, true);
+            //pipelineManager.getPlugin().consoleMessage("&8[&e" + loadingStrategy + "&8] &eFound existing Pipeline Task: " + existingTask, true);
             return existingTask;
         }
         PipelineTask<T> pipelineTask = new PipelineTask<>(pipelineManager.getPlugin(), this, pipelineAction, type, uuid, () -> removePipelineTask(type, uuid));
-        pipelineManager.getPlugin().consoleMessage("&8[&e" + loadingStrategy + "&8] &eScheduling Pipeline Task: " + pipelineTask, true);
+        //pipelineManager.getPlugin().consoleMessage("&8[&e" + loadingStrategy + "&8] &eScheduling Pipeline Task: " + pipelineTask, true);
 
         if (!pendingTasks.containsKey(uuid))
             pendingTasks.put(uuid, new ConcurrentHashMap<>());
@@ -48,7 +48,7 @@ public class PipelineTaskSchedulerImpl implements PipelineTaskScheduler {
     }
 
     @Override
-    public synchronized <T extends VCoreData> PipelineTask<T> getExistingPipelineTask(@Nonnull Class<? extends T> type, @Nonnull UUID uuid) {
+    public synchronized <T extends VCoreData> PipelineTask<T> getExistingPipelineTask(@NotNull Class<? extends T> type, @NotNull(exception = IllegalArgumentException.class) UUID uuid) {
         if (!pendingTasks.containsKey(uuid))
             return null;
         Map<Class<? extends VCoreData>, PipelineTask<?>> map = pendingTasks.get(uuid);
@@ -59,7 +59,7 @@ public class PipelineTaskSchedulerImpl implements PipelineTaskScheduler {
     }
 
     @Override
-    public <T extends VCoreData> void removePipelineTask(@Nonnull Class<? extends T> type, @Nonnull UUID uuid) {
+    public synchronized <T extends VCoreData> void removePipelineTask(@NotNull Class<? extends T> type, @NotNull UUID uuid) {
         if (!pendingTasks.containsKey(uuid))
             return;
         pendingTasks.get(uuid).remove(type);

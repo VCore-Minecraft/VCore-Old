@@ -24,8 +24,24 @@ public class RandomUtil {
         return ThreadLocalRandom.current().nextInt(min, max + 1);
     }
 
+    public static class ProbabilityCounter<T> {
+        Map<T, Integer> counting = new HashMap<>();
+
+        public void count(T element) {
+            if (!counting.containsKey(element))
+                counting.put(element, 1);
+            else
+                counting.put(element, counting.get(element) + 1);
+        }
+
+        public Map<T, Integer> getCounting() {
+            return counting;
+        }
+    }
+
     public static class RandomCollection<T> {
         private final NavigableMap<Double, T> map = new TreeMap<>();
+        private final List<Map.Entry<T, Double>> elementWeightList = new ArrayList<>();
         private double total = 0;
 
         public void add(double weight, T result) {
@@ -33,6 +49,7 @@ public class RandomUtil {
                 return;
             total += weight;
             map.put(total, result);
+            elementWeightList.add(Map.entry(result, weight));
         }
 
         public T next() {
@@ -43,7 +60,11 @@ public class RandomUtil {
         }
 
         public void addAll(RandomCollection<T> randomCollection) {
-            map.putAll(randomCollection.map);
+            randomCollection.elementWeightList.iterator().forEachRemaining(tDoubleEntry -> add(tDoubleEntry.getValue(), tDoubleEntry.getKey()));
+        }
+
+        public List<Map.Entry<T, Double>> getElementWeightList() {
+            return elementWeightList;
         }
 
         public Map<T, Integer> benchmark(int number, boolean print) {

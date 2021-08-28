@@ -115,7 +115,7 @@ public class VBlock extends CustomDataHolder<Location, NBTBlockHolder, CustomBlo
         return blockPersistentData;
     }
 
-    @Nonnull
+    @NotNull
     @Override
     public NBTBlockHolder getNBTCompound() {
         return new NBTBlockHolder(getDataHolder(), blockPersistentData);

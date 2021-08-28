@@ -29,6 +29,7 @@ public abstract class VCoreData implements VCoreSerializable {
     private final long cleanTime;
     private final TimeUnit cleanTimeUnit;
     private long lastUse = System.currentTimeMillis();
+    private boolean markedForRemoval = false;
 
     public VCoreData(VCorePlugin<?, ?> plugin, UUID objectUUID) {
         this.plugin = plugin;
@@ -44,6 +45,11 @@ public abstract class VCoreData implements VCoreSerializable {
 
                 @Override
                 public void pushUpdate(VCoreData vCoreData, Runnable callback) {
+
+                }
+
+                @Override
+                public void pushRemoval(VCoreData vCoreData, Runnable callback) {
 
                 }
             };
@@ -107,21 +113,42 @@ public abstract class VCoreData implements VCoreSerializable {
     }
 
     /**
-     * Executed after the object was deleted from local cache. Only it was deleted successfully
+     * Executed before the object is deleted from local cache.
      */
     public void onDelete() {
     }
 
     /**
-     * Executed after Data was loaded from Pipeline. Not if it was found in LocalCache
+     * Executed directly after Data was loaded from Pipeline. Not if it was found in LocalCache
      */
     public void onLoad() {
+
+    }
+
+    /**
+     * Executed before onLoad and before onCreate everytime the data is being loaded into local cache.
+     * You can use this function to load dependent data from pipeline that is directly associated with this data
+     */
+    public void loadDependentData() {
+
     }
 
     /**
      * Executed before Data is cleared from LocalCache
      */
     public void onCleanUp() {
+    }
+
+    public void markForRemoval() {
+        this.markedForRemoval = true;
+    }
+
+    public void unMarkRemoval() {
+        this.markedForRemoval = false;
+    }
+
+    public boolean isMarkedForRemoval() {
+        return markedForRemoval;
     }
 
     public void debugToConsole() {
@@ -140,5 +167,21 @@ public abstract class VCoreData implements VCoreSerializable {
 
     public long getLastUse() {
         return lastUse;
+    }
+
+    @Override
+    public Map<String, Object> serialize() {
+        unMarkRemoval();
+        return VCoreSerializable.super.serialize();
+    }
+
+    @Override
+    public Map<String, Object> deserialize(Map<String, Object> serializedData) {
+        unMarkRemoval();
+        return VCoreSerializable.super.deserialize(serializedData);
+    }
+
+    public DataManipulator getDataManipulator() {
+        return dataManipulator;
     }
 }

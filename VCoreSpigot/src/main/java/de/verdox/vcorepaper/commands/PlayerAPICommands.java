@@ -60,7 +60,7 @@ public class PlayerAPICommands extends VCoreCommand.VCoreBukkitCommand {
                         VCorePlayer vCorePlayer = vCorePaper.getServices().getPipeline().load(VCorePlayer.class, sender.getUniqueId(), Pipeline.LoadingStrategy.LOAD_PIPELINE);
                         ServerInstance serverInstance = commandParameters.getObject(0, ServerInstance.class);
 
-                        ServerLocation serverLocation = new ServerLocation(serverInstance.serverName
+                        ServerLocation serverLocation = new ServerLocation(serverInstance.getServerName()
                                 , commandParameters.getObject(1, String.class)
                                 , commandParameters.getObject(2, Double.class)
                                 , commandParameters.getObject(3, Double.class)
@@ -103,7 +103,7 @@ public class PlayerAPICommands extends VCoreCommand.VCoreBukkitCommand {
                 .commandCallback((commandSender, commandParameters) -> {
                     VCorePlayer victim = commandParameters.getObject(0, VCorePlayer.class);
                     ServerInstance serverInstance = commandParameters.getObject(1, ServerInstance.class);
-                    vCorePlugin.getCoreInstance().getPlayerAPI().changeServer(victim, serverInstance.serverName);
+                    vCorePlugin.getCoreInstance().getPlayerAPI().changeServer(victim, serverInstance.getServerName());
                 });
 
         addCommandCallback("sendMessage")

@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2021. Lukas Jonsson
+ */
+
 package de.verdox.vcore.plugin;
 
 import de.verdox.vcore.performance.concurrent.CatchingRunnable;
@@ -14,8 +18,8 @@ import net.md_5.bungee.api.plugin.Plugin;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.jetbrains.annotations.NotNull;
 
-import javax.annotation.Nonnull;
 import java.io.File;
 import java.util.List;
 
@@ -121,12 +125,12 @@ public interface VCorePlugin<T, R extends VCoreSubsystem<?>> extends SystemLoada
 
             return new TaskBatch<>(this) {
                 @Override
-                public void runSync(@Nonnull Runnable runnable) {
+                public void runSync(@NotNull Runnable runnable) {
                     Bukkit.getScheduler().runTask(getPlugin().getPlugin(), runnable);
                 }
 
                 @Override
-                public void runAsync(@Nonnull Runnable runnable) {
+                public void runAsync(@NotNull Runnable runnable) {
                     serviceParts.vCoreScheduler.async(new CatchingRunnable(runnable));
                 }
 
@@ -220,12 +224,12 @@ public interface VCorePlugin<T, R extends VCoreSubsystem<?>> extends SystemLoada
         public TaskBatch<VCorePlugin<Plugin, VCoreSubsystem.BungeeCord>> createTaskBatch() {
             return new TaskBatch<>(this) {
                 @Override
-                public void runSync(@Nonnull Runnable runnable) {
+                public void runSync(@NotNull Runnable runnable) {
                     runnable.run();
                 }
 
                 @Override
-                public void runAsync(@Nonnull Runnable runnable) {
+                public void runAsync(@NotNull Runnable runnable) {
                     serviceParts.vCoreScheduler.async(new CatchingRunnable(runnable));
                 }
 

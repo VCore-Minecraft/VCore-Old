@@ -5,8 +5,8 @@
 package de.verdox.vcore.plugin.wrapper.bungeecord;
 
 import de.verdox.vcore.plugin.wrapper.Platform;
+import org.jetbrains.annotations.NotNull;
 
-import javax.annotation.Nonnull;
 import java.util.UUID;
 
 /**
@@ -15,7 +15,7 @@ import java.util.UUID;
  * @date 04.08.2021 23:42
  */
 public interface BungeePlatform extends Platform {
-    boolean sendToServer(@Nonnull UUID playerUUID, @Nonnull String serverName);
+    boolean sendToServer(@NotNull UUID playerUUID, @NotNull String serverName);
 
-    boolean kickPlayer(@Nonnull UUID playerUUID, @Nonnull String kickMessage);
+    boolean kickPlayer(@NotNull UUID playerUUID, @NotNull String kickMessage);
 }

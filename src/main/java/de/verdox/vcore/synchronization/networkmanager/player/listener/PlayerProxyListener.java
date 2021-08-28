@@ -6,7 +6,9 @@ package de.verdox.vcore.synchronization.networkmanager.player.listener;
 
 import de.verdox.vcore.plugin.VCorePlugin;
 import de.verdox.vcore.plugin.listener.VCoreListener;
+import de.verdox.vcore.plugin.wrapper.types.enums.PlayerMessageType;
 import de.verdox.vcore.synchronization.networkmanager.NetworkManager;
+import de.verdox.vcore.synchronization.networkmanager.enums.GlobalProperty;
 import de.verdox.vcore.synchronization.networkmanager.player.VCorePlayer;
 import de.verdox.vcore.synchronization.pipeline.parts.Pipeline;
 import net.md_5.bungee.api.ChatColor;
@@ -48,8 +50,11 @@ public class PlayerProxyListener extends VCoreListener.VCoreBungeeListener imple
             return;
         if (!plugin.getServices().getPipeline().exist(VCorePlayer.class, uuid, Pipeline.QueryStrategy.LOCAL, Pipeline.QueryStrategy.GLOBAL_CACHE))
             return;
+        VCorePlayer vCorePlayer = networkManager.getPlugin().getCoreInstance().getPlayerAPI().getVCorePlayer(uuid);
         e.setCancelled(true);
-        e.setCancelReason(new TextComponent(ChatColor.translateAlternateColorCodes('&', "&cDu bist bereits auf dem Netzwerk")));
+        e.setCancelReason(new TextComponent(ChatColor.translateAlternateColorCodes('&', "&cDu bist bereits auf dem Netzwerk. Bitte neu verbinden&7!")));
+        networkManager.getPlugin().getCoreInstance().getPlayerAPI().kickPlayer(vCorePlayer, "&cLogged in from another location");
+        plugin.getServices().getPipeline().delete(VCorePlayer.class, uuid, true, Pipeline.QueryStrategy.ALL);
     }
 
     @net.md_5.bungee.event.EventHandler
@@ -61,6 +66,7 @@ public class PlayerProxyListener extends VCoreListener.VCoreBungeeListener imple
                     e.getPlayer().getUniqueId(),
                     e.getPlayer().getName());
         });
+        plugin.getCoreInstance().getPlayerAPI().broadcastMessage("&8[&a+&8] &e" + e.getPlayer().getName(), PlayerMessageType.CHAT, GlobalProperty.NETWORK);
     }
 
     @net.md_5.bungee.event.EventHandler
@@ -72,5 +78,6 @@ public class PlayerProxyListener extends VCoreListener.VCoreBungeeListener imple
                     e.getPlayer().getUniqueId(),
                     e.getPlayer().getName());
         });
+        plugin.getCoreInstance().getPlayerAPI().broadcastMessage("&8[&c-&8] &e" + e.getPlayer().getName(), PlayerMessageType.CHAT, GlobalProperty.NETWORK);
     }
 }

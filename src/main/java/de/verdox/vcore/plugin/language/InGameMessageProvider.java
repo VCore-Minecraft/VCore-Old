@@ -5,8 +5,8 @@
 package de.verdox.vcore.plugin.language;
 
 import de.verdox.vcore.plugin.VCorePlugin;
+import org.jetbrains.annotations.NotNull;
 
-import javax.annotation.Nonnull;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -22,7 +22,7 @@ public class InGameMessageProvider {
     private final Map<String, InGameMessage> messages = new ConcurrentHashMap<>();
     private String prefix;
 
-    public InGameMessageProvider(@Nonnull VCorePlugin<?, ?> vCorePlugin) {
+    public InGameMessageProvider(@NotNull VCorePlugin<?, ?> vCorePlugin) {
         this.vCorePlugin = vCorePlugin;
         prefix = "&8[&6" + vCorePlugin.getPluginName() + "&8] &f";
         for (Language value : Language.values()) {
@@ -33,11 +33,11 @@ public class InGameMessageProvider {
         registerStandardMessages();
     }
 
-    public void setPrefix(@Nonnull String prefix) {
+    public void setPrefix(@NotNull String prefix) {
         this.prefix = prefix;
     }
 
-    public void registerMessage(@Nonnull String messageIdentifier, @Nonnull InGameMessage inGameMessage) {
+    public void registerMessage(@NotNull String messageIdentifier, @NotNull InGameMessage inGameMessage) {
         if (messages.containsKey(messageIdentifier))
             throw new IllegalStateException("messageIdentifier " + messageIdentifier + " already taken");
         messages.put(messageIdentifier, inGameMessage);
@@ -47,7 +47,7 @@ public class InGameMessageProvider {
         });
     }
 
-    public String getMessage(@Nonnull String messageIdentifier, @Nonnull Language language) {
+    public String getMessage(@NotNull String messageIdentifier, @NotNull Language language) {
         if (!messages.containsKey(messageIdentifier))
             throw new IllegalStateException("messageIdentifier " + messageIdentifier + " not found!");
         LanguageConfig languageConfig = languagesConfigs.get(language);

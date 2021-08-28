@@ -10,8 +10,8 @@ import de.verdox.vcore.plugin.wrapper.types.enums.PlayerMessageType;
 import de.verdox.vcore.synchronization.networkmanager.enums.GlobalProperty;
 import de.verdox.vcore.synchronization.networkmanager.player.VCorePlayer;
 import de.verdox.vcore.synchronization.networkmanager.player.scheduling.VCorePlayerTaskScheduler;
+import org.jetbrains.annotations.NotNull;
 
-import javax.annotation.Nonnull;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -24,45 +24,45 @@ import java.util.concurrent.CompletableFuture;
 public interface VCorePlayerAPI {
     VCorePlayerTaskScheduler getPlayerScheduler();
 
-    CompletableFuture<Boolean> isOnline(@Nonnull UUID uuid);
+    CompletableFuture<Boolean> isOnline(@NotNull UUID uuid);
 
-    CompletableFuture<VCorePlayer> getVCorePlayerAsync(@Nonnull UUID uuid);
+    CompletableFuture<VCorePlayer> getVCorePlayerAsync(@NotNull UUID uuid);
 
-    CompletableFuture<VCorePlayer> getVCorePlayerAsync(@Nonnull String userName);
+    CompletableFuture<VCorePlayer> getVCorePlayerAsync(@NotNull String userName);
 
-    VCorePlayer getVCorePlayer(@Nonnull UUID uuid);
+    VCorePlayer getVCorePlayer(@NotNull UUID uuid);
 
-    VCorePlayer getVCorePlayer(@Nonnull String userName);
+    VCorePlayer getVCorePlayer(@NotNull String userName);
 
     CompletableFuture<Set<VCorePlayer>> getAllOnlinePlayers();
 
-    CompletableFuture<ServerLocation> getServerLocation(@Nonnull VCorePlayer vCorePlayer);
+    CompletableFuture<ServerLocation> getServerLocation(@NotNull VCorePlayer vCorePlayer);
 
-    CompletableFuture<String> getPlayerIP(@Nonnull VCorePlayer vCorePlayer);
+    CompletableFuture<String> getPlayerIP(@NotNull VCorePlayer vCorePlayer);
 
     //TODO: gamerules global ändern (für alle welten und nur eine welt (mehrere welten auf anderen servern mit gleichem server)), difficulty, sendTitle,
     //TODO: globales Scoreboard, globale BossBar, give, kill, IP Command, PlayerInfo Command mit allen verfügbaren Daten über den VCorePlayer
 
     //TODO: Update Functions auf Future Objekte ändern -> Checken obs geklappt hat -> Command Response für Sender
-    void teleport(@Nonnull VCorePlayer vCorePlayer, @Nonnull ServerLocation serverLocation);
+    void teleport(@NotNull VCorePlayer vCorePlayer, @NotNull ServerLocation serverLocation);
 
-    void teleport(@Nonnull VCorePlayer vCorePlayer, @Nonnull VCorePlayer target);
+    void teleport(@NotNull VCorePlayer vCorePlayer, @NotNull VCorePlayer target);
 
-    void kickPlayer(@Nonnull VCorePlayer vCorePlayer, @Nonnull String message);
+    void kickPlayer(@NotNull VCorePlayer vCorePlayer, @NotNull String message);
 
-    void changeServer(@Nonnull VCorePlayer vCorePlayer, @Nonnull String serverName);
+    void changeServer(@NotNull VCorePlayer vCorePlayer, @NotNull String serverName);
 
-    void sendMessage(@Nonnull VCorePlayer vCorePlayer, @Nonnull PlayerMessageType playerMessageType, @Nonnull String message);
+    void sendMessage(@NotNull VCorePlayer vCorePlayer, @NotNull PlayerMessageType playerMessageType, @NotNull String message);
 
-    void healPlayer(@Nonnull VCorePlayer vCorePlayer);
+    void healPlayer(@NotNull VCorePlayer vCorePlayer);
 
-    void feedPlayer(@Nonnull VCorePlayer vCorePlayer);
+    void feedPlayer(@NotNull VCorePlayer vCorePlayer);
 
-    void setGameMode(@Nonnull VCorePlayer vCorePlayer, @Nonnull PlayerGameMode gameMode);
+    void setGameMode(@NotNull VCorePlayer vCorePlayer, @NotNull PlayerGameMode gameMode);
 
-    void clearInventory(@Nonnull VCorePlayer vCorePlayer);
+    void clearInventory(@NotNull VCorePlayer vCorePlayer);
 
-    void broadcastMessage(@Nonnull String message, @Nonnull PlayerMessageType playerMessageType, @Nonnull GlobalProperty globalProperty);
+    void broadcastMessage(@NotNull String message, @NotNull PlayerMessageType playerMessageType, @NotNull GlobalProperty globalProperty);
     //TODO: Send message an Liste von Spielern
     //TODO: Globale Message, Serverglobale MEssage ( Auf dem GameServer oder Proxy Globale Message)
 

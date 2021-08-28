@@ -9,8 +9,7 @@ import de.verdox.vcore.synchronization.pipeline.annotations.DataStorageIdentifie
 import de.verdox.vcore.synchronization.pipeline.annotations.RequiredSubsystemInfo;
 import de.verdox.vcore.synchronization.pipeline.annotations.VCoreDataProperties;
 import de.verdox.vcore.synchronization.pipeline.datatypes.VCoreData;
-
-import javax.annotation.Nonnull;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * @version 1.0
@@ -26,7 +25,7 @@ public class AnnotationResolver {
      * @return The Data Identifier of the class
      */
 
-    @Nonnull
+    @NotNull
     public static String getDataStorageIdentifier(Class<?> customClass) {
         DataStorageIdentifier dataStorageIdentifier = customClass.getAnnotation(DataStorageIdentifier.class);
         if (dataStorageIdentifier == null)
@@ -42,7 +41,7 @@ public class AnnotationResolver {
      * @throws RuntimeException when no Annotation was found
      */
 
-    @Nonnull
+    @NotNull
     public static Class<? extends VCoreSubsystem<?>> findDependSubsystemClass(Class<? extends VCoreData> classType) {
         RequiredSubsystemInfo requiredSubsystemInfo = classType.getAnnotation(RequiredSubsystemInfo.class);
         if (requiredSubsystemInfo == null)
@@ -58,7 +57,7 @@ public class AnnotationResolver {
      * @throws RuntimeException when no Annotation was found
      */
 
-    @Nonnull
+    @NotNull
     public static VCoreDataProperties getDataProperties(Class<? extends VCoreData> classType) {
         VCoreDataProperties vCoreDataProperties = classType.getAnnotation(VCoreDataProperties.class);
         if (vCoreDataProperties == null)

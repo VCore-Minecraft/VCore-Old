@@ -20,8 +20,8 @@ import de.verdox.vcore.synchronization.pipeline.parts.storage.GlobalStorage;
 import de.verdox.vcore.synchronization.pipeline.parts.storage.PipelineTaskScheduler;
 import de.verdox.vcore.util.global.AnnotationResolver;
 import io.netty.util.concurrent.DefaultThreadFactory;
+import org.jetbrains.annotations.NotNull;
 
-import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -50,7 +50,7 @@ public class PipelineManager implements Pipeline {
     private final ExecutorService executorService;
     private final boolean loaded;
 
-    public PipelineManager(VCorePlugin<?, ?> plugin, @Nonnull LocalCache localCache, @Nullable GlobalCache globalCache, @Nullable GlobalStorage globalStorage) {
+    public PipelineManager(VCorePlugin<?, ?> plugin, @NotNull LocalCache localCache, @Nullable GlobalCache globalCache, @Nullable GlobalStorage globalStorage) {
         this.plugin = plugin;
         this.executorService = Executors.newFixedThreadPool(2, new DefaultThreadFactory(plugin.getPluginName() + "Pipeline"));
         this.globalStorage = globalStorage;
@@ -65,8 +65,6 @@ public class PipelineManager implements Pipeline {
         plugin.getServices().getVCoreScheduler().asyncInterval(() -> {
             plugin.getServices().getSubsystemManager().getRegisteredPlayerDataClasses().forEach(aClass -> {
                 VCoreDataProperties vCoreDataProperties = AnnotationResolver.getDataProperties(aClass);
-                if (vCoreDataProperties == null)
-                    return;
                 if (!vCoreDataProperties.cleanOnNoUse())
                     return;
                 Set<UUID> cachedUUIDs = localCache.getSavedUUIDs(aClass);
@@ -87,8 +85,6 @@ public class PipelineManager implements Pipeline {
             });
             plugin.getServices().getSubsystemManager().getRegisteredServerDataClasses().forEach(aClass -> {
                 VCoreDataProperties vCoreDataProperties = AnnotationResolver.getDataProperties(aClass);
-                if (vCoreDataProperties == null)
-                    return;
                 if (!vCoreDataProperties.cleanOnNoUse())
                     return;
                 Set<UUID> cachedUUIDs = localCache.getSavedUUIDs(aClass);
@@ -117,67 +113,63 @@ public class PipelineManager implements Pipeline {
      * @return VCoreDataType
      */
     @Override
-    public final <T extends VCoreData> T load(@Nonnull Class<? extends T> type, @Nonnull UUID uuid, @Nonnull LoadingStrategy loadingStrategy, boolean createIfNotExist, @Nullable Consumer<T> callback) {
-        plugin.consoleMessage("&8[&e" + loadingStrategy + "&8] &bLoading data from pipeline &a" + type.getSimpleName() + " &b" + uuid, true);
+    public final <T extends VCoreData> T load(@NotNull Class<? extends T> type, @NotNull(exception = NullPointerException.class) UUID uuid, @NotNull LoadingStrategy loadingStrategy, boolean createIfNotExist, @Nullable Consumer<T> callback) {
+        //plugin.consoleMessage("&8[&e" + loadingStrategy + "&8] &bLoading data from pipeline &a" + type.getSimpleName() + " &b" + uuid, true);
         PipelineTaskScheduler.PipelineTask<T> pipelineTask = pipelineTaskScheduler.schedulePipelineTask(PipelineTaskScheduler.PipelineAction.LOAD, loadingStrategy, type, uuid);
 
+        // Subsystem Check
         if (!NetworkData.class.isAssignableFrom(type)) {
             VCoreSubsystem<?> subsystem = plugin.findDependSubsystem(type);
-            if (subsystem == null)
-                throw new NullPointerException("Subsystem of " + type + " could not be found in plugin" + plugin.getPluginName());
-        }
-        if (!loadingStrategy.equals(LoadingStrategy.LOAD_PIPELINE)) {
-            if (!localCache.dataExist(type, uuid)) {
-                if (loadingStrategy.equals(LoadingStrategy.LOAD_LOCAL))
-                    throw new NullPointerException(type + " with uuid " + uuid + " does not exist in local!");
-                else {
-                    // LOAD_LOCAL_ELSE_LOAD
-                    executorService.submit(new CatchingRunnable(() -> {
-                        T data = loadFromPipeline(type, uuid, createIfNotExist);
-                        pipelineTask.getCompletableFuture().complete(data);
-                        plugin.consoleMessage("&8[&e" + loadingStrategy + "&8] &eCompleted with&7: &b " + data, true);
-                        if (callback != null)
-                            callback.accept(data);
-                    }));
-                }
+            if (subsystem == null) {
+                plugin.consoleMessage("&4You are trying to load &e" + type + " &4with a Pipeline that does not know this type. Choose the Plugin that knows the subsystem of this dataType to prevent this error.", false);
+                throw new IllegalStateException("Subsystem of " + type + " could not be found in plugin" + plugin.getPluginName());
             }
-            if (!localCache.dataExist(type, uuid)) {
-                throw new IllegalStateException("Does not exist in Local Cache");
-            }
-            T data = localCache.getData(type, uuid);
-            if (callback != null)
-                callback.accept(data);
-            data.updateLastUse();
-            pipelineTask.getCompletableFuture().complete(data);
-            plugin.consoleMessage("&8[&e" + loadingStrategy + "&8] &eCompleted with&7: &b " + data, true);
-            return data;
         }
+
         if (localCache.dataExist(type, uuid)) {
             T data = localCache.getData(type, uuid);
-            data.updateLastUse();
-            pipelineTask.getCompletableFuture().complete(data);
-            plugin.consoleMessage("&8[&e" + loadingStrategy + "&8] &eCompleted with&7: &b " + data, true);
             if (callback != null)
                 callback.accept(data);
+            data.updateLastUse();
+            pipelineTask.getCompletableFuture().complete(data);
+            return data;
+        } else if (loadingStrategy.equals(LoadingStrategy.LOAD_LOCAL)) {
+            if (createIfNotExist) {
+                T data = createNewData(type, uuid);
+                data.updateLastUse();
+                pipelineTask.getCompletableFuture().complete(data);
+                return data;
+            }
+            throw new NullPointerException(type + " with uuid " + uuid + " does not exist in local!");
+        } else if (loadingStrategy.equals(LoadingStrategy.LOAD_LOCAL_ELSE_LOAD)) {
+            executorService.submit(new CatchingRunnable(() -> {
+                T data = loadFromPipeline(type, uuid, createIfNotExist);
+                pipelineTask.getCompletableFuture().complete(data);
+                plugin.consoleMessage("&8[&e" + loadingStrategy + "&8] &eCompleted with&7: &b " + data, true);
+                if (callback != null)
+                    callback.accept(data);
+            }));
+            return null;
+        } else if (loadingStrategy.equals(LoadingStrategy.LOAD_PIPELINE)) {
+            T data = loadFromPipeline(type, uuid, createIfNotExist);
+            pipelineTask.getCompletableFuture().complete(data);
+            plugin.consoleMessage("&8[&e" + loadingStrategy + "&8] &eCompleted with&7: &b " + data, true);
             return data;
         }
-        T data = loadFromPipeline(type, uuid, createIfNotExist);
-        pipelineTask.getCompletableFuture().complete(data);
-        plugin.consoleMessage("&8[&e" + loadingStrategy + "&8] &eCompleted with&7: &b " + data, true);
-        return data;
+        return null;
     }
 
-    @Nonnull
+    @NotNull
     @Override
-    public <T extends VCoreData> CompletableFuture<T> loadAsync(@Nonnull Class<? extends T> type, @Nonnull UUID uuid, @Nonnull LoadingStrategy loadingStrategy, boolean createIfNotExist, @org.jetbrains.annotations.Nullable Consumer<T> callback) {
+    public <T extends VCoreData> CompletableFuture<T> loadAsync(@NotNull Class<? extends T> type, @NotNull UUID uuid, @NotNull LoadingStrategy loadingStrategy, boolean createIfNotExist, @org.jetbrains.annotations.Nullable Consumer<T> callback) {
         CompletableFuture<T> completableFuture = new CompletableFuture<>();
         executorService.submit(new CatchingRunnable(() -> completableFuture.complete(load(type, uuid, loadingStrategy, createIfNotExist, callback))));
         return completableFuture;
     }
 
-    @Nonnull
+    @NotNull
     @Override
-    public <T extends VCoreData> Set<T> loadAllData(@Nonnull Class<? extends T> type, @Nonnull LoadingStrategy loadingStrategy) {
+    public <T extends VCoreData> Set<T> loadAllData(@NotNull Class<? extends T> type, @NotNull LoadingStrategy loadingStrategy) {
         Set<T> set = new HashSet<>();
         if (loadingStrategy.equals(LoadingStrategy.LOAD_PIPELINE))
             synchronizeData(type);
@@ -187,74 +179,93 @@ public class PipelineManager implements Pipeline {
         return set;
     }
 
-    @Nonnull
+    @NotNull
     @Override
-    public <T extends VCoreData> CompletableFuture<Set<T>> loadAllDataAsync(@Nonnull Class<? extends T> type, @Nonnull LoadingStrategy loadingStrategy) {
+    public <T extends VCoreData> CompletableFuture<Set<T>> loadAllDataAsync(@NotNull Class<? extends T> type, @NotNull LoadingStrategy loadingStrategy) {
         CompletableFuture<Set<T>> completableFuture = new CompletableFuture<>();
         executorService.submit(new CatchingRunnable(() -> completableFuture.complete(loadAllData(type, loadingStrategy))));
         return completableFuture;
     }
 
     @Override
-    public <T extends VCoreData> boolean exist(@Nonnull Class<? extends T> type, @Nonnull UUID uuid, @Nonnull QueryStrategy... strategies) {
+    public <T extends VCoreData> boolean exist(@NotNull Class<? extends T> type, @NotNull UUID uuid, @NotNull QueryStrategy... strategies) {
         if (strategies.length == 0)
             return false;
-        for (QueryStrategy queryStrategy : Arrays.stream(strategies).collect(Collectors.toSet())) {
-            if (queryStrategy.equals(QueryStrategy.LOCAL)) {
-                boolean localExist = getLocalCache().dataExist(type, uuid);
-                if (localExist)
-                    return true;
-            } else if (queryStrategy.equals(QueryStrategy.GLOBAL_CACHE)) {
-                if (getGlobalCache() == null)
-                    continue;
+        Set<QueryStrategy> strategySet = Arrays.stream(strategies).collect(Collectors.toSet());
+
+        if (strategySet.contains(QueryStrategy.ALL) || strategySet.contains(QueryStrategy.LOCAL)) {
+            boolean localExist = getLocalCache().dataExist(type, uuid);
+            if (localExist)
+                return true;
+        }
+        if (strategySet.contains(QueryStrategy.ALL) || strategySet.contains(QueryStrategy.GLOBAL_CACHE)) {
+            if (getGlobalCache() != null) {
                 boolean globalCacheExists = getGlobalCache().dataExist(type, uuid);
                 if (globalCacheExists)
                     return true;
-            } else if (queryStrategy.equals(QueryStrategy.GLOBAL_STORAGE)) {
-                if (getGlobalStorage() == null)
-                    continue;
-                boolean globalStorageExists = getGlobalStorage().dataExist(type, uuid);
-                if (globalStorageExists)
-                    return true;
             }
+        }
+        if (strategySet.contains(QueryStrategy.ALL) || strategySet.contains(QueryStrategy.GLOBAL_STORAGE)) {
+            if (getGlobalStorage() != null)
+                return getGlobalStorage().dataExist(type, uuid);
         }
         return false;
     }
 
     @Override
-    public <T extends VCoreData> CompletableFuture<Boolean> existAsync(@Nonnull Class<? extends T> type, @Nonnull UUID uuid, @Nonnull QueryStrategy... strategies) {
+    public <T extends VCoreData> CompletableFuture<Boolean> existAsync(@NotNull Class<? extends T> type, @NotNull UUID uuid, @NotNull QueryStrategy... strategies) {
         CompletableFuture<Boolean> completableFuture = new CompletableFuture<>();
         executorService.submit(new CatchingRunnable(() -> completableFuture.complete(exist(type, uuid, strategies))));
         return completableFuture;
     }
 
     @Override
-    public <T extends VCoreData> boolean delete(@Nonnull Class<? extends T> type, @Nonnull UUID uuid) {
-        plugin.consoleMessage("&eDeleting&7: &b" + type.getSimpleName() + " &ewith uuid &a" + uuid, true);
-        if (getLocalCache() != null) {
+    public <T extends VCoreData> boolean delete(@NotNull Class<? extends T> type, @NotNull UUID uuid, boolean notifyOthers, @NotNull QueryStrategy... strategies) {
+        Set<QueryStrategy> strategySet = Arrays.stream(strategies).collect(Collectors.toSet());
+        if (strategySet.isEmpty())
+            strategySet.add(QueryStrategy.ALL);
+        plugin.consoleMessage("&eDeleting&7: &b" + type.getSimpleName() + " &euuid &a" + uuid + "&e" + Arrays.toString(strategies), true);
+        if (strategySet.contains(QueryStrategy.ALL) || strategySet.contains(QueryStrategy.LOCAL)) {
+            plugin.consoleMessage("&eDeleting from Local Cache&7: &b" + type.getSimpleName() + " &euuid &a" + uuid + "&e", true);
             T data = getLocalCache().getData(type, uuid);
-            if (!getLocalCache().remove(type, uuid))
-                plugin.consoleMessage("&8[&eLocalCache&8] &cCould not delete&7: &b" + type.getSimpleName() + " &ewith uuid &a" + uuid, true);
-            else if (data != null)
+
+            if (data != null)
                 data.onDelete();
+
+            if (!getLocalCache().remove(type, uuid))
+                plugin.consoleMessage("&8[&eLocalCache&8] &cCould not delete&7: &b" + type.getSimpleName() + " &euuid &a" + uuid, true);
+            else if (data != null) {
+                if (notifyOthers)
+                    data.getDataManipulator().pushRemoval(data, null);
+                data.markForRemoval();
+                plugin.consoleMessage("&8[&eLocalCache&8] &eDeleted&7: &b" + type.getSimpleName() + " &euuid &a" + uuid + "&e" + Arrays.toString(strategies), true);
+            }
         }
-        if (getGlobalCache() != null)
+        if (getGlobalCache() != null && (strategySet.contains(QueryStrategy.ALL) || strategySet.contains(QueryStrategy.GLOBAL_CACHE))) {
+            plugin.consoleMessage("&eDeleting from Global Cache&7: &b" + type.getSimpleName() + " &euuid &a" + uuid + "&e", true);
             if (!getGlobalCache().remove(type, uuid))
-                plugin.consoleMessage("&8[&eGlobalCache&8] &cCould not delete&7: &b" + type.getSimpleName() + " &ewith uuid &a" + uuid, true);
-        if (getGlobalStorage() != null)
+                plugin.consoleMessage("&8[&eGlobalCache&8] &cCould not delete&7: &b" + type.getSimpleName() + " &euuid &a" + uuid, true);
+            else
+                plugin.consoleMessage("&8[&eGlobalCache&8] &eDeleted&7: &b" + type.getSimpleName() + " &euuid &a" + uuid + "&e" + Arrays.toString(strategies), true);
+        }
+        if (getGlobalStorage() != null && (strategySet.contains(QueryStrategy.ALL) || strategySet.contains(QueryStrategy.GLOBAL_STORAGE))) {
+            plugin.consoleMessage("&eDeleting from Global Storage&7: &b" + type.getSimpleName() + " &euuid &a" + uuid + "&e", true);
             if (!getGlobalStorage().remove(type, uuid))
-                plugin.consoleMessage("&8[&eGlobalStorage&8] &cCould not delete&7: &b" + type.getSimpleName() + " &ewith uuid &a" + uuid, true);
+                plugin.consoleMessage("&8[&eGlobalStorage&8] &cCould not delete&7: &b" + type.getSimpleName() + " &euuid &a" + uuid, true);
+            else
+                plugin.consoleMessage("&8[&eGlobalStorage&8] &eDeleted&7: &b" + type.getSimpleName() + " &euuid &a" + uuid + "&e" + Arrays.toString(strategies), true);
+        }
         return true;
     }
 
     @Override
-    public <T extends VCoreData> CompletableFuture<Boolean> deleteAsync(@Nonnull Class<? extends T> type, @Nonnull UUID uuid) {
+    public <T extends VCoreData> CompletableFuture<Boolean> deleteAsync(@NotNull Class<? extends T> type, @NotNull UUID uuid, boolean notifyOthers, @NotNull QueryStrategy... strategies) {
         CompletableFuture<Boolean> completableFuture = new CompletableFuture<>();
-        executorService.submit(new CatchingRunnable(() -> completableFuture.complete(delete(type, uuid))));
+        executorService.submit(new CatchingRunnable(() -> completableFuture.complete(delete(type, uuid, notifyOthers, strategies))));
         return completableFuture;
     }
 
-    private <T extends VCoreData> void synchronizeData(@Nonnull Class<? extends T> type) {
+    private <T extends VCoreData> void synchronizeData(@NotNull Class<? extends T> type) {
         if (getGlobalStorage() != null)
             getGlobalStorage().getSavedUUIDs(type).forEach(uuid -> {
                 if (!localCache.dataExist(type, uuid))
@@ -287,25 +298,23 @@ public class PipelineManager implements Pipeline {
         plugin.consoleMessage("&eSaving all data&7...", false);
         // getLocalCache().getSavedUUIDs()
         plugin.getServices().getSubsystemManager().getActiveServerDataClasses()
-                .forEach(aClass -> getLocalCache().getSavedUUIDs(aClass).forEach(uuid -> {
-                    VCoreData vCoreData = getLocalCache().getData(aClass, uuid);
-                    vCoreData.cleanUp();
-                    pipelineDataSynchronizer.doSynchronisation(DataSynchronizer.DataSourceType.LOCAL, DataSynchronizer.DataSourceType.GLOBAL_CACHE, aClass, uuid, null);
-                    pipelineDataSynchronizer.doSynchronisation(DataSynchronizer.DataSourceType.LOCAL, DataSynchronizer.DataSourceType.GLOBAL_STORAGE, aClass, uuid, null);
-                    vCoreData.save(false);
-                    getLocalCache().remove(aClass, uuid);
-                    plugin.consoleMessage("&aSaved &b" + uuid + " &8[&e" + aClass + "&8]", false);
-                }));
+                .forEach(aClass -> getLocalCache().getSavedUUIDs(aClass).forEach(uuid -> saveData(aClass, uuid)));
         plugin.getServices().getSubsystemManager().getActivePlayerDataClasses()
-                .forEach(aClass -> getLocalCache().getSavedUUIDs(aClass).forEach(uuid -> {
-                    VCoreData vCoreData = getLocalCache().getData(aClass, uuid);
-                    vCoreData.cleanUp();
-                    pipelineDataSynchronizer.doSynchronisation(DataSynchronizer.DataSourceType.LOCAL, DataSynchronizer.DataSourceType.GLOBAL_CACHE, aClass, uuid, null);
-                    pipelineDataSynchronizer.doSynchronisation(DataSynchronizer.DataSourceType.LOCAL, DataSynchronizer.DataSourceType.GLOBAL_STORAGE, aClass, uuid, null);
-                    vCoreData.save(false);
-                    plugin.consoleMessage("&aSaved &b" + uuid + " &8[&e" + aClass + "&8]", false);
-                    getLocalCache().remove(aClass, uuid);
-                }));
+                .forEach(aClass -> getLocalCache().getSavedUUIDs(aClass).forEach(uuid -> saveData(aClass, uuid)));
+    }
+
+    private void saveData(@NotNull Class<? extends VCoreData> type, @NotNull UUID uuid) {
+        VCoreData vCoreData = getLocalCache().getData(type, uuid);
+        if (vCoreData == null)
+            return;
+        if (vCoreData.isMarkedForRemoval())
+            return;
+        vCoreData.cleanUp();
+        pipelineDataSynchronizer.doSynchronisation(DataSynchronizer.DataSourceType.LOCAL, DataSynchronizer.DataSourceType.GLOBAL_CACHE, type, uuid, null);
+        pipelineDataSynchronizer.doSynchronisation(DataSynchronizer.DataSourceType.LOCAL, DataSynchronizer.DataSourceType.GLOBAL_STORAGE, type, uuid, null);
+        vCoreData.save(false);
+        plugin.consoleMessage("&aSaved &b" + uuid + " &8[&e" + type + "&8]", false);
+        getLocalCache().remove(type, uuid);
     }
 
     @Override
@@ -319,7 +328,7 @@ public class PipelineManager implements Pipeline {
         return pipelineDataSynchronizer;
     }
 
-    <T extends VCoreData> T loadFromPipeline(@Nonnull Class<? extends T> dataClass, @Nonnull UUID uuid, boolean createIfNotExist) {
+    private <T extends VCoreData> T loadFromPipeline(@NotNull Class<? extends T> dataClass, @NotNull UUID uuid, boolean createIfNotExist) {
         // ExistCheck LocalCache
         if (localCache.dataExist(dataClass, uuid)) {
             plugin.consoleMessage("&eFound Data in Local Cache &8[&b" + dataClass.getSimpleName() + "&8]", 1, true);
@@ -342,15 +351,7 @@ public class PipelineManager implements Pipeline {
         } else {
             if (!createIfNotExist)
                 return null;
-            plugin.consoleMessage("&eNo Data was found. Creating new data! &8[&b" + dataClass.getSimpleName() + "&8]", 1, true);
-            T vCoreData = localCache.instantiateData(dataClass, uuid);
-            vCoreData.onCreate();
-            localCache.save(dataClass, vCoreData);
-            //getLocalDataHandler().localToRedis(vCoreData,dataClass,vCoreData.getUUID());
-            pipelineDataSynchronizer.synchronize(DataSynchronizer.DataSourceType.LOCAL, DataSynchronizer.DataSourceType.GLOBAL_CACHE, dataClass, uuid);
-
-            if (!NetworkData.class.isAssignableFrom(dataClass))
-                pipelineDataSynchronizer.synchronize(DataSynchronizer.DataSourceType.LOCAL, DataSynchronizer.DataSourceType.GLOBAL_STORAGE, dataClass, uuid);
+            createNewData(dataClass, uuid);
         }
         plugin.consoleMessage("&eLoaded &a" + dataClass.getSimpleName() + " &ewith uuid&7: " + uuid, 1, true);
         if (!localCache.dataExist(dataClass, uuid))
@@ -360,11 +361,24 @@ public class PipelineManager implements Pipeline {
         return data;
     }
 
+    private <T extends VCoreData> T createNewData(@NotNull Class<? extends T> dataClass, @NotNull UUID uuid) {
+        plugin.consoleMessage("&eNo Data was found. Creating new data! &8[&b" + dataClass.getSimpleName() + "&8]", 1, true);
+        T vCoreData = localCache.instantiateData(dataClass, uuid);
+        vCoreData.loadDependentData();
+        vCoreData.onCreate();
+        localCache.save(dataClass, vCoreData);
+
+        pipelineDataSynchronizer.synchronize(DataSynchronizer.DataSourceType.LOCAL, DataSynchronizer.DataSourceType.GLOBAL_CACHE, dataClass, uuid);
+
+        if (!NetworkData.class.isAssignableFrom(dataClass))
+            pipelineDataSynchronizer.synchronize(DataSynchronizer.DataSourceType.LOCAL, DataSynchronizer.DataSourceType.GLOBAL_STORAGE, dataClass, uuid);
+        return vCoreData;
+    }
+
     private <S extends VCoreData> void preloadData(Class<? extends S> type) {
         VCoreDataProperties vCoreDataProperties = AnnotationResolver.getDataProperties(type);
-        if (vCoreDataProperties == null)
-            return;
         PreloadStrategy preloadStrategy = vCoreDataProperties.preloadStrategy();
+        // Data will only be preloaded if it is declared properly
         if (!preloadStrategy.equals(PreloadStrategy.LOAD_BEFORE))
             return;
         plugin.consoleMessage("&ePreloading &b" + type.getSimpleName(), true);

@@ -10,6 +10,7 @@ import de.verdox.vcore.plugin.files.DebugConfig;
 import de.verdox.vcore.plugin.subsystem.VCoreSubsystem;
 import de.verdox.vcore.synchronization.messaging.MessagingConfig;
 import de.verdox.vcore.synchronization.messaging.MessagingService;
+import de.verdox.vcore.synchronization.networkmanager.server.ServerInstance;
 import de.verdox.vcore.synchronization.pipeline.PipelineConfig;
 import de.verdox.vcore.synchronization.pipeline.PipelineManager;
 import de.verdox.vcore.synchronization.pipeline.parts.Pipeline;
@@ -54,6 +55,10 @@ public abstract class PluginServiceParts<T extends VCorePlugin<?, S>, S extends 
         this.vCoreScheduler = new VCoreScheduler(plugin);
         this.pipeline = pipelineConfig.constructPipeline(plugin);
         this.messagingService = messagingConfig.constructMessagingService();
+    }
+
+    public ServerInstance getServerInstance() {
+        return getPipeline().load(ServerInstance.class, plugin.getCoreInstance().getNetworkManager().getServerCache().getServerUUID(plugin.getCoreInstance().getServerName()), Pipeline.LoadingStrategy.LOAD_PIPELINE);
     }
 
     public void enableAfter() {

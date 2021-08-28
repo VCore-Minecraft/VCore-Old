@@ -18,8 +18,9 @@ import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.checkerframework.checker.index.qual.NonNegative;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.Nonnull;
 import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
@@ -33,7 +34,7 @@ import java.util.stream.Collectors;
 public class VCommandCallback {
     private final VCorePlugin<?, ?> plugin;
     private final List<CommandCallbackInfo> callbackInfos = new ArrayList<>();
-    private String[] commandPath;
+    private final String[] commandPath;
     private String neededPermission;
     private CommandExecutorType commandExecutorType;
     private BiConsumer<CommandSender, CommandParameters> providedArguments;
@@ -41,14 +42,18 @@ public class VCommandCallback {
 
     //TODO: Im Command Callback eine Möglichkeit dem Spieler vorzeitig die Error Message zu senden
 
-    public VCommandCallback(@Nonnull VCorePlugin<?, ?> plugin, @Nonnull String... commandPath) {
+    public VCommandCallback(@NotNull VCorePlugin<?, ?> plugin, @NotNull String... commandPath) {
         this.plugin = plugin;
         this.commandPath = commandPath;
         for (String s : commandPath)
             addCommandPath(s);
     }
 
-    public VCommandCallback addCommandPath(@Nonnull String commandPath) {
+    public String getNeededPermission() {
+        return neededPermission;
+    }
+
+    public VCommandCallback addCommandPath(@NotNull String commandPath) {
         if (commandPath.isEmpty())
             return this;
         int index = callbackInfos.size();
@@ -56,7 +61,7 @@ public class VCommandCallback {
         return this;
     }
 
-    public VCommandCallback askFor(@Nonnull String name, @Nonnull CommandAskType commandAskType, @Nonnull String errorMessage, @Nonnull String... suggested) {
+    public VCommandCallback askFor(@NotNull String name, @NotNull CommandAskType commandAskType, @NotNull String errorMessage, @NotNull String... suggested) {
         int index = callbackInfos.size();
         callbackInfos.add(new CommandAskParameter(plugin, index, name, commandAskType, errorMessage, Arrays.asList(suggested)));
         if (commandAskType.equals(CommandAskType.REST_OF_INPUT))
@@ -64,17 +69,18 @@ public class VCommandCallback {
         return this;
     }
 
-    public VCommandCallback withPermission(@Nonnull String permission) {
+    //TODO: Permission in Bukkit registrieren
+    public VCommandCallback withPermission(@NotNull String permission) {
         this.neededPermission = permission;
         return this;
     }
 
-    public VCommandCallback setExecutor(@Nonnull CommandExecutorType commandExecutorType) {
+    public VCommandCallback setExecutor(@NotNull CommandExecutorType commandExecutorType) {
         this.commandExecutorType = commandExecutorType;
         return this;
     }
 
-    public VCommandCallback commandCallback(@Nonnull BiConsumer<CommandSender, CommandParameters> providedArguments) {
+    public VCommandCallback commandCallback(@NotNull BiConsumer<CommandSender, CommandParameters> providedArguments) {
         this.providedArguments = providedArguments;
         return this;
     }
@@ -82,9 +88,8 @@ public class VCommandCallback {
     String getSuggested(VCoreCommand<?, ?> command) {
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("&7/&b").append(command.getCommandName()).append(" ");
-        for (CommandCallbackInfo callbackInfo : callbackInfos) {
+        for (CommandCallbackInfo callbackInfo : callbackInfos)
             stringBuilder.append(callbackInfo.commandHelpPlaceholder()).append(" ");
-        }
         return stringBuilder.toString();
     }
 
@@ -112,8 +117,9 @@ public class VCommandCallback {
             return suggested;
         if (neededPermission != null && !neededPermission.isEmpty() && !sender.hasPermission(neededPermission))
             return suggested;
+        String argument = args[currentArgument];
         CommandCallbackInfo info = callbackInfos.get(currentArgument);
-        return info.suggest();
+        return info.suggest(argument);
     }
 
     CallbackResponse onCommand(CommandSender sender, Command command, String label, String[] args) {
@@ -277,7 +283,7 @@ public class VCommandCallback {
             this.parameters = parameters;
         }
 
-        public <T> T getObject(@NonNegative int index, @Nonnull Class<? extends T> type) {
+        public <T> T getObject(@NonNegative int index, @NotNull Class<? extends T> type) {
             return type.cast(parameters.get(index));
         }
 
@@ -304,7 +310,8 @@ public class VCommandCallback {
             this.index = index;
         }
 
-        public abstract List<String> suggest();
+        @Nullable
+        public abstract List<String> suggest(String argument);
 
         public abstract String commandHelpPlaceholder();
     }
@@ -318,8 +325,10 @@ public class VCommandCallback {
         }
 
         @Override
-        public List<String> suggest() {
-            return List.of(commandPath);
+        public List<String> suggest(String argument) {
+            if (commandPath.contains(argument))
+                return List.of(commandPath);
+            return null;
         }
 
         @Override
@@ -340,10 +349,10 @@ public class VCommandCallback {
     public static class CommandAskParameter extends CommandCallbackInfo {
         protected final String name;
         protected final CommandAskType commandAskType;
-        private String errorMessage;
-        private List<String> suggested;
+        private final String errorMessage;
+        private final List<String> suggested;
 
-        CommandAskParameter(VCorePlugin<?, ?> plugin, int index, @Nonnull String name, @Nonnull CommandAskType commandAskType, @Nonnull String errorMessage, @Nonnull List<String> suggested) {
+        CommandAskParameter(VCorePlugin<?, ?> plugin, int index, @NotNull String name, @NotNull CommandAskType commandAskType, @NotNull String errorMessage, @NotNull List<String> suggested) {
             super(plugin, index);
             this.name = name;
             this.commandAskType = commandAskType;
@@ -360,7 +369,7 @@ public class VCommandCallback {
         }
 
         @Override
-        public List<String> suggest() {
+        public List<String> suggest(String argument) {
             if (commandAskType.equals(CommandAskType.PLAYER_ONLINE) && suggested.isEmpty())
                 return Bukkit.getOnlinePlayers().stream().map(HumanEntity::getName).collect(Collectors.toList());
             if (commandAskType.equals(CommandAskType.BOOLEAN))
@@ -382,8 +391,9 @@ public class VCommandCallback {
                     return List.of(VCoreUtil.getRandomUtil().randomInt(1, 100) + "");
             }
             if (commandAskType.equals(CommandAskType.VCORE_GAMESERVER))
-                return plugin.getCoreInstance().getServices().getPipeline().getLocalCache().getAllData(ServerInstance.class).stream().filter(serverInstance -> serverInstance.getServerType().equals(ServerType.GAME_SERVER)).map(serverInstance -> serverInstance.serverName).collect(Collectors.toList());
-            return suggested;
+                return plugin.getCoreInstance().getServices().getPipeline().getLocalCache().getAllData(ServerInstance.class).stream().filter(serverInstance -> serverInstance.getServerType().equals(ServerType.GAME_SERVER)).map(ServerInstance::getServerName).collect(Collectors.toList());
+
+            return suggested.stream().filter(s -> s.contains(argument)).collect(Collectors.toList());
         }
 
         @Override

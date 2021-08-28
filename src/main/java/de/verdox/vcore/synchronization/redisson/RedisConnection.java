@@ -5,13 +5,12 @@
 package de.verdox.vcore.synchronization.redisson;
 
 import de.verdox.vcore.plugin.VCorePlugin;
+import org.jetbrains.annotations.NotNull;
 import org.redisson.Redisson;
 import org.redisson.api.RedissonClient;
 import org.redisson.config.ClusterServersConfig;
 import org.redisson.config.Config;
 import org.redisson.config.SingleServerConfig;
-
-import javax.annotation.Nonnull;
 
 /**
  * @version 1.0
@@ -22,7 +21,7 @@ public abstract class RedisConnection {
     protected final VCorePlugin<?, ?> plugin;
     protected final RedissonClient redissonClient;
 
-    public RedisConnection(@Nonnull VCorePlugin<?, ?> plugin, boolean clusterMode, @Nonnull String[] addressArray, String redisPassword) {
+    public RedisConnection(@NotNull VCorePlugin<?, ?> plugin, boolean clusterMode, @NotNull String[] addressArray, String redisPassword) {
         this.plugin = plugin;
         if (addressArray.length == 0)
             throw new IllegalArgumentException("Address Array empty");

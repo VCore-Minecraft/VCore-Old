@@ -4,6 +4,8 @@
 
 package de.verdox.vcore.util.global;
 
+import org.checkerframework.checker.index.qual.NonNegative;
+
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -55,52 +57,40 @@ public class TimeUtil {
             this((int) TimeUnit.MILLISECONDS.toSeconds(inputMillis));
         }
 
-        @Override
-        public String toString() {
+        public String toString(@NonNegative int visibleFormats) {
             StringBuilder stringBuilder = new StringBuilder();
-            if (years != 0) {
-                if (years == 1)
-                    stringBuilder.append(years + " Jahr ");
-                else
-                    stringBuilder.append(years + " Jahre ");
-            }
-            if (months != 0) {
-                if (months == 1)
-                    stringBuilder.append(months + " Monat ");
-                else
-                    stringBuilder.append(months + " Monate ");
-            }
-            if (weeks != 0) {
-                if (weeks == 1)
-                    stringBuilder.append(weeks + " Woche ");
-                else
-                    stringBuilder.append(weeks + " Wochen ");
-            }
-            if (days != 0) {
-                if (days == 1)
-                    stringBuilder.append(days + " Tag ");
-                else
-                    stringBuilder.append(days + " Tage ");
-            }
-            if (hours != 0) {
-                if (hours == 1)
-                    stringBuilder.append(hours + " Stunde ");
-                else
-                    stringBuilder.append(hours + " Stunden ");
-            }
-            if (minutes != 0) {
-                if (minutes == 1)
-                    stringBuilder.append(minutes + " Minute ");
-                else
-                    stringBuilder.append(minutes + " Minuten ");
-            }
-            if (seconds != 0) {
-                if (seconds == 1)
-                    stringBuilder.append(seconds + " Sekunde");
-                else
-                    stringBuilder.append(seconds + " Sekunden");
+
+            long[] valueArray = new long[]{years, months, weeks, days, hours, minutes, seconds};
+            String[] translationArray = new String[]{
+                    "Jahr", "Jahre",
+                    "Monat", "Monate",
+                    "Woche", "Wochen",
+                    "Tag", "Tage",
+                    "Stunde", "Stunden",
+                    "Minute", "Minuten",
+                    "Sekunde", "Sekunden",
+            };
+
+            int counter = 0;
+            for (int i = 0, j = 0; i < valueArray.length && counter < visibleFormats && j < translationArray.length; i++, j += 2) {
+                long value = valueArray[i];
+                String singular = translationArray[j];
+                String plural = translationArray[j + 1];
+
+                if (value != 0) {
+                    if (value == 1)
+                        stringBuilder.append(value).append(" ").append(singular).append(" ");
+                    else
+                        stringBuilder.append(value).append(" ").append(plural).append(" ");
+                    counter++;
+                }
             }
             return stringBuilder.toString();
+        }
+
+        @Override
+        public String toString() {
+            return toString(7);
         }
     }
 }

@@ -7,8 +7,8 @@ package de.verdox.vcorepaper.custom;
 import de.verdox.vcorepaper.custom.nbtholders.NBTHolder;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
+import org.jetbrains.annotations.NotNull;
 
-import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Objects;
 import java.util.Set;
@@ -24,15 +24,15 @@ public abstract class CustomDataHolder<S, N extends NBTHolder<?>, C extends Cust
     protected final S dataHolder;
     protected final C customDataManager;
 
-    public CustomDataHolder(@Nonnull S dataHolder, @Nonnull C customDataManager) {
+    public CustomDataHolder(@NotNull S dataHolder, @NotNull C customDataManager) {
         this.dataHolder = dataHolder;
         this.customDataManager = customDataManager;
     }
 
     protected abstract <T, R extends CustomData<T>> void onStoreData(Class<? extends R> customDataType, T value);
 
-    @Nonnull
-    public final <T, R extends CustomData<T>> CustomDataHolder<S, N, C> storeCustomData(@Nullable Class<? extends R> customDataType, @Nonnull T value, @Nullable Consumer<R> callback) {
+    @NotNull
+    public final <T, R extends CustomData<T>> CustomDataHolder<S, N, C> storeCustomData(@Nullable Class<? extends R> customDataType, @NotNull T value, @Nullable Consumer<R> callback) {
         R customData = instantiateData(customDataType);
         if (customData == null)
             throw new NullPointerException("CustomData could not be instantiated");
@@ -65,11 +65,13 @@ public abstract class CustomDataHolder<S, N extends NBTHolder<?>, C extends Cust
         return deleteCustomData(customDataType, null);
     }
 
-    @Nonnull
-    public final <T, R extends CustomData<T>> CustomDataHolder<S, N, C> storeCustomData(@Nullable Class<? extends R> customDataType, @Nonnull T value) {
+    //TODO: Auf NBT typen zurückgreifen für Integer, UUID, ItemStack usw
+    @NotNull
+    public final <T, R extends CustomData<T>> CustomDataHolder<S, N, C> storeCustomData(@Nullable Class<? extends R> customDataType, @NotNull T value) {
         return storeCustomData(customDataType, value, null);
     }
 
+    //TODO: Auf NBT typen zurückgreifen für Integer, UUID, ItemStack usw
     public final <T, R extends CustomData<T>> T getCustomData(Class<? extends R> customDataClass) {
         R customData = instantiateData(customDataClass);
         if (customData == null)
@@ -86,7 +88,7 @@ public abstract class CustomDataHolder<S, N extends NBTHolder<?>, C extends Cust
         return toNBTHolder().getPersistentDataContainer().hasKey(nbtKey);
     }
 
-    @Nonnull
+    @NotNull
     public Set<String> getCustomDataKeys() {
         return toNBTHolder().getPersistentDataContainer().getKeys().parallelStream().collect(Collectors.toSet());
     }
@@ -109,15 +111,15 @@ public abstract class CustomDataHolder<S, N extends NBTHolder<?>, C extends Cust
         }
     }
 
-    @Nonnull
+    @NotNull
     public S getDataHolder() {
         return dataHolder;
     }
 
-    @Nonnull
+    @NotNull
     public abstract N toNBTHolder();
 
-    @Nonnull
+    @NotNull
     public C getCustomDataManager() {
         return customDataManager;
     }

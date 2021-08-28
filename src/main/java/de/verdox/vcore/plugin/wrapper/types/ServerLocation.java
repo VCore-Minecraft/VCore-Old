@@ -4,7 +4,7 @@
 
 package de.verdox.vcore.plugin.wrapper.types;
 
-import javax.annotation.Nonnull;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * @version 1.0
@@ -14,12 +14,12 @@ import javax.annotation.Nonnull;
 public class ServerLocation extends GameLocation {
     public final String serverName;
 
-    public ServerLocation(@Nonnull String serverName, @Nonnull String worldName, double x, double y, double z) {
+    public ServerLocation(@NotNull String serverName, @NotNull String worldName, double x, double y, double z) {
         super(worldName, x, y, z);
         this.serverName = serverName;
     }
 
-    public ServerLocation withServerName(@Nonnull String serverName) {
+    public ServerLocation withServerName(@NotNull String serverName) {
         return new ServerLocation(serverName, worldName, x, y, z);
     }
 

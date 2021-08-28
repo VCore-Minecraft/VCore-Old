@@ -17,6 +17,7 @@ import de.verdox.vcore.synchronization.pipeline.parts.storage.GlobalStorage;
 import de.verdox.vcore.synchronization.pipeline.parts.storage.RemoteStorage;
 import de.verdox.vcore.util.global.AnnotationResolver;
 import org.bson.Document;
+import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nonnull;
 import java.util.*;
@@ -31,12 +32,12 @@ public class MongoDBStorage implements GlobalStorage, RemoteStorage {
 
     private MongoClient mongoClient;
     private MongoDatabase mongoDatabase;
-    private VCorePlugin<?, ?> vCorePlugin;
-    private String host;
-    private String database;
-    private int port;
-    private String user;
-    private String password;
+    private final VCorePlugin<?, ?> vCorePlugin;
+    private final String host;
+    private final String database;
+    private final int port;
+    private final String user;
+    private final String password;
     //private final CodecRegistry codecRegistry;
 
     public MongoDBStorage(VCorePlugin<?, ?> vCorePlugin, String host, String database, int port, String user, String password) {
@@ -58,7 +59,7 @@ public class MongoDBStorage implements GlobalStorage, RemoteStorage {
 
 
     @Override
-    public Map<String, Object> loadData(@Nonnull Class<? extends VCoreData> dataClass, @Nonnull UUID objectUUID) {
+    public Map<String, Object> loadData(@Nonnull @NotNull Class<? extends VCoreData> dataClass, @Nonnull @NotNull UUID objectUUID) {
         Document filter = new Document("objectUUID", objectUUID.toString());
 
         Document mongoDBData = getMongoStorage(dataClass, getSuffix(dataClass)).find(filter).first();
@@ -84,13 +85,13 @@ public class MongoDBStorage implements GlobalStorage, RemoteStorage {
     }
 
     @Override
-    public boolean dataExist(@Nonnull Class<? extends VCoreData> dataClass, @Nonnull UUID objectUUID) {
+    public boolean dataExist(@Nonnull @NotNull Class<? extends VCoreData> dataClass, @Nonnull @NotNull UUID objectUUID) {
         Document document = getMongoStorage(dataClass, getSuffix(dataClass)).find(new Document("objectUUID", objectUUID.toString())).first();
         return document != null;
     }
 
     @Override
-    public void save(@Nonnull Class<? extends VCoreData> dataClass, @Nonnull UUID objectUUID, @Nonnull Map<String, Object> dataToSave) {
+    public void save(@Nonnull @NotNull Class<? extends VCoreData> dataClass, @Nonnull @NotNull UUID objectUUID, @Nonnull @NotNull Map<String, Object> dataToSave) {
         Document filter = new Document("objectUUID", objectUUID.toString());
 
         MongoCollection<Document> collection = getMongoStorage(dataClass, getSuffix(dataClass));
@@ -107,7 +108,7 @@ public class MongoDBStorage implements GlobalStorage, RemoteStorage {
     }
 
     @Override
-    public boolean remove(@Nonnull Class<? extends VCoreData> dataClass, @Nonnull UUID objectUUID) {
+    public boolean remove(@Nonnull @NotNull Class<? extends VCoreData> dataClass, @Nonnull @NotNull UUID objectUUID) {
         Document filter = new Document("objectUUID", objectUUID.toString());
 
         MongoCollection<Document> collection = getMongoStorage(dataClass, getSuffix(dataClass));
@@ -115,7 +116,7 @@ public class MongoDBStorage implements GlobalStorage, RemoteStorage {
     }
 
     @Override
-    public Set<UUID> getSavedUUIDs(@Nonnull Class<? extends VCoreData> dataClass) {
+    public Set<UUID> getSavedUUIDs(@Nonnull @NotNull Class<? extends VCoreData> dataClass) {
         MongoCollection<Document> collection = getMongoStorage(dataClass, getSuffix(dataClass));
         Set<UUID> uuids = new HashSet<>();
         for (Document document : collection.find()) {
@@ -142,24 +143,12 @@ public class MongoDBStorage implements GlobalStorage, RemoteStorage {
 
     private final com.mongodb.client.MongoCollection<Document> getCollection(String name) {
         try {
-            com.mongodb.client.MongoCollection<Document> collection = mongoDatabase.getCollection(name);
-            //String indexName = "vcore_objectUUID_index";
-            //boolean contains = false;
-            //for (Document document : collection.listIndexes()) {
-            //    if(!document.containsKey("name"))
-            //        continue;
-            //    String foundIndexName = document.getString("name");
-            //    if(foundIndexName.equals(indexName))
-            //        contains = true;
-            //}
-            //if(!contains)
-            //    collection.createIndex(Indexes.hashed("objectUUID"), new IndexOptions().unique(true).background(true).name("vcore_objectUUID_index"));
             return mongoDatabase.getCollection(name);
         }
         // Collection does not exist
         catch (IllegalArgumentException e) {
             mongoDatabase.createCollection(name);
-            return getCollection(name);
+            return mongoDatabase.getCollection(name);
         }
     }
 

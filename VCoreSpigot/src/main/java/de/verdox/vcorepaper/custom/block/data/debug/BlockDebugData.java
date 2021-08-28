@@ -6,8 +6,7 @@ package de.verdox.vcorepaper.custom.block.data.debug;
 
 import de.verdox.vcorepaper.custom.annotation.NBTIdentifier;
 import de.verdox.vcorepaper.custom.block.data.VBlockCustomData;
-
-import javax.annotation.Nonnull;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * @version 1.0
@@ -16,7 +15,7 @@ import javax.annotation.Nonnull;
  */
 @NBTIdentifier(nbtKey = "debugKey")
 public class BlockDebugData extends VBlockCustomData<Long> {
-    @Nonnull
+    @NotNull
     @Override
     public Class<Long> getTypeClass() {
         return Long.class;

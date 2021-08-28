@@ -11,6 +11,7 @@ import de.verdox.vcore.synchronization.pipeline.datatypes.VCoreData;
 import de.verdox.vcore.synchronization.pipeline.parts.storage.GlobalStorage;
 import de.verdox.vcore.util.global.AnnotationResolver;
 import org.apache.commons.io.FilenameUtils;
+import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nonnull;
 import java.io.File;
@@ -25,7 +26,7 @@ import java.util.*;
  */
 public class YamlStorage implements GlobalStorage {
 
-    private VCorePlugin<?, ?> plugin;
+    private final VCorePlugin<?, ?> plugin;
 
     public YamlStorage(VCorePlugin<?, ?> plugin) {
         this.plugin = plugin;
@@ -33,7 +34,7 @@ public class YamlStorage implements GlobalStorage {
     }
 
     @Override
-    public Map<String, Object> loadData(@Nonnull Class<? extends VCoreData> dataClass, @Nonnull UUID objectUUID) {
+    public Map<String, Object> loadData(@Nonnull @NotNull Class<? extends VCoreData> dataClass, @Nonnull @NotNull UUID objectUUID) {
         Map<String, Object> data = new HashMap<>();
         if (!dataExist(dataClass, objectUUID))
             return data;
@@ -50,12 +51,12 @@ public class YamlStorage implements GlobalStorage {
     }
 
     @Override
-    public boolean dataExist(@Nonnull Class<? extends VCoreData> dataClass, @Nonnull UUID objectUUID) {
+    public boolean dataExist(@Nonnull @NotNull Class<? extends VCoreData> dataClass, @Nonnull @NotNull UUID objectUUID) {
         return getSaveFile(dataClass, objectUUID).getFile().exists();
     }
 
     @Override
-    public void save(@Nonnull Class<? extends VCoreData> dataClass, @Nonnull UUID objectUUID, @Nonnull Map<String, Object> dataToSave) {
+    public void save(@Nonnull @NotNull Class<? extends VCoreData> dataClass, @Nonnull @NotNull UUID objectUUID, @Nonnull @NotNull Map<String, Object> dataToSave) {
         VCoreYAMLConfig vCoreYAMLConfig = getSaveFile(dataClass, objectUUID);
         vCoreYAMLConfig.init();
         dataToSave.forEach((s, o) -> {
@@ -68,14 +69,14 @@ public class YamlStorage implements GlobalStorage {
     }
 
     @Override
-    public boolean remove(@Nonnull Class<? extends VCoreData> dataClass, @Nonnull UUID objectUUID) {
+    public boolean remove(@Nonnull @NotNull Class<? extends VCoreData> dataClass, @Nonnull @NotNull UUID objectUUID) {
         if (!dataExist(dataClass, objectUUID))
             return false;
         return getSaveFile(dataClass, objectUUID).getFile().delete();
     }
 
     @Override
-    public Set<UUID> getSavedUUIDs(@Nonnull Class<? extends VCoreData> dataClass) {
+    public Set<UUID> getSavedUUIDs(@Nonnull @NotNull Class<? extends VCoreData> dataClass) {
         Set<UUID> foundUUIDs = new HashSet<>();
         VCoreYAMLConfig dummyConfig = getSaveFile(dataClass, UUID.randomUUID());
         File parentFolder = dummyConfig.getFile().getParentFile();
@@ -105,7 +106,7 @@ public class YamlStorage implements GlobalStorage {
      * @param objectUUID ObjectUUID
      * @return the VCoreYamlConfig instance
      */
-    private VCoreYAMLConfig getSaveFile(@Nonnull Class<? extends VCoreData> dataClass, @Nonnull UUID objectUUID) {
+    private VCoreYAMLConfig getSaveFile(@NotNull Class<? extends VCoreData> dataClass, @NotNull UUID objectUUID) {
         String storageIdentifier = AnnotationResolver.getDataStorageIdentifier(dataClass);
         String prefix;
         if (NetworkData.class.isAssignableFrom(dataClass))

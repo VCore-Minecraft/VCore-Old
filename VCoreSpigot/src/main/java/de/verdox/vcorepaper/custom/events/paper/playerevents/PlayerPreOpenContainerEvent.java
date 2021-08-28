@@ -8,8 +8,7 @@ import de.verdox.vcorepaper.custom.events.VCoreEvent;
 import org.bukkit.block.Container;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Cancellable;
-
-import javax.annotation.Nonnull;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * @version 1.0
@@ -28,7 +27,7 @@ public class PlayerPreOpenContainerEvent extends VCoreEvent implements Cancellab
      * @param player    The player
      * @param container The Container
      */
-    public PlayerPreOpenContainerEvent(@Nonnull Player player, @Nonnull Container container) {
+    public PlayerPreOpenContainerEvent(@NotNull Player player, @NotNull Container container) {
         this.player = player;
         this.container = container;
     }

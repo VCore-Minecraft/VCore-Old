@@ -4,7 +4,8 @@
 
 package de.verdox.vcore.plugin.wrapper.types;
 
-import javax.annotation.Nonnull;
+import org.jetbrains.annotations.NotNull;
+
 import java.util.Objects;
 
 /**
@@ -19,7 +20,7 @@ public class WorldChunk {
     public final int globalSpaceX;
     public final int globalSpaceZ;
 
-    public WorldChunk(@Nonnull String worldName, int x, int z) {
+    public WorldChunk(@NotNull String worldName, int x, int z) {
         this.worldName = worldName;
         this.x = x;
         this.z = z;
@@ -40,6 +41,33 @@ public class WorldChunk {
                 ", globalSpaceX=" + globalSpaceX +
                 ", globalSpaceZ=" + globalSpaceZ +
                 '}';
+    }
+
+    /**
+     * @return Chunk coordinates packed into a long
+     */
+    public static long getChunkKey(int x, int z) {
+        return (long) x & 0xffffffffL | ((long) z & 0xffffffffL) << 32;
+    }
+
+    public static int getRegionX(int chunkX) {
+        return chunkX >> 5;
+    }
+
+    public static int getRegionZ(int chunkZ) {
+        return chunkZ >> 5;
+    }
+
+    public static long getRegionKey(int chunkX, int chunkZ) {
+        return WorldRegion.getRegionKey(getRegionX(chunkX), getRegionZ(chunkZ));
+    }
+
+    public long getChunkKey() {
+        return getChunkKey(x, z);
+    }
+
+    public long getRegionKey() {
+        return getRegionKey(x, z);
     }
 
     @Override

@@ -19,7 +19,7 @@ public abstract class ServerPingEvent {
 
     public ServerPingEvent(ServerType serverType, String serverName, String serverAddress, int serverPort) {
         this.serverType = serverType;
-        this.serverName = serverName;
+        this.serverName = serverName.toLowerCase();
         this.serverAddress = serverAddress;
         this.serverPort = serverPort;
     }

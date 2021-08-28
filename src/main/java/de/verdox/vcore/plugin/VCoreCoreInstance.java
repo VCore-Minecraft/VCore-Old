@@ -7,6 +7,7 @@ package de.verdox.vcore.plugin;
 import de.verdox.vcore.plugin.subsystem.VCoreSubsystem;
 import de.verdox.vcore.synchronization.networkmanager.NetworkManager;
 import de.verdox.vcore.synchronization.networkmanager.player.api.VCorePlayerAPI;
+import de.verdox.vcore.synchronization.networkmanager.server.api.VCoreServerAPI;
 import net.md_5.bungee.api.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -17,6 +18,8 @@ import org.bukkit.plugin.java.JavaPlugin;
  */
 public interface VCoreCoreInstance<T, R extends VCoreSubsystem<?>> extends VCorePlugin<T, R> {
     VCorePlayerAPI getPlayerAPI();
+
+    VCoreServerAPI getServerAPI();
 
     <X extends VCorePlugin<T, R>> NetworkManager<X> getNetworkManager();
 

@@ -4,7 +4,8 @@
 
 package de.verdox.vcore.synchronization.pipeline.datatypes.serializables.reference;
 
-import javax.annotation.Nonnull;
+import org.jetbrains.annotations.NotNull;
+
 import java.io.Serializable;
 import java.util.Map;
 
@@ -13,11 +14,11 @@ import java.util.Map;
  * @Author: Lukas Jonsson (Verdox)
  * @date 25.06.2021 23:56
  */
-public abstract class VCoreDataReference<T> implements Serializable {
+public abstract class VCoreFieldReference<T> implements Serializable {
     private final Map<String, Object> data;
     private final String fieldName;
 
-    public VCoreDataReference(@Nonnull Map<String, Object> data, @Nonnull String fieldName) {
+    public VCoreFieldReference(@NotNull Map<String, Object> data, @NotNull String fieldName) {
         this.data = data;
         this.fieldName = fieldName;
     }
@@ -30,7 +31,7 @@ public abstract class VCoreDataReference<T> implements Serializable {
         return (T) data.get(fieldName);
     }
 
-    public VCoreDataReference<T> setValue(@Nonnull T value) {
+    public VCoreFieldReference<T> setValue(@NotNull T value) {
         data.put(fieldName, value);
         return this;
     }

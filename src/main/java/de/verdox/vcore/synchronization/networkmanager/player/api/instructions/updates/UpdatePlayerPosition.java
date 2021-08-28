@@ -7,12 +7,12 @@ package de.verdox.vcore.synchronization.networkmanager.player.api.instructions.u
 import de.verdox.vcore.plugin.wrapper.bungeecord.BungeePlatform;
 import de.verdox.vcore.plugin.wrapper.spigot.SpigotPlatform;
 import de.verdox.vcore.plugin.wrapper.types.GameLocation;
-import de.verdox.vcore.synchronization.messaging.instructions.update.Update;
+import de.verdox.vcore.synchronization.messaging.instructions.update.CleverUpdate;
 import de.verdox.vcore.synchronization.networkmanager.player.VCorePlayer;
 import de.verdox.vcore.synchronization.networkmanager.player.api.VCorePlayerAPI;
 import de.verdox.vcore.synchronization.pipeline.parts.Pipeline;
+import org.jetbrains.annotations.NotNull;
 
-import javax.annotation.Nonnull;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -22,12 +22,12 @@ import java.util.concurrent.TimeUnit;
  * @Author: Lukas Jonsson (Verdox)
  * @date 05.08.2021 03:29
  */
-public class UpdatePlayerPosition extends Update {
+public class UpdatePlayerPosition extends CleverUpdate {
     public UpdatePlayerPosition(UUID uuid) {
         super(uuid);
     }
 
-    @Nonnull
+    @NotNull
     @Override
     public UpdateCompletion executeUpdate(Object[] instructionData) {
 
@@ -55,7 +55,7 @@ public class UpdatePlayerPosition extends Update {
             if (!serverName.equals(gameServerName))
                 return UpdateCompletion.NOTHING;
             // Player is already online
-            plugin.getCoreInstance().getPlayerAPI().getPlayerScheduler().schedulePlayerTask(uuid, () -> {
+            plugin.getCoreInstance().getPlayerAPI().getPlayerScheduler().schedulePlayerTask(uuid, getUuid(), () -> {
                 GameLocation gameLocation = new GameLocation(worldName, x, y, z);
                 spigotPlatform.teleportPlayer(vCorePlayer.getObjectUUID(), gameLocation);
             }, 5, TimeUnit.SECONDS);
@@ -71,10 +71,5 @@ public class UpdatePlayerPosition extends Update {
     @Override
     protected List<Class<?>> dataTypes() {
         return List.of(UUID.class, String.class, String.class, Double.class, Double.class, Double.class);
-    }
-
-    @Override
-    public boolean onSend(Object[] queryData) {
-        return true;
     }
 }

@@ -4,10 +4,10 @@
 
 package de.verdox.vcore.synchronization.networkmanager.player.api.instructions.updates;
 
-import de.verdox.vcore.synchronization.messaging.instructions.update.Update;
+import de.verdox.vcore.synchronization.messaging.instructions.update.CleverUpdate;
 import de.verdox.vcore.synchronization.networkmanager.player.api.VCorePlayerAPI;
+import org.jetbrains.annotations.NotNull;
 
-import javax.annotation.Nonnull;
 import java.util.List;
 import java.util.UUID;
 
@@ -16,12 +16,12 @@ import java.util.UUID;
  * @Author: Lukas Jonsson (Verdox)
  * @date 05.08.2021 22:27
  */
-public class UpdatePlayerKick extends Update {
+public class UpdatePlayerKick extends CleverUpdate {
     public UpdatePlayerKick(UUID uuid) {
         super(uuid);
     }
 
-    @Nonnull
+    @NotNull
     @Override
     public UpdateCompletion executeUpdate(Object[] instructionData) {
         UUID targetUUID = (UUID) instructionData[0];
