@@ -31,7 +31,7 @@ public class VCoreWaterfall extends VCoreCoreInstance.BungeeCord {
         networkManager = new NetworkManager<>(ServerType.PROXY, this);
         new PlayerProxyListener(networkManager);
 
-        getServices().eventBus.register(new ServerPingListener());
+        getServices().eventBus.register(new ServerPingListener(this));
         this.vCorePlayerAPI = new VCorePlayerBungeeImpl(this);
         this.vCoreServerAPI = new VCoreServerAPIImpl(this);
 

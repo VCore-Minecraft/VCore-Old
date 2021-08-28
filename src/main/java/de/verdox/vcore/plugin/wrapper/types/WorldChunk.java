@@ -43,6 +43,33 @@ public class WorldChunk {
                 '}';
     }
 
+    /**
+     * @return Chunk coordinates packed into a long
+     */
+    public static long getChunkKey(int x, int z) {
+        return (long) x & 0xffffffffL | ((long) z & 0xffffffffL) << 32;
+    }
+
+    public static int getRegionX(int chunkX) {
+        return chunkX >> 5;
+    }
+
+    public static int getRegionZ(int chunkZ) {
+        return chunkZ >> 5;
+    }
+
+    public static long getRegionKey(int chunkX, int chunkZ) {
+        return WorldRegion.getRegionKey(getRegionX(chunkX), getRegionZ(chunkZ));
+    }
+
+    public long getChunkKey() {
+        return getChunkKey(x, z);
+    }
+
+    public long getRegionKey() {
+        return getRegionKey(x, z);
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

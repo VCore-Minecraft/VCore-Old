@@ -25,6 +25,12 @@ public class WorldRegion {
         this.regionZ = worldChunk.z >> 5;
     }
 
+    public WorldRegion(String worldName, int regionX, int regionZ) {
+        this.worldName = worldName;
+        this.regionX = regionX;
+        this.regionZ = regionZ;
+    }
+
     public Set<WorldChunk> getChunks() {
         if (chunks.isEmpty()) {
             int minChunkX = regionX << 5;
@@ -37,13 +43,25 @@ public class WorldRegion {
         return chunks;
     }
 
+    public static long getRegionKey(int x, int z) {
+        return (long) x & 0xffffffffL | ((long) z & 0xffffffffL) << 32;
+    }
+
+    public static String toString(int regionX, int regionZ) {
+        return "region_" + regionX + "_" + regionZ;
+    }
+
     @Override
     public String toString() {
         return worldName + "_" + toStringWithoutWorld();
     }
 
+    public long getRegionKey() {
+        return getRegionKey(regionX, regionZ);
+    }
+
     public String toStringWithoutWorld() {
-        return "region_" + regionX + "_" + regionZ;
+        return toString(regionX, regionZ);
     }
 
     @Override

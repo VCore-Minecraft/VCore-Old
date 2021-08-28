@@ -36,15 +36,5 @@ public class NMSCommand extends VCoreCommand.VCoreBukkitCommand {
                     }
                 })
         ;
-
-        addCommandCallback("world")
-                .setExecutor(VCommandCallback.CommandExecutorType.PLAYER)
-                .addCommandPath("createDragonBattle")
-                .commandCallback((commandSender, commandParameters) -> {
-                    Player player = (Player) commandSender;
-                    VCorePaper.getInstance().sync(() -> {
-                        VCorePaper.getInstance().getNmsManager().getNmsWorldHandler().createDragonBattle(player.getLocation().clone().add(0, 30, 0), player.getLocation().clone());
-                    });
-                });
     }
 }

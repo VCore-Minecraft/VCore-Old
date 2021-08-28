@@ -9,7 +9,6 @@ import de.verdox.vcorepaper.nms.NMSVersion;
 import de.verdox.vcorepaper.nms.nmshandler.v1_16_3.world.WorldHandler_V1_16_R3;
 import org.apache.commons.lang.NotImplementedException;
 import org.bukkit.Location;
-import org.bukkit.boss.DragonBattle;
 import org.bukkit.entity.Player;
 import org.checkerframework.checker.index.qual.NonNegative;
 import org.jetbrains.annotations.NotNull;
@@ -92,6 +91,4 @@ public interface NMSWorldHandler extends NMSHandler {
     default void refreshWorldBorder(@NotNull Player player) {
         refreshWorldBorder(player, null);
     }
-
-    DragonBattle createDragonBattle(@NotNull Location dragonSpawnLoc, @NotNull Location exitPortalLoc);
 }
