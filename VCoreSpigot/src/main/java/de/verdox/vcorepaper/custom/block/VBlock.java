@@ -66,6 +66,8 @@ public abstract class VBlock<D, N extends NBTHolder<?>, M extends CustomDataMana
         }
     }
 
+    public abstract boolean isVBlock();
+
     public static class LocationBased extends VBlock<Location, NBTLocation, CustomLocationDataManager> {
         private final NBTLocation nbtLocation;
 
@@ -82,6 +84,11 @@ public abstract class VBlock<D, N extends NBTHolder<?>, M extends CustomDataMana
         @Override
         public LocationBased asLocationBased() {
             return this;
+        }
+
+        @Override
+        public boolean isVBlock() {
+            return toNBTHolder().isNBTLocation();
         }
 
         @NotNull
@@ -111,6 +118,11 @@ public abstract class VBlock<D, N extends NBTHolder<?>, M extends CustomDataMana
         @Override
         public LocationBased asLocationBased() {
             return VCorePaper.getInstance().getCustomLocationDataManager().getVBlock(block.getLocation());
+        }
+
+        @Override
+        public boolean isVBlock() {
+            return toNBTHolder().isNBTBlock();
         }
 
         @NotNull

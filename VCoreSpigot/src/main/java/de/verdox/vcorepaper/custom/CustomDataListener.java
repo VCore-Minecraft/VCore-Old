@@ -67,21 +67,22 @@ public class CustomDataListener extends VCoreListener.VCoreBukkitListener {
                         .filter(Objects::nonNull)
                         .filter(itemCustomData -> itemCustomData instanceof BlockInteractCallback)
                         .forEach(itemCustomData -> ((BlockInteractCallback) itemCustomData).blockCallback(player, action, finalVCoreItem, vBlock, EventBlockCallback.CallbackType.INTERACT_BLOCK));
-
-            vBlock.getCustomDataKeys()
-                    .parallelStream()
-                    .map(key -> VCorePaper.getInstance().getCustomBlockDataManager().getDataType(key))
-                    .filter(Objects::nonNull)
-                    .filter(itemCustomData -> itemCustomData instanceof BlockInteractCallback)
-                    .forEach(itemCustomData -> ((BlockInteractCallback) itemCustomData).blockCallback(player, action, finalVCoreItem, vBlock, EventBlockCallback.CallbackType.INTERACT_BLOCK));
+            if (vBlock.isVBlock())
+                vBlock.getCustomDataKeys()
+                        .parallelStream()
+                        .map(key -> VCorePaper.getInstance().getCustomBlockDataManager().getDataType(key))
+                        .filter(Objects::nonNull)
+                        .filter(itemCustomData -> itemCustomData instanceof BlockInteractCallback)
+                        .forEach(itemCustomData -> ((BlockInteractCallback) itemCustomData).blockCallback(player, action, finalVCoreItem, vBlock, EventBlockCallback.CallbackType.INTERACT_BLOCK));
             VBlock.LocationBased vBlockLocBased = vBlock.asLocationBased();
-            vBlockLocBased
-                    .getCustomDataKeys()
-                    .parallelStream()
-                    .map(key -> VCorePaper.getInstance().getCustomLocationDataManager().getDataType(key))
-                    .filter(Objects::nonNull)
-                    .filter(vBlockCustomData -> vBlockCustomData instanceof BlockInteractCallback)
-                    .forEach(vBlockCustomData -> ((BlockPlaceCallback) vBlockCustomData).blockCallback(player, Action.RIGHT_CLICK_BLOCK, finalVCoreItem, vBlockLocBased, EventBlockCallback.CallbackType.PLACE_BLOCK));
+            if (vBlockLocBased.isVBlock())
+                vBlockLocBased
+                        .getCustomDataKeys()
+                        .parallelStream()
+                        .map(key -> VCorePaper.getInstance().getCustomLocationDataManager().getDataType(key))
+                        .filter(Objects::nonNull)
+                        .filter(vBlockCustomData -> vBlockCustomData instanceof BlockInteractCallback)
+                        .forEach(vBlockCustomData -> ((BlockPlaceCallback) vBlockCustomData).blockCallback(player, Action.RIGHT_CLICK_BLOCK, finalVCoreItem, vBlockLocBased, EventBlockCallback.CallbackType.PLACE_BLOCK));
 
         });
     }
@@ -111,20 +112,22 @@ public class CustomDataListener extends VCoreListener.VCoreBukkitListener {
                         .filter(itemCustomData -> itemCustomData instanceof BlockPlaceCallback)
                         .forEach(itemCustomData -> ((BlockPlaceCallback) itemCustomData).blockCallback(player, Action.RIGHT_CLICK_BLOCK, finalVCoreItem, vBlock, EventBlockCallback.CallbackType.PLACE_BLOCK));
 
-            vBlock.getCustomDataKeys()
-                    .parallelStream()
-                    .map(key -> VCorePaper.getInstance().getCustomBlockDataManager().getDataType(key))
-                    .filter(Objects::nonNull)
-                    .filter(vBlockCustomData -> vBlockCustomData instanceof BlockPlaceCallback)
-                    .forEach(vBlockCustomData -> ((BlockPlaceCallback) vBlockCustomData).blockCallback(player, Action.RIGHT_CLICK_BLOCK, finalVCoreItem, vBlock, EventBlockCallback.CallbackType.PLACE_BLOCK));
+            if (vBlock.isVBlock())
+                vBlock.getCustomDataKeys()
+                        .parallelStream()
+                        .map(key -> VCorePaper.getInstance().getCustomBlockDataManager().getDataType(key))
+                        .filter(Objects::nonNull)
+                        .filter(vBlockCustomData -> vBlockCustomData instanceof BlockPlaceCallback)
+                        .forEach(vBlockCustomData -> ((BlockPlaceCallback) vBlockCustomData).blockCallback(player, Action.RIGHT_CLICK_BLOCK, finalVCoreItem, vBlock, EventBlockCallback.CallbackType.PLACE_BLOCK));
             VBlock.LocationBased vBlockLocBased = vBlock.asLocationBased();
-            vBlockLocBased
-                    .getCustomDataKeys()
-                    .parallelStream()
-                    .map(key -> VCorePaper.getInstance().getCustomLocationDataManager().getDataType(key))
-                    .filter(Objects::nonNull)
-                    .filter(vBlockCustomData -> vBlockCustomData instanceof BlockPlaceCallback)
-                    .forEach(vBlockCustomData -> ((BlockPlaceCallback) vBlockCustomData).blockCallback(player, Action.RIGHT_CLICK_BLOCK, finalVCoreItem, vBlockLocBased, EventBlockCallback.CallbackType.PLACE_BLOCK));
+            if (vBlockLocBased.isVBlock())
+                vBlockLocBased
+                        .getCustomDataKeys()
+                        .parallelStream()
+                        .map(key -> VCorePaper.getInstance().getCustomLocationDataManager().getDataType(key))
+                        .filter(Objects::nonNull)
+                        .filter(vBlockCustomData -> vBlockCustomData instanceof BlockPlaceCallback)
+                        .forEach(vBlockCustomData -> ((BlockPlaceCallback) vBlockCustomData).blockCallback(player, Action.RIGHT_CLICK_BLOCK, finalVCoreItem, vBlockLocBased, EventBlockCallback.CallbackType.PLACE_BLOCK));
 
         });
     }
@@ -156,22 +159,24 @@ public class CustomDataListener extends VCoreListener.VCoreBukkitListener {
                             ((BlockDestroyCallback) itemCustomData).blockCallback(player, Action.LEFT_CLICK_BLOCK, finalVCoreItem, vBlock, EventBlockCallback.CallbackType.BREAK_BLOCK);
                         });
             try {
-                vBlock.getCustomDataKeys()
-                        .parallelStream()
-                        .map(key -> VCorePaper.getInstance().getCustomBlockDataManager().getDataType(key))
-                        .filter(Objects::nonNull)
-                        .filter(vBlockCustomData -> vBlockCustomData instanceof BlockDestroyCallback)
-                        .forEach(vBlockCustomData -> ((BlockDestroyCallback) vBlockCustomData).blockCallback(player, Action.LEFT_CLICK_BLOCK, finalVCoreItem, vBlock, EventBlockCallback.CallbackType.BREAK_BLOCK));
+                if (vBlock.isVBlock())
+                    vBlock.getCustomDataKeys()
+                            .parallelStream()
+                            .map(key -> VCorePaper.getInstance().getCustomBlockDataManager().getDataType(key))
+                            .filter(Objects::nonNull)
+                            .filter(vBlockCustomData -> vBlockCustomData instanceof BlockDestroyCallback)
+                            .forEach(vBlockCustomData -> ((BlockDestroyCallback) vBlockCustomData).blockCallback(player, Action.LEFT_CLICK_BLOCK, finalVCoreItem, vBlock, EventBlockCallback.CallbackType.BREAK_BLOCK));
                 VBlock.LocationBased vBlockLocBased = vBlock.asLocationBased();
-                vBlockLocBased
-                        .getCustomDataKeys()
-                        .parallelStream()
-                        .map(key -> VCorePaper.getInstance().getCustomLocationDataManager().getDataType(key))
-                        .filter(Objects::nonNull)
-                        .filter(vBlockCustomData -> vBlockCustomData instanceof BlockDestroyCallback)
-                        .forEach(vBlockCustomData -> ((BlockDestroyCallback) vBlockCustomData).blockCallback(player, Action.LEFT_CLICK_BLOCK, finalVCoreItem, vBlockLocBased, EventBlockCallback.CallbackType.BREAK_BLOCK));
+                if (vBlock.isVBlock())
+                    vBlockLocBased
+                            .getCustomDataKeys()
+                            .parallelStream()
+                            .map(key -> VCorePaper.getInstance().getCustomLocationDataManager().getDataType(key))
+                            .filter(Objects::nonNull)
+                            .filter(vBlockCustomData -> vBlockCustomData instanceof BlockDestroyCallback)
+                            .forEach(vBlockCustomData -> ((BlockDestroyCallback) vBlockCustomData).blockCallback(player, Action.LEFT_CLICK_BLOCK, finalVCoreItem, vBlockLocBased, EventBlockCallback.CallbackType.BREAK_BLOCK));
             } finally {
-                if (!vBlock.isFlagSet(VBlockFlag.PRESERVE_DATA_ON_BREAK))
+                if (vBlock.isVBlock() && !vBlock.isFlagSet(VBlockFlag.PRESERVE_DATA_ON_BREAK))
                     vBlock.toNBTHolder().delete();
             }
         });

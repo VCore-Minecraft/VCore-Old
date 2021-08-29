@@ -64,6 +64,18 @@ public class NBTLocation extends NBTHolderImpl<Location, NBTCompound> {
         return this.blockCompound;
     }
 
+    public boolean isNBTLocation() {
+        if (this.nbtFile == null || this.chunkCompound == null || this.splitChunkCompound == null || this.blockCompound == null)
+            return false;
+        if (!this.nbtFile.hasKey(((ChunkKey) splitChunkKey).toString()))
+            return false;
+        if (!this.chunkCompound.hasKey(splitChunkKey.toString()))
+            return false;
+        if (!this.splitChunkCompound.hasKey(new LocationKey(this.dataHolder).toStringWithoutWorld()))
+            return false;
+        return !this.blockCompound.getKeys().isEmpty();
+    }
+
     /**
      * Not usable right now -> Object references must be declared new if compounds are cleared
      */

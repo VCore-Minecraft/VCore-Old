@@ -16,7 +16,6 @@ import de.verdox.vcore.synchronization.networkmanager.server.ServerType;
 import de.verdox.vcore.synchronization.pipeline.parts.Pipeline;
 
 import java.util.UUID;
-import java.util.concurrent.ExecutionException;
 
 /**
  * @version 1.0
@@ -39,7 +38,7 @@ public class VCorePlayerCache {
 
     class PlayerRedisListener {
         @Subscribe
-        public void playerMessages(MessageEvent e) throws ExecutionException, InterruptedException {
+        public void playerMessages(MessageEvent e) {
             MessageWrapper messageWrapper = new MessageWrapper(e.getMessage());
             if (!messageWrapper.validate(String.class, String.class, UUID.class, String.class))
                 return;
@@ -71,7 +70,8 @@ public class VCorePlayerCache {
                 } else if (serverInstance.getServerType().equals(ServerType.PROXY)) {
                     vCorePlayer.currentProxyServer = serverInstance.getServerName();
                 }
-                vCorePlayer.save(false);
+                if (serverInstance.getServerName().equals(networkManager.getPlugin().getCoreInstance().getServerName()))
+                    vCorePlayer.save(false);
             } else {
                 VCorePlayer vCorePlayer = vCorePlugin.getServices().getPipeline().load(VCorePlayer.class, playerUUID, Pipeline.LoadingStrategy.LOAD_PIPELINE, false);
                 if (vCorePlayer == null)
