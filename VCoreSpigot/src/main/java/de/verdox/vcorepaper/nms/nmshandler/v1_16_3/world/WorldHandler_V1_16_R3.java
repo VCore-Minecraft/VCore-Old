@@ -65,22 +65,18 @@ public class WorldHandler_V1_16_R3 implements NMSWorldHandler {
 
     @Override
     public void refreshChunk(@NotNull Player player, @NotNull Chunk chunk, Runnable callback) {
-        VCorePaper.getInstance().createTaskBatch().doAsync(() -> {
-            PacketPlayOutMapChunk packetPlayOutMapChunk = new PacketPlayOutMapChunk(((CraftChunk) chunk).getHandle(), 65535, false);
-            ((CraftPlayer) player).getHandle().playerConnection.sendPacket(packetPlayOutMapChunk);
-            VCorePaper.getInstance().consoleMessage("Sent Fake Chunk [" + chunk.getX() + "|" + chunk.getZ() + "]", true);
-        }).executeBatch(callback);
+        PacketPlayOutMapChunk packetPlayOutMapChunk = new PacketPlayOutMapChunk(((CraftChunk) chunk).getHandle(), 65535, false);
+        ((CraftPlayer) player).getHandle().playerConnection.sendPacket(packetPlayOutMapChunk);
     }
 
     @Override
     public void sendFakeBiome(@NotNull Player player, @NotNull Chunk chunk, @NotNull Biome biome, Runnable callback) {
-        VCorePaper.getInstance().createTaskBatch().doAsync(() -> {
-            ChunkPacketWrapper.V_1_16_R3 chunkPacketWrapper = new ChunkPacketWrapper.V_1_16_R3(chunk, 65535, true);
-            int[] biomeArray = chunkPacketWrapper.biomes.readField();
-            Arrays.fill(biomeArray, VCoreUtil.BukkitUtil.getVanillaUtil().getBiomeID_1_16(biome));
-            chunkPacketWrapper.biomes.setField(biomeArray);
-            chunkPacketWrapper.sendPlayer(player);
-        }).executeBatch(callback);
+        ChunkPacketWrapper.V_1_16_R3 chunkPacketWrapper = new ChunkPacketWrapper.V_1_16_R3(chunk, 65535, true);
+        int[] biomeArray = chunkPacketWrapper.biomes.readField();
+        Arrays.fill(biomeArray, VCoreUtil.BukkitUtil.getVanillaUtil().getBiomeID_1_16(biome));
+        chunkPacketWrapper.biomes.setField(biomeArray);
+        chunkPacketWrapper.sendPlayer(player);
+        VCorePaper.getInstance().consoleMessage("&7Sent Fake Biome&7: &e" + biome + " &8[&6" + chunk.getX() + "&8|&6" + chunk.getZ() + "&8]", true);
     }
 
 
@@ -133,61 +129,62 @@ public class WorldHandler_V1_16_R3 implements NMSWorldHandler {
         if (world == null)
             return;
 
-        VCorePaper.getInstance().async(() -> {
-            EnumGamemode enumGamemode = EnumGamemode.getById(player.getGameMode().getValue());
-            craftPlayer.getHandle().playerConnection.sendPacket(new PacketPlayOutRespawn(dimensionManager, world, seed, enumGamemode, enumGamemode, false, false, flag));
-            entityPlayer.playerConnection.sendPacket(new PacketPlayOutPosition(player.getLocation().getX(), player.getLocation().getY(), player.getLocation().getZ(), player.getLocation().getYaw(), player.getLocation().getPitch(), Set.of(), 0));
-            CraftChunk chunk = (CraftChunk) craftPlayer.getChunk();
-            entityPlayer.playerConnection.sendPacket(new PacketPlayOutViewCentre(chunk.getX(), chunk.getZ()));
-            entityPlayer.playerConnection.sendPacket(new PacketPlayOutMapChunk(chunk.getHandle(), 65535, true));
+        EnumGamemode enumGamemode = EnumGamemode.getById(player.getGameMode().getValue());
+        craftPlayer.getHandle().playerConnection.sendPacket(new PacketPlayOutRespawn(dimensionManager, world, seed, enumGamemode, enumGamemode, false, false, flag));
+        entityPlayer.playerConnection.sendPacket(new PacketPlayOutPosition(player.getLocation().getX(), player.getLocation().getY(), player.getLocation().getZ(), player.getLocation().getYaw(), player.getLocation().getPitch(), Set.of(), 0));
+        CraftChunk chunk = (CraftChunk) craftPlayer.getChunk();
+        entityPlayer.playerConnection.sendPacket(new PacketPlayOutViewCentre(chunk.getX(), chunk.getZ()));
+        entityPlayer.playerConnection.sendPacket(new PacketPlayOutMapChunk(chunk.getHandle(), 65535, true));
 
-            for (int x = chunk.getX() - Bukkit.getViewDistance(); x < chunk.getX() + Bukkit.getViewDistance(); x++)
-                for (int z = chunk.getZ() - Bukkit.getViewDistance(); z < chunk.getZ() + Bukkit.getViewDistance(); z++) {
-                    chunk.getWorld().getChunkAtAsync(x, z, false).whenComplete((foundChunk, throwable) -> {
-                        CraftChunk craftChunk = (CraftChunk) foundChunk;
-                        craftPlayer.getWorld().refreshChunk(craftChunk.getX(), craftChunk.getZ());
-                        entityPlayer.playerConnection.sendPacket(new PacketPlayOutMapChunk(craftChunk.getHandle(), 65535, true));
+        for (int x = chunk.getX() - Bukkit.getViewDistance(); x < chunk.getX() + Bukkit.getViewDistance(); x++)
+            for (int z = chunk.getZ() - Bukkit.getViewDistance(); z < chunk.getZ() + Bukkit.getViewDistance(); z++) {
+                chunk.getWorld().getChunkAtAsync(x, z, false).whenComplete((foundChunk, throwable) -> {
+                    CraftChunk craftChunk = (CraftChunk) foundChunk;
+                    craftPlayer.getWorld().refreshChunk(craftChunk.getX(), craftChunk.getZ());
+                    entityPlayer.playerConnection.sendPacket(new PacketPlayOutMapChunk(craftChunk.getHandle(), 65535, true));
 
 
-                        for (Entity entity : craftChunk.getEntities()) {
-                            CraftEntity craftEntity = (CraftEntity) entity;
-                            if (entity instanceof LivingEntity) {
-                                EntityLiving entityLiving = (EntityLiving) craftEntity.getHandle();
-                                // EntityLiving Packet
-                                entityPlayer.playerConnection.sendPacket(new PacketPlayOutSpawnEntityLiving((EntityLiving) craftEntity.getHandle()));
-                                // Entity Effects Packets
-                                entityLiving.getEffects().iterator().forEachRemaining(mobEffect -> entityPlayer.playerConnection.sendPacket(new PacketPlayOutEntityEffect(craftEntity.getEntityId(), mobEffect)));
-                                List<Pair<EnumItemSlot, ItemStack>> contents = new ArrayList<>();
+                    for (Entity entity : craftChunk.getEntities()) {
+                        CraftEntity craftEntity = (CraftEntity) entity;
+                        if (entity instanceof LivingEntity) {
+                            EntityLiving entityLiving = (EntityLiving) craftEntity.getHandle();
+                            // EntityLiving Packet
+                            entityPlayer.playerConnection.sendPacket(new PacketPlayOutSpawnEntityLiving((EntityLiving) craftEntity.getHandle()));
+                            // Entity Effects Packets
+                            entityLiving.getEffects().iterator().forEachRemaining(mobEffect -> entityPlayer.playerConnection.sendPacket(new PacketPlayOutEntityEffect(craftEntity.getEntityId(), mobEffect)));
+                            List<Pair<EnumItemSlot, ItemStack>> contents = new ArrayList<>();
 
-                                for (EnumItemSlot value : EnumItemSlot.values()) {
-                                    ItemStack itemStack = entityLiving.getEquipment(value);
-                                    if (itemStack != null)
-                                        contents.add(new Pair<>(value, itemStack));
-                                }
-                                entityLiving.getId();
-                                // Equipment Packet
-                                entityPlayer.playerConnection.sendPacket(new PacketPlayOutEntityEquipment(entityLiving.getId(), contents));
-                            } else if (entity instanceof Painting) {
-                                entityPlayer.playerConnection.sendPacket(new PacketPlayOutSpawnEntityPainting((EntityPainting) craftEntity.getHandle()));
-                            } else if (entity instanceof ExperienceOrb) {
-                                entityPlayer.playerConnection.sendPacket(new PacketPlayOutSpawnEntityExperienceOrb((EntityExperienceOrb) craftEntity.getHandle()));
-                            } else
-                                // Packet for non Living Entities
-                                entityPlayer.playerConnection.sendPacket(new PacketPlayOutSpawnEntity(craftEntity.getHandle()));
-
-                            if (entity instanceof ItemFrame) {
-                                CraftItemFrame craftItemFrame = (CraftItemFrame) entity;
-                                CraftEntity passenger = (CraftEntity) craftItemFrame.getPassenger();
-                                if (passenger != null)
-                                    entityPlayer.playerConnection.sendPacket(new PacketPlayOutAttachEntity(passenger.getHandle(), craftItemFrame.getHandle()));
+                            for (EnumItemSlot value : EnumItemSlot.values()) {
+                                ItemStack itemStack = entityLiving.getEquipment(value);
+                                if (itemStack != null)
+                                    contents.add(new Pair<>(value, itemStack));
                             }
-                            // Packet for Entity MetaData
-                            entityPlayer.playerConnection.sendPacket(new PacketPlayOutEntityMetadata(craftEntity.getHandle().getId(), craftEntity.getHandle().getDataWatcher(), true));
+                            entityLiving.getId();
+                            // Equipment Packet
+                            entityPlayer.playerConnection.sendPacket(new PacketPlayOutEntityEquipment(entityLiving.getId(), contents));
+                        } else if (entity instanceof Painting) {
+                            entityPlayer.playerConnection.sendPacket(new PacketPlayOutSpawnEntityPainting((EntityPainting) craftEntity.getHandle()));
+                        } else if (entity instanceof ExperienceOrb) {
+                            entityPlayer.playerConnection.sendPacket(new PacketPlayOutSpawnEntityExperienceOrb((EntityExperienceOrb) craftEntity.getHandle()));
+                        } else
+                            // Packet for non Living Entities
+                            entityPlayer.playerConnection.sendPacket(new PacketPlayOutSpawnEntity(craftEntity.getHandle()));
+
+                        if (entity instanceof ItemFrame) {
+                            CraftItemFrame craftItemFrame = (CraftItemFrame) entity;
+                            CraftEntity passenger = (CraftEntity) craftItemFrame.getPassenger();
+                            if (passenger != null)
+                                entityPlayer.playerConnection.sendPacket(new PacketPlayOutAttachEntity(passenger.getHandle(), craftItemFrame.getHandle()));
                         }
-                    });
-                }
-            dedicatedServer.getPlayerList().updateClient(entityPlayer);
-        });
+                        // Packet for Entity MetaData
+                        entityPlayer.playerConnection.sendPacket(new PacketPlayOutEntityMetadata(craftEntity.getHandle().getId(), craftEntity.getHandle().getDataWatcher(), true));
+                    }
+                });
+            }
+        dedicatedServer.getPlayerList().updateClient(entityPlayer);
+        if (callback != null)
+            callback.run();
+        VCorePaper.getInstance().consoleMessage("&7Sent Fake Dimension&7: &e+" + environment, true);
     }
 
     @Override

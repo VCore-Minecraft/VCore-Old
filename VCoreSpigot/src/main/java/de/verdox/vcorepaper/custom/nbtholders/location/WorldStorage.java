@@ -5,6 +5,7 @@
 package de.verdox.vcorepaper.custom.nbtholders.location;
 
 import de.tr7zw.changeme.nbtapi.NBTFile;
+import de.tr7zw.changeme.nbtapi.NbtApiException;
 import de.verdox.vcore.plugin.VCorePlugin;
 import de.verdox.vcore.plugin.wrapper.types.WorldRegion;
 
@@ -22,7 +23,7 @@ public class WorldStorage {
     private final VCorePlugin<?, ?> plugin;
     private final File worldDirectory;
     private final String worldName;
-    private final Map<Long, NBTFile> fileCache = new ConcurrentHashMap<>();
+    private final Map<WorldRegion, NBTFile> fileCache = new ConcurrentHashMap<>();
 
     public WorldStorage(VCorePlugin<?, ?> plugin, File worldDirectory, String worldName) {
         this.plugin = plugin;
@@ -30,30 +31,24 @@ public class WorldStorage {
         this.worldName = worldName;
     }
 
-    public String getWorldName() {
-        return worldName;
-    }
-
     public boolean isRegionCached(int regionX, int regionZ) {
-        return fileCache.containsKey(WorldRegion.getRegionKey(regionX, regionZ));
+        return fileCache.containsKey(new WorldRegion(worldName, regionX, regionZ));
     }
 
-    synchronized NBTFile cacheRegion(int regionX, int regionZ) {
-        long regionKey = WorldRegion.getRegionKey(regionX, regionZ);
+    NBTFile cacheRegion(int regionX, int regionZ) {
         if (isRegionCached(regionX, regionZ))
-            return fileCache.get(regionKey);
-        plugin.consoleMessage("&8[&b" + worldName + "&8] &eLoading Region&7: " + WorldRegion.toString(regionX, regionZ), true);
+            return fileCache.get(new WorldRegion(worldName, regionX, regionZ));
         return loadNBTFileUnsafe(regionX, regionZ);
     }
 
     synchronized void unCacheRegion(int regionX, int regionZ) {
         if (!isRegionCached(regionX, regionZ))
             return;
-        long regionKey = WorldRegion.getRegionKey(regionX, regionZ);
         try {
-            plugin.consoleMessage("&8[&b" + worldName + "&8] &eUnloading Region&7: " + WorldRegion.toString(regionX, regionZ), true);
-            fileCache.remove(regionKey).save();
-        } catch (IOException e) {
+            fileCache.remove(new WorldRegion(worldName, regionX, regionZ)).save();
+            plugin.consoleMessage("&8[&b" + worldName + "&8] &bRegion unloaded&7: " + WorldRegion.toString(regionX, regionZ), true);
+        } catch (IOException | NbtApiException e) {
+            plugin.consoleMessage("&8[&b" + worldName + "&8] &bCould not save Region&7: " + WorldRegion.toString(regionX, regionZ), true);
             e.printStackTrace();
         }
     }
@@ -61,8 +56,7 @@ public class WorldStorage {
     NBTFile getNBTFile(int regionX, int regionZ) {
         if (!isRegionCached(regionX, regionZ))
             return cacheRegion(regionX, regionZ);
-        long regionKey = WorldRegion.getRegionKey(regionX, regionZ);
-        return fileCache.get(regionKey);
+        return fileCache.get(new WorldRegion(worldName, regionX, regionZ));
     }
 
     public void saveAll() {
@@ -75,17 +69,24 @@ public class WorldStorage {
         });
     }
 
-    private NBTFile loadNBTFileUnsafe(int regionX, int regionZ) {
-        long regionKey = WorldRegion.getRegionKey(regionX, regionZ);
+    private synchronized NBTFile loadNBTFileUnsafe(int regionX, int regionZ) {
+        WorldRegion worldRegion = new WorldRegion(worldName, regionX, regionZ);
+        File file = new File(worldDirectory.getAbsolutePath() + "//VBlocks//" + worldRegion.toStringWithoutWorld() + ".nbt");
         try {
-            if (fileCache.containsKey(regionKey))
-                return fileCache.get(regionKey);
-            WorldRegion worldRegion = new WorldRegion(worldName, regionX, regionZ);
-            NBTFile nbtFile = new NBTFile(new File(worldDirectory.getAbsolutePath() + "//VBlocks//" + worldRegion.toStringWithoutWorld() + ".nbt"));
-            fileCache.put(worldRegion.getRegionKey(), nbtFile);
+            if (fileCache.containsKey(worldRegion))
+                return fileCache.get(worldRegion);
+            NBTFile nbtFile = new NBTFile(file);
+            fileCache.put(worldRegion, nbtFile);
+            plugin.consoleMessage("&8[&b" + worldName + "&8] &aRegion loaded&7: " + worldRegion.toStringWithoutWorld(), true);
             return nbtFile;
         } catch (IOException e) {
+            plugin.consoleMessage("&8[&b" + worldName + "&8] &4Error while loading Region&7: " + worldRegion.toStringWithoutWorld(), true);
             e.printStackTrace();
+            return null;
+        } catch (NbtApiException e) {
+            plugin.consoleMessage("&8[&b" + worldName + "&8] &4Error while reading Region NBT-File&7: " + worldRegion.toStringWithoutWorld(), true);
+            e.printStackTrace();
+            file.delete();
             return null;
         }
     }
