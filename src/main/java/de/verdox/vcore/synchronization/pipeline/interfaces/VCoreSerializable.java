@@ -6,6 +6,7 @@ package de.verdox.vcore.synchronization.pipeline.interfaces;
 
 import de.verdox.vcore.synchronization.pipeline.annotations.VCorePersistentData;
 import de.verdox.vcore.util.VCoreUtil;
+import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -31,6 +32,7 @@ public interface VCoreSerializable {
                 .collect(Collectors.toSet());
     }
 
+    @NotNull
     default Map<String, Object> serialize() {
         Map<String, Object> serializedData = new HashMap<>();
         getPersistentDataFieldNames(getClass()).forEach(dataKey -> {

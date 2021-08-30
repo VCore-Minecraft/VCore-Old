@@ -33,7 +33,7 @@ public class AdvancementsUtil {
 
     public static void regrantAdvancement(@NotNull Player player, @NotNull Advancement advancement) {
         clearAdvancement(player, advancement);
-        regrantAdvancement(player, advancement);
+        awardAdvancement(player, advancement);
     }
 
     public static boolean awardAdvancement(@NotNull Player player, @NotNull Advancement advancement) {
@@ -42,8 +42,6 @@ public class AdvancementsUtil {
             return false;
         for (String criterion : advancement.getCriteria())
             advancementProgress.awardCriteria(criterion);
-        for (String criterion : advancement.getCriteria())
-            player.sendMessage(criterion);
         return true;
     }
 

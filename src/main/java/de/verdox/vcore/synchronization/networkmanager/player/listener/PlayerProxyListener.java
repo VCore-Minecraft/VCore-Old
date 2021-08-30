@@ -54,6 +54,7 @@ public class PlayerProxyListener extends VCoreListener.VCoreBungeeListener imple
         e.setCancelled(true);
         e.setCancelReason(new TextComponent(ChatColor.translateAlternateColorCodes('&', "&cDu bist bereits auf dem Netzwerk. Bitte neu verbinden&7!")));
         networkManager.getPlugin().getCoreInstance().getPlayerAPI().kickPlayer(vCorePlayer, "&cLogged in from another location");
+        plugin.getServices().getPipeline().delete(VCorePlayer.class, uuid, true, Pipeline.QueryStrategy.ALL);
     }
 
     @net.md_5.bungee.event.EventHandler

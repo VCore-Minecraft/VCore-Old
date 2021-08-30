@@ -56,6 +56,8 @@ public class PipelineDataSynchronizer implements DataSynchronizer {
             if (!pipelineManager.localCache.dataExist(dataClass, objectUUID))
                 return false;
             VCoreData data = pipelineManager.localCache.getData(dataClass, objectUUID);
+            if (data == null)
+                return false;
             Map<String, Object> dataToSave = data.serialize();
             dataToSave.remove("_id");
             // Local to Global Cache
@@ -80,6 +82,8 @@ public class PipelineDataSynchronizer implements DataSynchronizer {
                 if (!pipelineManager.localCache.dataExist(dataClass, objectUUID))
                     pipelineManager.localCache.save(dataClass, pipelineManager.localCache.instantiateData(dataClass, objectUUID));
                 VCoreData data = pipelineManager.localCache.getData(dataClass, objectUUID);
+                if (data == null)
+                    return false;
                 data.deserialize(globalCachedData);
                 data.loadDependentData();
                 data.onLoad();
@@ -96,6 +100,8 @@ public class PipelineDataSynchronizer implements DataSynchronizer {
                 if (!pipelineManager.localCache.dataExist(dataClass, objectUUID))
                     pipelineManager.localCache.save(dataClass, pipelineManager.localCache.instantiateData(dataClass, objectUUID));
                 VCoreData data = pipelineManager.localCache.getData(dataClass, objectUUID);
+                if (data == null)
+                    return false;
                 data.deserialize(globalSavedData);
                 data.loadDependentData();
                 data.onLoad();

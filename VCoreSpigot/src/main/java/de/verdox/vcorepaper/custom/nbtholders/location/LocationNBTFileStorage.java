@@ -51,7 +51,7 @@ public class LocationNBTFileStorage extends VCoreListener.VCoreBukkitListener im
         File worldDirectory = e.getWorld().getWorldFolder();
         executor.submit(() -> {
             if (!fileCache.containsKey(worldName)) {
-                plugin.consoleMessage("&8[&b" + e.getChunk().getWorld().getName() + "&8] &eaWorld loaded", false);
+                plugin.consoleMessage("&8[&b" + e.getChunk().getWorld().getName() + "&8] &eWorld loaded", false);
                 fileCache.put(worldName, new WorldStorage(plugin, worldDirectory, worldName));
             }
             WorldStorage worldStorage = fileCache.get(worldName);
