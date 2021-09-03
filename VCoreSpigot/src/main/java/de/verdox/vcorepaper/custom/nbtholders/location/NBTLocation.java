@@ -50,7 +50,6 @@ public class NBTLocation extends NBTHolderImpl<Location, NBTCompound> {
 
     protected NBTCompound getOrLoadLocationCompound() {
         if (Objects.isNull(this.nbtFile)) {
-            System.out.println("Trying to load from NBT File");
             this.nbtFile = VCorePaper.getInstance().getBlockFileStorage().getWorldStorage(worldChunk.worldName).getNBTFile(WorldChunk.getRegionX(worldChunk.x), WorldChunk.getRegionZ(worldChunk.z));
             if (this.nbtFile == null) {
                 throw new IllegalStateException("Could not load NBT Location");

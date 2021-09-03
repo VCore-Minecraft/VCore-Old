@@ -25,6 +25,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 /**
@@ -50,6 +51,10 @@ public class SerializablePlayerInventory extends SerializableInventory {
 
     public SerializablePlayerInventory(Map<String, Object> data) {
         super(data);
+    }
+
+    public SerializablePlayerInventory() {
+        super(new ConcurrentHashMap<>());
     }
 
     public boolean restoreInventory(@NotNull Player player, @Nullable Runnable callback) {

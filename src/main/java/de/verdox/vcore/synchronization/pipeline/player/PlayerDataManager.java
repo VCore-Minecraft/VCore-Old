@@ -47,15 +47,16 @@ public class PlayerDataManager implements SystemLoadable {
     protected final void loginPipeline(@NotNull UUID player) {
         if (plugin instanceof VCoreCoreInstance)
             plugin.consoleMessage("&eHandling Player Join &b" + player, false);
-        plugin.getServices().eventBus.post(new PlayerPreSessionLoadEvent(plugin, player));
         plugin.createTaskBatch().wait(400, TimeUnit.MILLISECONDS).doAsync(() -> {
+            plugin.getServices().eventBus.post(new PlayerPreSessionLoadEvent(plugin, player));
             plugin.getServices().getSubsystemManager().getActivePlayerDataClasses()
                     .parallelStream()
                     .forEach(aClass -> {
                         PlayerData playerData = pipelineManager.load(aClass, player, Pipeline.LoadingStrategy.LOAD_PIPELINE, true);
                         playerData.onConnect(player);
                     });
-        }).doSync(() -> plugin.getServices().eventBus.post(new PlayerSessionLoadedEvent(plugin, player, System.currentTimeMillis()))).executeBatch();
+            plugin.getServices().eventBus.post(new PlayerSessionLoadedEvent(plugin, player, System.currentTimeMillis()));
+        }).executeBatch();
     }
 
     protected final void logoutPipeline(@NotNull UUID player) {

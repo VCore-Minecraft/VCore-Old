@@ -4,8 +4,11 @@
 
 package de.verdox.vcorepaper.custom.custompipelinedata.inventories;
 
+import de.verdox.vcore.synchronization.pipeline.datatypes.CustomPipelineData;
 import de.verdox.vcore.synchronization.pipeline.datatypes.serializables.reference.objects.StringBsonReference;
 import de.verdox.vcorepaper.custom.util.Serializer;
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
@@ -31,6 +34,10 @@ public class SerializableInventory implements Serializable, CustomPipelineData {
         saveStorageContents(storageContents);
     }
 
+    public SerializableInventory() {
+        this(new ConcurrentHashMap<>());
+    }
+
     public SerializableInventory(Map<String, Object> data) {
         this.data = data;
     }
@@ -41,6 +48,18 @@ public class SerializableInventory implements Serializable, CustomPipelineData {
 
     public final void saveStorageContents(ItemStack[] storageContents) {
         new StringBsonReference(data, "storageContents").setValue(Serializer.itemStackArrayToBase64(storageContents));
+    }
+
+    public Inventory asInventory(String displayName, int size) {
+        Inventory inventory = Bukkit.createInventory(null, size, ChatColor.translateAlternateColorCodes('&', displayName));
+        inventory.setContents(deSerializeStorageContents());
+        return inventory;
+    }
+
+    public void saveToInventory(@NotNull Inventory inventory, boolean override) {
+        if (override)
+            inventory.clear();
+        inventory.addItem(deSerializeStorageContents());
     }
 
     @NotNull

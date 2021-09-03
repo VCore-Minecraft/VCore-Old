@@ -43,7 +43,7 @@ public class ServerPingListener {
         if (!ProxyServer.getInstance().getServersCopy().containsKey(e.getServerName()) && e.getServerType().equals(ServerType.GAME_SERVER)) {
             ServerInfo serverInfo = ProxyServer.getInstance().constructServerInfo(e.getServerName(), new InetSocketAddress(e.getServerAddress(), e.getServerPort()), e.getServerName(), false);
             ProxyServer.getInstance().getServers().put(serverInfo.getName(), serverInfo);
-            vCoreWaterfall.consoleMessage("&aAdding Server to Cache&7: &b" + serverInfo.getName() + " &7| &b" + serverInfo.getSocketAddress(), false);
+            vCoreWaterfall.consoleMessage("&aAdding Server to Cache&7: &b" + serverInfo.getName() + " &7| &b" + serverInfo.getSocketAddress() + " &7| &e" + e.getServerType(), false);
         }
     }
 

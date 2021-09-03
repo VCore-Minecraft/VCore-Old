@@ -7,11 +7,16 @@ package de.verdox.vcorepaper.commands;
 import de.verdox.vcore.plugin.VCorePlugin;
 import de.verdox.vcore.plugin.command.VCommandCallback;
 import de.verdox.vcore.plugin.command.VCoreCommand;
+import de.verdox.vcore.util.VCoreUtil;
 import de.verdox.vcorepaper.VCorePaper;
 import org.bukkit.ChatColor;
 import org.bukkit.World;
 import org.bukkit.block.Biome;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Villager;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.util.RayTraceResult;
 
 import java.util.Arrays;
 
@@ -66,6 +71,73 @@ public class NMSCommand extends VCoreCommand.VCoreBukkitCommand {
                     Player player = (Player) commandSender;
                     VCorePaper.getInstance().sync(() -> {
                         VCorePaper.getInstance().getNmsManager().getNmsWorldHandler().resetView(player);
+                    });
+                });
+
+        addCommandCallback("item")
+                .setExecutor(VCommandCallback.CommandExecutorType.PLAYER)
+                .addCommandPath("newStackSize")
+                .withPermission("nms.item.newStackSize")
+                .askFor("newStackSize", VCommandCallback.CommandAskType.POSITIVE_NUMBER, "&cProvide a valid positive number", "64", "32", "16", "8", "4", "2", "1")
+                .commandCallback((commandSender, commandParameters) -> {
+                    Player player = (Player) commandSender;
+                    ItemStack stack = player.getInventory().getItemInMainHand();
+                    if (stack.getType().isAir()) {
+                        player.sendMessage(ChatColor.translateAlternateColorCodes('&', "&cYou need to hold an item in your main hand&7!"));
+                        return;
+                    }
+                    double newStackSize = commandParameters.getObject(0, Double.class);
+                    VCorePaper.getInstance().getNmsManager().getNMSItemHandler().changeMaxStackSize(stack, (int) newStackSize);
+                });
+
+        addCommandCallback("entity")
+                .setExecutor(VCommandCallback.CommandExecutorType.PLAYER)
+                .addCommandPath("villager")
+                .addCommandPath("changeProfession")
+                .withPermission("nms.entity.changeProfession")
+                .askFor("Profession", VCommandCallback.CommandAskType.STRING, "&cProfession not found&7!", Arrays.stream(Villager.Profession.values()).map(Enum::name).toArray(String[]::new))
+                .commandCallback((commandSender, commandParameters) -> {
+                    Player player = (Player) commandSender;
+
+                    Villager.Profession profession = commandParameters.getEnum(0, Villager.Profession.class);
+                    if (profession == null) {
+                        player.sendMessage(ChatColor.translateAlternateColorCodes('&', "&cProfession not found&7!"));
+                        return;
+                    }
+
+                    VCorePaper.getInstance().sync(() -> {
+                        RayTraceResult rayTraceResult = VCoreUtil.BukkitUtil.getBukkitPlayerUtil().rayTraceEntities(player, 15);
+                        if (rayTraceResult == null || rayTraceResult.getHitEntity() == null || !rayTraceResult.getHitEntity().getType().equals(EntityType.VILLAGER)) {
+                            player.sendMessage(ChatColor.translateAlternateColorCodes('&', "&cLook at an villager&7!"));
+                            return;
+                        }
+                        Villager villager = (Villager) rayTraceResult.getHitEntity();
+                        villager.setProfession(profession);
+                    });
+                });
+
+        addCommandCallback("entity")
+                .setExecutor(VCommandCallback.CommandExecutorType.PLAYER)
+                .addCommandPath("villager")
+                .addCommandPath("changeType")
+                .withPermission("nms.entity.changeType")
+                .askFor("Type", VCommandCallback.CommandAskType.STRING, "&cType not found&7!", Arrays.stream(Villager.Type.values()).map(Enum::name).toArray(String[]::new))
+                .commandCallback((commandSender, commandParameters) -> {
+                    Player player = (Player) commandSender;
+
+                    Villager.Type type = commandParameters.getEnum(0, Villager.Type.class);
+                    if (type == null) {
+                        player.sendMessage(ChatColor.translateAlternateColorCodes('&', "&cType not found&7!"));
+                        return;
+                    }
+                    VCorePaper.getInstance().sync(() -> {
+                        RayTraceResult rayTraceResult = VCoreUtil.BukkitUtil.getBukkitPlayerUtil().rayTraceEntities(player, 15);
+                        if (rayTraceResult == null || rayTraceResult.getHitEntity() == null || !rayTraceResult.getHitEntity().getType().equals(EntityType.VILLAGER)) {
+                            player.sendMessage(ChatColor.translateAlternateColorCodes('&', "&cLook at an villager&7!"));
+                            return;
+                        }
+                        Villager villager = (Villager) rayTraceResult.getHitEntity();
+                        villager.setVillagerType(type);
                     });
                 });
     }

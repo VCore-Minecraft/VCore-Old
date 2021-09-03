@@ -5,12 +5,14 @@
 package de.verdox.vcore.synchronization.pipeline.interfaces;
 
 import de.verdox.vcore.synchronization.pipeline.annotations.VCorePersistentData;
+import de.verdox.vcore.synchronization.pipeline.datatypes.CustomPipelineData;
 import de.verdox.vcore.util.VCoreUtil;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 /**
@@ -43,6 +45,8 @@ public interface VCoreSerializable {
                 if (data instanceof Collection<?>) {
                     Collection<?> collection = (Collection<?>) data;
                     serializedData.put(field.getName(), new ArrayList<>(collection));
+                } else if (data instanceof CustomPipelineData) {
+                    serializedData.put(dataKey, ((CustomPipelineData) data).getUnderlyingMap());
                 } else
                     serializedData.put(field.getName(), field.get(this));
             } catch (NoSuchFieldException | IllegalAccessException e) {
@@ -79,6 +83,11 @@ public interface VCoreSerializable {
                         Collection<?> fieldCollection = (Collection<?>) field.get(this);
                         fieldCollection.clear();
                         fieldCollection.addAll((Collection) value);
+                    } else if (CustomPipelineData.class.isAssignableFrom(field.getType()) && value instanceof Map) {
+                        Class<? extends CustomPipelineData> type = (Class<? extends CustomPipelineData>) field.getType();
+                        CustomPipelineData customPipelineData = instantiateCustomPipelineData(type);
+                        customPipelineData.getUnderlyingMap().putAll((Map<? extends String, ?>) value);
+                        field.set(this, customPipelineData);
                     } else {
                         try {
                             field.set(this, VCoreUtil.getTypeUtil().castData(value, field.getType()));
@@ -95,5 +104,21 @@ public interface VCoreSerializable {
             }
         });
         return dataBeforeDeserialization;
+    }
+
+    @NotNull
+    private <T extends CustomPipelineData> T instantiateCustomPipelineData(Class<? extends T> type) {
+        T instantiated;
+        try {
+            // Searching for empty Constructor
+            instantiated = type.getConstructor().newInstance();
+        } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+            try {
+                instantiated = type.getConstructor(Map.class).newInstance(new ConcurrentHashMap<>());
+            } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException instantiationException) {
+                throw new IllegalStateException("Could not find an empty constructor or a Map Constructor");
+            }
+        }
+        return instantiated;
     }
 }

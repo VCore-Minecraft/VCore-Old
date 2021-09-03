@@ -115,6 +115,7 @@ public class GUITemplate {
     }
 
     public static class SelectionGUI<T> {
+        private Supplier<Collection<T>> listSupplier;
         private final BukkitPlugin bukkitPlugin;
         private final Function<T, ItemStack> objectToItemStack;
         private final Map<VCoreItem, Function<VCoreGUI.VCoreGUIClick<T>, VCoreGUI.Response<?, ?>>> additionalItems = new HashMap<>();
@@ -142,12 +143,33 @@ public class GUITemplate {
             guiSize = (rows * 9) + 9 + 9;
         }
 
+        public SelectionGUI(@NotNull String title, @NotNull Supplier<Collection<T>> listSupplier, @NotNull BukkitPlugin bukkitPlugin, @Positive int page, @Positive int rows, @NotNull Function<T, ItemStack> objectToItemStack) {
+            this.title = title;
+            this.listSupplier = listSupplier;
+            this.listUpdater = this.listSupplier;
+            this.bukkitPlugin = bukkitPlugin;
+            this.objectToItemStack = objectToItemStack;
+            this.page = page;
+            this.rows = rows;
+            if (rows > 4)
+                rows = 4;
+            guiSize = (rows * 9) + 9 + 9;
+        }
+
         public SelectionGUI(@NotNull String title, @NotNull Collection<T> objectList, @NotNull BukkitPlugin bukkitPlugin, @NotNull Function<T, ItemStack> objectToItemStack) {
             this(title, objectList, bukkitPlugin, 1, 4, objectToItemStack);
         }
 
+        public SelectionGUI(@NotNull String title, @NotNull Supplier<Collection<T>> listSupplier, @NotNull BukkitPlugin bukkitPlugin, @NotNull Function<T, ItemStack> objectToItemStack) {
+            this(title, listSupplier, bukkitPlugin, 1, 4, objectToItemStack);
+        }
+
         public SelectionGUI(@NotNull String title, @NotNull Collection<T> objectList, @NotNull BukkitPlugin bukkitPlugin, @Positive int rows, @NotNull Function<T, ItemStack> objectToItemStack) {
             this(title, objectList, bukkitPlugin, 1, rows, objectToItemStack);
+        }
+
+        public SelectionGUI(@NotNull String title, @NotNull Supplier<Collection<T>> listSupplier, @NotNull BukkitPlugin bukkitPlugin, @Positive int rows, @NotNull Function<T, ItemStack> objectToItemStack) {
+            this(title, listSupplier, bukkitPlugin, 1, rows, objectToItemStack);
         }
 
         public SelectionGUI<T> updateList(Supplier<Collection<T>> listUpdater) {
@@ -209,6 +231,8 @@ public class GUITemplate {
         }
 
         private Stream<T> filterWithPattern() {
+            if (objectList == null)
+                return new HashSet<T>().stream();
             return objectList.stream().filter(t -> {
                 if (t == null)
                     return false;
@@ -238,6 +262,8 @@ public class GUITemplate {
                     .type(InventoryType.CHEST)
                     .size(guiSize)
                     .content(contentBuilder -> {
+                        if (objectList == null)
+                            objectList = listSupplier.get();
                         if (listUpdater != null)
                             objectList = listUpdater.get();
 

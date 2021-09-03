@@ -148,8 +148,12 @@ public class WorldHandler_V1_16_R3 implements NMSWorldHandler {
                         CraftEntity craftEntity = (CraftEntity) entity;
                         if (entity instanceof LivingEntity) {
                             EntityLiving entityLiving = (EntityLiving) craftEntity.getHandle();
-                            // EntityLiving Packet
-                            entityPlayer.playerConnection.sendPacket(new PacketPlayOutSpawnEntityLiving((EntityLiving) craftEntity.getHandle()));
+                            // Packet for Player
+                            if (entity instanceof Player && !entity.equals(player)) {
+                                entityPlayer.playerConnection.sendPacket(new PacketPlayOutNamedEntitySpawn((EntityHuman) craftEntity.getHandle()));
+                            } else
+                                // EntityLiving Packet
+                                entityPlayer.playerConnection.sendPacket(new PacketPlayOutSpawnEntityLiving((EntityLiving) craftEntity.getHandle()));
                             // Entity Effects Packets
                             entityLiving.getEffects().iterator().forEachRemaining(mobEffect -> entityPlayer.playerConnection.sendPacket(new PacketPlayOutEntityEffect(craftEntity.getEntityId(), mobEffect)));
                             List<Pair<EnumItemSlot, ItemStack>> contents = new ArrayList<>();
@@ -184,7 +188,7 @@ public class WorldHandler_V1_16_R3 implements NMSWorldHandler {
         dedicatedServer.getPlayerList().updateClient(entityPlayer);
         if (callback != null)
             callback.run();
-        VCorePaper.getInstance().consoleMessage("&7Sent Fake Dimension&7: &e+" + environment, true);
+        //VCorePaper.getInstance().consoleMessage("&7Sent Fake Dimension&7: &e" + environment, true);
     }
 
     @Override
