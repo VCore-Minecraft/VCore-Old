@@ -21,3 +21,6 @@ commands:
   playerapi:
     description: "Admin Command for PlayerAPI"
     permission: "vcore.playerapi"
+  talkingNPC:
+    description: "Talking NPC"
+    permission: "vcore.talkingNPC"

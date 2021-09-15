@@ -16,7 +16,7 @@
     <name>VCorePaper</name>
 
     <properties>
-        <java.version>1.8</java.version>
+        <java.version>16</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
@@ -91,7 +91,7 @@
         <dependency>
             <groupId>net.wesjd</groupId>
             <artifactId>anvilgui</artifactId>
-            <version>1.4.0-SNAPSHOT</version>
+            <version>1.5.3-SNAPSHOT</version>
         </dependency>
         <!-- Advancements API (MIT LICENCE)-->
         <dependency>
@@ -126,11 +126,18 @@
             <version>4.6.0</version>
             <scope>provided</scope>
         </dependency>
+        <!-- Paper 1.16.5 -->
+        <dependency>
+            <groupId>com.destroystokyo.paper</groupId>
+            <artifactId>paper_1.16.5</artifactId>
+            <version>1.16.5</version>
+            <scope>provided</scope>
+        </dependency>
         <!-- Paper -->
         <dependency>
             <groupId>com.destroystokyo.paper</groupId>
-            <artifactId>paper</artifactId>
-            <version>1.16.5</version>
+            <artifactId>paper_1.17.1</artifactId>
+            <version>1.17.1</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>
@@ -149,7 +156,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
-                <version>3.2.4</version>
+                <version>3.3.0-SNAPSHOT</version>
                 <executions>
                     <execution>
                         <phase>package</phase>
@@ -212,5 +219,13 @@
             <url>https://git.6nt.de/api/v4/projects/64/packages/maven</url>
         </snapshotRepository>
     </distributionManagement>
-
+    <pluginRepositories>
+        <pluginRepository>
+            <id>maven-snapshots</id>
+            <url>https://repository.apache.org/content/repositories/snapshots/</url>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </pluginRepository>
+    </pluginRepositories>
 </project>

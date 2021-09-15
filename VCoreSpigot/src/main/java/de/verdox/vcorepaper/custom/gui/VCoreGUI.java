@@ -6,6 +6,7 @@ package de.verdox.vcorepaper.custom.gui;
 
 import de.verdox.vcore.plugin.bukkit.BukkitPlugin;
 import de.verdox.vcorepaper.VCorePaper;
+import de.verdox.vcorepaper.custom.gui.event.PlayerOpenVCoreGUIEvent;
 import de.verdox.vcorepaper.custom.items.VCoreItem;
 import net.wesjd.anvilgui.AnvilGUI;
 import org.apache.commons.lang.Validate;
@@ -91,6 +92,12 @@ public class VCoreGUI<T> implements CustomGUI {
     }
 
     public void openInventory() {
+
+        PlayerOpenVCoreGUIEvent playerOpenVCoreGUIEvent = new PlayerOpenVCoreGUIEvent(player, this);
+        Bukkit.getPluginManager().callEvent(playerOpenVCoreGUIEvent);
+        if (playerOpenVCoreGUIEvent.isCancelled())
+            return;
+
         if (this.openPredicate != null && !openPredicate.test(player))
             return;
         Bukkit.getPluginManager().registerEvents(this.listener, this.plugin);
@@ -283,8 +290,6 @@ public class VCoreGUI<T> implements CustomGUI {
             this.title = title;
             return this;
         }
-
-        //TODO: Close if predicate reached -> Falls Objekte in der Zeit gelöscht werden
 
         public Builder<T> type(InventoryType inventoryType) {
             Validate.notNull(inventoryType, "inventoryType cannot be null");

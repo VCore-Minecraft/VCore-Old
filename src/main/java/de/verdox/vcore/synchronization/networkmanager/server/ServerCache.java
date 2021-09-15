@@ -57,14 +57,14 @@ public class ServerCache {
 
             if (messageWrapper.parameterContains("serverStatus", "online")) {
                 boolean firstReceived = false;
-                if (!networkManager.getPlugin().getServices().getPipeline().exist(ServerInstance.class, serverUUID, Pipeline.QueryStrategy.LOCAL)) {
-                    ServerInstance serverInstance = networkManager.getPlugin().getServices().getPipeline().load(ServerInstance.class, serverUUID, Pipeline.LoadingStrategy.LOAD_PIPELINE, true);
+                ServerInstance serverInstance = networkManager.getPlugin().getServices().getPipeline().load(ServerInstance.class, serverUUID, Pipeline.LoadingStrategy.LOAD_PIPELINE, true);
+                serverInstance.setServerName(serverName);
+                serverInstance.serverAddress = serverAddress;
+                serverInstance.serverPort = serverPort;
+                serverInstance.setServerType(ServerType.valueOf(serverType));
+                serverInstance.save(false);
 
-                    serverInstance.setServerName(serverName);
-                    serverInstance.serverAddress = serverAddress;
-                    serverInstance.serverPort = serverPort;
-                    serverInstance.setServerType(ServerType.valueOf(serverType));
-                    serverInstance.save(false);
+                if (!networkManager.getPlugin().getServices().getPipeline().exist(ServerInstance.class, serverUUID, Pipeline.QueryStrategy.LOCAL)) {
                     firstReceived = true;
                 }
                 networkManager.getPlugin().getServices().eventBus.post(new ServerPingOnlineEvent(ServerType.valueOf(serverType), serverName, serverAddress, serverPort, firstReceived));

@@ -18,6 +18,7 @@ import de.verdox.vcore.synchronization.networkmanager.server.api.VCoreServerAPII
 import de.verdox.vcorepaper.commands.AdminCommands;
 import de.verdox.vcorepaper.commands.NMSCommand;
 import de.verdox.vcorepaper.commands.PlayerAPICommands;
+import de.verdox.vcorepaper.commands.TalkingNPCCommand;
 import de.verdox.vcorepaper.custom.CustomDataListener;
 import de.verdox.vcorepaper.custom.block.CustomBlockDataManager;
 import de.verdox.vcorepaper.custom.block.CustomBlockProvider;
@@ -29,6 +30,7 @@ import de.verdox.vcorepaper.custom.entities.CustomEntityManager;
 import de.verdox.vcorepaper.custom.events.paper.CustomPaperEventListener;
 import de.verdox.vcorepaper.custom.items.CustomItemManager;
 import de.verdox.vcorepaper.custom.nbtholders.location.LocationNBTFileStorage;
+import de.verdox.vcorepaper.custom.talkingnpc.TalkingNPCListener;
 import de.verdox.vcorepaper.nms.NMSManager;
 import net.roxeez.advancement.AdvancementManager;
 import org.bukkit.Bukkit;
@@ -36,6 +38,10 @@ import org.bukkit.Bukkit;
 import java.util.List;
 
 public class VCorePaper extends VCoreCoreInstance.Minecraft {
+
+    //TODO: Integrieren possibly: https://www.spigotmc.org/resources/mapapi.93343
+    //TODO: Standard Commands mit ner Config /discord /teamspeak /forum /wiki
+
     public static VCorePaper instance;
 
     private final AdvancementManager manager = new AdvancementManager(this);
@@ -65,6 +71,13 @@ public class VCorePaper extends VCoreCoreInstance.Minecraft {
     @Override
     public void onPluginEnable() {
         instance = this;
+
+        Bukkit.advancementIterator().forEachRemaining(advancement -> {
+            Bukkit.getUnsafe().removeAdvancement(advancement.getKey());
+        });
+
+        Bukkit.reloadData();
+
         this.vCorePlayerAPI = new VCorePlayerAPIBukkitImpl(this);
         this.vCoreServerAPI = new VCoreServerAPIImpl(this);
         this.nmsManager = new NMSManager(this);
@@ -83,11 +96,13 @@ public class VCorePaper extends VCoreCoreInstance.Minecraft {
         new CustomEntityListener(this);
         new VBlockListener(this);
         new CustomPaperEventListener(this);
+        new TalkingNPCListener(this);
 
 
         new AdminCommands(this, "debug");
         new NMSCommand(this, "nms");
         new PlayerAPICommands(this, "playerapi");
+        new TalkingNPCCommand(this, "talkingNPC");
 
         if (Bukkit.getPluginManager().getPlugin("ProtocolLib") != null)
             protocolManager = ProtocolLibrary.getProtocolManager();

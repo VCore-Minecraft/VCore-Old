@@ -122,6 +122,7 @@ public class PipelineManager implements Pipeline {
             VCoreSubsystem<?> subsystem = plugin.findDependSubsystem(type);
             if (subsystem == null) {
                 plugin.consoleMessage("&4You are trying to load &e" + type + " &4with a Pipeline that does not know this type. Choose the Plugin that knows the subsystem of this dataType to prevent this error.", false);
+                pipelineTask.getCompletableFuture().complete(null);
                 throw new IllegalStateException("Subsystem of " + type + " could not be found in plugin" + plugin.getPluginName());
             }
         }
@@ -140,6 +141,7 @@ public class PipelineManager implements Pipeline {
                 pipelineTask.getCompletableFuture().complete(data);
                 return data;
             }
+            pipelineTask.getCompletableFuture().complete(null);
             throw new NullPointerException(type + " with uuid " + uuid + " does not exist in local!");
         } else if (loadingStrategy.equals(LoadingStrategy.LOAD_LOCAL_ELSE_LOAD)) {
             executorService.submit(new CatchingRunnable(() -> {

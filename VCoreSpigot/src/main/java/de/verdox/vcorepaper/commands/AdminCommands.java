@@ -12,7 +12,11 @@ import de.verdox.vcorepaper.VCorePaper;
 import de.verdox.vcorepaper.custom.block.VBlock;
 import de.verdox.vcorepaper.custom.block.data.debug.BlockDebugData;
 import de.verdox.vcorepaper.custom.entities.VCoreEntity;
+import de.verdox.vcorepaper.custom.gui.book.BookGUI;
 import de.verdox.vcorepaper.custom.items.VCoreItem;
+import net.kyori.adventure.inventory.Book;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Chunk;
@@ -33,6 +37,22 @@ public class AdminCommands extends VCoreCommand.VCoreBukkitCommand {
     public AdminCommands(VCorePaper vCorePlugin, String commandName) {
         super(vCorePlugin, commandName);
         this.vCorePaper = vCorePlugin;
+
+        addCommandCallback("debugBookGUI")
+                .withPermission("vcore.debug")
+                .setExecutor(VCommandCallback.CommandExecutorType.PLAYER)
+                .commandCallback((commandSender, commandParameters) -> {
+                    Player player = (Player) commandSender;
+                    BookGUI bookGUI = new BookGUI(VCorePaper.getInstance(), player);
+
+                    TextComponent component = bookGUI.createResponsiveCallbackText(Component.text("Klicke mich als Test"), System.out::println);
+
+                    bookGUI.provideBook(() -> Book.builder()
+                            .title(Component.text("test"))
+                            .addPage(component).build());
+
+                    bookGUI.openBook();
+                });
 
         addCommandCallback("debugNetworkInfo")
                 .withPermission("vcore.debug")

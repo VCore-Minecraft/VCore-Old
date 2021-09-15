@@ -7,6 +7,7 @@ package de.verdox.vcorepaper.nms.nmshandler.api.world;
 import de.verdox.vcorepaper.nms.NMSHandler;
 import de.verdox.vcorepaper.nms.NMSVersion;
 import de.verdox.vcorepaper.nms.nmshandler.v1_16_3.world.WorldHandler_V1_16_R3;
+import de.verdox.vcorepaper.nms.nmshandler.v_1_17_1.world.WorldHandler_V1_17_1R1;
 import org.apache.commons.lang.NotImplementedException;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
@@ -22,9 +23,10 @@ import reactor.util.annotation.Nullable;
 public interface NMSWorldHandler extends NMSHandler {
 
     static NMSWorldHandler getRightHandler(NMSVersion nmsVersion) {
-        if (nmsVersion.equals(NMSVersion.V1_16_5)) {
+        if (nmsVersion.equals(NMSVersion.V1_16_5))
             return new WorldHandler_V1_16_R3();
-        }
+        else if (nmsVersion.equals(NMSVersion.V1_17_1))
+            return new WorldHandler_V1_17_1R1();
         throw new NotImplementedException("This Handler [" + NMSWorldHandler.class.getName() + "] is not implemented for NMS version: " + nmsVersion.getNmsVersionTag());
     }
 

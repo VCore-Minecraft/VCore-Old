@@ -8,8 +8,8 @@ import com.mojang.datafixers.util.Pair;
 import de.verdox.vcore.util.VCoreUtil;
 import de.verdox.vcorepaper.VCorePaper;
 import de.verdox.vcorepaper.nms.nmshandler.api.world.NMSWorldHandler;
-import de.verdox.vcorepaper.nms.packetabstraction.wrapper.ChunkPacketWrapper;
 import de.verdox.vcorepaper.nms.packetabstraction.wrapper.WorldBorderPacketWrapper;
+import de.verdox.vcorepaper.nms.packetabstraction.wrapper.chunk.ChunkPacketWrapper_V_1_16_R3;
 import de.verdox.vcorepaper.nms.reflection.java.FieldReflection;
 import net.minecraft.server.v1_16_R3.*;
 import org.bukkit.Bukkit;
@@ -71,7 +71,7 @@ public class WorldHandler_V1_16_R3 implements NMSWorldHandler {
 
     @Override
     public void sendFakeBiome(@NotNull Player player, @NotNull Chunk chunk, @NotNull Biome biome, Runnable callback) {
-        ChunkPacketWrapper.V_1_16_R3 chunkPacketWrapper = new ChunkPacketWrapper.V_1_16_R3(chunk, 65535, true);
+        ChunkPacketWrapper_V_1_16_R3 chunkPacketWrapper = new ChunkPacketWrapper_V_1_16_R3(chunk, 65535, true);
         int[] biomeArray = chunkPacketWrapper.biomes.readField();
         Arrays.fill(biomeArray, VCoreUtil.BukkitUtil.getVanillaUtil().getBiomeID_1_16(biome));
         chunkPacketWrapper.biomes.setField(biomeArray);
@@ -87,39 +87,26 @@ public class WorldHandler_V1_16_R3 implements NMSWorldHandler {
         CraftPlayer craftPlayer = (CraftPlayer) player;
         CraftServer craftServer = (CraftServer) craftPlayer.getServer();
         EntityPlayer entityPlayer = ((CraftPlayer) player).getHandle();
-        WorldServer worldServer = entityPlayer.getWorldServer();
-        WorldData worldData = worldServer.getWorldData();
         DedicatedServer dedicatedServer = craftServer.getServer();
 
         long seed = craftPlayer.getWorld().getSeed();
 
         ResourceKey<World> world;
-        ResourceKey<World> fakeWorld;
         DimensionManager dimensionManager;
-        DimensionManager fakeDimensionManager;
         switch (environment) {
             case NORMAL: {
                 world = World.OVERWORLD;
                 dimensionManager = FieldReflection.getField(DimensionManager.class, "OVERWORLD_IMPL", DimensionManager.class).readField();
-
-                fakeWorld = World.THE_NETHER;
-                fakeDimensionManager = FieldReflection.getField(DimensionManager.class, "THE_NETHER_IMPL", DimensionManager.class).readField();
                 break;
             }
             case NETHER: {
                 world = World.THE_NETHER;
                 dimensionManager = FieldReflection.getField(DimensionManager.class, "THE_NETHER_IMPL", DimensionManager.class).readField();
-
-                fakeWorld = World.THE_END;
-                fakeDimensionManager = FieldReflection.getField(DimensionManager.class, "THE_END_IMPL", DimensionManager.class).readField();
                 break;
             }
             case THE_END: {
                 world = World.THE_END;
                 dimensionManager = FieldReflection.getField(DimensionManager.class, "THE_END_IMPL", DimensionManager.class).readField();
-
-                fakeWorld = World.OVERWORLD;
-                fakeDimensionManager = FieldReflection.getField(DimensionManager.class, "OVERWORLD_IMPL", DimensionManager.class).readField();
                 break;
             }
             default:

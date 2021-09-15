@@ -18,6 +18,8 @@ public enum NMSVersion {
     V1_16_5("1_16_R3", "1.16.5-R0.1-SNAPSHOT"),
     // 1.17
     V1_17("1_17_R1", "1.17-R0.1-SNAPSHOT"),
+    // 1.17.1
+    V1_17_1("1_17_1_R1", "1.17.1-R0.1-SNAPSHOT"),
     ;
 
     private final String nmsVersionTag;

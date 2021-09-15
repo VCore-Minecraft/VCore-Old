@@ -13,6 +13,8 @@ import org.bukkit.advancement.Advancement;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Locale;
+
 /**
  * @version 1.0
  * @Author: Lukas Jonsson (Verdox)
@@ -35,5 +37,13 @@ public abstract class VAdvancement implements AdvancementCreator {
 
     public void awardPlayer(@NotNull Player player) {
         VCorePaper.getInstance().sync(() -> AdvancementsUtil.regrantAdvancement(player, asBukkitAdvancement()));
+    }
+
+    public static NamespacedKey getBlockTexture(String name) {
+        return NamespacedKey.minecraft("textures/block/" + name.toLowerCase(Locale.ROOT) + ".png");
+    }
+
+    public NamespacedKey getTexture(String name) {
+        return getBlockTexture(name);
     }
 }

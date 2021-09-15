@@ -15,7 +15,6 @@ import org.bukkit.block.Biome;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Villager;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.RayTraceResult;
 
 import java.util.Arrays;
@@ -72,22 +71,6 @@ public class NMSCommand extends VCoreCommand.VCoreBukkitCommand {
                     VCorePaper.getInstance().sync(() -> {
                         VCorePaper.getInstance().getNmsManager().getNmsWorldHandler().resetView(player);
                     });
-                });
-
-        addCommandCallback("item")
-                .setExecutor(VCommandCallback.CommandExecutorType.PLAYER)
-                .addCommandPath("newStackSize")
-                .withPermission("nms.item.newStackSize")
-                .askFor("newStackSize", VCommandCallback.CommandAskType.POSITIVE_NUMBER, "&cProvide a valid positive number", "64", "32", "16", "8", "4", "2", "1")
-                .commandCallback((commandSender, commandParameters) -> {
-                    Player player = (Player) commandSender;
-                    ItemStack stack = player.getInventory().getItemInMainHand();
-                    if (stack.getType().isAir()) {
-                        player.sendMessage(ChatColor.translateAlternateColorCodes('&', "&cYou need to hold an item in your main hand&7!"));
-                        return;
-                    }
-                    double newStackSize = commandParameters.getObject(0, Double.class);
-                    VCorePaper.getInstance().getNmsManager().getNMSItemHandler().changeMaxStackSize(stack, (int) newStackSize);
                 });
 
         addCommandCallback("entity")

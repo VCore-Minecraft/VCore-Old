@@ -136,7 +136,7 @@ public class PlayerAPICommands extends VCoreCommand.VCoreBukkitCommand {
                 });
 
         addCommandCallback("setGameMode")
-                .withPermission("vcore.feedPlayer")
+                .withPermission("vcore.setGameMode")
                 .askFor("PlayerTarget", VCommandCallback.CommandAskType.VCORE_PLAYER, "&cSpieler wurde nicht gefunden&7!")
                 .askFor("String", VCommandCallback.CommandAskType.STRING, "&cGameMode existiert nicht&7!", suggestEnum(PlayerGameMode.class))
                 .setExecutor(VCommandCallback.CommandExecutorType.PLAYER)
