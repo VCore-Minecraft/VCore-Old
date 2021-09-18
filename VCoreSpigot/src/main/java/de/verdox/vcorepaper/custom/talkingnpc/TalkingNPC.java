@@ -122,7 +122,7 @@ public class TalkingNPC extends VCoreEntity {
             TextComponent textComponent = Component.text("");
             String name = getName();
             if (!name.isEmpty()) {
-                textComponent = textComponent.append(Component.text(ChatColor.stripColor(name)).decoration(TextDecoration.UNDERLINED, true).color(TextColor.fromHexString("#44ffd2")))
+                textComponent = textComponent.append(Component.text(ChatColor.stripColor(ChatColor.translateAlternateColorCodes('&', name))).decoration(TextDecoration.UNDERLINED, true).color(TextColor.fromHexString("#44ffd2")))
                         .append(Component.newline())
                         .append(Component.newline());
             }
@@ -130,7 +130,7 @@ public class TalkingNPC extends VCoreEntity {
                 List<String> lines = VCoreUtil.BukkitUtil.getBukkitBookUtil().getLines(getTalking());
 
                 for (int i = 0; i < lines.size(); i++) {
-                    String line = ChatColor.stripColor(lines.get(i));
+                    String line = ChatColor.stripColor(ChatColor.translateAlternateColorCodes('&', lines.get(i)));
                     textComponent = textComponent.append(Component.newline().append(Component.text(line)).color(TextColor.fromHexString("#774936")));
 
                     if (i != 0 && i % 12 == 0) {

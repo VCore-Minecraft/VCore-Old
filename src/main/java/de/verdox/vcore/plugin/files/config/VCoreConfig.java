@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2021. Lukas Jonsson
+ */
+
 package de.verdox.vcore.plugin.files.config;
 
 import de.verdox.vcore.plugin.VCorePlugin;
@@ -5,7 +9,7 @@ import de.verdox.vcore.plugin.files.config.bukkit.VCoreBukkitConfig;
 import de.verdox.vcore.plugin.files.config.bungeecord.VCoreBungeeConfig;
 import de.verdox.vcore.plugin.files.config.serialization.VCoreDeserializer;
 import de.verdox.vcore.plugin.files.config.serialization.VCoreSerializable;
-import org.apache.commons.io.FilenameUtils;
+import org.bukkit.craftbukkit.libs.org.apache.commons.io.FilenameUtils;
 
 import java.io.File;
 

@@ -11,8 +11,9 @@ import de.verdox.vcore.util.bukkit.keys.ChunkKey;
 import de.verdox.vcore.util.bukkit.keys.LocationKey;
 import de.verdox.vcore.util.bukkit.keys.SplitChunkKey;
 import de.verdox.vcorepaper.VCorePaper;
+import de.verdox.vcorepaper.custom.block.VBlock;
 import de.verdox.vcorepaper.custom.nbtholders.NBTHolderImpl;
-import de.verdox.vcorepaper.custom.nbtholders.location.event.nbtlocation.NBTBlockDeleteEvent;
+import de.verdox.vcorepaper.custom.nbtholders.location.event.nbtlocation.VBlockDeleteEvent;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 
@@ -36,9 +37,11 @@ public class NBTLocation extends NBTHolderImpl<Location, NBTCompound> {
     private NBTCompound chunkCompound;
     private NBTCompound splitChunkCompound;
     private NBTCompound blockCompound;
+    private final VBlock.LocationBased vBlock;
 
-    public NBTLocation(Location location) {
+    public NBTLocation(VBlock.LocationBased vBlock, Location location) {
         super(location);
+        this.vBlock = vBlock;
         chunkY = dataHolder.getBlockY() / 16;
         chunkX = dataHolder.getBlockX() >> 4;
         chunkZ = dataHolder.getBlockZ() >> 4;
@@ -65,14 +68,16 @@ public class NBTLocation extends NBTHolderImpl<Location, NBTCompound> {
     }
 
     public boolean isNBTLocation() {
-        if (this.nbtFile == null || this.chunkCompound == null || this.splitChunkCompound == null || this.blockCompound == null)
+        this.nbtFile = VCorePaper.getInstance().getBlockFileStorage().getWorldStorage(worldChunk.worldName).getNBTFile(WorldChunk.getRegionX(worldChunk.x), WorldChunk.getRegionZ(worldChunk.z));
+        if (this.nbtFile == null || !this.nbtFile.hasKey(((ChunkKey) splitChunkKey).toString()))
             return false;
-        if (!this.nbtFile.hasKey(((ChunkKey) splitChunkKey).toString()))
-            return false;
+        this.chunkCompound = this.nbtFile.getCompound(((ChunkKey) splitChunkKey).toString());
         if (!this.chunkCompound.hasKey(splitChunkKey.toString()))
             return false;
+        this.splitChunkCompound = this.chunkCompound.getCompound(splitChunkKey.toString());
         if (!this.splitChunkCompound.hasKey(new LocationKey(this.dataHolder).toStringWithoutWorld()))
             return false;
+        this.blockCompound = this.splitChunkCompound.getCompound(new LocationKey(this.dataHolder).toStringWithoutWorld());
         return !this.blockCompound.getKeys().isEmpty();
     }
 
@@ -80,18 +85,16 @@ public class NBTLocation extends NBTHolderImpl<Location, NBTCompound> {
      * Not usable right now -> Object references must be declared new if compounds are cleared
      */
     private void clearGarbage() {
-        if (blockCompound.getKeys().isEmpty()) {
+        if (this.blockCompound != null && blockCompound.getKeys().isEmpty()) {
             splitChunkCompound.removeKey(blockCompound.getName());
             this.blockCompound = null;
         }
-        if (splitChunkCompound.getKeys().isEmpty()) {
+        if (this.splitChunkCompound != null && splitChunkCompound.getKeys().isEmpty()) {
             chunkCompound.removeKey(splitChunkCompound.getName());
             this.splitChunkCompound = null;
         }
-        if (chunkCompound.getKeys().isEmpty()) {
+        if (this.chunkCompound != null && chunkCompound.getKeys().isEmpty())
             nbtFile.removeKey(chunkCompound.getName());
-            this.nbtFile = null;
-        }
     }
 
     @Override
@@ -125,9 +128,12 @@ public class NBTLocation extends NBTHolderImpl<Location, NBTCompound> {
 
     @Override
     public void delete() {
-        NBTBlockDeleteEvent NBTBlockDeleteEvent = new NBTBlockDeleteEvent(this);
+        VBlockDeleteEvent NBTBlockDeleteEvent = new VBlockDeleteEvent(vBlock);
         Bukkit.getPluginManager().callEvent(NBTBlockDeleteEvent);
-        if (!NBTBlockDeleteEvent.isCancelled())
+        if (!NBTBlockDeleteEvent.isCancelled()) {
             splitChunkCompound.removeKey(new LocationKey(this.dataHolder).toStringWithoutWorld());
+            this.blockCompound = null;
+            save();
+        }
     }
 }

@@ -4,6 +4,7 @@
 
 package de.verdox.vcorepaper.custom.util;
 
+import de.verdox.vcorepaper.VCorePaper;
 import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
 import org.bukkit.advancement.Advancement;
@@ -33,15 +34,23 @@ public class AdvancementsUtil {
 
     public static void regrantAdvancement(@NotNull Player player, @NotNull Advancement advancement) {
         clearAdvancement(player, advancement);
-        awardAdvancement(player, advancement);
+        awardAdvancement(player, advancement, false);
     }
 
     public static boolean awardAdvancement(@NotNull Player player, @NotNull Advancement advancement) {
+        return awardAdvancement(player, advancement, false);
+    }
+
+    public static boolean awardAdvancement(@NotNull Player player, @NotNull Advancement advancement, boolean silently) {
         AdvancementProgress advancementProgress = getProgress(player, advancement);
         if (advancementProgress.isDone())
             return false;
-        for (String criterion : advancement.getCriteria())
-            advancementProgress.awardCriteria(criterion);
+        for (String criterion : advancement.getCriteria()) {
+            if (silently)
+                VCorePaper.getInstance().getNmsManager().getNMSPlayerHandler().silentlyGrantAdvancementProgress(player, advancement, criterion);
+            else
+                advancementProgress.awardCriteria(criterion);
+        }
         return true;
     }
 

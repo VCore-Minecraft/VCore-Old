@@ -39,6 +39,7 @@ public abstract class VAdvancement implements AdvancementCreator {
         VCorePaper.getInstance().sync(() -> AdvancementsUtil.regrantAdvancement(player, asBukkitAdvancement()));
     }
 
+
     public static NamespacedKey getBlockTexture(String name) {
         return NamespacedKey.minecraft("textures/block/" + name.toLowerCase(Locale.ROOT) + ".png");
     }

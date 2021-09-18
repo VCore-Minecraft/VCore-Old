@@ -25,9 +25,11 @@ import de.verdox.vcorepaper.custom.block.CustomBlockProvider;
 import de.verdox.vcorepaper.custom.block.CustomLocationDataManager;
 import de.verdox.vcorepaper.custom.block.data.debug.BlockDebugData;
 import de.verdox.vcorepaper.custom.block.internal.VBlockListener;
+import de.verdox.vcorepaper.custom.block.internal.WorldEditVBlockListener;
 import de.verdox.vcorepaper.custom.entities.CustomEntityListener;
 import de.verdox.vcorepaper.custom.entities.CustomEntityManager;
 import de.verdox.vcorepaper.custom.events.paper.CustomPaperEventListener;
+import de.verdox.vcorepaper.custom.events.paper.blockevents.BlockStateChangeListener;
 import de.verdox.vcorepaper.custom.items.CustomItemManager;
 import de.verdox.vcorepaper.custom.nbtholders.location.LocationNBTFileStorage;
 import de.verdox.vcorepaper.custom.talkingnpc.TalkingNPCListener;
@@ -95,8 +97,11 @@ public class VCorePaper extends VCoreCoreInstance.Minecraft {
         new CustomDataListener(this);
         new CustomEntityListener(this);
         new VBlockListener(this);
+        if (Bukkit.getPluginManager().getPlugin("WorldEdit") != null || Bukkit.getPluginManager().getPlugin("FastAsyncWorldEdit") != null)
+            new WorldEditVBlockListener(this);
         new CustomPaperEventListener(this);
         new TalkingNPCListener(this);
+        new BlockStateChangeListener(this);
 
 
         new AdminCommands(this, "debug");
@@ -120,6 +125,7 @@ public class VCorePaper extends VCoreCoreInstance.Minecraft {
         }
         networkManager.getServerPingManager().sendOnlinePing();
         getCustomLocationDataManager().registerData(BlockDebugData.class);
+        getCustomBlockDataManager().registerData(BlockDebugData.class);
     }
 
     public ProtocolManager getProtocolManager() {

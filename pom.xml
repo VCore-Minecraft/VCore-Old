@@ -95,7 +95,7 @@
         <dependency>
             <groupId>org.mongodb</groupId>
             <artifactId>mongo-java-driver</artifactId>
-            <version>3.4.1</version>
+            <version>3.12.10</version>
         </dependency>
         <dependency>
             <groupId>com.j256.ormlite</groupId>
@@ -126,7 +126,12 @@
             <artifactId>annotations</artifactId>
             <version>16.0.1</version>
         </dependency>
-
+        <dependency>
+            <groupId>com.destroystokyo.paper</groupId>
+            <artifactId>paper_1.16.5</artifactId>
+            <version>1.16.5</version>
+            <scope>compile</scope>
+        </dependency>
     </dependencies>
 
     <build>

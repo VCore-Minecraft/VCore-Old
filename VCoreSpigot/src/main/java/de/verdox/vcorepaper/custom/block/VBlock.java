@@ -90,12 +90,13 @@ public abstract class VBlock<D, N extends NBTHolder<?>, M extends CustomDataMana
 
     public abstract boolean isVBlock();
 
+
     public static class LocationBased extends VBlock<Location, NBTLocation, CustomLocationDataManager> {
         private final NBTLocation nbtLocation;
 
         public LocationBased(@NotNull Location dataHolder, @NotNull CustomLocationDataManager customDataManager) {
             super(dataHolder, customDataManager);
-            nbtLocation = new NBTLocation(getDataHolder());
+            nbtLocation = new NBTLocation(this, getDataHolder());
         }
 
         @Override
@@ -129,7 +130,7 @@ public abstract class VBlock<D, N extends NBTHolder<?>, M extends CustomDataMana
         public BlockBased(@NotNull Block block, @NotNull CustomBlockDataManager customDataManager) {
             super(block, customDataManager);
             this.block = block;
-            this.nbtBlockHolder = new NBTBlockHolder(block);
+            this.nbtBlockHolder = new NBTBlockHolder(this, block);
         }
 
         @Override
@@ -154,7 +155,9 @@ public abstract class VBlock<D, N extends NBTHolder<?>, M extends CustomDataMana
         }
 
         public boolean isFlagSet(VBlockFlag flag) {
-            if (!isVBlock() || !toNBTHolder().getPersistentDataContainer().hasKey(flag.getNbtTag()))
+            if (!isVBlock())
+                return false;
+            if (!toNBTHolder().getPersistentDataContainer().hasKey(flag.getNbtTag()))
                 return false;
             return toNBTHolder().getPersistentDataContainer().getBoolean(flag.getNbtTag());
         }

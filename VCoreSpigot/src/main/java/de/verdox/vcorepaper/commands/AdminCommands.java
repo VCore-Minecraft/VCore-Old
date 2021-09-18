@@ -130,8 +130,8 @@ public class AdminCommands extends VCoreCommand.VCoreBukkitCommand {
         addCommandCallback("debugBlock")
                 .withPermission("vcore.debug")
                 .setExecutor(VCommandCallback.CommandExecutorType.PLAYER)
-                .askFor("SavingTechnique", VCommandCallback.CommandAskType.STRING, "&cTechnique unknown", "LocationBased", "BlockBased", "ALL")
                 .addCommandPath("addDebugInfo")
+                .askFor("SavingTechnique", VCommandCallback.CommandAskType.STRING, "&cTechnique unknown", "LocationBased", "BlockBased", "ALL")
                 .commandCallback((commandSender, commandParameters) -> {
                     Player player = (Player) commandSender;
                     String technique = commandParameters.getObject(0, String.class);
@@ -161,6 +161,7 @@ public class AdminCommands extends VCoreCommand.VCoreBukkitCommand {
                         VBlock.LocationBased vBlock = VCorePaper.getInstance().getCustomLocationDataManager().wrap(VBlock.LocationBased.class, hitBlock.getLocation());
                         vBlock.storeCustomData(BlockDebugData.class, System.currentTimeMillis(), null);
                     }
+                    commandSender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&aDebug Info gespeichert&7!"));
                 });
         addCommandCallback("debugBlock")
                 .withPermission("vcore.debug")

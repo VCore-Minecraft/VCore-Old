@@ -307,14 +307,17 @@ public class PipelineManager implements Pipeline {
 
     private void saveData(@NotNull Class<? extends VCoreData> type, @NotNull UUID uuid) {
         VCoreData vCoreData = getLocalCache().getData(type, uuid);
+        plugin.consoleMessage("&eSaving &b" + uuid + " &8[&e" + type + "&8]", false);
         if (vCoreData == null)
             return;
         if (vCoreData.isMarkedForRemoval())
             return;
+        plugin.consoleMessage("&7Cleaning Up &b" + uuid + " &8[&e" + type + "&8]", 1, false);
         vCoreData.cleanUp();
+        plugin.consoleMessage("&7Syncing &b" + uuid + " &8[&e" + type + "&8] &7 -> &bGlobal Cache", 1, false);
         pipelineDataSynchronizer.doSynchronisation(DataSynchronizer.DataSourceType.LOCAL, DataSynchronizer.DataSourceType.GLOBAL_CACHE, type, uuid, null);
+        plugin.consoleMessage("&7Syncing &b" + uuid + " &8[&e" + type + "&8] &7 -> &bGlobal Storage", 1, false);
         pipelineDataSynchronizer.doSynchronisation(DataSynchronizer.DataSourceType.LOCAL, DataSynchronizer.DataSourceType.GLOBAL_STORAGE, type, uuid, null);
-        vCoreData.save(false);
         plugin.consoleMessage("&aSaved &b" + uuid + " &8[&e" + type + "&8]", false);
         getLocalCache().remove(type, uuid);
     }

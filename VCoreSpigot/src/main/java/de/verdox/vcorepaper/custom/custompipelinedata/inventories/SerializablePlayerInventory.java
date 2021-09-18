@@ -123,6 +123,10 @@ public class SerializablePlayerInventory extends SerializableInventory {
         new StringBsonReference(data, "armorContents").setValue(Serializer.itemStackArrayToBase64(armorContents));
     }
 
+    public void saveAdvancements() {
+
+    }
+
     @NotNull
     public ItemStack[] deSerializeArmorContents() {
         try {
