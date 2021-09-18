@@ -4,25 +4,25 @@
 
 package de.verdox.vcorepaper.custom.nbtholders.location.event.nbtlocation;
 
+import de.verdox.vcorepaper.custom.block.VBlock;
 import de.verdox.vcorepaper.custom.events.VCoreHybridEvent;
-import de.verdox.vcorepaper.custom.nbtholders.location.NBTLocation;
 
 /**
  * @version 1.0
  * @Author: Lukas Jonsson (Verdox)
  * @date 10.08.2021 23:07
  */
-public abstract class NBTBlockEvent extends VCoreHybridEvent {
+public abstract class VBlockEvent extends VCoreHybridEvent {
 
-    private final NBTLocation nbtLocation;
+    private final VBlock<?, ?, ?> vBlock;
     private boolean cancelled;
 
-    public NBTBlockEvent(NBTLocation nbtLocation) {
-        this.nbtLocation = nbtLocation;
+    public VBlockEvent(VBlock<?, ?, ?> vBlock) {
+        this.vBlock = vBlock;
     }
 
-    public NBTLocation getNbtBlock() {
-        return nbtLocation;
+    public VBlock<?, ?, ?> getVBlock() {
+        return vBlock;
     }
 
     public boolean isCancelled() {

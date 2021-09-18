@@ -12,7 +12,11 @@ import de.verdox.vcorepaper.VCorePaper;
 import de.verdox.vcorepaper.custom.block.VBlock;
 import de.verdox.vcorepaper.custom.block.data.debug.BlockDebugData;
 import de.verdox.vcorepaper.custom.entities.VCoreEntity;
+import de.verdox.vcorepaper.custom.gui.book.BookGUI;
 import de.verdox.vcorepaper.custom.items.VCoreItem;
+import net.kyori.adventure.inventory.Book;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Chunk;
@@ -33,6 +37,22 @@ public class AdminCommands extends VCoreCommand.VCoreBukkitCommand {
     public AdminCommands(VCorePaper vCorePlugin, String commandName) {
         super(vCorePlugin, commandName);
         this.vCorePaper = vCorePlugin;
+
+        addCommandCallback("debugBookGUI")
+                .withPermission("vcore.debug")
+                .setExecutor(VCommandCallback.CommandExecutorType.PLAYER)
+                .commandCallback((commandSender, commandParameters) -> {
+                    Player player = (Player) commandSender;
+                    BookGUI bookGUI = new BookGUI(VCorePaper.getInstance(), player);
+
+                    TextComponent component = bookGUI.createResponsiveCallbackText(Component.text("Klicke mich als Test"), System.out::println);
+
+                    bookGUI.provideBook(() -> Book.builder()
+                            .title(Component.text("test"))
+                            .addPage(component).build());
+
+                    bookGUI.openBook();
+                });
 
         addCommandCallback("debugNetworkInfo")
                 .withPermission("vcore.debug")
@@ -110,8 +130,8 @@ public class AdminCommands extends VCoreCommand.VCoreBukkitCommand {
         addCommandCallback("debugBlock")
                 .withPermission("vcore.debug")
                 .setExecutor(VCommandCallback.CommandExecutorType.PLAYER)
-                .askFor("SavingTechnique", VCommandCallback.CommandAskType.STRING, "&cTechnique unknown", "LocationBased", "BlockBased", "ALL")
                 .addCommandPath("addDebugInfo")
+                .askFor("SavingTechnique", VCommandCallback.CommandAskType.STRING, "&cTechnique unknown", "LocationBased", "BlockBased", "ALL")
                 .commandCallback((commandSender, commandParameters) -> {
                     Player player = (Player) commandSender;
                     String technique = commandParameters.getObject(0, String.class);
@@ -141,6 +161,7 @@ public class AdminCommands extends VCoreCommand.VCoreBukkitCommand {
                         VBlock.LocationBased vBlock = VCorePaper.getInstance().getCustomLocationDataManager().wrap(VBlock.LocationBased.class, hitBlock.getLocation());
                         vBlock.storeCustomData(BlockDebugData.class, System.currentTimeMillis(), null);
                     }
+                    commandSender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&aDebug Info gespeichert&7!"));
                 });
         addCommandCallback("debugBlock")
                 .withPermission("vcore.debug")

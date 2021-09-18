@@ -35,6 +35,17 @@ public class BukkitInventoryUtil {
         return true;
     }
 
+    public boolean hasStorageContentSpaceFor(@NotNull Inventory inventory, @NotNull ItemStack... stacks) {
+        Inventory copy = Bukkit.createInventory(null, (inventory.getSize() / 9) * 9, "");
+        copyStorageContentsToInventory(inventory, copy);
+        for (ItemStack itemStack : stacks) {
+            Map<Integer, ItemStack> leftItems = copy.addItem(itemStack);
+            if (!leftItems.isEmpty())
+                return false;
+        }
+        return true;
+    }
+
     public int countItemAmount(@NotNull Inventory inventory, @NotNull ItemStack itemStack) {
         return inventory.all(itemStack.getType()).values()
                 .stream()

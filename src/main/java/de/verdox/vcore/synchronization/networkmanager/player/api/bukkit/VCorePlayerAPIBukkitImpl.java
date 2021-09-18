@@ -31,8 +31,11 @@ import java.util.concurrent.TimeoutException;
  * @date 03.08.2021 20:17
  */
 public class VCorePlayerAPIBukkitImpl extends VCorePlayerAPIImpl implements Listener {
+    private final VCorePlugin.Minecraft plugin;
+
     public VCorePlayerAPIBukkitImpl(VCorePlugin.Minecraft plugin) {
         super(plugin);
+        this.plugin = plugin;
         plugin.getServer().getPluginManager().registerEvents(this, plugin);
     }
 
@@ -51,8 +54,10 @@ public class VCorePlayerAPIBukkitImpl extends VCorePlayerAPIImpl implements List
     @EventHandler
     public void onJoin(PlayerJoinEvent e) {
         CompletableFuture<Set<Runnable>> future = vCorePlayerTaskScheduler.getAllTasks(e.getPlayer().getUniqueId());
-        plugin.async(() -> {
+        Bukkit.getScheduler().runTaskLaterAsynchronously(plugin.getPlugin(), () -> {
             try {
+                if (Bukkit.getPlayer(e.getPlayer().getUniqueId()) == null)
+                    return;
                 Set<Runnable> tasks = future.get(5, TimeUnit.SECONDS);
                 plugin.consoleMessage("&eFound Tasks for &e" + e.getPlayer().getName() + " &b" + tasks.size(), false);
                 if (tasks.size() == 0)
@@ -62,7 +67,7 @@ public class VCorePlayerAPIBukkitImpl extends VCorePlayerAPIImpl implements List
             } catch (InterruptedException | ExecutionException | TimeoutException interruptedException) {
                 interruptedException.printStackTrace();
             }
-        });
+        }, 10L);
     }
 
     private ServerLocation convertToServerLocation(Location location) {

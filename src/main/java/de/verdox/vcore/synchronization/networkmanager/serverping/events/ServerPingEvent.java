@@ -5,6 +5,7 @@
 package de.verdox.vcore.synchronization.networkmanager.serverping.events;
 
 import de.verdox.vcore.synchronization.networkmanager.server.ServerType;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * @version 1.0
@@ -17,7 +18,7 @@ public abstract class ServerPingEvent {
     private final String serverAddress;
     private final int serverPort;
 
-    public ServerPingEvent(ServerType serverType, String serverName, String serverAddress, int serverPort) {
+    public ServerPingEvent(@NotNull ServerType serverType, @NotNull String serverName, @NotNull String serverAddress, int serverPort) {
         this.serverType = serverType;
         this.serverName = serverName.toLowerCase();
         this.serverAddress = serverAddress;

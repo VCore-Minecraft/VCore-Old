@@ -2,7 +2,7 @@
  * Copyright (c) 2021. Lukas Jonsson
  */
 
-package de.verdox.vcorepaper.custom.custompipelinedata.inventories;
+package de.verdox.vcore.synchronization.pipeline.datatypes;
 
 import java.util.Map;
 

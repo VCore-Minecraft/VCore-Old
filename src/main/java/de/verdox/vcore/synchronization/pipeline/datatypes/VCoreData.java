@@ -11,6 +11,7 @@ import de.verdox.vcore.synchronization.pipeline.interfaces.VCoreSerializable;
 import de.verdox.vcore.synchronization.pipeline.parts.DataSynchronizer;
 import de.verdox.vcore.util.global.AnnotationResolver;
 
+import javax.annotation.Nonnull;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
@@ -169,6 +170,7 @@ public abstract class VCoreData implements VCoreSerializable {
         return lastUse;
     }
 
+    @Nonnull
     @Override
     public Map<String, Object> serialize() {
         unMarkRemoval();

@@ -32,6 +32,13 @@ public class ItemPreset {
                 .buildItem();
     }
 
+    public VCoreItem getCreateButton(String displayName) {
+        return getCustomItemManager()
+                .createItemBuilder(Material.LIME_DYE, 1, displayName)
+                .addNBTData(VCoreNBTTags.GUI_ITEM_NOT_DRAGGABLE, "")
+                .buildItem();
+    }
+
     public static class VCoreNBTTags {
         public static final String GUI_ITEM_NOT_DRAGGABLE = "GUI_ITEM_NOT_DRAGGABLE";
         public static final String GUI_ITEM_DRAGGABLE = "GUI_ITEM_DRAGGABLE";

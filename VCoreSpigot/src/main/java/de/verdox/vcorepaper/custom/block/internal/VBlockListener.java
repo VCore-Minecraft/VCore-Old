@@ -9,11 +9,11 @@ import de.verdox.vcore.plugin.listener.VCoreListener;
 import de.verdox.vcorepaper.VCorePaper;
 import de.verdox.vcorepaper.custom.block.VBlock;
 import de.verdox.vcorepaper.custom.block.flags.VBlockFlag;
-import de.verdox.vcorepaper.custom.nbtholders.location.NBTLocation;
-import de.verdox.vcorepaper.custom.nbtholders.location.event.nbtlocation.NBTBlockDeleteEvent;
+import de.verdox.vcorepaper.custom.events.paper.blockevents.BlockChangeStateEvent;
 import org.bukkit.block.Block;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.block.*;
 
 /**
@@ -46,68 +46,74 @@ public class VBlockListener extends VCoreListener.VCoreBukkitListener {
         return vBlock.isFlagSet(vBlockFlag);
     }
 
-    @EventHandler
-    public void onDelete(NBTBlockDeleteEvent e) {
-        NBTLocation nbtLocation = e.getNbtBlock();
-        if (!nbtLocation.getPersistentDataContainer().hasKey(VBlockFlag.PRESERVE_DATA_ON_BREAK.getNbtTag()))
-            return;
-        e.setCancelled(nbtLocation.getPersistentDataContainer().getBoolean(VBlockFlag.PRESERVE_DATA_ON_BREAK.getNbtTag()));
-    }
-
-    @EventHandler
+    @EventHandler(priority = EventPriority.HIGH)
     public void blockFromTo(BlockFromToEvent e) {
-        plugin.consoleMessage("&8[&eVBlockListener&8] &eChecking " + e.getClass().getSimpleName(), 1, true);
+        //plugin.consoleMessage("&8[&eVBlockListener&8] &eChecking " + e.getClass().getSimpleName(), 1, true);
         cancelBlockEventByFlag(e, VBlockFlag.DENY_BLOCK_LIQUID_EVENT);
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.HIGH)
     public void blockGrowEvent(BlockGrowEvent e) {
-        plugin.consoleMessage("&8[&eVBlockListener&8] &eChecking " + e.getClass().getSimpleName(), 1, true);
+        //plugin.consoleMessage("&8[&eVBlockListener&8] &eChecking " + e.getClass().getSimpleName(), 1, true);
         cancelBlockEventByFlag(e, VBlockFlag.DENY_BLOCK_GROW_EVENT);
 
         //Block stemBlock = VCoreUtil.getBukkitWorldUtil().findStem(block);
         //TODO: Für Crops fertig machen
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.HIGH)
     public void leavesDecayEvent(LeavesDecayEvent e) {
-        plugin.consoleMessage("&8[&eVBlockListener&8] &eChecking " + e.getClass().getSimpleName(), 1, true);
+        //plugin.consoleMessage("&8[&eVBlockListener&8] &eChecking " + e.getClass().getSimpleName(), 1, true);
         cancelBlockEventByFlag(e, VBlockFlag.DENY_BLOCK_LEAVES_DECAY_EVENT);
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.HIGH)
     public void explodeEvent(BlockExplodeEvent e) {
-        plugin.consoleMessage("&8[&eVBlockListener&8] &eChecking " + e.getClass().getSimpleName(), 1, true);
+        //plugin.consoleMessage("&8[&eVBlockListener&8] &eChecking " + e.getClass().getSimpleName(), 1, true);
         cancelBlockEventByFlag(e, VBlockFlag.DENY_BLOCK_EXPLODE_EVENT);
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.HIGH)
     public void dropItems(BlockDropItemEvent e) {
-        plugin.consoleMessage("&8[&eVBlockListener&8] &eChecking " + e.getClass().getSimpleName(), 1, true);
+        //plugin.consoleMessage("&8[&eVBlockListener&8] &eChecking " + e.getClass().getSimpleName(), 1, true);
         cancelBlockEventByFlag(e, VBlockFlag.DENY_BLOCK_DROP_ITEMS_EVENT);
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.HIGH)
     public void blockPistonExtendEvent(BlockPistonExtendEvent e) {
-        plugin.consoleMessage("&8[&eVBlockListener&8] &eChecking " + e.getClass().getSimpleName(), 1, true);
+        //plugin.consoleMessage("&8[&eVBlockListener&8] &eChecking " + e.getClass().getSimpleName(), 1, true);
         for (Block block : e.getBlocks()) {
             if (cancelBlockEventByFlag(e, block, VBlockFlag.DENY_BLOCK_PISTON_EVENT))
                 return;
         }
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.HIGH)
     public void blockPistonRetractEvent(BlockPistonRetractEvent e) {
-        plugin.consoleMessage("&8[&eVBlockListener&8] &eChecking " + e.getClass().getSimpleName(), 1, true);
+        //plugin.consoleMessage("&8[&eVBlockListener&8] &eChecking " + e.getClass().getSimpleName(), 1, true);
         for (Block block : e.getBlocks()) {
             if (cancelBlockEventByFlag(e, block, VBlockFlag.DENY_BLOCK_PISTON_EVENT))
                 return;
         }
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.HIGH)
     public void blockBurnEvent(BlockBurnEvent e) {
-        plugin.consoleMessage("&8[&eVBlockListener&8] &eChecking " + e.getClass().getSimpleName(), 1, true);
+        //plugin.consoleMessage("&8[&eVBlockListener&8] &eChecking " + e.getClass().getSimpleName(), 1, true);
         cancelBlockEventByFlag(e, VBlockFlag.DENY_BLOCK_BURN_EVENT);
     }
+
+    @EventHandler(priority = EventPriority.HIGHEST)
+    public void onBlockStateChange(BlockChangeStateEvent e) {
+        if (e.getOldBlockState().getMaterial().isAir() || e.getOldBlockState().getMaterial().equals(e.getNewBlockState().getMaterial()))
+            return;
+        VBlock.BlockBased blockBased = VCorePaper.getInstance().getCustomBlockDataManager().getVBlock(e.getBlock());
+        boolean preserveDataOnBreak = blockBased.isVBlock() && blockBased.isFlagSet(VBlockFlag.PRESERVE_DATA_ON_BREAK);
+        if (!preserveDataOnBreak)
+            blockBased.toNBTHolder().delete();
+        VBlock.LocationBased locationBased = blockBased.asLocationBased();
+        if (locationBased.isVBlock() && !preserveDataOnBreak)
+            locationBased.toNBTHolder().delete();
+    }
+
 }

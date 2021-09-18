@@ -55,6 +55,10 @@ public class VCoreUtil {
         public static BukkitInventoryUtil getBukkitInventoryUtil() {
             return new BukkitInventoryUtil();
         }
+
+        public static BukkitBookUtil getBukkitBookUtil() {
+            return new BukkitBookUtil();
+        }
     }
 
     public static class BungeeCordUtil {

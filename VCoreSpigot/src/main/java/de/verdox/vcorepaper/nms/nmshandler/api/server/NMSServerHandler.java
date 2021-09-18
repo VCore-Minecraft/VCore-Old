@@ -4,10 +4,19 @@
 
 package de.verdox.vcorepaper.nms.nmshandler.api.server;
 
+import de.verdox.vcore.plugin.VCorePlugin;
 import de.verdox.vcorepaper.nms.NMSHandler;
 import de.verdox.vcorepaper.nms.NMSVersion;
 import de.verdox.vcorepaper.nms.nmshandler.v1_16_3.server.ServerHandler_V1_16_R3;
+import de.verdox.vcorepaper.nms.nmshandler.v_1_17_1.server.ServerHandler_V1_17_1R1;
 import org.apache.commons.lang.NotImplementedException;
+import org.bukkit.command.Command;
+import org.bukkit.command.PluginCommand;
+import org.bukkit.entity.Player;
+import org.bukkit.plugin.Plugin;
+import org.jetbrains.annotations.NotNull;
+
+import java.util.function.Consumer;
 
 /**
  * @version 1.0
@@ -17,11 +26,18 @@ import org.apache.commons.lang.NotImplementedException;
 public interface NMSServerHandler extends NMSHandler {
 
     static NMSServerHandler getRightHandler(NMSVersion nmsVersion) {
-        if (nmsVersion.equals(NMSVersion.V1_16_5)) {
+        if (nmsVersion.equals(NMSVersion.V1_16_5))
             return new ServerHandler_V1_16_R3();
-        }
+        else if (nmsVersion.equals(NMSVersion.V1_17_1))
+            return new ServerHandler_V1_17_1R1();
         throw new NotImplementedException("This Handler [" + NMSVersion.class.getName() + "] is not implemented for NMS version: " + nmsVersion.getNmsVersionTag());
     }
+
+    Command registerRuntimeCommand(@NotNull VCorePlugin.Minecraft plugin, @NotNull String runtimeCommandIdentifier, @NotNull Consumer<Player> callback);
+
+    boolean unregisterCommand(@NotNull PluginCommand pluginCommand);
+
+    boolean unregisterCommand(@NotNull Plugin plugin, @NotNull String commandName);
 
     boolean readPropertySetting(SERVER_PROPERTY_BOOLEAN server_property_boolean);
 

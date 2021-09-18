@@ -12,10 +12,13 @@ import de.verdox.vcorepaper.custom.block.flags.VBlockFlag;
 import de.verdox.vcorepaper.custom.nbtholders.NBTHolder;
 import de.verdox.vcorepaper.custom.nbtholders.block.NBTBlockHolder;
 import de.verdox.vcorepaper.custom.nbtholders.location.NBTLocation;
+import de.verdox.vcorepaper.custom.util.Serializer;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
+import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.Set;
@@ -51,6 +54,25 @@ public abstract class VBlock<D, N extends NBTHolder<?>, M extends CustomDataMana
      */
     public abstract VBlock.LocationBased asLocationBased();
 
+    public void alternativeLootItems(@NotNull ItemStack... itemStacks) {
+        toNBTHolder().getPersistentDataContainer().setString("vblockAdditionalLoot", Serializer.itemStackArrayToBase64(itemStacks));
+    }
+
+    public boolean hasAlternativeLootItems() {
+        return toNBTHolder().getPersistentDataContainer().hasKey("vblockAdditionalLoot");
+    }
+
+    public ItemStack[] getAdditionalLootItems() {
+        if (!hasAlternativeLootItems())
+            return new ItemStack[0];
+        try {
+            return Serializer.itemStackArrayFromBase64(toNBTHolder().getPersistentDataContainer().getString("vblockAdditionalLoot"));
+        } catch (IOException e) {
+            e.printStackTrace();
+            return new ItemStack[0];
+        }
+    }
+
     @Override
     protected <T, R extends CustomData<T>> void onStoreData(Class<? extends R> customDataType, T value) {
 
@@ -66,12 +88,15 @@ public abstract class VBlock<D, N extends NBTHolder<?>, M extends CustomDataMana
         }
     }
 
+    public abstract boolean isVBlock();
+
+
     public static class LocationBased extends VBlock<Location, NBTLocation, CustomLocationDataManager> {
         private final NBTLocation nbtLocation;
 
         public LocationBased(@NotNull Location dataHolder, @NotNull CustomLocationDataManager customDataManager) {
             super(dataHolder, customDataManager);
-            nbtLocation = new NBTLocation(getDataHolder());
+            nbtLocation = new NBTLocation(this, getDataHolder());
         }
 
         @Override
@@ -82,6 +107,11 @@ public abstract class VBlock<D, N extends NBTHolder<?>, M extends CustomDataMana
         @Override
         public LocationBased asLocationBased() {
             return this;
+        }
+
+        @Override
+        public boolean isVBlock() {
+            return toNBTHolder().isNBTLocation();
         }
 
         @NotNull
@@ -100,7 +130,7 @@ public abstract class VBlock<D, N extends NBTHolder<?>, M extends CustomDataMana
         public BlockBased(@NotNull Block block, @NotNull CustomBlockDataManager customDataManager) {
             super(block, customDataManager);
             this.block = block;
-            this.nbtBlockHolder = new NBTBlockHolder(block);
+            this.nbtBlockHolder = new NBTBlockHolder(this, block);
         }
 
         @Override
@@ -113,6 +143,11 @@ public abstract class VBlock<D, N extends NBTHolder<?>, M extends CustomDataMana
             return VCorePaper.getInstance().getCustomLocationDataManager().getVBlock(block.getLocation());
         }
 
+        @Override
+        public boolean isVBlock() {
+            return toNBTHolder().isNBTBlock();
+        }
+
         @NotNull
         @Override
         public NBTBlockHolder toNBTHolder() {
@@ -120,9 +155,10 @@ public abstract class VBlock<D, N extends NBTHolder<?>, M extends CustomDataMana
         }
 
         public boolean isFlagSet(VBlockFlag flag) {
-            if (!toNBTHolder().getPersistentDataContainer().hasKey(flag.getNbtTag())) {
+            if (!isVBlock())
                 return false;
-            }
+            if (!toNBTHolder().getPersistentDataContainer().hasKey(flag.getNbtTag()))
+                return false;
             return toNBTHolder().getPersistentDataContainer().getBoolean(flag.getNbtTag());
         }
 

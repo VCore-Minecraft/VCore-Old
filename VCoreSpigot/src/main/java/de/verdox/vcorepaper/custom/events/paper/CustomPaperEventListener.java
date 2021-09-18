@@ -82,7 +82,7 @@ public class CustomPaperEventListener extends VCoreListener.VCoreBukkitListener 
                 || e.getClickedBlock() == null
                 || !(e.getClickedBlock().getState() instanceof Container))
             return;
-        plugin.consoleMessage("&8[&eEvent&7-&eDebug&8] &7Calling &b" + PlayerPreOpenContainerEvent.class.getSimpleName(), true);
+        //plugin.consoleMessage("&8[&eEvent&7-&eDebug&8] &7Calling &b" + PlayerPreOpenContainerEvent.class.getSimpleName(), true);
         e.setCancelled(!VCoreUtil.BukkitUtil.getBukkitServerUtil().callCancellable(new PlayerPreOpenContainerEvent(e.getPlayer(), (Container) e.getClickedBlock().getState())));
     }
 
@@ -96,84 +96,7 @@ public class CustomPaperEventListener extends VCoreListener.VCoreBukkitListener 
         DoubleChest doubleChest = (DoubleChest) chest.getBlockInventory().getHolder();
         Set<Chest> foundChests = VCoreUtil.BukkitUtil.getBukkitWorldUtil().findConnectedChest(chest);
         Chest otherChest = foundChests.stream().filter(chest1 -> !chest1.equals(chest)).findAny().orElseThrow(() -> new IllegalStateException("Could not find connected chest. Might be an API Bug"));
-        plugin.consoleMessage("&8[&eEvent&7-&eDebug&8] &7Calling &b" + ChestSplitEvent.class.getSimpleName(), true);
+        //plugin.consoleMessage("&8[&eEvent&7-&eDebug&8] &7Calling &b" + ChestSplitEvent.class.getSimpleName(), true);
         e.setCancelled(!VCoreUtil.BukkitUtil.getBukkitServerUtil().callCancellable(new ChestSplitEvent(e.getPlayer(), otherChest, chest, doubleChest)));
     }
-
-    //private boolean callBlockChangeState(Block block, boolean materialChanged){
-    //    BlockChangeStateEvent blockChangeStateEvent = new BlockChangeStateEvent(block,materialChanged);
-    //    Bukkit.getPluginManager().callEvent(blockChangeStateEvent);
-    //    return blockChangeStateEvent.isCancelled();
-    //}
-//
-    //@EventHandler(priority = EventPriority.HIGHEST)
-    //public void blockBreak(BlockBreakEvent e){
-    //    if(e.isCancelled())
-    //        return;
-    //    e.setCancelled(callBlockChangeState(e.getBlock(),true));
-    //}
-//
-    //@EventHandler(priority = EventPriority.HIGHEST)
-    //public void blockPlace(BlockPlaceEvent e){
-    //    if(e.isCancelled())
-    //        return;
-    //    e.setCancelled(callBlockChangeState(e.getBlock(),true));
-    //}
-//
-    //@EventHandler
-    //public void pistonRetract(BlockPistonRetractEvent e){
-    //    if(e.isCancelled())
-    //        return;
-    //    for (Block block : e.getBlocks()) {
-    //        if(callBlockChangeState(block,true)) {
-    //            e.setCancelled(true);
-    //            return;
-    //        }
-    //    }
-    //}
-//
-    //@EventHandler
-    //public void pistonExtend(BlockPistonExtendEvent e){
-    //    if(e.isCancelled())
-    //        return;
-    //    for (Block block : e.getBlocks()) {
-    //        if(callBlockChangeState(block,true)) {
-    //            e.setCancelled(true);
-    //            return;
-    //        }
-    //    }
-    //}
-//
-    //@EventHandler
-    //public void blockFromTo(BlockFromToEvent e){
-    //    if(e.isCancelled())
-    //        return;
-    //    e.setCancelled(callBlockChangeState(e.getBlock(),true));
-    //}
-//
-    //@EventHandler
-    //public void explodeEvent(BlockExplodeEvent e){
-    //    if(e.isCancelled())
-    //        return;
-    //    e.setCancelled(callBlockChangeState(e.getBlock(),true));
-    //}
-//
-    //@EventHandler
-    //public void entityChangeBlock(EntityChangeBlockEvent e){
-    //    if(e.isCancelled())
-    //        return;
-    //    e.setCancelled(callBlockChangeState(e.getBlock(),true));
-    //}
-//
-    //@EventHandler
-    //public void interact(PlayerInteractEvent e){
-    //    if(e.isCancelled())
-    //        return;
-    //    if(e.getAction().equals(Action.PHYSICAL)){
-    //        Block block = e.getClickedBlock();
-    //        if(block == null)
-    //            return;
-    //        e.setCancelled(callBlockChangeState(e.getClickedBlock(),block.getType().equals(Material.FARMLAND)));
-    //    }
-    //}
 }

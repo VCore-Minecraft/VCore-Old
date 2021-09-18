@@ -122,6 +122,7 @@ public class PipelineManager implements Pipeline {
             VCoreSubsystem<?> subsystem = plugin.findDependSubsystem(type);
             if (subsystem == null) {
                 plugin.consoleMessage("&4You are trying to load &e" + type + " &4with a Pipeline that does not know this type. Choose the Plugin that knows the subsystem of this dataType to prevent this error.", false);
+                pipelineTask.getCompletableFuture().complete(null);
                 throw new IllegalStateException("Subsystem of " + type + " could not be found in plugin" + plugin.getPluginName());
             }
         }
@@ -140,6 +141,7 @@ public class PipelineManager implements Pipeline {
                 pipelineTask.getCompletableFuture().complete(data);
                 return data;
             }
+            pipelineTask.getCompletableFuture().complete(null);
             throw new NullPointerException(type + " with uuid " + uuid + " does not exist in local!");
         } else if (loadingStrategy.equals(LoadingStrategy.LOAD_LOCAL_ELSE_LOAD)) {
             executorService.submit(new CatchingRunnable(() -> {
@@ -305,14 +307,17 @@ public class PipelineManager implements Pipeline {
 
     private void saveData(@NotNull Class<? extends VCoreData> type, @NotNull UUID uuid) {
         VCoreData vCoreData = getLocalCache().getData(type, uuid);
+        plugin.consoleMessage("&eSaving &b" + uuid + " &8[&e" + type + "&8]", false);
         if (vCoreData == null)
             return;
         if (vCoreData.isMarkedForRemoval())
             return;
+        plugin.consoleMessage("&7Cleaning Up &b" + uuid + " &8[&e" + type + "&8]", 1, false);
         vCoreData.cleanUp();
+        plugin.consoleMessage("&7Syncing &b" + uuid + " &8[&e" + type + "&8] &7 -> &bGlobal Cache", 1, false);
         pipelineDataSynchronizer.doSynchronisation(DataSynchronizer.DataSourceType.LOCAL, DataSynchronizer.DataSourceType.GLOBAL_CACHE, type, uuid, null);
+        plugin.consoleMessage("&7Syncing &b" + uuid + " &8[&e" + type + "&8] &7 -> &bGlobal Storage", 1, false);
         pipelineDataSynchronizer.doSynchronisation(DataSynchronizer.DataSourceType.LOCAL, DataSynchronizer.DataSourceType.GLOBAL_STORAGE, type, uuid, null);
-        vCoreData.save(false);
         plugin.consoleMessage("&aSaved &b" + uuid + " &8[&e" + type + "&8]", false);
         getLocalCache().remove(type, uuid);
     }

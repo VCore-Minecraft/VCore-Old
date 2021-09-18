@@ -6,6 +6,7 @@ package de.verdox.vcorepaper.custom.block;
 
 import de.verdox.vcore.plugin.SystemLoadable;
 import de.verdox.vcorepaper.VCorePaper;
+import de.verdox.vcorepaper.custom.block.data.VBlockCustomData;
 
 /**
  * @version 1.0
@@ -29,6 +30,14 @@ public class CustomBlockProvider implements SystemLoadable {
 
     public CustomLocationDataManager getLocationDataManager() {
         return customLocationDataManager;
+    }
+
+    /**
+     * Registering custom Data for both block Saving Types
+     */
+    public final void globalRegisterData(Class<? extends VBlockCustomData<?>> customDataClass) {
+        getBlockDataManager().registerData(customDataClass);
+        getLocationDataManager().registerData(customDataClass);
     }
 
     @Override

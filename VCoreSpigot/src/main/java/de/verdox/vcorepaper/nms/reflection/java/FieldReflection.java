@@ -5,6 +5,7 @@
 package de.verdox.vcorepaper.nms.reflection.java;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 
 /**
  * @version 1.0
@@ -28,6 +29,24 @@ public class FieldReflection {
             e.printStackTrace();
             return null;
         }
+    }
+
+    public static void setFinalField(Class<?> type, Object instance, String fieldName, Object value) {
+
+        ReferenceField<?> referenceField = getField(type, fieldName, Object.class);
+        Field field = referenceField.field;
+
+        field.setAccessible(true);
+        try {
+            Field modifiersField = Field.class.getDeclaredField("modifiers");
+            modifiersField.setAccessible(true);
+            modifiersField.setInt(field, field.getModifiers() & ~Modifier.FINAL);
+
+            field.set(instance, value);
+        } catch (NoSuchFieldException | IllegalAccessException e) {
+            e.printStackTrace();
+        }
+
     }
 
 

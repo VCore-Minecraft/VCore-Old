@@ -1,8 +1,12 @@
+/*
+ * Copyright (c) 2021. Lukas Jonsson
+ */
+
 package de.verdox.vcore.plugin.files.storage;
 
 import de.verdox.vcore.plugin.VCorePlugin;
 import de.verdox.vcore.plugin.files.config.VCoreConfig;
-import org.apache.commons.io.FilenameUtils;
+import org.bukkit.craftbukkit.libs.org.apache.commons.io.FilenameUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -18,8 +22,8 @@ public abstract class StorageSystem<S extends VCoreConfig<?>> {
     protected String storageName;
     protected String pluginDirectory;
     protected File directory;
-    private Map<String, S> saveFiles;
-    private VCorePlugin<?, ?> plugin;
+    private final Map<String, S> saveFiles;
+    private final VCorePlugin<?, ?> plugin;
 
     public StorageSystem(VCorePlugin<?, ?> plugin, String storageName, String pluginDirectory) {
         this.plugin = plugin;

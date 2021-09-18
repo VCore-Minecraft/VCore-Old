@@ -6,6 +6,7 @@ package de.verdox.vcorepaper.nms;
 
 import de.verdox.vcorepaper.VCorePaper;
 import de.verdox.vcorepaper.nms.nmshandler.api.entity.NMSEntityHandler;
+import de.verdox.vcorepaper.nms.nmshandler.api.player.NMSPlayerHandler;
 import de.verdox.vcorepaper.nms.nmshandler.api.server.NMSServerHandler;
 import de.verdox.vcorepaper.nms.nmshandler.api.world.NMSWorldHandler;
 import org.bukkit.Bukkit;
@@ -41,5 +42,9 @@ public class NMSManager {
 
     public NMSEntityHandler getNMSEntityHandler() {
         return NMSEntityHandler.getRightHandler(nmsVersion);
+    }
+
+    public NMSPlayerHandler getNMSPlayerHandler() {
+        return NMSPlayerHandler.getRightHandler(nmsVersion);
     }
 }

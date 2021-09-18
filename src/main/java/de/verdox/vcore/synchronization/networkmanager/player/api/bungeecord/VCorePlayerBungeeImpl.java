@@ -33,6 +33,8 @@ public class VCorePlayerBungeeImpl extends VCorePlayerAPIImpl implements Listene
         CompletableFuture<Set<Runnable>> future = vCorePlayerTaskScheduler.getAllTasks(e.getConnection().getUniqueId());
         plugin.async(() -> {
             try {
+                if (ProxyServer.getInstance().getPlayer(e.getConnection().getUniqueId()) == null)
+                    return;
                 Set<Runnable> tasks = future.get(5, TimeUnit.SECONDS);
                 plugin.consoleMessage("&eFound Tasks for &e" + e.getConnection().getName() + " &b" + tasks.size(), false);
                 if (tasks.size() == 0)

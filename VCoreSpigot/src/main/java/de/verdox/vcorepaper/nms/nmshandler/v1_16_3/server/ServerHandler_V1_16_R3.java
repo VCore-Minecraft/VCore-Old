@@ -4,9 +4,25 @@
 
 package de.verdox.vcorepaper.nms.nmshandler.v1_16_3.server;
 
+import de.verdox.vcore.plugin.VCorePlugin;
+import de.verdox.vcorepaper.VCorePaper;
 import de.verdox.vcorepaper.nms.nmshandler.api.server.NMSServerHandler;
 import net.minecraft.server.v1_16_R3.DedicatedServer;
 import net.minecraft.server.v1_16_R3.MinecraftServer;
+import org.bukkit.Bukkit;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandMap;
+import org.bukkit.command.PluginCommand;
+import org.bukkit.command.SimpleCommandMap;
+import org.bukkit.entity.Player;
+import org.bukkit.plugin.Plugin;
+import org.jetbrains.annotations.NotNull;
+
+import javax.annotation.Nonnull;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.util.function.Consumer;
 
 /**
  * @version 1.0
@@ -14,6 +30,54 @@ import net.minecraft.server.v1_16_R3.MinecraftServer;
  * @date 21.06.2021 14:54
  */
 public class ServerHandler_V1_16_R3 implements NMSServerHandler {
+
+    @Override
+    public Command registerRuntimeCommand(@Nonnull VCorePlugin.Minecraft plugin, @Nonnull String runtimeCommandIdentifier, @NotNull Consumer<Player> callback) {
+        PluginCommand pluginCommand = createCommand(runtimeCommandIdentifier, VCorePaper.getInstance());
+        assert pluginCommand != null;
+        getCommandMap().register(plugin.getName(), pluginCommand);
+        pluginCommand.setExecutor((sender, command, label, args) -> {
+            if (!(sender instanceof Player))
+                return false;
+            Player player = (Player) sender;
+            callback.accept(player);
+            return true;
+        });
+        return pluginCommand;
+    }
+
+    @Override
+    public boolean unregisterCommand(@NotNull PluginCommand pluginCommand) {
+        return unregisterCommand(pluginCommand.getPlugin(), pluginCommand.getName());
+    }
+
+    @Override
+    public boolean unregisterCommand(@NotNull Plugin plugin, @NotNull String commandName) {
+        return getCommandMap().getKnownCommands().remove(plugin.getName() + ":" + commandName) != null;
+    }
+
+    private PluginCommand createCommand(String runtimeCommandIdentifier, VCorePlugin.Minecraft plugin) {
+        try {
+            Constructor<PluginCommand> c = PluginCommand.class.getDeclaredConstructor(String.class, Plugin.class);
+            c.setAccessible(true);
+            return c.newInstance(runtimeCommandIdentifier, plugin);
+        } catch (NoSuchMethodException | InstantiationException | IllegalAccessException | InvocationTargetException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    private CommandMap getCommandMap() {
+        try {
+            Field f = Bukkit.getPluginManager().getClass().getDeclaredField("commandMap");
+            f.setAccessible(true);
+            return (SimpleCommandMap) f.get(Bukkit.getPluginManager());
+        } catch (NoSuchFieldException | IllegalAccessException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
     @Override
     public boolean readPropertySetting(SERVER_PROPERTY_BOOLEAN server_property_boolean) {
         DedicatedServer dedicatedServer = (DedicatedServer) MinecraftServer.getServer();

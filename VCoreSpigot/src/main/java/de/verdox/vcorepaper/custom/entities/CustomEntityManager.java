@@ -6,6 +6,7 @@ package de.verdox.vcorepaper.custom.entities;
 
 import de.verdox.vcorepaper.VCorePaper;
 import de.verdox.vcorepaper.custom.CustomDataManager;
+import de.verdox.vcorepaper.custom.talkingnpc.TalkingNPCService;
 import org.bukkit.entity.Entity;
 
 import java.lang.reflect.InvocationTargetException;
@@ -13,12 +14,17 @@ import java.lang.reflect.InvocationTargetException;
 public class CustomEntityManager extends CustomDataManager<Entity, EntityCustomData<?>, VCoreEntity> {
 
     private static CustomEntityManager instance = null;
+    private final TalkingNPCService talkingNPCService = new TalkingNPCService(this);
 
     public CustomEntityManager(VCorePaper plugin) {
         super(plugin);
         if (instance != null)
             throw new IllegalStateException("There can only be one CustomEntityManager");
         instance = this;
+    }
+
+    public TalkingNPCService getTalkingNPCService() {
+        return talkingNPCService;
     }
 
     @Override
@@ -50,4 +56,6 @@ public class CustomEntityManager extends CustomDataManager<Entity, EntityCustomD
             return null;
         }
     }
+
+
 }

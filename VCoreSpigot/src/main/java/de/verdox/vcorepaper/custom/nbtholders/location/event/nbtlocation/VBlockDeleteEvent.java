@@ -4,15 +4,15 @@
 
 package de.verdox.vcorepaper.custom.nbtholders.location.event.nbtlocation;
 
-import de.verdox.vcorepaper.custom.nbtholders.location.NBTLocation;
+import de.verdox.vcorepaper.custom.block.VBlock;
 
 /**
  * @version 1.0
  * @Author: Lukas Jonsson (Verdox)
  * @date 10.08.2021 23:08
  */
-public class NBTBlockDeleteEvent extends NBTBlockEvent {
-    public NBTBlockDeleteEvent(NBTLocation nbtLocation) {
-        super(nbtLocation);
+public class VBlockDeleteEvent extends VBlockEvent {
+    public VBlockDeleteEvent(VBlock<?, ?, ?> vBlock) {
+        super(vBlock);
     }
 }

@@ -29,6 +29,10 @@ import java.util.stream.Collectors;
  */
 public class NetworkManager<T extends VCorePlugin<?, ?>> implements SystemLoadable {
 
+    //TODO: Keep Alive VCorePlayer
+    //TODO: Keep Alive Data Injection (ServerInstance Tags, VCorePlayer Tags, etc)
+    //TODO: Crashes erkennen
+
     private final ServerType serverType;
     private final T plugin;
     private final ServerPingManager<T> serverPingManager;

@@ -5,6 +5,7 @@
 package de.verdox.vcore.synchronization.networkmanager.serverping.events;
 
 import de.verdox.vcore.synchronization.networkmanager.server.ServerType;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * @version 1.0
@@ -14,7 +15,7 @@ import de.verdox.vcore.synchronization.networkmanager.server.ServerType;
 public class ServerPingOnlineEvent extends ServerPingEvent {
     private final boolean firstReceivedPing;
 
-    public ServerPingOnlineEvent(ServerType serverType, String serverName, String serverAddress, int serverPort, boolean firstReceivedPing) {
+    public ServerPingOnlineEvent(@NotNull ServerType serverType, @NotNull String serverName, @NotNull String serverAddress, int serverPort, boolean firstReceivedPing) {
         super(serverType, serverName, serverAddress, serverPort);
         this.firstReceivedPing = firstReceivedPing;
     }

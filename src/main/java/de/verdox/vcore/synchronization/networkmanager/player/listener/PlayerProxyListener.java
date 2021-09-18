@@ -6,18 +6,14 @@ package de.verdox.vcore.synchronization.networkmanager.player.listener;
 
 import de.verdox.vcore.plugin.VCorePlugin;
 import de.verdox.vcore.plugin.listener.VCoreListener;
-import de.verdox.vcore.plugin.wrapper.types.enums.PlayerMessageType;
 import de.verdox.vcore.synchronization.networkmanager.NetworkManager;
-import de.verdox.vcore.synchronization.networkmanager.enums.GlobalProperty;
 import de.verdox.vcore.synchronization.networkmanager.player.VCorePlayer;
 import de.verdox.vcore.synchronization.pipeline.parts.Pipeline;
 import net.md_5.bungee.api.ChatColor;
-import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.event.LoginEvent;
 import net.md_5.bungee.api.event.PlayerDisconnectEvent;
 import net.md_5.bungee.api.event.PostLoginEvent;
-import net.md_5.bungee.api.event.PreLoginEvent;
 
 import java.util.UUID;
 
@@ -35,21 +31,13 @@ public class PlayerProxyListener extends VCoreListener.VCoreBungeeListener imple
     }
 
     @net.md_5.bungee.event.EventHandler
-    public void preLoginEvent(PreLoginEvent e) {
-        String name = e.getConnection().getName();
-        if (ProxyServer.getInstance().getPlayer(name) == null)
-            return;
-        e.setCancelled(true);
-        e.setCancelReason(new TextComponent(ChatColor.translateAlternateColorCodes('&', "&cDu bist bereits auf dem Netzwerk")));
-    }
-
-    @net.md_5.bungee.event.EventHandler
     public void loginEvent(LoginEvent e) {
         UUID uuid = e.getConnection().getUniqueId();
         if (uuid == null)
             return;
         if (!plugin.getServices().getPipeline().exist(VCorePlayer.class, uuid, Pipeline.QueryStrategy.LOCAL, Pipeline.QueryStrategy.GLOBAL_CACHE))
             return;
+        plugin.consoleMessage("&ePlayer tried to connect twice&7: &b" + e.getConnection().getName() + " &8[&a" + e.getConnection().getUniqueId() + "&8]", false);
         VCorePlayer vCorePlayer = networkManager.getPlugin().getCoreInstance().getPlayerAPI().getVCorePlayer(uuid);
         e.setCancelled(true);
         e.setCancelReason(new TextComponent(ChatColor.translateAlternateColorCodes('&', "&cDu bist bereits auf dem Netzwerk. Bitte neu verbinden&7!")));
@@ -66,7 +54,7 @@ public class PlayerProxyListener extends VCoreListener.VCoreBungeeListener imple
                     e.getPlayer().getUniqueId(),
                     e.getPlayer().getName());
         });
-        plugin.getCoreInstance().getPlayerAPI().broadcastMessage("&8[&a+&8] &e" + e.getPlayer().getName(), PlayerMessageType.CHAT, GlobalProperty.NETWORK);
+        //plugin.getCoreInstance().getPlayerAPI().broadcastMessage("&8[&a+&8] &e" + e.getPlayer().getName(), PlayerMessageType.CHAT, GlobalProperty.NETWORK);
     }
 
     @net.md_5.bungee.event.EventHandler
@@ -78,6 +66,6 @@ public class PlayerProxyListener extends VCoreListener.VCoreBungeeListener imple
                     e.getPlayer().getUniqueId(),
                     e.getPlayer().getName());
         });
-        plugin.getCoreInstance().getPlayerAPI().broadcastMessage("&8[&c-&8] &e" + e.getPlayer().getName(), PlayerMessageType.CHAT, GlobalProperty.NETWORK);
+        //plugin.getCoreInstance().getPlayerAPI().broadcastMessage("&8[&c-&8] &e" + e.getPlayer().getName(), PlayerMessageType.CHAT, GlobalProperty.NETWORK);
     }
 }

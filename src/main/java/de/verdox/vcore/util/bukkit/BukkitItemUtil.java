@@ -5,9 +5,11 @@
 package de.verdox.vcore.util.bukkit;
 
 import de.verdox.vcore.util.VCoreUtil;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
+import org.bukkit.event.player.PlayerItemDamageEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.Damageable;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -34,6 +36,8 @@ public class BukkitItemUtil {
      * @return damage that was dealt
      */
     public int applyDamageNaturally(@Nullable ItemStack stack, @NotNull Material material, @Nullable Player player) {
+
+
         if (stack == null)
             return 0;
         ItemMeta meta = stack.getItemMeta();
@@ -60,6 +64,12 @@ public class BukkitItemUtil {
             float chanceOfDurabilityLoss = 100 / (float) (durabilityLevel + 1);
             if (VCoreUtil.getRandomUtil().randomPercentage() > chanceOfDurabilityLoss)
                 damageDealt = 0;
+        }
+        if (player != null) {
+            PlayerItemDamageEvent playerItemDamageEvent = new PlayerItemDamageEvent(player, stack, damageDealt);
+            Bukkit.getPluginManager().callEvent(playerItemDamageEvent);
+            if (playerItemDamageEvent.isCancelled())
+                return 0;
         }
 
         damageable.setDamage((damageable.getDamage() + damageDealt));
@@ -93,6 +103,30 @@ public class BukkitItemUtil {
         else if (material.equals(Material.FISHING_ROD))
             return true;
         else return material.equals(Material.FLINT_AND_STEEL);
+    }
+
+    public Material getSeedMaterial(@NotNull Material plantItem) {
+        switch (plantItem) {
+            case WHEAT:
+                return Material.WHEAT_SEEDS;
+            case BEETROOT:
+                return Material.BEETROOT_SEEDS;
+            case POTATO:
+                return Material.POTATO;
+            case CARROT:
+                return Material.CARROT;
+            case SUGAR_CANE:
+                return Material.SUGAR_CANE;
+            case SWEET_BERRY_BUSH:
+                return Material.SWEET_BERRIES;
+            case MELON_STEM:
+                return Material.MELON_SEEDS;
+            case PUMPKIN_STEM:
+                return Material.PUMPKIN_SEEDS;
+            case COCOA:
+                return Material.COCOA_BEANS;
+        }
+        return plantItem;
     }
 
 }

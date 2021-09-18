@@ -1,9 +1,14 @@
+/*
+ * Copyright (c) 2021. Lukas Jonsson
+ */
+
 package de.verdox.vcore.util.bukkit.keys;
 
 import de.verdox.vcore.plugin.wrapper.types.WorldChunk;
 import io.papermc.lib.PaperLib;
 import org.bukkit.Chunk;
 import org.bukkit.World;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.HashSet;
 import java.util.Objects;
@@ -30,9 +35,10 @@ public class ChunkKey extends VCoreKey {
         return world.isChunkLoaded(this.worldChunk.x, this.worldChunk.z);
     }
 
+    @Nullable
     public final CompletableFuture<Chunk> getChunkIn(World world) {
         if (isChunkLoadedIn(world))
-            return PaperLib.getChunkAtAsync(world, worldChunk.x, worldChunk.z);
+            return PaperLib.getChunkAtAsync(world, worldChunk.x, worldChunk.z, false);
         return null;
     }
 

@@ -117,6 +117,8 @@ public class VCommandCallback {
             return suggested;
         if (neededPermission != null && !neededPermission.isEmpty() && !sender.hasPermission(neededPermission))
             return suggested;
+        if (currentArgument == -1)
+            return List.of("");
         String argument = args[currentArgument];
         CommandCallbackInfo info = callbackInfos.get(currentArgument);
         return info.suggest(argument);

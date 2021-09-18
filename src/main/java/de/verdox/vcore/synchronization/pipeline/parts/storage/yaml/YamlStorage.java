@@ -10,7 +10,7 @@ import de.verdox.vcore.synchronization.pipeline.datatypes.NetworkData;
 import de.verdox.vcore.synchronization.pipeline.datatypes.VCoreData;
 import de.verdox.vcore.synchronization.pipeline.parts.storage.GlobalStorage;
 import de.verdox.vcore.util.global.AnnotationResolver;
-import org.apache.commons.io.FilenameUtils;
+import org.bukkit.craftbukkit.libs.org.apache.commons.io.FilenameUtils;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nonnull;

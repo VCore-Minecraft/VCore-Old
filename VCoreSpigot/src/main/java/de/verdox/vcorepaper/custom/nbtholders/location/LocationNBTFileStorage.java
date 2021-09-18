@@ -4,6 +4,7 @@
 
 package de.verdox.vcorepaper.custom.nbtholders.location;
 
+import de.verdox.vcore.performance.concurrent.CatchingRunnable;
 import de.verdox.vcore.plugin.SystemLoadable;
 import de.verdox.vcore.plugin.VCorePlugin;
 import de.verdox.vcore.plugin.listener.VCoreListener;
@@ -49,9 +50,9 @@ public class LocationNBTFileStorage extends VCoreListener.VCoreBukkitListener im
         String worldName = e.getChunk().getWorld().getName();
 
         File worldDirectory = e.getWorld().getWorldFolder();
-        executor.submit(() -> {
+        executor.submit(new CatchingRunnable(() -> {
             if (!fileCache.containsKey(worldName)) {
-                plugin.consoleMessage("&8[&b" + e.getChunk().getWorld().getName() + "&8] &eaWorld loaded", false);
+                plugin.consoleMessage("&8[&b" + e.getChunk().getWorld().getName() + "&8] &eWorld loaded", false);
                 fileCache.put(worldName, new WorldStorage(plugin, worldDirectory, worldName));
             }
             WorldStorage worldStorage = fileCache.get(worldName);
@@ -61,25 +62,23 @@ public class LocationNBTFileStorage extends VCoreListener.VCoreBukkitListener im
             if (worldStorage.isRegionCached(regionX, regionZ))
                 return;
             worldStorage.cacheRegion(regionX, regionZ);
-        });
+        }));
     }
 
     @EventHandler
     public void onChunkUnload(ChunkUnloadEvent e) {
         Chunk chunk = e.getChunk();
         String worldName = e.getChunk().getWorld().getName();
-        executor.submit(() -> {
+        executor.submit(new CatchingRunnable(() -> {
             if (!fileCache.containsKey(worldName))
                 return;
             WorldStorage worldStorage = fileCache.get(worldName);
             int regionX = WorldChunk.getRegionX(chunk.getX());
             int regionZ = WorldChunk.getRegionZ(chunk.getZ());
             WorldRegion worldRegion = new WorldRegion(worldName, regionX, regionZ);
-            if (!VCoreUtil.BukkitUtil.getBukkitWorldUtil().isRegionLoaded(worldRegion) && worldStorage.isRegionCached(regionX, regionZ)) {
-                plugin.consoleMessage("&8[&b" + e.getChunk().getWorld().getName() + "&8] &eUnloading Region " + WorldRegion.toString(regionX, regionZ) + " &8[&6Chunk&7: &e" + chunk.getX() + " &7| &e" + chunk.getZ() + "&8]", true);
+            if (!VCoreUtil.BukkitUtil.getBukkitWorldUtil().isRegionLoaded(worldRegion) && worldStorage.isRegionCached(regionX, regionZ))
                 worldStorage.unCacheRegion(regionX, regionZ);
-            }
-        });
+        }));
     }
 
     @EventHandler
