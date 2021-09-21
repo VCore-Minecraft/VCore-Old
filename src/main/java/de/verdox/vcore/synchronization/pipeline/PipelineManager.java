@@ -356,11 +356,16 @@ public class PipelineManager implements Pipeline {
         } else {
             if (!createIfNotExist)
                 return null;
-            createNewData(dataClass, uuid);
+            T data = createNewData(dataClass, uuid);
+            data.updateLastUse();
+            plugin.consoleMessage("&eLoaded &a" + dataClass.getSimpleName() + " &ewith uuid&7: " + uuid, 1, true);
+            return data;
         }
         plugin.consoleMessage("&eLoaded &a" + dataClass.getSimpleName() + " &ewith uuid&7: " + uuid, 1, true);
-        if (!localCache.dataExist(dataClass, uuid))
-            throw new NullPointerException("Error in dataPipeline while loading " + dataClass + " with uuid " + uuid);
+        if (!localCache.dataExist(dataClass, uuid)) {
+            plugin.consoleMessage("&cData deleted from other thread while loading &a" + dataClass.getSimpleName() + " &ewith uuid&7: " + uuid, 1, true);
+            return null;
+        }
         T data = localCache.getData(dataClass, uuid);
         data.updateLastUse();
         return data;

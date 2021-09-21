@@ -126,6 +126,7 @@ public class CustomItemManager extends CustomDataManager<ItemStack, ItemCustomDa
 
         private final CustomItemManager customItemManager;
         private Material material;
+        private ItemStack stack;
         private int amount = 1;
         private String displayName;
         private List<String> lore;
@@ -167,6 +168,7 @@ public class CustomItemManager extends CustomDataManager<ItemStack, ItemCustomDa
         VCoreItemBuilder(CustomItemManager customItemManager, ItemStack stack, int amount, String displayName) {
             this.customItemManager = customItemManager;
             this.material = stack.getType();
+            this.stack = stack;
             this.amount = amount;
             this.displayName = displayName;
             if (displayName.equals(stack.getI18NDisplayName()) && stack.getItemMeta() != null && !stack.getItemMeta().getDisplayName().isEmpty())
@@ -230,12 +232,12 @@ public class CustomItemManager extends CustomDataManager<ItemStack, ItemCustomDa
         public <R extends VCoreItem> VCoreItem buildItem(Class<? extends R> type) {
             if (material == null)
                 throw new NullPointerException("Material can't be null!");
-            ItemStack itemStack = new ItemStack(material, amount);
-            ItemMeta meta;
-            if (this.meta != null)
-                meta = this.meta;
+            ItemStack itemStack;
+            if (this.stack != null)
+                itemStack = this.stack.clone();
             else
-                meta = itemStack.getItemMeta();
+                itemStack = new ItemStack(material, amount);
+            ItemMeta meta = itemStack.getItemMeta();
             if (displayName != null && !displayName.isEmpty())
                 meta.setDisplayName(ChatColor.translateAlternateColorCodes('&', displayName));
             if (lore != null && !lore.isEmpty())

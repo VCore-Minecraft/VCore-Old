@@ -71,10 +71,12 @@ public class SerializableAdvancementProgress implements Serializable, CustomPipe
                 return;
             AdvancementProgress advancementProgress = player.getAdvancementProgress(advancement);
             progressMap.forEach((criteria, unlocked) -> {
-                if (unlocked)
-                    VCorePaper.getInstance().getNmsManager().getNMSPlayerHandler().silentlyGrantAdvancementProgress(player, advancement, criteria);
-                else
-                    advancementProgress.revokeCriteria(criteria);
+                VCorePaper.getInstance().sync(() -> {
+                    if (unlocked)
+                        VCorePaper.getInstance().getNmsManager().getNMSPlayerHandler().silentlyGrantAdvancementProgress(player, advancement, criteria);
+                    else
+                        advancementProgress.revokeCriteria(criteria);
+                });
             });
         });
         if (callback != null)
@@ -84,5 +86,10 @@ public class SerializableAdvancementProgress implements Serializable, CustomPipe
     @Override
     public Map<String, Object> getUnderlyingMap() {
         return data;
+    }
+
+    @Override
+    public void save() {
+
     }
 }

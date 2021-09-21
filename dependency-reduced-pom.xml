@@ -84,6 +84,12 @@
             <version>1.16-R0.4-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>com.destroystokyo.paper</groupId>
+            <artifactId>paper_1.16.5</artifactId>
+            <version>1.16.5</version>
+            <scope>provided</scope>
+        </dependency>
     </dependencies>
     <reporting>
         <plugins>

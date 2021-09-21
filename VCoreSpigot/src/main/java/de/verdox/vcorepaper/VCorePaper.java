@@ -9,12 +9,14 @@ import com.comphenix.protocol.ProtocolManager;
 import de.verdox.vcore.plugin.VCoreCoreInstance;
 import de.verdox.vcore.plugin.subsystem.VCoreSubsystem;
 import de.verdox.vcore.synchronization.networkmanager.NetworkManager;
+import de.verdox.vcore.synchronization.networkmanager.player.VCorePlayer;
 import de.verdox.vcore.synchronization.networkmanager.player.api.VCorePlayerAPI;
 import de.verdox.vcore.synchronization.networkmanager.player.api.bukkit.VCorePlayerAPIBukkitImpl;
 import de.verdox.vcore.synchronization.networkmanager.player.listener.PlayerBukkitListener;
 import de.verdox.vcore.synchronization.networkmanager.server.ServerType;
 import de.verdox.vcore.synchronization.networkmanager.server.api.VCoreServerAPI;
 import de.verdox.vcore.synchronization.networkmanager.server.api.VCoreServerAPIImpl;
+import de.verdox.vcore.synchronization.pipeline.parts.Pipeline;
 import de.verdox.vcorepaper.commands.AdminCommands;
 import de.verdox.vcorepaper.commands.NMSCommand;
 import de.verdox.vcorepaper.commands.PlayerAPICommands;
@@ -43,6 +45,7 @@ public class VCorePaper extends VCoreCoreInstance.Minecraft {
 
     //TODO: Integrieren possibly: https://www.spigotmc.org/resources/mapapi.93343
     //TODO: Standard Commands mit ner Config /discord /teamspeak /forum /wiki
+    // Wenn Server während Laufzeit gestartet ist muss der Spielercache irgendwie aktualisiert werden
 
     public static VCorePaper instance;
 
@@ -126,6 +129,7 @@ public class VCorePaper extends VCoreCoreInstance.Minecraft {
         networkManager.getServerPingManager().sendOnlinePing();
         getCustomLocationDataManager().registerData(BlockDebugData.class);
         getCustomBlockDataManager().registerData(BlockDebugData.class);
+        getInstance().getServices().getPipeline().loadAllData(VCorePlayer.class, Pipeline.LoadingStrategy.LOAD_PIPELINE);
     }
 
     public ProtocolManager getProtocolManager() {
@@ -181,11 +185,6 @@ public class VCorePaper extends VCoreCoreInstance.Minecraft {
 
     public NMSManager getNmsManager() {
         return nmsManager;
-    }
-
-    @Override
-    public void shutdown() {
-
     }
 
     public NetworkManager<VCorePaper> getNetworkManager() {

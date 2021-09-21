@@ -12,6 +12,8 @@ import org.bukkit.craftbukkit.v1_16_R3.CraftWorld;
 import org.bukkit.craftbukkit.v1_16_R3.entity.CraftPlayer;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Villager;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.Locale;
@@ -107,5 +109,15 @@ public class EntityHandler_V1_16_R3 implements NMSEntityHandler {
             craftPlayer.getHandle().playerConnection.sendPacket(packetPlayOutSpawnEntity);
             craftPlayer.getHandle().playerConnection.sendPacket(packetPlayOutEntityMetadata);
         });
+    }
+
+    @Override
+    public void openTradingGUI(@NotNull Villager villager, @NotNull Player player) {
+
+    }
+
+    @Override
+    public int getOffers(@NotNull Villager villager) {
+        return 0;
     }
 }

@@ -27,6 +27,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class SerializableInventory implements Serializable, CustomPipelineData {
 
     protected final Map<String, Object> data;
+    private Inventory localRepresentation;
 
     public SerializableInventory(@NotNull String id, @NotNull ItemStack[] storageContents) {
         this.data = new ConcurrentHashMap<>();
@@ -51,9 +52,16 @@ public class SerializableInventory implements Serializable, CustomPipelineData {
     }
 
     public Inventory asInventory(String displayName, int size) {
-        Inventory inventory = Bukkit.createInventory(null, size, ChatColor.translateAlternateColorCodes('&', displayName));
-        inventory.setContents(deSerializeStorageContents());
-        return inventory;
+        if (localRepresentation == null) {
+            localRepresentation = Bukkit.createInventory(null, size, ChatColor.translateAlternateColorCodes('&', displayName));
+            localRepresentation.setContents(deSerializeStorageContents());
+        }
+        return localRepresentation;
+    }
+
+    public void save() {
+        if (localRepresentation != null)
+            saveStorageContents(localRepresentation.getStorageContents());
     }
 
     public void saveToInventory(@NotNull Inventory inventory, boolean override) {

@@ -326,6 +326,10 @@ public class VCoreGUI<T> implements CustomGUI {
             return this;
         }
 
+        public ContentBuilder<T> addContent(int slot, VCoreItem stack) {
+            return addContent(slot, stack, null);
+        }
+
         public ContentBuilder<T> removeItem(int slot) {
             itemCache.remove(slot);
             return this;
@@ -344,8 +348,8 @@ public class VCoreGUI<T> implements CustomGUI {
             return this;
         }
 
-        public ContentBuilder<T> createBorder(int size, VCoreItem vCoreItem, T object) {
-            int rows = size / 9;
+        public ContentBuilder<T> createBorder(int guiSize, VCoreItem vCoreItem, T object) {
+            int rows = guiSize / 9;
 
             fillRowWithItem(0, vCoreItem, object);
             fillRowWithItem(rows - 1, vCoreItem, object);
@@ -355,8 +359,8 @@ public class VCoreGUI<T> implements CustomGUI {
             return this;
         }
 
-        public ContentBuilder<T> createBorder(int size) {
-            return createBorder(size, VCorePaper.getInstance().getCustomItemManager().getGuiBorderItem(), null);
+        public ContentBuilder<T> createBorder(int guiSize) {
+            return createBorder(guiSize, VCorePaper.getInstance().getCustomItemManager().getGuiBorderItem(), null);
         }
 
 

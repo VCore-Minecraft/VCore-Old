@@ -17,7 +17,9 @@ import org.bukkit.inventory.ItemStack;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 /**
  * @version 1.0
@@ -53,7 +55,7 @@ public class ObservableInventory implements CustomGUI {
             open = false;
             HandlerList.unregisterAll(this.listener);
             if (onClose != null)
-                onClose.accept(Arrays.asList(inventory.getContents()));
+                onClose.accept(Arrays.stream(inventory.getContents()).filter(Objects::nonNull).collect(Collectors.toList()));
         }
     }
 
