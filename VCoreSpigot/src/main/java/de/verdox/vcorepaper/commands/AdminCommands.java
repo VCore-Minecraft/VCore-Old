@@ -12,11 +12,8 @@ import de.verdox.vcorepaper.VCorePaper;
 import de.verdox.vcorepaper.custom.block.VBlock;
 import de.verdox.vcorepaper.custom.block.data.debug.BlockDebugData;
 import de.verdox.vcorepaper.custom.entities.VCoreEntity;
-import de.verdox.vcorepaper.custom.gui.book.BookGUI;
+import de.verdox.vcorepaper.custom.gui.book.DialogBuilder;
 import de.verdox.vcorepaper.custom.items.VCoreItem;
-import net.kyori.adventure.inventory.Book;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.TextComponent;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Chunk;
@@ -43,15 +40,12 @@ public class AdminCommands extends VCoreCommand.VCoreBukkitCommand {
                 .setExecutor(VCommandCallback.CommandExecutorType.PLAYER)
                 .commandCallback((commandSender, commandParameters) -> {
                     Player player = (Player) commandSender;
-                    BookGUI bookGUI = new BookGUI(VCorePaper.getInstance(), player);
-
-                    TextComponent component = bookGUI.createResponsiveCallbackText(Component.text("Klicke mich als Test"), System.out::println);
-
-                    bookGUI.provideBook(() -> Book.builder()
-                            .title(Component.text("test"))
-                            .addPage(component).build());
-
-                    bookGUI.openBook();
+                    new DialogBuilder(VCorePaper.getInstance(), player)
+                            .addText("Hallo Fremder, dies ist ein Super cooler Text, versuche mal den Button unter dieser Line")
+                            .addButton("TestButton", player1 -> player1.sendMessage("hi"))
+                            .addText("Dann geht es direkt mit einem nächsten Teil weiter :D")
+                            .addButton("TestButton2", player1 -> player1.sendMessage("hi2"))
+                            .openDialog();
                 });
 
         addCommandCallback("debugNetworkInfo")

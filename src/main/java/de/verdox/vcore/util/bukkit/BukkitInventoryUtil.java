@@ -5,6 +5,7 @@
 package de.verdox.vcore.util.bukkit;
 
 import de.verdox.vcore.plugin.wrapper.types.StackPile;
+import de.verdox.vcore.util.VCoreUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.event.inventory.InventoryType;
@@ -50,6 +51,18 @@ public class BukkitInventoryUtil {
         return inventory.all(itemStack.getType()).values()
                 .stream()
                 .filter(stack -> stack.isSimilar(itemStack)).flatMapToInt(stack -> IntStream.of(stack.getAmount())).sum();
+    }
+
+    public boolean containsAtLeast(@NotNull Inventory inventory, @NotNull Inventory inventoryWithItems) {
+        for (ItemStack stack : inventoryWithItems) {
+            if (stack == null || stack.getType().isAir())
+                continue;
+            int amountAtLeast = VCoreUtil.BukkitUtil.getBukkitInventoryUtil().countItemAmount(inventory, stack);
+            if (!inventory.containsAtLeast(stack, amountAtLeast)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     public Map<Integer, ItemStack> removeItem(@NotNull Inventory inventory, @NotNull ItemStack itemStack, @Positive int number) {

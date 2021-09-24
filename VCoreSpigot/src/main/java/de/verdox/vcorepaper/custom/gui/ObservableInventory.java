@@ -11,7 +11,9 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
+import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
+import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
@@ -32,15 +34,21 @@ public class ObservableInventory implements CustomGUI {
     private final BukkitPlugin plugin;
     private final Inventory inventory;
     private final Player player;
+    private final boolean preventClick;
     private final Consumer<List<ItemStack>> onClose;
     private boolean open;
 
-    public ObservableInventory(BukkitPlugin plugin, Player player, Inventory inventory, Consumer<List<ItemStack>> onClose) {
+    public ObservableInventory(BukkitPlugin plugin, Player player, Inventory inventory, boolean preventClick, Consumer<List<ItemStack>> onClose) {
         this.plugin = plugin;
         this.inventory = inventory;
         this.player = player;
+        this.preventClick = preventClick;
         this.onClose = onClose;
         this.listener = new ObservableInventoryListener();
+    }
+
+    public ObservableInventory(BukkitPlugin plugin, Player player, Inventory inventory, Consumer<List<ItemStack>> onClose) {
+        this(plugin, player, inventory, false, onClose);
     }
 
     @Override
@@ -65,6 +73,18 @@ public class ObservableInventory implements CustomGUI {
             if (open && e.getInventory().equals(inventory)) {
                 closeInventory();
             }
+        }
+
+        @EventHandler
+        public void onClick(InventoryClickEvent e) {
+            if (open && e.getClickedInventory() != null && e.getClickedInventory().equals(inventory) && preventClick)
+                e.setCancelled(true);
+        }
+
+        @EventHandler
+        public void onDrag(InventoryDragEvent e) {
+            if (open && e.getInventory().equals(inventory) && preventClick)
+                e.setCancelled(true);
         }
     }
 }

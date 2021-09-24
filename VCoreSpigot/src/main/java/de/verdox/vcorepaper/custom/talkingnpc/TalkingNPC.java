@@ -9,6 +9,7 @@ import de.verdox.vcore.util.VCoreUtil;
 import de.verdox.vcorepaper.VCorePaper;
 import de.verdox.vcorepaper.custom.entities.CustomEntityManager;
 import de.verdox.vcorepaper.custom.entities.VCoreEntity;
+import de.verdox.vcorepaper.custom.gui.book.DialogGUI;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.event.HoverEvent;
@@ -129,8 +130,6 @@ public class TalkingNPC extends VCoreEntity {
                 .hoverEvent(HoverEvent.showText(Component.text("Klicke mich").color(TextColor.fromHexString("#ffbfa0"))));
         addButton(textComponent
                 , player -> VCoreUtil.BukkitUtil.getBukkitPlayerUtil().sendPlayerMessage(player, ChatMessageType.ACTION_BAR, "&7Du wendest dich ab..."));
-
-
     }
 
     public TextComponent addButton(@NotNull TextComponent textComponent, @NotNull Consumer<Player> consumer) {

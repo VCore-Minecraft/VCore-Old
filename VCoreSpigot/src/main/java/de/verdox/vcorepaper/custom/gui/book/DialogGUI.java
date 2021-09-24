@@ -2,11 +2,10 @@
  * Copyright (c) 2021. Lukas Jonsson
  */
 
-package de.verdox.vcorepaper.custom.talkingnpc;
+package de.verdox.vcorepaper.custom.gui.book;
 
 import de.verdox.vcore.util.VCoreUtil;
 import de.verdox.vcorepaper.VCorePaper;
-import de.verdox.vcorepaper.custom.gui.book.BookGUI;
 import net.kyori.adventure.inventory.Book;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
@@ -47,6 +46,10 @@ public class DialogGUI {
 
     public void openDialog() {
         createBookGUI(player).openBook();
+    }
+
+    public List<Component> getContent() {
+        return createBookGUI(player).getPages();
     }
 
     public BookGUI createBookGUI(@NotNull Player player) {

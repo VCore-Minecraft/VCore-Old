@@ -45,20 +45,19 @@ public interface VCoreSerializable {
     @NotNull
     default Map<String, Object> serialize() {
         Map<String, Object> serializedData = new HashMap<>();
-
         getPersistentDataFieldNames(getClass()).forEach(dataKey -> {
             try {
                 Field field = findField(getClass(), dataKey);
-                if (field == null) {
-                    System.out.println("Could not find field: " + dataKey);
+                if (field == null)
                     return;
-                }
                 field.setAccessible(true);
                 Object data = field.get(this);
                 if (data instanceof Collection<?>) {
                     Collection<?> collection = (Collection<?>) data;
                     serializedData.put(field.getName(), new ArrayList<>(collection));
-                } else if (data instanceof CustomPipelineData customPipelineData) {
+                } else if (data instanceof Map<?, ?>)
+                    serializedData.put(field.getName(), new LinkedHashMap<>((Map) data));
+                else if (data instanceof CustomPipelineData customPipelineData) {
                     customPipelineData.save();
                     if (!customPipelineData.getUnderlyingMap().isEmpty())
                         serializedData.put(dataKey, ((CustomPipelineData) data).getUnderlyingMap());
@@ -83,7 +82,6 @@ public interface VCoreSerializable {
                 return;
             if (key.equals("_id"))
                 return;
-
             try {
                 Field field = findField(getClass(), key);
                 if (field == null)
@@ -100,6 +98,12 @@ public interface VCoreSerializable {
                         Collection<?> fieldCollection = (Collection<?>) field.get(this);
                         fieldCollection.clear();
                         fieldCollection.addAll((Collection) value);
+                    } else if (Map.class.isAssignableFrom(field.getType())) {
+                        if (field.get(this) == null)
+                            field.set(field.getType().getConstructor().newInstance(), this);
+                        Map<?, ?> map = (Map<?, ?>) field.get(this);
+                        map.clear();
+                        map.putAll((Map) value);
                     } else if (CustomPipelineData.class.isAssignableFrom(field.getType()) && value instanceof Map) {
                         Class<? extends CustomPipelineData> type = (Class<? extends CustomPipelineData>) field.getType();
                         CustomPipelineData customPipelineData = instantiateCustomPipelineData(type);

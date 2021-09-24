@@ -7,6 +7,7 @@ package de.verdox.vcorepaper.custom.gui.book;
 import de.verdox.vcore.plugin.VCorePlugin;
 import de.verdox.vcorepaper.custom.gui.book.event.PlayerOpenBookGUIEvent;
 import net.kyori.adventure.inventory.Book;
+import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.event.ClickEvent;
 import org.bukkit.Bukkit;
@@ -21,6 +22,7 @@ import org.bukkit.event.player.PlayerKickEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -48,6 +50,10 @@ public class BookGUI {
 
     public void provideBook(@NotNull Supplier<Book> bookSupplier) {
         book = bookSupplier.get();
+    }
+
+    public List<Component> getPages() {
+        return book.pages();
     }
 
     public void openBook() {
