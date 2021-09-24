@@ -111,8 +111,8 @@ public class PipelineManager implements Pipeline {
      */
     @Override
     public final <T extends VCoreData> T load(@NotNull Class<? extends T> type, @NotNull(exception = NullPointerException.class) UUID uuid, @NotNull LoadingStrategy loadingStrategy, boolean createIfNotExist, @Nullable Consumer<T> callback) {
-        Objects.requireNonNull(type);
-        Objects.requireNonNull(uuid);
+        Objects.requireNonNull(type, "Dataclass can't be null");
+        Objects.requireNonNull(uuid, "UUID can't be null");
         //plugin.consoleMessage("&8[&e" + loadingStrategy + "&8] &bLoading data from pipeline &a" + type.getSimpleName() + " &b" + uuid, true);
         PipelineTaskScheduler.PipelineTask<T> pipelineTask = pipelineTaskScheduler.schedulePipelineTask(PipelineTaskScheduler.PipelineAction.LOAD, loadingStrategy, type, uuid);
 
@@ -163,8 +163,8 @@ public class PipelineManager implements Pipeline {
     @NotNull
     @Override
     public <T extends VCoreData> CompletableFuture<T> loadAsync(@NotNull Class<? extends T> type, @NotNull UUID uuid, @NotNull LoadingStrategy loadingStrategy, boolean createIfNotExist, @org.jetbrains.annotations.Nullable Consumer<T> callback) {
-        Objects.requireNonNull(type);
-        Objects.requireNonNull(uuid);
+        Objects.requireNonNull(type, "Dataclass can't be null");
+        Objects.requireNonNull(uuid, "UUID can't be null");
         CompletableFuture<T> completableFuture = new CompletableFuture<>();
         executorService.submit(new CatchingRunnable(() -> completableFuture.complete(load(type, uuid, loadingStrategy, createIfNotExist, callback))));
         return completableFuture;
@@ -173,7 +173,7 @@ public class PipelineManager implements Pipeline {
     @NotNull
     @Override
     public <T extends VCoreData> Set<T> loadAllData(@NotNull Class<? extends T> type, @NotNull LoadingStrategy loadingStrategy) {
-        Objects.requireNonNull(type);
+        Objects.requireNonNull(type, "Dataclass can't be null");
         Set<T> set = new HashSet<>();
         if (loadingStrategy.equals(LoadingStrategy.LOAD_PIPELINE))
             synchronizeData(type);
@@ -186,7 +186,7 @@ public class PipelineManager implements Pipeline {
     @NotNull
     @Override
     public <T extends VCoreData> CompletableFuture<Set<T>> loadAllDataAsync(@NotNull Class<? extends T> type, @NotNull LoadingStrategy loadingStrategy) {
-        Objects.requireNonNull(type);
+        Objects.requireNonNull(type, "Dataclass can't be null");
         CompletableFuture<Set<T>> completableFuture = new CompletableFuture<>();
         executorService.submit(new CatchingRunnable(() -> completableFuture.complete(loadAllData(type, loadingStrategy))));
         return completableFuture;
@@ -194,8 +194,8 @@ public class PipelineManager implements Pipeline {
 
     @Override
     public <T extends VCoreData> boolean exist(@NotNull Class<? extends T> type, @NotNull UUID uuid, @NotNull QueryStrategy... strategies) {
-        Objects.requireNonNull(type);
-        Objects.requireNonNull(uuid);
+        Objects.requireNonNull(type, "Dataclass can't be null");
+        Objects.requireNonNull(uuid, "UUID can't be null");
         if (strategies.length == 0)
             return false;
         Set<QueryStrategy> strategySet = Arrays.stream(strategies).collect(Collectors.toSet());
@@ -221,8 +221,8 @@ public class PipelineManager implements Pipeline {
 
     @Override
     public <T extends VCoreData> CompletableFuture<Boolean> existAsync(@NotNull Class<? extends T> type, @NotNull UUID uuid, @NotNull QueryStrategy... strategies) {
-        Objects.requireNonNull(type);
-        Objects.requireNonNull(uuid);
+        Objects.requireNonNull(type, "Dataclass can't be null");
+        Objects.requireNonNull(uuid, "UUID can't be null");
         CompletableFuture<Boolean> completableFuture = new CompletableFuture<>();
         executorService.submit(new CatchingRunnable(() -> completableFuture.complete(exist(type, uuid, strategies))));
         return completableFuture;
@@ -230,8 +230,8 @@ public class PipelineManager implements Pipeline {
 
     @Override
     public <T extends VCoreData> boolean delete(@NotNull Class<? extends T> type, @NotNull UUID uuid, boolean notifyOthers, @NotNull QueryStrategy... strategies) {
-        Objects.requireNonNull(type);
-        Objects.requireNonNull(uuid);
+        Objects.requireNonNull(type, "Dataclass can't be null");
+        Objects.requireNonNull(uuid, "UUID can't be null");
         Set<QueryStrategy> strategySet = Arrays.stream(strategies).collect(Collectors.toSet());
         if (strategySet.isEmpty())
             strategySet.add(QueryStrategy.ALL);
@@ -271,15 +271,15 @@ public class PipelineManager implements Pipeline {
 
     @Override
     public <T extends VCoreData> CompletableFuture<Boolean> deleteAsync(@NotNull Class<? extends T> type, @NotNull UUID uuid, boolean notifyOthers, @NotNull QueryStrategy... strategies) {
-        Objects.requireNonNull(type);
-        Objects.requireNonNull(uuid);
+        Objects.requireNonNull(type, "Dataclass can't be null");
+        Objects.requireNonNull(uuid, "UUID can't be null");
         CompletableFuture<Boolean> completableFuture = new CompletableFuture<>();
         executorService.submit(new CatchingRunnable(() -> completableFuture.complete(delete(type, uuid, notifyOthers, strategies))));
         return completableFuture;
     }
 
     private <T extends VCoreData> void synchronizeData(@NotNull Class<? extends T> type) {
-        Objects.requireNonNull(type);
+        Objects.requireNonNull(type, "Dataclass can't be null");
         if (getGlobalStorage() != null)
             getGlobalStorage().getSavedUUIDs(type).forEach(uuid -> {
                 if (!localCache.dataExist(type, uuid))
@@ -348,8 +348,8 @@ public class PipelineManager implements Pipeline {
     }
 
     private <T extends VCoreData> T loadFromPipeline(@NotNull Class<? extends T> dataClass, @NotNull UUID uuid, boolean createIfNotExist) {
-        Objects.requireNonNull(dataClass);
-        Objects.requireNonNull(uuid);
+        Objects.requireNonNull(dataClass, "Dataclass can't be null");
+        Objects.requireNonNull(uuid, "UUID can't be null");
         // ExistCheck LocalCache
         if (localCache.dataExist(dataClass, uuid)) {
             plugin.consoleMessage("&eFound Data in Local Cache &8[&b" + dataClass.getSimpleName() + "&8]", 1, true);
@@ -388,8 +388,8 @@ public class PipelineManager implements Pipeline {
     }
 
     private <T extends VCoreData> T createNewData(@NotNull Class<? extends T> dataClass, @NotNull UUID uuid) {
-        Objects.requireNonNull(dataClass);
-        Objects.requireNonNull(uuid);
+        Objects.requireNonNull(dataClass, "Dataclass can't be null");
+        Objects.requireNonNull(uuid, "UUID can't be null");
         plugin.consoleMessage("&eNo Data was found. Creating new data! &8[&b" + dataClass.getSimpleName() + "&8]", 1, true);
         T vCoreData = localCache.instantiateData(dataClass, uuid);
         vCoreData.loadDependentData();
@@ -404,7 +404,7 @@ public class PipelineManager implements Pipeline {
     }
 
     private <S extends VCoreData> void preloadData(Class<? extends S> type) {
-        Objects.requireNonNull(type);
+        Objects.requireNonNull(type, "Dataclass can't be null");
         VCoreDataProperties vCoreDataProperties = AnnotationResolver.getDataProperties(type);
         PreloadStrategy preloadStrategy = vCoreDataProperties.preloadStrategy();
         // Data will only be preloaded if it is declared properly
