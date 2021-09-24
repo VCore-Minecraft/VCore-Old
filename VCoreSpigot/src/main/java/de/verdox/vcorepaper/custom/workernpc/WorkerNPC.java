@@ -9,7 +9,9 @@ import de.verdox.vcorepaper.VCorePaper;
 import de.verdox.vcorepaper.custom.entities.CustomEntityManager;
 import de.verdox.vcorepaper.custom.entities.VCoreEntity;
 import de.verdox.vcorepaper.custom.gui.book.DialogBuilder;
+import de.verdox.vcorepaper.custom.gui.book.event.PlayerPreOpenDialogEvent;
 import net.kyori.adventure.text.TextComponent;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.entity.Entity;
@@ -63,7 +65,6 @@ public class WorkerNPC extends VCoreEntity {
     }
 
     public void openDialog(@NotNull Player player) {
-
         DialogBuilder dialogBuilder = new DialogBuilder(VCorePaper.getInstance(), player);
         if (getName() != null)
             dialogBuilder.addText(getName()).newLine();
@@ -73,7 +74,11 @@ public class WorkerNPC extends VCoreEntity {
         //dialogBuilder.newLine();
         getAllContent(dialogBuilder, player).forEach((textComponent, consumer) -> dialogBuilder.addButton(textComponent.content(), consumer));
         dialogBuilder.newLine();
-        dialogBuilder.openDialog();
+
+        PlayerPreOpenDialogEvent playerPreOpenDialogEvent = new PlayerPreOpenDialogEvent(player, this, dialogBuilder);
+        Bukkit.getPluginManager().callEvent(playerPreOpenDialogEvent);
+        if (!playerPreOpenDialogEvent.isCancelled())
+            playerPreOpenDialogEvent.getDialogBuilder().openDialog();
     }
 
     public <T extends NPCProfession> T addProfession(@NotNull Class<? extends T> type) {
