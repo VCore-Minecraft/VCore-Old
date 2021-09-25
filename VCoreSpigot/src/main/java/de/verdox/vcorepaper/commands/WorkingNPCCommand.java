@@ -20,8 +20,6 @@ import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.util.RayTraceResult;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Arrays;
-
 /**
  * @version 1.0
  * @Author: Lukas Jonsson (Verdox)
@@ -70,13 +68,17 @@ public class WorkingNPCCommand extends VCoreCommand.VCoreBukkitCommand {
                 .withPermission("workingNPC.setName")
                 .askFor("npcName", VCommandCallback.CommandAskType.STRING, "")
                 .commandCallback((commandSender, commandParameters) -> {
-                    Player player = (Player) commandSender;
-                    WorkerNPC workerNPC = lookAtWorkerNPC(player);
-                    if (workerNPC == null)
-                        return;
-                    String newName = commandParameters.getObject(0, String.class);
-                    workerNPC.setName(newName);
-                    player.sendMessage(ChatColor.GREEN + "Name changed!");
+                    vCorePlugin.sync(() -> {
+                        Player player = (Player) commandSender;
+                        WorkerNPC workerNPC = lookAtWorkerNPC(player);
+                        if (workerNPC == null) {
+                            player.sendMessage("§cSchaue einen WorkingNPC an.");
+                            return;
+                        }
+                        String newName = commandParameters.getObject(0, String.class);
+                        workerNPC.setName(newName);
+                        player.sendMessage(ChatColor.GREEN + "Name changed!");
+                    });
                 });
 
         addCommandCallback("changeText")
@@ -84,18 +86,20 @@ public class WorkingNPCCommand extends VCoreCommand.VCoreBukkitCommand {
                 .withPermission("workingNPC.changeText")
                 .askFor("npcName", VCommandCallback.CommandAskType.STRING, "")
                 .commandCallback((commandSender, commandParameters) -> {
-                    Player player = (Player) commandSender;
-                    WorkerNPC workerNPC = lookAtWorkerNPC(player);
-                    if (workerNPC == null)
-                        return;
-                    new PlayerChatInput.PlayerChatInputBuilder<String>(VCorePaper.getInstance(), player)
-                            .isValidInput((player1, s) -> true)
-                            .setValue((player1, s) -> s)
-                            .sendValueMessage("Write the new text in the chat")
-                            .onFinish((player1, s) -> {
-                                workerNPC.setText(s);
-                                player.sendMessage(ChatColor.GREEN + "Text changed!");
-                            }).build().start();
+                    vCorePlugin.sync(() -> {
+                        Player player = (Player) commandSender;
+                        WorkerNPC workerNPC = lookAtWorkerNPC(player);
+                        if (workerNPC == null)
+                            return;
+                        new PlayerChatInput.PlayerChatInputBuilder<String>(VCorePaper.getInstance(), player)
+                                .isValidInput((player1, s) -> true)
+                                .setValue((player1, s) -> s)
+                                .sendValueMessage("Write the new text in the chat")
+                                .onFinish((player1, s) -> {
+                                    workerNPC.setText(s);
+                                    player.sendMessage(ChatColor.GREEN + "Text changed!");
+                                }).build().start();
+                    });
                 });
 
         addCommandCallback("addProfession")
@@ -103,7 +107,6 @@ public class WorkingNPCCommand extends VCoreCommand.VCoreBukkitCommand {
                 .withPermission("workingNPC.addProfession")
                 .askFor("profession", VCommandCallback.CommandAskType.STRING, "&cProfession unknown", VCorePaper.getInstance().getCustomEntityManager().getProfessionRegistry().getProfessions().toArray(String[]::new))
                 .commandCallback((commandSender, commandParameters) -> {
-                    System.out.println(Arrays.toString(VCorePaper.getInstance().getCustomEntityManager().getProfessionRegistry().getProfessions().toArray(String[]::new)));
                     Player player = (Player) commandSender;
                     vCorePlugin.sync(() -> {
                         WorkerNPC workerNPC = lookAtWorkerNPC(player);

@@ -18,6 +18,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.*;
+import org.bukkit.event.player.PlayerSwapHandItemsEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.scheduler.BukkitTask;
 
@@ -547,6 +548,12 @@ public class VCoreGUI<T> implements CustomGUI {
                         .onClose(player -> copy())
                         .open(getPlayer());
             }
+        }
+
+        @EventHandler
+        public void offHandSwitch(PlayerSwapHandItemsEvent e) {
+            if (e.getPlayer().getOpenInventory().getTopInventory().equals(VCoreGUI.this.inventory))
+                e.setCancelled(true);
         }
 
         @EventHandler
