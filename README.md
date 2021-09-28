@@ -38,3 +38,14 @@ The api will get big changes so use it at your own risk!
  - ([GPL-2.0 License](https://github.com/dmulloy2/ProtocolLib/blob/master/License.txt)) - [dmulloy2 - ProtocolLib](https://github.com/dmulloy2/ProtocolLib) 
  - ([GPL-3.0 License](https://dev.bukkit.org/projects/holographic-displays)) - [filoghost - Holographic Displays](https://dev.bukkit.org/projects/holographic-displays) 
  - ([GPL-3.0 License](https://github.com/Carleslc/Simple-YAML/blob/master/LICENSE)) - [Carleslc - Simple-YAML](https://github.com/Carleslc/Simple-YAML)
+
+## Special thanks to
+![YourKit](https://www.yourkit.com/images/yklogo.png)
+
+For there awesome Java Profiling Tool!
+
+YourKit supports open source projects with innovative and intelligent tools
+for monitoring and profiling Java and .NET applications.
+YourKit is the creator of <a href="https://www.yourkit.com/java/profiler/">YourKit Java Profiler</a>,
+<a href="https://www.yourkit.com/.net/profiler/">YourKit .NET Profiler</a>,
+and <a href="https://www.yourkit.com/youmonitor/">YourKit YouMonitor</a>.
