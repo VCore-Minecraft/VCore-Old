@@ -11,6 +11,7 @@ import reactor.util.annotation.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -29,7 +30,8 @@ public abstract class TaskBatch<V extends VCorePlugin<?, ?>> {
     private final AtomicBoolean locked = new AtomicBoolean(false);
     private Runnable callback;
 
-    public TaskBatch(V plugin) {
+    public TaskBatch(@NotNull V plugin) {
+        Objects.requireNonNull(plugin, "plugin can't be null");
         this.plugin = plugin;
     }
 

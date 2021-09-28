@@ -59,7 +59,7 @@ public class MongoDBStorage implements GlobalStorage, RemoteStorage {
 
 
     @Override
-    public Map<String, Object> loadData(@Nonnull @NotNull Class<? extends VCoreData> dataClass, @Nonnull @NotNull UUID objectUUID) {
+    public synchronized Map<String, Object> loadData(@Nonnull @NotNull Class<? extends VCoreData> dataClass, @Nonnull @NotNull UUID objectUUID) {
         Document filter = new Document("objectUUID", objectUUID.toString());
 
         Document mongoDBData = getMongoStorage(dataClass, getSuffix(dataClass)).find(filter).first();
@@ -85,13 +85,13 @@ public class MongoDBStorage implements GlobalStorage, RemoteStorage {
     }
 
     @Override
-    public boolean dataExist(@Nonnull @NotNull Class<? extends VCoreData> dataClass, @Nonnull @NotNull UUID objectUUID) {
+    public synchronized boolean dataExist(@Nonnull @NotNull Class<? extends VCoreData> dataClass, @Nonnull @NotNull UUID objectUUID) {
         Document document = getMongoStorage(dataClass, getSuffix(dataClass)).find(new Document("objectUUID", objectUUID.toString())).first();
         return document != null;
     }
 
     @Override
-    public void save(@Nonnull @NotNull Class<? extends VCoreData> dataClass, @Nonnull @NotNull UUID objectUUID, @Nonnull @NotNull Map<String, Object> dataToSave) {
+    public synchronized void save(@Nonnull @NotNull Class<? extends VCoreData> dataClass, @Nonnull @NotNull UUID objectUUID, @Nonnull @NotNull Map<String, Object> dataToSave) {
         Document filter = new Document("objectUUID", objectUUID.toString());
 
         MongoCollection<Document> collection = getMongoStorage(dataClass, getSuffix(dataClass));
@@ -108,7 +108,7 @@ public class MongoDBStorage implements GlobalStorage, RemoteStorage {
     }
 
     @Override
-    public boolean remove(@Nonnull @NotNull Class<? extends VCoreData> dataClass, @Nonnull @NotNull UUID objectUUID) {
+    public synchronized boolean remove(@Nonnull @NotNull Class<? extends VCoreData> dataClass, @Nonnull @NotNull UUID objectUUID) {
         Document filter = new Document("objectUUID", objectUUID.toString());
 
         MongoCollection<Document> collection = getMongoStorage(dataClass, getSuffix(dataClass));
@@ -116,7 +116,7 @@ public class MongoDBStorage implements GlobalStorage, RemoteStorage {
     }
 
     @Override
-    public Set<UUID> getSavedUUIDs(@Nonnull @NotNull Class<? extends VCoreData> dataClass) {
+    public synchronized Set<UUID> getSavedUUIDs(@Nonnull @NotNull Class<? extends VCoreData> dataClass) {
         MongoCollection<Document> collection = getMongoStorage(dataClass, getSuffix(dataClass));
         Set<UUID> uuids = new HashSet<>();
         for (Document document : collection.find()) {
@@ -127,7 +127,7 @@ public class MongoDBStorage implements GlobalStorage, RemoteStorage {
         return uuids;
     }
 
-    private MongoCollection<Document> getMongoStorage(Class<? extends VCoreData> dataClass, String suffix) {
+    private synchronized MongoCollection<Document> getMongoStorage(Class<? extends VCoreData> dataClass, String suffix) {
         if (NetworkData.class.isAssignableFrom(dataClass)) {
             return getCollection("VCore_NetworkData_" + dataClass.getCanonicalName() + "_" + suffix);
         } else {
@@ -141,7 +141,7 @@ public class MongoDBStorage implements GlobalStorage, RemoteStorage {
         }
     }
 
-    private final com.mongodb.client.MongoCollection<Document> getCollection(String name) {
+    private synchronized com.mongodb.client.MongoCollection<Document> getCollection(String name) {
         try {
             return mongoDatabase.getCollection(name);
         }
