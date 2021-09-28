@@ -552,14 +552,18 @@ public class VCoreGUI<T> implements CustomGUI {
 
         @EventHandler
         public void offHandSwitch(PlayerSwapHandItemsEvent e) {
-            if (e.getPlayer().getOpenInventory().getTopInventory().equals(VCoreGUI.this.inventory))
+            if (e.getPlayer().getOpenInventory().getTopInventory().equals(VCoreGUI.this.inventory)) {
                 e.setCancelled(true);
+                player.updateInventory();
+            }
         }
 
         @EventHandler
         public void onInventoryDrag(InventoryDragEvent e) {
-            if (e.getInventory().equals(VCoreGUI.this.inventory))
+            if (e.getInventory().equals(VCoreGUI.this.inventory)) {
                 e.setCancelled(true);
+                player.updateInventory();
+            }
         }
 
         @EventHandler

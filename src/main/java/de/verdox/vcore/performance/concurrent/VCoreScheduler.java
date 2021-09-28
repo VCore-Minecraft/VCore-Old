@@ -7,8 +7,9 @@ package de.verdox.vcore.performance.concurrent;
 import de.verdox.vcore.plugin.SystemLoadable;
 import de.verdox.vcore.plugin.VCorePlugin;
 import io.netty.util.concurrent.DefaultThreadFactory;
-import org.checkerframework.checker.index.qual.NonNegative;
+import org.jetbrains.annotations.NotNull;
 
+import java.util.Objects;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -23,19 +24,31 @@ public class VCoreScheduler implements SystemLoadable {
         this.scheduledExecutorService = Executors.newScheduledThreadPool(4, new DefaultThreadFactory(vCorePlugin.getPluginName() + "Scheduler"));
     }
 
-    public ScheduledFuture<?> asyncInterval(Runnable task, long delay, long interval) {
+    public ScheduledFuture<?> asyncInterval(@NotNull Runnable task, long delay, long interval) {
+        Objects.requireNonNull(task, "task can't be null");
         return scheduledExecutorService.scheduleAtFixedRate(new CatchingRunnable(task), delay * 50, interval * 50, TimeUnit.MILLISECONDS);
     }
 
-    public ScheduledFuture<?> asyncSchedule(Runnable task, long delay) {
+    public ScheduledFuture<?> asyncInterval(@NotNull Runnable task, long delay, long interval, @NotNull TimeUnit timeUnit) {
+        Objects.requireNonNull(task, "task can't be null");
+        Objects.requireNonNull(timeUnit, "timeUnit can't be null");
+        return scheduledExecutorService.scheduleAtFixedRate(new CatchingRunnable(task), delay, interval, timeUnit);
+    }
+
+
+    public ScheduledFuture<?> asyncSchedule(@NotNull Runnable task, long delay) {
+        Objects.requireNonNull(task, "task can't be null");
         return scheduledExecutorService.schedule(new CatchingRunnable(task), delay * 50, TimeUnit.MILLISECONDS);
     }
 
-    public ScheduledFuture<?> asyncSchedule(Runnable task, @NonNegative long delay, TimeUnit timeUnit) {
+    public ScheduledFuture<?> asyncSchedule(@NotNull Runnable task, long delay, @NotNull TimeUnit timeUnit) {
+        Objects.requireNonNull(task, "task can't be null");
+        Objects.requireNonNull(timeUnit, "timeUnit can't be null");
         return scheduledExecutorService.schedule(new CatchingRunnable(task), delay, timeUnit);
     }
 
-    public void async(Runnable task) {
+    public void async(@NotNull Runnable task) {
+        Objects.requireNonNull(task, "task can't be null");
         scheduledExecutorService.execute(new CatchingRunnable(task));
     }
 
