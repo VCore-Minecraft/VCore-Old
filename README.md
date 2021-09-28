@@ -42,7 +42,7 @@ The api will get big changes so use it at your own risk!
 ## Special thanks to
 ![YourKit](https://www.yourkit.com/images/yklogo.png)
 
-For there awesome Java Profiling Tool!
+For there awesome Java Profiling Tool used to make VCore even better!
 
 YourKit supports open source projects with innovative and intelligent tools
 for monitoring and profiling Java and .NET applications.
