@@ -10,6 +10,7 @@ import de.verdox.vcore.plugin.command.VCoreCommand;
 import de.verdox.vcore.plugin.wrapper.types.WorldChunk;
 import de.verdox.vcorepaper.VCorePaper;
 import de.verdox.vcorepaper.custom.gui.book.DialogBuilder;
+import de.verdox.vcorepaper.custom.nbt.block.VBlock;
 import de.verdox.vcorepaper.custom.nbt.block.data.debug.BlockDebugData;
 import de.verdox.vcorepaper.custom.nbt.entities.VCoreEntity;
 import de.verdox.vcorepaper.custom.nbt.items.VCoreItem;
