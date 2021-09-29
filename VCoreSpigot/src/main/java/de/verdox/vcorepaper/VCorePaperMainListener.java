@@ -4,11 +4,9 @@
 
 package de.verdox.vcorepaper;
 
-import com.google.common.eventbus.Subscribe;
 import de.verdox.vcore.plugin.VCorePlugin;
 import de.verdox.vcore.plugin.listener.VCoreListener;
-import de.verdox.vcore.synchronization.networkmanager.serverping.events.ServerPingOfflineEvent;
-import de.verdox.vcore.synchronization.networkmanager.serverping.events.ServerPingOnlineEvent;
+import net.kyori.adventure.text.Component;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerKickEvent;
@@ -24,18 +22,6 @@ public class VCorePaperMainListener extends VCoreListener.VCoreBukkitListener {
         super(plugin);
     }
 
-    @Subscribe
-    public void onServerOnline(ServerPingOnlineEvent e) {
-        if (!e.isFirstReceivedPing())
-            return;
-
-    }
-
-    @Subscribe
-    public void onServerOffline(ServerPingOfflineEvent e) {
-
-    }
-
     @EventHandler
     public void onJoin(PlayerJoinEvent e) {
         e.joinMessage(null);
@@ -48,7 +34,7 @@ public class VCorePaperMainListener extends VCoreListener.VCoreBukkitListener {
 
     @EventHandler
     public void onKick(PlayerKickEvent e) {
-        e.leaveMessage(null);
+        e.leaveMessage(Component.text(""));
     }
 
 }

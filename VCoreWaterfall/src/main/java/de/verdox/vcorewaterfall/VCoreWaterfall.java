@@ -16,6 +16,7 @@ import de.verdox.vcore.synchronization.networkmanager.server.api.VCoreServerAPI;
 import de.verdox.vcore.synchronization.networkmanager.server.api.VCoreServerAPIImpl;
 import de.verdox.vcorewaterfall.pings.ServerPingListener;
 import net.md_5.bungee.api.ProxyServer;
+import org.bstats.bungeecord.Metrics;
 
 import java.util.List;
 
@@ -23,11 +24,13 @@ public class VCoreWaterfall extends VCoreCoreInstance.BungeeCord {
     private NetworkManager<VCoreWaterfall> networkManager;
     private VCorePlayerAPI vCorePlayerAPI;
     private VCoreServerAPI vCoreServerAPI;
+    private Metrics metrics;
 
     //TODO: BungeeCord Fallback Server umgehen? Selber irgendwie fallback server bei join event bestimmen oder sowas
 
     @Override
     public void onPluginEnable() {
+        metrics = new Metrics(this, 12913);
         networkManager = new NetworkManager<>(this, ServerType.PROXY);
         new PlayerProxyListener(networkManager);
 

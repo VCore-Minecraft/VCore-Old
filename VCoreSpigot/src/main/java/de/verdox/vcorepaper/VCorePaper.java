@@ -38,6 +38,7 @@ import de.verdox.vcorepaper.custom.nbt.items.CustomItemManager;
 import de.verdox.vcorepaper.custom.workernpc.listener.WorkerNPCListener;
 import de.verdox.vcorepaper.nms.NMSManager;
 import net.roxeez.advancement.AdvancementManager;
+import org.bstats.bukkit.Metrics;
 import org.bukkit.Bukkit;
 import org.jetbrains.annotations.Nullable;
 
@@ -71,6 +72,7 @@ public class VCorePaper extends VCoreCoreInstance.Minecraft {
     private EconomyContainer economyContainer = new EconomyContainer();
 
     private LocationNBTFileStorage locationNBTFileStorage;
+    private Metrics metrics;
 
     public static VCorePaper getInstance() {
         return instance;
@@ -78,6 +80,7 @@ public class VCorePaper extends VCoreCoreInstance.Minecraft {
 
     @Override
     public void onPluginEnable() {
+        metrics = new Metrics(this, 12912);
         instance = this;
 
         Bukkit.advancementIterator().forEachRemaining(advancement -> {
