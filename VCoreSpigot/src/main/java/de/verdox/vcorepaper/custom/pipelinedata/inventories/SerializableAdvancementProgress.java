@@ -2,7 +2,7 @@
  * Copyright (c) 2021. Lukas Jonsson
  */
 
-package de.verdox.vcorepaper.custom.custompipelinedata.inventories;
+package de.verdox.vcorepaper.custom.pipelinedata.inventories;
 
 import de.verdox.vcore.synchronization.pipeline.datatypes.CustomPipelineData;
 import de.verdox.vcore.synchronization.pipeline.datatypes.serializables.reference.collections.MapBsonReference;
