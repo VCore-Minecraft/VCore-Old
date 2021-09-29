@@ -10,8 +10,10 @@ import de.verdox.vcore.plugin.files.config.bungeecord.VCoreBungeeConfig;
 import de.verdox.vcore.plugin.files.config.serialization.VCoreDeserializer;
 import de.verdox.vcore.plugin.files.config.serialization.VCoreSerializable;
 import org.bukkit.craftbukkit.libs.org.apache.commons.io.FilenameUtils;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
+import java.util.Objects;
 
 public abstract class VCoreConfig<T> {
     protected final VCorePlugin<?, ?> plugin;
@@ -21,7 +23,9 @@ public abstract class VCoreConfig<T> {
     protected T config;
     protected boolean initialized = false;
 
-    public VCoreConfig(VCorePlugin<?, ?> plugin, File file) {
+    public VCoreConfig(@NotNull VCorePlugin<?, ?> plugin, @NotNull File file) {
+        Objects.requireNonNull(plugin, "plugin can't be null!");
+        Objects.requireNonNull(file, "file can't be null!");
         this.plugin = plugin;
         this.file = file;
         this.fileName = FilenameUtils.removeExtension(file.getName());
@@ -29,7 +33,10 @@ public abstract class VCoreConfig<T> {
         this.pluginDirectory = split[split.length - 1];
     }
 
-    public VCoreConfig(VCorePlugin<?, ?> plugin, String fileName, String pluginDirectory) {
+    public VCoreConfig(@NotNull VCorePlugin<?, ?> plugin, @NotNull String fileName, @NotNull String pluginDirectory) {
+        Objects.requireNonNull(plugin, "plugin can't be null!");
+        Objects.requireNonNull(fileName, "fileName can't be null!");
+        Objects.requireNonNull(pluginDirectory, "pluginDirectory can't be null!");
         this.plugin = plugin;
         this.file = new File(plugin.getPluginDataFolder() + pluginDirectory, fileName);
         this.fileName = fileName;

@@ -8,6 +8,7 @@ import de.verdox.vcore.synchronization.pipeline.annotations.VCorePersistentData;
 import de.verdox.vcore.synchronization.pipeline.datatypes.CustomPipelineData;
 import de.verdox.vcore.util.VCoreUtil;
 import org.jetbrains.annotations.NotNull;
+import org.reflections.ReflectionUtils;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -22,16 +23,23 @@ import java.util.stream.Collectors;
  */
 public interface VCoreSerializable {
     static Set<String> getPersistentDataFieldNames(Class<? extends VCoreSerializable> vCoreDataClass) {
-        return Arrays.stream(vCoreDataClass.getDeclaredFields())
-                .filter(field -> field.getAnnotation(VCorePersistentData.class) != null)
-                .map(Field::getName)
-                .collect(Collectors.toSet());
+        return getPersistentDataFields(vCoreDataClass).stream().map(Field::getName).collect(Collectors.toSet());
     }
 
-    static Set<Field> getPersistentDataFields(Class<? extends VCoreSerializable> vCoreDataClass) {
-        return Arrays.stream(vCoreDataClass.getDeclaredFields())
-                .filter(field -> field.getAnnotation(VCorePersistentData.class) != null)
-                .collect(Collectors.toSet());
+    private static Set<Field> getPersistentDataFields(Class<? extends VCoreSerializable> vCoreDataClass) {
+        return ReflectionUtils.getAllFields(vCoreDataClass, field -> field.getAnnotation(VCorePersistentData.class) != null);
+    }
+
+    private Field findField(Class<? extends VCoreSerializable> type, String fieldName) {
+        try {
+            return type.getDeclaredField(fieldName);
+        } catch (NoSuchFieldException e) {
+            try {
+                return type.getField(fieldName);
+            } catch (NoSuchFieldException noSuchFieldException) {
+                return getPersistentDataFields(type).stream().filter(field -> field.getName().equals(fieldName)).findAny().orElse(null);
+            }
+        }
     }
 
     @NotNull
@@ -39,17 +47,23 @@ public interface VCoreSerializable {
         Map<String, Object> serializedData = new HashMap<>();
         getPersistentDataFieldNames(getClass()).forEach(dataKey -> {
             try {
-                Field field = getClass().getDeclaredField(dataKey);
+                Field field = findField(getClass(), dataKey);
+                if (field == null)
+                    return;
                 field.setAccessible(true);
                 Object data = field.get(this);
                 if (data instanceof Collection<?>) {
                     Collection<?> collection = (Collection<?>) data;
                     serializedData.put(field.getName(), new ArrayList<>(collection));
-                } else if (data instanceof CustomPipelineData) {
-                    serializedData.put(dataKey, ((CustomPipelineData) data).getUnderlyingMap());
+                } else if (data instanceof Map<?, ?>)
+                    serializedData.put(field.getName(), new LinkedHashMap<>((Map) data));
+                else if (data instanceof CustomPipelineData customPipelineData) {
+                    customPipelineData.save();
+                    if (!customPipelineData.getUnderlyingMap().isEmpty())
+                        serializedData.put(dataKey, ((CustomPipelineData) data).getUnderlyingMap());
                 } else
                     serializedData.put(field.getName(), field.get(this));
-            } catch (NoSuchFieldException | IllegalAccessException e) {
+            } catch (IllegalAccessException e) {
                 e.printStackTrace();
             }
         });
@@ -68,9 +82,10 @@ public interface VCoreSerializable {
                 return;
             if (key.equals("_id"))
                 return;
-
             try {
-                Field field = getClass().getDeclaredField(key);
+                Field field = findField(getClass(), key);
+                if (field == null)
+                    return;
                 field.setAccessible(true);
                 dataBeforeDeserialization.put(key, field.get(this));
                 if (value == null)
@@ -83,6 +98,12 @@ public interface VCoreSerializable {
                         Collection<?> fieldCollection = (Collection<?>) field.get(this);
                         fieldCollection.clear();
                         fieldCollection.addAll((Collection) value);
+                    } else if (Map.class.isAssignableFrom(field.getType())) {
+                        if (field.get(this) == null)
+                            field.set(field.getType().getConstructor().newInstance(), this);
+                        Map<?, ?> map = (Map<?, ?>) field.get(this);
+                        map.clear();
+                        map.putAll((Map) value);
                     } else if (CustomPipelineData.class.isAssignableFrom(field.getType()) && value instanceof Map) {
                         Class<? extends CustomPipelineData> type = (Class<? extends CustomPipelineData>) field.getType();
                         CustomPipelineData customPipelineData = instantiateCustomPipelineData(type);
@@ -99,8 +120,6 @@ public interface VCoreSerializable {
                     field.set(this, value);
             } catch (IllegalAccessException | NoSuchMethodException | InstantiationException | InvocationTargetException e) {
                 e.printStackTrace();
-            } catch (NoSuchFieldException e) {
-                //System.err.println("Field " + key + " not found. Cleanup Task for missing fields will be implemented in a future release");
             }
         });
         return dataBeforeDeserialization;

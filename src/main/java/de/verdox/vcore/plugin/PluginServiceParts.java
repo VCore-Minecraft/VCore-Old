@@ -17,6 +17,9 @@ import de.verdox.vcore.synchronization.pipeline.parts.Pipeline;
 import de.verdox.vcore.synchronization.pipeline.player.PlayerDataManager;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.connection.Connection;
+import org.jetbrains.annotations.NotNull;
+
+import java.util.Objects;
 
 /**
  * @version 1.0
@@ -36,7 +39,8 @@ public abstract class PluginServiceParts<T extends VCorePlugin<?, S>, S extends 
 
     protected boolean loaded;
 
-    PluginServiceParts(T plugin) {
+    PluginServiceParts(@NotNull T plugin) {
+        Objects.requireNonNull(plugin, "plugin can't be null!");
         this.plugin = plugin;
         debugConfig = new DebugConfig(plugin);
         debugConfig.init();

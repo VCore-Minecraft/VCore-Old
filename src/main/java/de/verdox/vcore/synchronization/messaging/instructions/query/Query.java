@@ -8,6 +8,7 @@ import de.verdox.vcore.synchronization.messaging.instructions.InstructionRespond
 import de.verdox.vcore.synchronization.messaging.instructions.MessagingInstruction;
 import de.verdox.vcore.synchronization.messaging.instructions.ResponseProcessor;
 import de.verdox.vcore.synchronization.messaging.instructions.annotations.InstructionInfo;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -22,8 +23,9 @@ import java.util.concurrent.CompletableFuture;
 public abstract class Query<T> extends MessagingInstruction<T> implements InstructionResponder, ResponseProcessor<T> {
     private final CompletableFuture<T> future = new CompletableFuture<>();
 
-    public Query(UUID uuid) {
+    public Query(@NotNull UUID uuid) {
         super(uuid);
+
     }
 
     @Override

@@ -61,4 +61,33 @@ public class BukkitBookUtil {
 
         return lines;
     }
+
+    public String rawButtonFormat(String rawText) {
+        final MinecraftFont font = new MinecraftFont();
+        final int maxLineWidth = font.getWidth("LLLLLLLLLLLLLLLLLLL");
+        final int textWidth = font.getWidth(rawText);
+        final int spaceWidth = font.getWidth(" ");
+        final int paddingSize = maxLineWidth - textWidth - (font.getWidth("[") * 2);
+        final int spaceCount = paddingSize / spaceWidth;
+        int leftSide = spaceCount / 2;
+        int rightSite = spaceCount - leftSide;
+
+        StringBuilder stringBuilder = new StringBuilder("[");
+
+        int leftCounter = 0;
+        while (leftCounter < leftSide - 3) {
+            stringBuilder.append(" ");
+            leftCounter++;
+        }
+        stringBuilder.append(rawText);
+        int rightCounter = 0;
+        while (rightCounter < rightSite - 3) {
+            stringBuilder.append(" ");
+            rightCounter++;
+        }
+        stringBuilder.append("]");
+
+        // Leading §r to prevent the string trimming
+        return stringBuilder.toString();
+    }
 }

@@ -8,7 +8,7 @@ softdepend:
   - ProtocolLib
   - PlaceholderAPI
   - WorldEdit
-
+  - Vault
 commands:
   debug:
     description: "Main Debug Command for VCorePaper"
@@ -25,3 +25,6 @@ commands:
   talkingNPC:
     description: "Talking NPC"
     permission: "vcore.talkingNPC"
+  workingNPC:
+    description: "Working NPC Admin Command"
+    permission: "vcore.workingNPC"

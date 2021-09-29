@@ -24,7 +24,7 @@ public abstract class VCoreFieldReference<T> implements Serializable {
     }
 
     public T getValue() {
-        if (!data.containsKey(fieldName)) {
+        if (this.data == null || !data.containsKey(fieldName)) {
             setValue(defaultValue());
             return defaultValue();
         }
@@ -37,10 +37,14 @@ public abstract class VCoreFieldReference<T> implements Serializable {
     }
 
     public boolean isFieldSet() {
+        if (this.data == null)
+            return false;
         return data.containsKey(fieldName);
     }
 
     public T orElse(T elseValue) {
+        if (this.data == null)
+            return elseValue;
         if (!data.containsKey(fieldName))
             return elseValue;
         return getValue();

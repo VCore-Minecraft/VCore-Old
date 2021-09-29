@@ -16,6 +16,7 @@ import org.jetbrains.annotations.NotNull;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
@@ -31,7 +32,8 @@ public class InstructionService {
     private final Map<Integer, Class<? extends MessagingInstruction>> instructionTypes = new ConcurrentHashMap<>();
     private final Map<UUID, MessagingInstruction> pendingInstructions = new ConcurrentHashMap<>();
 
-    public InstructionService(VCorePlugin<?, ?> plugin) {
+    public InstructionService(@NotNull VCorePlugin<?, ?> plugin) {
+        Objects.requireNonNull(plugin, "plugin can't be null!");
         this.plugin = plugin;
         this.plugin.getServices().eventBus.register(this);
 

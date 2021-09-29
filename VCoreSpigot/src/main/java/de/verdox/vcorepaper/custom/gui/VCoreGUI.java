@@ -18,6 +18,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.*;
+import org.bukkit.event.player.PlayerSwapHandItemsEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.scheduler.BukkitTask;
 
@@ -326,6 +327,10 @@ public class VCoreGUI<T> implements CustomGUI {
             return this;
         }
 
+        public ContentBuilder<T> addContent(int slot, VCoreItem stack) {
+            return addContent(slot, stack, null);
+        }
+
         public ContentBuilder<T> removeItem(int slot) {
             itemCache.remove(slot);
             return this;
@@ -344,8 +349,8 @@ public class VCoreGUI<T> implements CustomGUI {
             return this;
         }
 
-        public ContentBuilder<T> createBorder(int size, VCoreItem vCoreItem, T object) {
-            int rows = size / 9;
+        public ContentBuilder<T> createBorder(int guiSize, VCoreItem vCoreItem, T object) {
+            int rows = guiSize / 9;
 
             fillRowWithItem(0, vCoreItem, object);
             fillRowWithItem(rows - 1, vCoreItem, object);
@@ -355,8 +360,8 @@ public class VCoreGUI<T> implements CustomGUI {
             return this;
         }
 
-        public ContentBuilder<T> createBorder(int size) {
-            return createBorder(size, VCorePaper.getInstance().getCustomItemManager().getGuiBorderItem(), null);
+        public ContentBuilder<T> createBorder(int guiSize) {
+            return createBorder(guiSize, VCorePaper.getInstance().getCustomItemManager().getGuiBorderItem(), null);
         }
 
 
@@ -546,9 +551,19 @@ public class VCoreGUI<T> implements CustomGUI {
         }
 
         @EventHandler
-        public void onInventoryDrag(InventoryDragEvent e) {
-            if (e.getInventory().equals(VCoreGUI.this.inventory))
+        public void offHandSwitch(PlayerSwapHandItemsEvent e) {
+            if (e.getPlayer().getOpenInventory().getTopInventory().equals(VCoreGUI.this.inventory)) {
                 e.setCancelled(true);
+                player.updateInventory();
+            }
+        }
+
+        @EventHandler
+        public void onInventoryDrag(InventoryDragEvent e) {
+            if (e.getInventory().equals(VCoreGUI.this.inventory)) {
+                e.setCancelled(true);
+                player.updateInventory();
+            }
         }
 
         @EventHandler

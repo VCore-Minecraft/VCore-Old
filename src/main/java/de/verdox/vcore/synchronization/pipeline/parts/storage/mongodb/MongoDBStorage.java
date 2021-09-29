@@ -19,7 +19,6 @@ import de.verdox.vcore.util.global.AnnotationResolver;
 import org.bson.Document;
 import org.jetbrains.annotations.NotNull;
 
-import javax.annotation.Nonnull;
 import java.util.*;
 
 /**
@@ -41,6 +40,11 @@ public class MongoDBStorage implements GlobalStorage, RemoteStorage {
     //private final CodecRegistry codecRegistry;
 
     public MongoDBStorage(VCorePlugin<?, ?> vCorePlugin, String host, String database, int port, String user, String password) {
+        Objects.requireNonNull(vCorePlugin, "vCorePlugin can't be null!");
+        Objects.requireNonNull(host, "host can't be null!");
+        Objects.requireNonNull(database, "database can't be null!");
+        Objects.requireNonNull(user, "user can't be null!");
+        Objects.requireNonNull(password, "password can't be null!");
         this.vCorePlugin = vCorePlugin;
         this.host = host;
         this.database = database;
@@ -59,7 +63,9 @@ public class MongoDBStorage implements GlobalStorage, RemoteStorage {
 
 
     @Override
-    public Map<String, Object> loadData(@Nonnull @NotNull Class<? extends VCoreData> dataClass, @Nonnull @NotNull UUID objectUUID) {
+    public synchronized Map<String, Object> loadData(@NotNull Class<? extends VCoreData> dataClass, @NotNull UUID objectUUID) {
+        Objects.requireNonNull(dataClass, "dataClass can't be null!");
+        Objects.requireNonNull(objectUUID, "objectUUID can't be null!");
         Document filter = new Document("objectUUID", objectUUID.toString());
 
         Document mongoDBData = getMongoStorage(dataClass, getSuffix(dataClass)).find(filter).first();
@@ -69,7 +75,8 @@ public class MongoDBStorage implements GlobalStorage, RemoteStorage {
         return convertDocumentToHashMap(mongoDBData);
     }
 
-    private Map<String, Object> convertDocumentToHashMap(Object object) {
+    private Map<String, Object> convertDocumentToHashMap(@NotNull Object object) {
+        Objects.requireNonNull(object, "object can't be null!");
         if (!(object instanceof Document))
             return null;
         Document document = (Document) object;
@@ -85,13 +92,18 @@ public class MongoDBStorage implements GlobalStorage, RemoteStorage {
     }
 
     @Override
-    public boolean dataExist(@Nonnull @NotNull Class<? extends VCoreData> dataClass, @Nonnull @NotNull UUID objectUUID) {
+    public synchronized boolean dataExist(@NotNull Class<? extends VCoreData> dataClass, @NotNull UUID objectUUID) {
+        Objects.requireNonNull(dataClass, "dataClass can't be null!");
+        Objects.requireNonNull(objectUUID, "objectUUID can't be null!");
         Document document = getMongoStorage(dataClass, getSuffix(dataClass)).find(new Document("objectUUID", objectUUID.toString())).first();
         return document != null;
     }
 
     @Override
-    public void save(@Nonnull @NotNull Class<? extends VCoreData> dataClass, @Nonnull @NotNull UUID objectUUID, @Nonnull @NotNull Map<String, Object> dataToSave) {
+    public synchronized void save(@NotNull Class<? extends VCoreData> dataClass, @NotNull UUID objectUUID, @NotNull Map<String, Object> dataToSave) {
+        Objects.requireNonNull(dataClass, "dataClass can't be null!");
+        Objects.requireNonNull(objectUUID, "objectUUID can't be null!");
+        Objects.requireNonNull(dataToSave, "dataToSave can't be null!");
         Document filter = new Document("objectUUID", objectUUID.toString());
 
         MongoCollection<Document> collection = getMongoStorage(dataClass, getSuffix(dataClass));
@@ -108,7 +120,9 @@ public class MongoDBStorage implements GlobalStorage, RemoteStorage {
     }
 
     @Override
-    public boolean remove(@Nonnull @NotNull Class<? extends VCoreData> dataClass, @Nonnull @NotNull UUID objectUUID) {
+    public synchronized boolean remove(@NotNull Class<? extends VCoreData> dataClass, @NotNull UUID objectUUID) {
+        Objects.requireNonNull(dataClass, "dataClass can't be null!");
+        Objects.requireNonNull(objectUUID, "objectUUID can't be null!");
         Document filter = new Document("objectUUID", objectUUID.toString());
 
         MongoCollection<Document> collection = getMongoStorage(dataClass, getSuffix(dataClass));
@@ -116,7 +130,8 @@ public class MongoDBStorage implements GlobalStorage, RemoteStorage {
     }
 
     @Override
-    public Set<UUID> getSavedUUIDs(@Nonnull @NotNull Class<? extends VCoreData> dataClass) {
+    public synchronized Set<UUID> getSavedUUIDs(@NotNull Class<? extends VCoreData> dataClass) {
+        Objects.requireNonNull(dataClass, "dataClass can't be null!");
         MongoCollection<Document> collection = getMongoStorage(dataClass, getSuffix(dataClass));
         Set<UUID> uuids = new HashSet<>();
         for (Document document : collection.find()) {
@@ -127,7 +142,9 @@ public class MongoDBStorage implements GlobalStorage, RemoteStorage {
         return uuids;
     }
 
-    private MongoCollection<Document> getMongoStorage(Class<? extends VCoreData> dataClass, String suffix) {
+    private synchronized MongoCollection<Document> getMongoStorage(@NotNull Class<? extends VCoreData> dataClass, @NotNull String suffix) {
+        Objects.requireNonNull(dataClass, "dataClass can't be null!");
+        Objects.requireNonNull(suffix, "suffix can't be null!");
         if (NetworkData.class.isAssignableFrom(dataClass)) {
             return getCollection("VCore_NetworkData_" + dataClass.getCanonicalName() + "_" + suffix);
         } else {
@@ -141,7 +158,8 @@ public class MongoDBStorage implements GlobalStorage, RemoteStorage {
         }
     }
 
-    private final com.mongodb.client.MongoCollection<Document> getCollection(String name) {
+    private synchronized com.mongodb.client.MongoCollection<Document> getCollection(@NotNull String name) {
+        Objects.requireNonNull(name, "name can't be null!");
         try {
             return mongoDatabase.getCollection(name);
         }
@@ -167,7 +185,8 @@ public class MongoDBStorage implements GlobalStorage, RemoteStorage {
         this.mongoClient.close();
     }
 
-    private String getSuffix(Class<? extends VCoreData> dataClass) {
+    private String getSuffix(@NotNull Class<? extends VCoreData> dataClass) {
+        Objects.requireNonNull(dataClass, "dataClass can't be null!");
         return AnnotationResolver.getDataStorageIdentifier(dataClass);
     }
 }

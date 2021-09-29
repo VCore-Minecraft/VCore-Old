@@ -7,11 +7,14 @@ package de.verdox.vcorepaper.nms.nmshandler.api.entity;
 import de.verdox.vcorepaper.nms.NMSHandler;
 import de.verdox.vcorepaper.nms.NMSVersion;
 import de.verdox.vcorepaper.nms.nmshandler.v1_16_3.entity.EntityHandler_V1_16_R3;
+import de.verdox.vcorepaper.nms.nmshandler.v_1_17_1.entity.EntityHandler_V1_17_R1;
 import org.apache.commons.lang.NotImplementedException;
 import org.bukkit.Location;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Villager;
 import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
@@ -23,10 +26,11 @@ import java.util.List;
 public interface NMSEntityHandler extends NMSHandler {
 
     static NMSEntityHandler getRightHandler(NMSVersion nmsVersion) {
-        if (nmsVersion.equals(NMSVersion.V1_16_5)) {
+        if (nmsVersion.equals(NMSVersion.V1_16_5))
             return new EntityHandler_V1_16_R3();
-        }
-        throw new NotImplementedException("This Handler [" + NMSEntityHandler.class.getName() + "] is not implemented for NMS version: " + nmsVersion.getNmsVersionTag());
+        else if (nmsVersion.equals(NMSVersion.V1_17_1))
+            return new EntityHandler_V1_17_R1();
+        throw new NotImplementedException("ThisHandler [" + NMSEntityHandler.class.getName() + "] is not implemented for NMS version: " + nmsVersion.getNmsVersionTag());
     }
 
     /**
@@ -56,4 +60,8 @@ public interface NMSEntityHandler extends NMSHandler {
     void sendArmorStandWithName(String name, Location location, List<Player> visibleTo);
 
     void sendFakeItem(ItemStack itemStack, Location location, List<Player> visibleTo);
+
+    void openTradingGUI(@NotNull Villager villager, @NotNull Player player);
+
+    int getOffers(@NotNull Villager villager);
 }

@@ -10,6 +10,7 @@ import de.verdox.vcore.synchronization.pipeline.interfaces.DataManipulator;
 import de.verdox.vcore.synchronization.pipeline.interfaces.VCoreSerializable;
 import de.verdox.vcore.synchronization.pipeline.parts.DataSynchronizer;
 import de.verdox.vcore.util.global.AnnotationResolver;
+import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nonnull;
 import java.util.Map;
@@ -32,7 +33,9 @@ public abstract class VCoreData implements VCoreSerializable {
     private long lastUse = System.currentTimeMillis();
     private boolean markedForRemoval = false;
 
-    public VCoreData(VCorePlugin<?, ?> plugin, UUID objectUUID) {
+    public VCoreData(@NotNull VCorePlugin<?, ?> plugin, @NotNull UUID objectUUID) {
+        Objects.requireNonNull(plugin, "plugin can't be null!");
+        Objects.requireNonNull(objectUUID, "objectUUID can't be null!");
         this.plugin = plugin;
         this.objectUUID = objectUUID;
         if (this.plugin.getServices().getPipeline().getGlobalCache() != null)

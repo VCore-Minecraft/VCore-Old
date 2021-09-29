@@ -5,6 +5,7 @@
 package de.verdox.vcore.synchronization.pipeline.datatypes;
 
 import de.verdox.vcore.plugin.VCorePlugin;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.UUID;
 
@@ -14,7 +15,7 @@ import java.util.UUID;
  * @date 01.08.2021 19:12
  */
 public abstract class NetworkData extends VCoreData {
-    public NetworkData(VCorePlugin<?, ?> plugin, UUID objectUUID) {
+    public NetworkData(@NotNull VCorePlugin<?, ?> plugin, @NotNull UUID objectUUID) {
         super(plugin, objectUUID);
     }
 }

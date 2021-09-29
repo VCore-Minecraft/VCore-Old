@@ -12,6 +12,7 @@ import de.verdox.vcore.plugin.wrapper.types.WorldChunk;
 import de.verdox.vcore.plugin.wrapper.types.WorldRegion;
 import de.verdox.vcore.util.VCoreUtil;
 import io.netty.util.concurrent.DefaultThreadFactory;
+import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.world.ChunkLoadEvent;
@@ -39,6 +40,10 @@ public class LocationNBTFileStorage extends VCoreListener.VCoreBukkitListener im
     }
 
     public WorldStorage getWorldStorage(String worldName) {
+        if (!fileCache.containsKey(worldName)) {
+            File worldDirectory = Bukkit.getWorld(worldName).getWorldFolder();
+            fileCache.put(worldName, new WorldStorage(plugin, worldDirectory, worldName));
+        }
         return fileCache.get(worldName);
     }
 

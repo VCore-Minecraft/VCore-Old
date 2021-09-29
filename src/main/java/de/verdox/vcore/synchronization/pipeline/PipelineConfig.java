@@ -13,9 +13,10 @@ import de.verdox.vcore.synchronization.pipeline.parts.local.LocalCache;
 import de.verdox.vcore.synchronization.pipeline.parts.local.LocalCacheImpl;
 import de.verdox.vcore.synchronization.pipeline.parts.storage.GlobalStorage;
 import de.verdox.vcore.synchronization.pipeline.parts.storage.mongodb.MongoDBStorage;
-import de.verdox.vcore.synchronization.pipeline.parts.storage.yaml.YamlStorage;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
+import java.util.Objects;
 
 /**
  * @version 1.0
@@ -30,7 +31,8 @@ public class PipelineConfig extends VCoreYAMLConfig {
 
     //TODO: Wenn Verbindungen nicht hergestellt werden können, SpielerConnect mit geeigneter Nachricht abbrechen
 
-    public Pipeline constructPipeline(VCorePlugin<?, ?> plugin) {
+    public Pipeline constructPipeline(@NotNull VCorePlugin<?, ?> plugin) {
+        Objects.requireNonNull(plugin, "plugin can't be null!");
         plugin.consoleMessage("&eConstructing Pipeline", false);
         LocalCache localCache = new LocalCacheImpl(plugin);
         GlobalCache globalCache = null;
@@ -70,8 +72,6 @@ public class PipelineConfig extends VCoreYAMLConfig {
                 String password = config.getString("GlobalStorage.mongodb.password");
 
                 globalStorage = new MongoDBStorage(plugin, host, database, port, user, password);
-            } else if (globalStorageType.equalsIgnoreCase("yaml") || globalStorageType.equalsIgnoreCase("yml")) {
-                globalStorage = new YamlStorage(plugin);
             } else {
                 plugin.consoleMessage("&cNo GlobalStorage loaded&7!", false);
             }

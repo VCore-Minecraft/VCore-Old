@@ -12,10 +12,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public abstract class StorageSystem<S extends VCoreConfig<?>> {
@@ -26,6 +23,9 @@ public abstract class StorageSystem<S extends VCoreConfig<?>> {
     private final VCorePlugin<?, ?> plugin;
 
     public StorageSystem(VCorePlugin<?, ?> plugin, String storageName, String pluginDirectory) {
+        Objects.requireNonNull(plugin, "plugin can't be null!");
+        Objects.requireNonNull(storageName, "storageName can't be null!");
+        Objects.requireNonNull(pluginDirectory, "pluginDirectory can't be null!");
         this.plugin = plugin;
         this.storageName = storageName;
         this.pluginDirectory = pluginDirectory;

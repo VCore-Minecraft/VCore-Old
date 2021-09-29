@@ -12,6 +12,8 @@ import org.redisson.config.ClusterServersConfig;
 import org.redisson.config.Config;
 import org.redisson.config.SingleServerConfig;
 
+import java.util.Objects;
+
 /**
  * @version 1.0
  * @Author: Lukas Jonsson (Verdox)
@@ -22,6 +24,9 @@ public abstract class RedisConnection {
     protected final RedissonClient redissonClient;
 
     public RedisConnection(@NotNull VCorePlugin<?, ?> plugin, boolean clusterMode, @NotNull String[] addressArray, String redisPassword) {
+        Objects.requireNonNull(plugin, "plugin can't be null!");
+        Objects.requireNonNull(addressArray, "addressArray can't be null!");
+        Objects.requireNonNull(redisPassword, "redisPassword can't be null!");
         this.plugin = plugin;
         if (addressArray.length == 0)
             throw new IllegalArgumentException("Address Array empty");

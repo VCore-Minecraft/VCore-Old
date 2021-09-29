@@ -12,8 +12,10 @@ import de.verdox.vcore.synchronization.networkmanager.player.scheduling.VCorePla
 import de.verdox.vcore.synchronization.networkmanager.server.ServerInstance;
 import de.verdox.vcore.synchronization.networkmanager.server.api.instructions.updates.RemoteServerShutdownUpdate;
 import de.verdox.vcore.synchronization.pipeline.parts.Pipeline;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Locale;
+import java.util.Objects;
 import java.util.UUID;
 
 /**
@@ -28,7 +30,8 @@ public class VCoreServerAPIImpl implements VCoreServerAPI {
     private final InstructionService instructionService;
     protected VCorePlayerTaskScheduler vCorePlayerTaskScheduler;
 
-    public VCoreServerAPIImpl(VCoreCoreInstance<?, ?> plugin) {
+    public VCoreServerAPIImpl(@NotNull VCoreCoreInstance<?, ?> plugin) {
+        Objects.requireNonNull(plugin, "plugin can't be null!");
         this.plugin = plugin;
         this.messagingService = plugin.getServices().getMessagingService();
         this.instructionService = messagingService.getInstructionService();

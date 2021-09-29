@@ -20,6 +20,7 @@ import de.verdox.vcore.synchronization.pipeline.parts.Pipeline;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nonnull;
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -39,7 +40,8 @@ public abstract class VCorePlayerAPIImpl implements VCorePlayerAPI, SystemLoadab
     private final InstructionService instructionService;
     protected VCorePlayerTaskScheduler vCorePlayerTaskScheduler;
 
-    public VCorePlayerAPIImpl(VCorePlugin<?, ?> plugin) {
+    public VCorePlayerAPIImpl(@NotNull VCorePlugin<?, ?> plugin) {
+        Objects.requireNonNull(plugin, "plugin can't be null!");
         this.plugin = plugin;
         this.messagingService = plugin.getServices().getMessagingService();
         this.instructionService = messagingService.getInstructionService();

@@ -11,6 +11,9 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerKickEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.jetbrains.annotations.NotNull;
+
+import java.util.Objects;
 
 /**
  * @version 1.0
@@ -20,8 +23,9 @@ import org.bukkit.event.player.PlayerQuitEvent;
 public class PlayerBukkitListener extends VCoreListener.VCoreBukkitListener implements VCorePlayerCacheListener {
     private final NetworkManager<?> networkManager;
 
-    public PlayerBukkitListener(NetworkManager<?> networkManager) {
+    public PlayerBukkitListener(@NotNull NetworkManager<?> networkManager) {
         super((VCorePlugin.Minecraft) networkManager.getPlugin());
+        Objects.requireNonNull(networkManager, "networkManager can't be null!");
         this.networkManager = networkManager;
     }
 

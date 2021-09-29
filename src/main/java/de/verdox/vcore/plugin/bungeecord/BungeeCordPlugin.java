@@ -1,11 +1,17 @@
+/*
+ * Copyright (c) 2021. Lukas Jonsson
+ */
+
 package de.verdox.vcore.plugin.bungeecord;
 
 import de.verdox.vcore.plugin.VCorePlugin;
 import de.verdox.vcore.plugin.subsystem.VCoreSubsystem;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.plugin.Plugin;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
+import java.util.Objects;
 
 public abstract class BungeeCordPlugin extends Plugin implements VCorePlugin<Plugin, VCoreSubsystem.BungeeCord> {
 
@@ -26,13 +32,15 @@ public abstract class BungeeCordPlugin extends Plugin implements VCorePlugin<Plu
 
     @Override
     public void consoleMessage(String message, boolean debug) {
+        Objects.requireNonNull(message, "message can't be null!");
         if (debug && !debug())
             return;
         consoleMessage(message, 0, debug);
     }
 
     @Override
-    public void consoleMessage(String message, int tabSize, boolean debug) {
+    public void consoleMessage(@NotNull String message, int tabSize, boolean debug) {
+        Objects.requireNonNull(message, "message can't be null!");
         if (debug && !debug())
             return;
         StringBuilder newMessageBuilder = new StringBuilder();

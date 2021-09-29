@@ -9,11 +9,13 @@ import de.verdox.vcore.synchronization.pipeline.interfaces.DataManipulator;
 import de.verdox.vcore.synchronization.pipeline.parts.DataSynchronizer;
 import de.verdox.vcore.synchronization.pipeline.parts.Pipeline;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.redisson.api.RTopic;
 import org.redisson.api.listener.MessageListener;
 
 import java.io.Serializable;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 
 /**
@@ -28,7 +30,9 @@ public class RedisDataManipulator implements DataManipulator {
     private final MessageListener<DataBlock> messageListener;
     private final UUID senderUUID = UUID.randomUUID();
 
-    RedisDataManipulator(@NotNull RedisCache redisCache, VCoreData vCoreData) {
+    RedisDataManipulator(@NotNull RedisCache redisCache, @NotNull VCoreData vCoreData) {
+        Objects.requireNonNull(redisCache, "redisCache can't be null!");
+        Objects.requireNonNull(vCoreData, "vCoreData can't be null!");
         this.redisCache = redisCache;
         this.dataTopic = this.redisCache.getTopic(vCoreData.getClass(), vCoreData.getObjectUUID());
         this.messageListener = (channel, dataBlock) -> {
@@ -53,12 +57,13 @@ public class RedisDataManipulator implements DataManipulator {
     }
 
     @Override
-    public void pushUpdate(VCoreData vCoreData, Runnable callback) {
+    public void pushUpdate(@NotNull VCoreData vCoreData, @Nullable Runnable callback) {
         doPush(vCoreData, callback);
     }
 
     @Override
-    public void pushRemoval(VCoreData vCoreData, Runnable callback) {
+    public void pushRemoval(@NotNull VCoreData vCoreData, @Nullable Runnable callback) {
+        Objects.requireNonNull(vCoreData, "vCoreData can't be null!");
         vCoreData.markForRemoval();
         dataTopic.publish(new RemoveDataBlock(senderUUID));
         vCoreData.getPlugin().consoleMessage("&ePushing Removal&7: &b" + System.currentTimeMillis(), true);
@@ -66,7 +71,8 @@ public class RedisDataManipulator implements DataManipulator {
             callback.run();
     }
 
-    private void doPush(VCoreData vCoreData, Runnable callback) {
+    private void doPush(@NotNull VCoreData vCoreData, @Nullable Runnable callback) {
+        Objects.requireNonNull(vCoreData, "vCoreData can't be null!");
         if (vCoreData.isMarkedForRemoval()) {
             vCoreData.getPlugin().consoleMessage("&4Push rejected as it is marked for removal &b" + vCoreData.getObjectUUID() + " &8[&e" + vCoreData.getClass().getSimpleName() + "&8] &b" + System.currentTimeMillis(), true);
             return;

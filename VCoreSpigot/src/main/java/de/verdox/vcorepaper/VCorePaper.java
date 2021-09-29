@@ -9,16 +9,18 @@ import com.comphenix.protocol.ProtocolManager;
 import de.verdox.vcore.plugin.VCoreCoreInstance;
 import de.verdox.vcore.plugin.subsystem.VCoreSubsystem;
 import de.verdox.vcore.synchronization.networkmanager.NetworkManager;
+import de.verdox.vcore.synchronization.networkmanager.player.VCorePlayer;
 import de.verdox.vcore.synchronization.networkmanager.player.api.VCorePlayerAPI;
 import de.verdox.vcore.synchronization.networkmanager.player.api.bukkit.VCorePlayerAPIBukkitImpl;
 import de.verdox.vcore.synchronization.networkmanager.player.listener.PlayerBukkitListener;
 import de.verdox.vcore.synchronization.networkmanager.server.ServerType;
 import de.verdox.vcore.synchronization.networkmanager.server.api.VCoreServerAPI;
 import de.verdox.vcore.synchronization.networkmanager.server.api.VCoreServerAPIImpl;
+import de.verdox.vcore.synchronization.pipeline.parts.Pipeline;
 import de.verdox.vcorepaper.commands.AdminCommands;
 import de.verdox.vcorepaper.commands.NMSCommand;
 import de.verdox.vcorepaper.commands.PlayerAPICommands;
-import de.verdox.vcorepaper.commands.TalkingNPCCommand;
+import de.verdox.vcorepaper.commands.WorkingNPCCommand;
 import de.verdox.vcorepaper.custom.CustomDataListener;
 import de.verdox.vcorepaper.custom.block.CustomBlockDataManager;
 import de.verdox.vcorepaper.custom.block.CustomBlockProvider;
@@ -26,16 +28,18 @@ import de.verdox.vcorepaper.custom.block.CustomLocationDataManager;
 import de.verdox.vcorepaper.custom.block.data.debug.BlockDebugData;
 import de.verdox.vcorepaper.custom.block.internal.VBlockListener;
 import de.verdox.vcorepaper.custom.block.internal.WorldEditVBlockListener;
+import de.verdox.vcorepaper.custom.economy.EconomyContainer;
 import de.verdox.vcorepaper.custom.entities.CustomEntityListener;
 import de.verdox.vcorepaper.custom.entities.CustomEntityManager;
 import de.verdox.vcorepaper.custom.events.paper.CustomPaperEventListener;
 import de.verdox.vcorepaper.custom.events.paper.blockevents.BlockStateChangeListener;
 import de.verdox.vcorepaper.custom.items.CustomItemManager;
 import de.verdox.vcorepaper.custom.nbtholders.location.LocationNBTFileStorage;
-import de.verdox.vcorepaper.custom.talkingnpc.TalkingNPCListener;
+import de.verdox.vcorepaper.custom.workernpc.listener.WorkerNPCListener;
 import de.verdox.vcorepaper.nms.NMSManager;
 import net.roxeez.advancement.AdvancementManager;
 import org.bukkit.Bukkit;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
@@ -43,6 +47,7 @@ public class VCorePaper extends VCoreCoreInstance.Minecraft {
 
     //TODO: Integrieren possibly: https://www.spigotmc.org/resources/mapapi.93343
     //TODO: Standard Commands mit ner Config /discord /teamspeak /forum /wiki
+    // Wenn Server während Laufzeit gestartet ist muss der Spielercache irgendwie aktualisiert werden
 
     public static VCorePaper instance;
 
@@ -63,6 +68,7 @@ public class VCorePaper extends VCoreCoreInstance.Minecraft {
 
     private VCorePlayerAPI vCorePlayerAPI;
     private VCoreServerAPI vCoreServerAPI;
+    private EconomyContainer economyContainer = new EconomyContainer();
 
     private LocationNBTFileStorage locationNBTFileStorage;
 
@@ -100,19 +106,19 @@ public class VCorePaper extends VCoreCoreInstance.Minecraft {
         if (Bukkit.getPluginManager().getPlugin("WorldEdit") != null || Bukkit.getPluginManager().getPlugin("FastAsyncWorldEdit") != null)
             new WorldEditVBlockListener(this);
         new CustomPaperEventListener(this);
-        new TalkingNPCListener(this);
         new BlockStateChangeListener(this);
+        new WorkerNPCListener(this);
 
 
         new AdminCommands(this, "debug");
         new NMSCommand(this, "nms");
         new PlayerAPICommands(this, "playerapi");
-        new TalkingNPCCommand(this, "talkingNPC");
+        new WorkingNPCCommand(this, "workingNPC");
 
         if (Bukkit.getPluginManager().getPlugin("ProtocolLib") != null)
             protocolManager = ProtocolLibrary.getProtocolManager();
 
-        networkManager = new NetworkManager<>(ServerType.GAME_SERVER, this);
+        networkManager = new NetworkManager<>(this, ServerType.GAME_SERVER);
         new PlayerBukkitListener(networkManager);
         if (networkManager.getServerCache().isServerNameTaken(getServerName())) {
             consoleMessage("&4<> ============================================= <>", false);
@@ -126,6 +132,19 @@ public class VCorePaper extends VCoreCoreInstance.Minecraft {
         networkManager.getServerPingManager().sendOnlinePing();
         getCustomLocationDataManager().registerData(BlockDebugData.class);
         getCustomBlockDataManager().registerData(BlockDebugData.class);
+        getInstance().getServices().getPipeline().loadAllData(VCorePlayer.class, Pipeline.LoadingStrategy.LOAD_PIPELINE);
+    }
+
+    public void setupEconomy() {
+        if (org.bukkit.Bukkit.getServer().getPluginManager().getPlugin("Vault") == null) {
+            return;
+        }
+        economyContainer = new EconomyContainer();
+    }
+
+    @Nullable
+    public EconomyContainer getEconomyContainer() {
+        return economyContainer;
     }
 
     public ProtocolManager getProtocolManager() {
@@ -181,11 +200,6 @@ public class VCorePaper extends VCoreCoreInstance.Minecraft {
 
     public NMSManager getNmsManager() {
         return nmsManager;
-    }
-
-    @Override
-    public void shutdown() {
-
     }
 
     public NetworkManager<VCorePaper> getNetworkManager() {

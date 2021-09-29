@@ -16,10 +16,7 @@ import de.verdox.vcore.synchronization.pipeline.parts.Pipeline;
 import org.jetbrains.annotations.NotNull;
 
 import java.nio.charset.StandardCharsets;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -40,7 +37,9 @@ public class NetworkManager<T extends VCorePlugin<?, ?>> implements SystemLoadab
     private final VCorePlayerCache vCorePlayerCache;
     private final boolean loaded;
 
-    public NetworkManager(@NotNull ServerType serverType, @NotNull T plugin) {
+    public NetworkManager(@NotNull T plugin, @NotNull ServerType serverType) {
+        Objects.requireNonNull(plugin, "plugin can't be null!");
+        Objects.requireNonNull(serverType, "serverType can't be null!");
         plugin.consoleMessage("&eStarting Network Manager&7!", false);
         this.serverType = serverType;
         this.plugin = plugin;

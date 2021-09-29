@@ -12,6 +12,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 /**
@@ -31,7 +32,8 @@ public abstract class MessagingInstruction<T> implements InstructionSender<T> {
     private Object[] data;
 
 
-    public MessagingInstruction(UUID uuid) {
+    public MessagingInstruction(@NotNull UUID uuid) {
+        Objects.requireNonNull(uuid, "uuid can't be null!");
         this.uuid = uuid;
         this.parameters = parameters().toArray(String[]::new);
         this.types = dataTypes();

@@ -4,6 +4,8 @@
 
 package de.verdox.vcore.synchronization.messaging.instructions.update;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
@@ -19,7 +21,7 @@ import java.util.concurrent.CompletableFuture;
  * Else it will send the instruction to the network but will not answer it itself.
  */
 public abstract class CleverUpdate extends Update {
-    public CleverUpdate(UUID uuid) {
+    public CleverUpdate(@NotNull UUID uuid) {
         super(uuid);
     }
 

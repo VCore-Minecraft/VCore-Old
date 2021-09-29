@@ -5,6 +5,9 @@
 package de.verdox.vcore.synchronization.messaging.event;
 
 import de.verdox.vcore.synchronization.messaging.messages.Message;
+import org.jetbrains.annotations.NotNull;
+
+import java.util.Objects;
 
 /**
  * @version 1.0
@@ -15,7 +18,9 @@ public class MessageEvent {
     private final String channelName;
     private final Message message;
 
-    public MessageEvent(String channelName, Message message) {
+    public MessageEvent(@NotNull String channelName, @NotNull Message message) {
+        Objects.requireNonNull(channelName, "channelName can't be null!");
+        Objects.requireNonNull(message, "message can't be null!");
         this.channelName = channelName;
         this.message = message;
     }

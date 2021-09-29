@@ -24,6 +24,9 @@ import java.io.File;
 import java.util.List;
 
 public interface VCorePlugin<T, R extends VCoreSubsystem<?>> extends SystemLoadable {
+
+    //TODO: Wenn nicht Bungee Modus muss der Spigot Server selbst die VCorePlayer Data rausnehmen
+
     String vCorePaperName = "VCorePaper";
     String vCoreWaterfallName = "VCoreWaterfall";
 
@@ -72,22 +75,22 @@ public interface VCorePlugin<T, R extends VCoreSubsystem<?>> extends SystemLoada
         private boolean loaded;
 
         @Override
-        public <V extends VCoreCoreInstance<JavaPlugin, VCoreSubsystem.Bukkit>> V getCoreInstance() {
+        public final <V extends VCoreCoreInstance<JavaPlugin, VCoreSubsystem.Bukkit>> V getCoreInstance() {
             return (V) Bukkit.getPluginManager().getPlugin(vCorePaperName);
         }
 
         @Override
-        public PlatformWrapper getPlatformWrapper() {
+        public final PlatformWrapper getPlatformWrapper() {
             return new BukkitPlatformWrapperImpl();
         }
 
         @Override
-        public void setDebugMode(boolean value) {
+        public final void setDebugMode(boolean value) {
             getServices().getDebugConfig().setDebugMode(value);
         }
 
         @Override
-        public boolean debug() {
+        public final boolean debug() {
             if (getServices() == null)
                 return true;
             if (getServices().getDebugConfig() == null)
@@ -116,12 +119,12 @@ public interface VCorePlugin<T, R extends VCoreSubsystem<?>> extends SystemLoada
         }
 
         @Override
-        public PluginServiceParts<?, VCoreSubsystem.Bukkit> getServices() {
+        public final PluginServiceParts<?, VCoreSubsystem.Bukkit> getServices() {
             return serviceParts;
         }
 
         @Override
-        public TaskBatch<VCorePlugin<JavaPlugin, VCoreSubsystem.Bukkit>> createTaskBatch() {
+        public final TaskBatch<VCorePlugin<JavaPlugin, VCoreSubsystem.Bukkit>> createTaskBatch() {
 
             return new TaskBatch<>(this) {
                 @Override
@@ -152,12 +155,12 @@ public interface VCorePlugin<T, R extends VCoreSubsystem<?>> extends SystemLoada
         }
 
         @Override
-        public boolean isLoaded() {
+        public final boolean isLoaded() {
             return loaded;
         }
 
         @Override
-        public void shutdown() {
+        public final void shutdown() {
             onDisable();
         }
     }

@@ -16,7 +16,7 @@ import java.util.UUID;
  * @date 26.08.2021 20:41
  */
 public class RemoteServerShutdownUpdate extends CleverUpdate {
-    public RemoteServerShutdownUpdate(UUID uuid) {
+    public RemoteServerShutdownUpdate(@NotNull UUID uuid) {
         super(uuid);
     }
 

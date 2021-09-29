@@ -8,7 +8,9 @@ import de.verdox.vcore.plugin.VCorePlugin;
 import de.verdox.vcore.synchronization.pipeline.datatypes.PlayerData;
 import de.verdox.vcore.synchronization.pipeline.datatypes.ServerData;
 import de.verdox.vcore.util.global.AnnotationResolver;
+import org.jetbrains.annotations.NotNull;
 
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 
@@ -17,7 +19,8 @@ public abstract class VCoreSubsystem<S extends VCorePlugin<?, ?>> {
     private final S vCorePlugin;
     private final UUID uuid;
 
-    public VCoreSubsystem(S vCorePlugin) {
+    public VCoreSubsystem(@NotNull S vCorePlugin) {
+        Objects.requireNonNull(vCorePlugin, "vCorePlugin can't be null!");
         this.vCorePlugin = vCorePlugin;
         uuid = UUID.nameUUIDFromBytes(AnnotationResolver.getDataStorageIdentifier(this.getClass()).getBytes());
     }

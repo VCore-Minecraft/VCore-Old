@@ -28,15 +28,11 @@ public class TalkingNPCListener extends VCoreListener.VCoreBukkitListener {
     public void playerInteract(PlayerInteractEntityEvent e) {
         Player player = e.getPlayer();
         Entity entity = e.getRightClicked();
-        if (!entity.getType().equals(EntityType.VILLAGER) || !VCorePaper.getInstance().getCustomEntityManager().getTalkingNPCService().isTalkingNPC(entity))
+        if (!entity.getType().equals(EntityType.VILLAGER))
             return;
         TalkingNPC talkingNPC = VCorePaper.getInstance().getCustomEntityManager().getTalkingNPCService().getTalkingNPC(entity);
-        if (!talkingNPC.verify())
-            return;
         e.setCancelled(true);
-        VCorePaper.getInstance().async(() -> {
-            talkingNPC.createBookGUI(player).openBook();
-            player.playSound(e.getPlayer().getLocation(), Sound.ENTITY_VILLAGER_CELEBRATE, 0.4f, 1f);
-        });
+        talkingNPC.openDialogGUI(player);
+        player.playSound(e.getPlayer().getLocation(), Sound.ENTITY_VILLAGER_CELEBRATE, 0.4f, 1f);
     }
 }

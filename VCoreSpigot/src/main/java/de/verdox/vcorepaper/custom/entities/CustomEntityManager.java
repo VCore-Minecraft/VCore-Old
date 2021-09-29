@@ -7,6 +7,7 @@ package de.verdox.vcorepaper.custom.entities;
 import de.verdox.vcorepaper.VCorePaper;
 import de.verdox.vcorepaper.custom.CustomDataManager;
 import de.verdox.vcorepaper.custom.talkingnpc.TalkingNPCService;
+import de.verdox.vcorepaper.custom.workernpc.ProfessionRegistry;
 import org.bukkit.entity.Entity;
 
 import java.lang.reflect.InvocationTargetException;
@@ -15,6 +16,7 @@ public class CustomEntityManager extends CustomDataManager<Entity, EntityCustomD
 
     private static CustomEntityManager instance = null;
     private final TalkingNPCService talkingNPCService = new TalkingNPCService(this);
+    private final ProfessionRegistry professionRegistry = new ProfessionRegistry(this);
 
     public CustomEntityManager(VCorePaper plugin) {
         super(plugin);
@@ -57,5 +59,7 @@ public class CustomEntityManager extends CustomDataManager<Entity, EntityCustomD
         }
     }
 
-
+    public ProfessionRegistry getProfessionRegistry() {
+        return professionRegistry;
+    }
 }

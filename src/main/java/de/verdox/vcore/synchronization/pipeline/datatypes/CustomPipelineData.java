@@ -13,4 +13,6 @@ import java.util.Map;
  */
 public interface CustomPipelineData {
     Map<String, Object> getUnderlyingMap();
+
+    void save();
 }

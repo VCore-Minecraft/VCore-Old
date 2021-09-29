@@ -35,7 +35,7 @@ public class ServerInstance extends NetworkData {
     @VCorePersistentData
     private final Map<String, String> infoTags = new ConcurrentHashMap<>();
 
-    public ServerInstance(VCorePlugin<?, ?> plugin, UUID objectUUID) {
+    public ServerInstance(@NotNull VCorePlugin<?, ?> plugin, @NotNull UUID objectUUID) {
         super(plugin, objectUUID);
     }
 
