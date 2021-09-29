@@ -12,7 +12,7 @@ import de.verdox.vcore.util.bukkit.keys.LocationKey;
 import de.verdox.vcore.util.bukkit.keys.SplitChunkKey;
 import de.verdox.vcorepaper.VCorePaper;
 import de.verdox.vcorepaper.custom.CustomDataManager;
-import de.verdox.vcorepaper.custom.block.data.VBlockCustomData;
+import de.verdox.vcorepaper.custom.nbt.block.data.VBlockCustomData;
 import de.verdox.vcorepaper.custom.old_blocks.files.VBlockSaveFile;
 import de.verdox.vcorepaper.custom.old_blocks.files.VBlockStorage;
 import io.netty.util.concurrent.DefaultThreadFactory;

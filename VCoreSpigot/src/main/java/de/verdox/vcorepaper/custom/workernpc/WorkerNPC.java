@@ -6,10 +6,10 @@ package de.verdox.vcorepaper.custom.workernpc;
 
 import de.tr7zw.changeme.nbtapi.NBTCompound;
 import de.verdox.vcorepaper.VCorePaper;
-import de.verdox.vcorepaper.custom.entities.CustomEntityManager;
-import de.verdox.vcorepaper.custom.entities.VCoreEntity;
 import de.verdox.vcorepaper.custom.gui.book.DialogBuilder;
 import de.verdox.vcorepaper.custom.gui.book.event.PlayerPreOpenDialogEvent;
+import de.verdox.vcorepaper.custom.nbt.entities.CustomEntityManager;
+import de.verdox.vcorepaper.custom.nbt.entities.VCoreEntity;
 import net.kyori.adventure.text.TextComponent;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;

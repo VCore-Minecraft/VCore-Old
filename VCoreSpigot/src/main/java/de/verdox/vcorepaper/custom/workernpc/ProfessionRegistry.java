@@ -4,7 +4,7 @@
 
 package de.verdox.vcorepaper.custom.workernpc;
 
-import de.verdox.vcorepaper.custom.entities.CustomEntityManager;
+import de.verdox.vcorepaper.custom.nbt.entities.CustomEntityManager;
 import de.verdox.vcorepaper.custom.workernpc.professions.VanillaTrader;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;

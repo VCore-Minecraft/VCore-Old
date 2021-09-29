@@ -28,14 +28,15 @@ public class PipelineTaskSchedulerImpl implements PipelineTaskScheduler {
     private final PipelineManager pipelineManager;
     private final Map<UUID, Map<Class<? extends VCoreData>, PipelineTask<?>>> pendingTasks = new ConcurrentHashMap<>();
 
-    public PipelineTaskSchedulerImpl(PipelineManager pipelineManager) {
+    public PipelineTaskSchedulerImpl(@NotNull PipelineManager pipelineManager) {
+        Objects.requireNonNull(pipelineManager, "pipelineManager can't be null!");
         this.pipelineManager = pipelineManager;
     }
 
     @Override
     public synchronized <T extends VCoreData> PipelineTask<T> schedulePipelineTask(@NotNull PipelineAction pipelineAction, @NotNull Pipeline.LoadingStrategy loadingStrategy, @NotNull Class<? extends T> type, @NotNull(exception = IllegalArgumentException.class) UUID uuid) {
-        Objects.requireNonNull(type);
-        Objects.requireNonNull(uuid);
+        Objects.requireNonNull(type, "type can't be null!");
+        Objects.requireNonNull(uuid, "uuid can't be null!");
         PipelineTask<T> existingTask = getExistingPipelineTask(type, uuid);
         if (existingTask != null) {
             //pipelineManager.getPlugin().consoleMessage("&8[&e" + loadingStrategy + "&8] &eFound existing Pipeline Task: " + existingTask, true);
@@ -52,8 +53,8 @@ public class PipelineTaskSchedulerImpl implements PipelineTaskScheduler {
 
     @Override
     public synchronized <T extends VCoreData> PipelineTask<T> getExistingPipelineTask(@NotNull Class<? extends T> type, @NotNull UUID uuid) {
-        Objects.requireNonNull(type);
-        Objects.requireNonNull(uuid);
+        Objects.requireNonNull(type, "type can't be null!");
+        Objects.requireNonNull(uuid, "uuid can't be null!");
         if (!pendingTasks.containsKey(uuid))
             return null;
         Map<Class<? extends VCoreData>, PipelineTask<?>> map = pendingTasks.get(uuid);
@@ -65,8 +66,8 @@ public class PipelineTaskSchedulerImpl implements PipelineTaskScheduler {
 
     @Override
     public synchronized <T extends VCoreData> void removePipelineTask(@NotNull Class<? extends T> type, @NotNull UUID uuid) {
-        Objects.requireNonNull(type);
-        Objects.requireNonNull(uuid);
+        Objects.requireNonNull(type, "type can't be null!");
+        Objects.requireNonNull(uuid, "uuid can't be null!");
         if (!pendingTasks.containsKey(uuid))
             return;
         pendingTasks.get(uuid).remove(type);

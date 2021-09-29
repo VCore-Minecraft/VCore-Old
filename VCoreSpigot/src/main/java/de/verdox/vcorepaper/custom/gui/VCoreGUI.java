@@ -7,7 +7,7 @@ package de.verdox.vcorepaper.custom.gui;
 import de.verdox.vcore.plugin.bukkit.BukkitPlugin;
 import de.verdox.vcorepaper.VCorePaper;
 import de.verdox.vcorepaper.custom.gui.event.PlayerOpenVCoreGUIEvent;
-import de.verdox.vcorepaper.custom.items.VCoreItem;
+import de.verdox.vcorepaper.custom.nbt.items.VCoreItem;
 import net.wesjd.anvilgui.AnvilGUI;
 import org.apache.commons.lang.Validate;
 import org.bukkit.Bukkit;

@@ -2,7 +2,7 @@
  * Copyright (c) 2021. Lukas Jonsson
  */
 
-package de.verdox.vcorepaper.custom.nbtholders;
+package de.verdox.vcorepaper.custom.nbt.holders;
 
 import de.verdox.vcore.util.VCoreUtil;
 import de.verdox.vcorepaper.custom.old_blocks.BlockPersistentData;

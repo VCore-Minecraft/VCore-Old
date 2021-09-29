@@ -4,7 +4,7 @@
 
 package de.verdox.vcorepaper.custom;
 
-import de.verdox.vcorepaper.custom.nbtholders.NBTHolder;
+import de.verdox.vcorepaper.custom.nbt.holders.NBTHolder;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.jetbrains.annotations.NotNull;
