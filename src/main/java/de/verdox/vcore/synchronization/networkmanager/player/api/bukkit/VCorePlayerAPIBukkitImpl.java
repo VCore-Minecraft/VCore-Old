@@ -33,7 +33,7 @@ import java.util.concurrent.TimeoutException;
 public class VCorePlayerAPIBukkitImpl extends VCorePlayerAPIImpl implements Listener {
     private final VCorePlugin.Minecraft plugin;
 
-    public VCorePlayerAPIBukkitImpl(VCorePlugin.Minecraft plugin) {
+    public VCorePlayerAPIBukkitImpl(@NotNull VCorePlugin.Minecraft plugin) {
         super(plugin);
         this.plugin = plugin;
         plugin.getServer().getPluginManager().registerEvents(this, plugin);

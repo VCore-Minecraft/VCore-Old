@@ -14,11 +14,7 @@ import java.util.UUID;
  * @Author: Lukas Jonsson (Verdox)
  * @date 05.08.2021 15:00
  */
-public final class PlayerTask {
-    private final UUID uuid;
-    private final UUID taskUUID;
-    private final Runnable runnable;
-
+public record PlayerTask(UUID uuid, UUID taskUUID, Runnable runnable) {
     public PlayerTask(@NotNull UUID uuid, @NotNull UUID taskUUID, @NotNull Runnable runnable) {
         this.uuid = uuid;
         this.taskUUID = taskUUID;

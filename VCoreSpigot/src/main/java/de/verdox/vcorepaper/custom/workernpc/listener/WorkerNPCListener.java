@@ -32,6 +32,8 @@ public class WorkerNPCListener extends VCoreListener.VCoreBukkitListener {
         if (!entity.getType().equals(EntityType.VILLAGER))
             return;
         WorkerNPC workerNPC = VCorePaper.getInstance().getCustomEntityManager().wrap(WorkerNPC.class, entity);
+        if (!workerNPC.verify())
+            return;
         e.setCancelled(true);
         plugin.async(() -> {
             workerNPC.openDialog(player);

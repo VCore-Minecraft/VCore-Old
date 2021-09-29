@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2021. Lukas Jonsson
+ */
+
 package de.verdox.vcore.plugin;
 
 import de.verdox.vcore.plugin.subsystem.VCoreSubsystem;
@@ -5,30 +9,29 @@ import de.verdox.vcore.synchronization.pipeline.annotations.RequiredSubsystemInf
 import de.verdox.vcore.synchronization.pipeline.datatypes.PlayerData;
 import de.verdox.vcore.synchronization.pipeline.datatypes.ServerData;
 import de.verdox.vcore.synchronization.pipeline.datatypes.VCoreData;
+import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class VCoreSubsystemManager<T extends VCorePlugin<?, R>, R extends VCoreSubsystem<T>> implements SystemLoadable {
 
     private final List<R> subSystems = new ArrayList<>();
     private final List<R> activatedSubSystems = new ArrayList<>();
-    private T plugin;
-    private Set<Class<? extends VCoreData>> registeredDataClasses = new HashSet<>();
+    private final T plugin;
+    private final Set<Class<? extends VCoreData>> registeredDataClasses = new HashSet<>();
     private Set<Class<? extends VCoreData>> activeDataClasses = new HashSet<>();
 
-    private Set<Class<? extends PlayerData>> registeredPlayerDataClasses = new HashSet<>();
+    private final Set<Class<? extends PlayerData>> registeredPlayerDataClasses = new HashSet<>();
     private Set<Class<? extends PlayerData>> activePlayerDataClasses = new HashSet<>();
 
-    private Set<Class<? extends ServerData>> registeredServerDataClasses = new HashSet<>();
+    private final Set<Class<? extends ServerData>> registeredServerDataClasses = new HashSet<>();
     private Set<Class<? extends ServerData>> activeServerDataClasses = new HashSet<>();
 
     private boolean loaded = false;
 
-    VCoreSubsystemManager(T plugin) {
+    VCoreSubsystemManager(@NotNull T plugin) {
+        Objects.requireNonNull(plugin, "plugin can't be null!");
         this.plugin = plugin;
     }
 

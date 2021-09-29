@@ -36,21 +36,25 @@ public abstract class TaskBatch<V extends VCorePlugin<?, ?>> {
     }
 
     public TaskBatch<V> doSync(@NotNull Runnable runnable) {
+        Objects.requireNonNull(runnable, "Runnable can't be null!");
         addTask(TaskType.SYNC, runnable, 0);
         return this;
     }
 
     public TaskBatch<V> doAsync(@NotNull Runnable runnable) {
+        Objects.requireNonNull(runnable, "Runnable can't be null!");
         addTask(TaskType.ASYNC, runnable, 0);
         return this;
     }
 
     public TaskBatch<V> wait(long delay, @NotNull TimeUnit timeUnit) {
+        Objects.requireNonNull(timeUnit, "timeUnit can't be null!");
         addTask(TaskType.WAIT, null, timeUnit.toMillis(delay));
         return this;
     }
 
     public void executeBatch(@Nullable Runnable callback) {
+        Objects.requireNonNull(callback, "Runnable can't be null!");
         this.callback = callback;
         executor.submit(new CatchingRunnable(this::runBatch));
     }
@@ -99,6 +103,7 @@ public abstract class TaskBatch<V extends VCorePlugin<?, ?>> {
     }
 
     private void addTask(@NotNull TaskType taskType, @Nullable Runnable runnable, long delay) {
+        Objects.requireNonNull(taskType, "taskType can't be null!");
         tasks.add(new TaskInfo(delay, taskType, () -> {
             if (runnable != null)
                 runnable.run();

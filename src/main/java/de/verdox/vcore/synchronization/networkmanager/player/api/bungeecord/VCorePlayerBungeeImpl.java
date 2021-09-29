@@ -10,6 +10,7 @@ import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.event.LoginEvent;
 import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.event.EventHandler;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
@@ -23,7 +24,7 @@ import java.util.concurrent.TimeoutException;
  * @date 03.08.2021 23:23
  */
 public class VCorePlayerBungeeImpl extends VCorePlayerAPIImpl implements Listener {
-    public VCorePlayerBungeeImpl(VCorePlugin.BungeeCord plugin) {
+    public VCorePlayerBungeeImpl(@NotNull VCorePlugin.BungeeCord plugin) {
         super(plugin);
         ProxyServer.getInstance().getPluginManager().registerListener(plugin, this);
     }

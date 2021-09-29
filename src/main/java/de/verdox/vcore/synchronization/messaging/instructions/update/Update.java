@@ -20,7 +20,7 @@ import java.util.concurrent.CompletableFuture;
 
 @InstructionInfo(awaitsResponse = false)
 public abstract class Update extends Query<Boolean> implements InstructionResponder {
-    public Update(UUID uuid) {
+    public Update(@NotNull UUID uuid) {
         super(uuid);
     }
 
