@@ -48,6 +48,8 @@ public class PipelineManager implements Pipeline {
     private final boolean loaded;
 
     public PipelineManager(VCorePlugin<?, ?> plugin, @NotNull LocalCache localCache, @Nullable GlobalCache globalCache, @Nullable GlobalStorage globalStorage) {
+        Objects.requireNonNull(plugin, "plugin can't be null!");
+        Objects.requireNonNull(localCache, "localCache can't be null!");
         this.plugin = plugin;
         this.executorService = Executors.newFixedThreadPool(2, new DefaultThreadFactory(plugin.getPluginName() + "Pipeline"));
         this.globalStorage = globalStorage;

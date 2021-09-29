@@ -25,6 +25,7 @@ import org.bukkit.event.player.PlayerKickEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -38,13 +39,15 @@ public class PlayerDataManager implements SystemLoadable {
     private final PipelineManager pipelineManager;
     private final boolean loaded;
 
-    public PlayerDataManager(PipelineManager pipelineManager) {
+    public PlayerDataManager(@NotNull PipelineManager pipelineManager) {
+        Objects.requireNonNull(pipelineManager, "pipelineManager can't be null!");
         this.pipelineManager = pipelineManager;
         this.plugin = pipelineManager.getPlugin();
         loaded = true;
     }
 
     protected final void loginPipeline(@NotNull UUID player) {
+        Objects.requireNonNull(player, "player can't be null!");
         if (plugin instanceof VCoreCoreInstance)
             plugin.consoleMessage("&eHandling Player Join &b" + player, false);
         plugin.createTaskBatch().wait(400, TimeUnit.MILLISECONDS).doAsync(() -> {
@@ -60,6 +63,7 @@ public class PlayerDataManager implements SystemLoadable {
     }
 
     protected final void logoutPipeline(@NotNull UUID player) {
+        Objects.requireNonNull(player, "player can't be null!");
         plugin.getServices().eventBus.post(new PlayerPreSessionUnloadEvent(plugin, player));
         plugin.createTaskBatch()
                 .doAsync(() -> {
@@ -85,7 +89,7 @@ public class PlayerDataManager implements SystemLoadable {
 
     public static class Bukkit extends PlayerDataManager implements Listener {
 
-        public Bukkit(PipelineManager pipelineManager) {
+        public Bukkit(@NotNull PipelineManager pipelineManager) {
             super(pipelineManager);
             VCorePlugin.Minecraft bukkitPlugin = (VCorePlugin.Minecraft) plugin;
             bukkitPlugin.getPlugin().getServer().getPluginManager().registerEvents(this, bukkitPlugin);
@@ -109,7 +113,7 @@ public class PlayerDataManager implements SystemLoadable {
     }
 
     public static class BungeeCord extends PlayerDataManager implements net.md_5.bungee.api.plugin.Listener {
-        public BungeeCord(PipelineManager pipelineManager) {
+        public BungeeCord(@NotNull PipelineManager pipelineManager) {
             super(pipelineManager);
             ProxyServer.getInstance().getPluginManager().registerListener((Plugin) pipelineManager.getPlugin(), this);
         }
