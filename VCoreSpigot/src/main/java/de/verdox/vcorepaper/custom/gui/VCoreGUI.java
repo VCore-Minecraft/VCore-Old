@@ -326,6 +326,13 @@ public class VCoreGUI<T> implements CustomGUI {
             return this;
         }
 
+        public ContentBuilder<T> addContent(int slot, VCoreItem stack) {
+            Validate.notNull(stack, "Stack cannot be null");
+            stack.toNBTHolder().getPersistentDataContainer().setInteger("vcore_gui_slot", slot);
+            itemCache.put(slot, new InventoryContent<>(stack, slot, null));
+            return this;
+        }
+
         public ContentBuilder<T> removeItem(int slot) {
             itemCache.remove(slot);
             return this;
