@@ -13,7 +13,6 @@ import de.verdox.vcore.synchronization.pipeline.parts.local.LocalCache;
 import de.verdox.vcore.synchronization.pipeline.parts.local.LocalCacheImpl;
 import de.verdox.vcore.synchronization.pipeline.parts.storage.GlobalStorage;
 import de.verdox.vcore.synchronization.pipeline.parts.storage.mongodb.MongoDBStorage;
-import de.verdox.vcore.synchronization.pipeline.parts.storage.yaml.YamlStorage;
 
 import java.util.List;
 
@@ -70,8 +69,6 @@ public class PipelineConfig extends VCoreYAMLConfig {
                 String password = config.getString("GlobalStorage.mongodb.password");
 
                 globalStorage = new MongoDBStorage(plugin, host, database, port, user, password);
-            } else if (globalStorageType.equalsIgnoreCase("yaml") || globalStorageType.equalsIgnoreCase("yml")) {
-                globalStorage = new YamlStorage(plugin);
             } else {
                 plugin.consoleMessage("&cNo GlobalStorage loaded&7!", false);
             }

@@ -7,6 +7,8 @@ package de.verdox.vcore.synchronization.networkmanager.serverping.events;
 import de.verdox.vcore.synchronization.networkmanager.server.ServerType;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Objects;
+
 /**
  * @version 1.0
  * @Author: Lukas Jonsson (Verdox)
@@ -19,6 +21,9 @@ public abstract class ServerPingEvent {
     private final int serverPort;
 
     public ServerPingEvent(@NotNull ServerType serverType, @NotNull String serverName, @NotNull String serverAddress, int serverPort) {
+        Objects.requireNonNull(serverType, "serverType can't be null!");
+        Objects.requireNonNull(serverName, "serverName can't be null!");
+        Objects.requireNonNull(serverAddress, "serverAddress can't be null!");
         this.serverType = serverType;
         this.serverName = serverName.toLowerCase();
         this.serverAddress = serverAddress;

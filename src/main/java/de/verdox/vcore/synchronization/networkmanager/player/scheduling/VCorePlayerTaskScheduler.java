@@ -10,10 +10,7 @@ import de.verdox.vcore.plugin.VCorePlugin;
 import de.verdox.vcore.synchronization.networkmanager.player.api.PlayerTask;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.*;
 import java.util.stream.Collectors;
 
@@ -27,7 +24,8 @@ public final class VCorePlayerTaskScheduler implements SystemLoadable {
     private final VCorePlugin<?, ?> plugin;
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
 
-    public VCorePlayerTaskScheduler(VCorePlugin<?, ?> plugin) {
+    public VCorePlayerTaskScheduler(@NotNull VCorePlugin<?, ?> plugin) {
+        Objects.requireNonNull(plugin, "plugin can't be null!");
         this.plugin = plugin;
     }
 
@@ -51,6 +49,10 @@ public final class VCorePlayerTaskScheduler implements SystemLoadable {
     }
 
     public void schedulePlayerTask(@NotNull UUID playerUUID, @NotNull UUID taskUUID, @NotNull Runnable runnable, int maxWaitTime, @NotNull TimeUnit timeUnit) {
+        Objects.requireNonNull(playerUUID, "playerUUID can't be null!");
+        Objects.requireNonNull(taskUUID, "taskUUID can't be null!");
+        Objects.requireNonNull(runnable, "runnable can't be null!");
+        Objects.requireNonNull(timeUnit, "timeUnit can't be null!");
         plugin.consoleMessage("&eScheduling Task", false);
         executor.submit(new CatchingRunnable(() -> {
             if (plugin.getPlatformWrapper().isPlayerOnline(playerUUID)) {
@@ -71,6 +73,8 @@ public final class VCorePlayerTaskScheduler implements SystemLoadable {
     }
 
     private void removePlayerTask(@NotNull UUID playerUUID, @NotNull PlayerTask playerTask) {
+        Objects.requireNonNull(playerUUID, "playerUUID can't be null!");
+        Objects.requireNonNull(playerTask, "playerTask can't be null!");
         if (!scheduledTasks.containsKey(playerUUID))
             return;
         Set<PlayerTask> playerTasks = scheduledTasks.get(playerUUID);
@@ -80,6 +84,7 @@ public final class VCorePlayerTaskScheduler implements SystemLoadable {
     }
 
     public CompletableFuture<Set<Runnable>> getAllTasks(@NotNull UUID playerUUID) {
+        Objects.requireNonNull(playerUUID, "playerUUID can't be null!");
         CompletableFuture<Set<Runnable>> future = new CompletableFuture<>();
         executor.submit(new CatchingRunnable(() -> {
             if (!scheduledTasks.containsKey(playerUUID)) {

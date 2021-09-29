@@ -23,10 +23,12 @@ public interface GlobalCache extends DataProvider {
 
     Map<String, Object> getObjectCache(Class<? extends VCoreData> dataClass, UUID objectUUID);
 
+    @Deprecated
     Set<Map<String, Object>> getCacheList(Class<? extends VCoreData> dataClass);
 
     Set<String> getKeys(Class<? extends VCoreData> dataClass);
 
+    @Deprecated
     Map<String, Object> getGlobalCacheMap(String name);
 
     boolean dataExist(@Nonnull @NotNull Class<? extends VCoreData> dataClass, @Nonnull @NotNull UUID objectUUID);

@@ -9,7 +9,9 @@ import de.verdox.vcore.plugin.VCorePlugin;
 import de.verdox.vcore.synchronization.messaging.messages.Message;
 import de.verdox.vcore.synchronization.networkmanager.NetworkManager;
 import de.verdox.vcore.synchronization.networkmanager.serverping.files.ServerPingConfig;
+import org.jetbrains.annotations.NotNull;
 
+import java.util.Objects;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -25,7 +27,8 @@ public class ServerPingManager<T extends VCorePlugin<?, ?>> implements SystemLoa
     private final ScheduledFuture<?> keepAlivePing;
     AtomicBoolean loaded = new AtomicBoolean();
 
-    public ServerPingManager(NetworkManager<T> networkManager) {
+    public ServerPingManager(@NotNull NetworkManager<T> networkManager) {
+        Objects.requireNonNull(networkManager, "networkManager can't be null!");
         this.networkManager = networkManager;
         this.serverPingConfig = new ServerPingConfig(networkManager.getPlugin(), "serverInfo.yml", "//settings");
         this.serverPingConfig.init();

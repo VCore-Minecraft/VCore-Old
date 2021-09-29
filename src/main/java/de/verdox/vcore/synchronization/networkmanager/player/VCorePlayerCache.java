@@ -14,7 +14,9 @@ import de.verdox.vcore.synchronization.networkmanager.player.listener.VCorePlaye
 import de.verdox.vcore.synchronization.networkmanager.server.ServerInstance;
 import de.verdox.vcore.synchronization.networkmanager.server.ServerType;
 import de.verdox.vcore.synchronization.pipeline.parts.Pipeline;
+import org.jetbrains.annotations.NotNull;
 
+import java.util.Objects;
 import java.util.UUID;
 
 /**
@@ -24,13 +26,14 @@ import java.util.UUID;
  */
 public class VCorePlayerCache {
 
-    //TODO: VCOrePlaer auch in DB speichern, Bei Delete evtl mitgeben wo deleted werden soll? (Nur aus Local und Global Cache aber Persistent Speichern -> Alternative zu Bukkit.getOfflinePlayer())
+    //TODO: VCOrePlayer auch in DB speichern, Bei Delete evtl mitgeben wo deleted werden soll? (Nur aus Local und Global Cache aber Persistent Speichern -> Alternative zu Bukkit.getOfflinePlayer())
     //TODO: Eigene bukkit.getOfflinePlayer Implementierung mit Mojang API implementieren?
 
     private final VCorePlugin<?, ?> vCorePlugin;
     private final NetworkManager<?> networkManager;
 
-    public VCorePlayerCache(NetworkManager<?> networkManager) {
+    public VCorePlayerCache(@NotNull NetworkManager<?> networkManager) {
+        Objects.requireNonNull(networkManager, "networkManager can't be null!");
         this.networkManager = networkManager;
         this.vCorePlugin = networkManager.getPlugin();
         vCorePlugin.getServices().eventBus.register(new PlayerRedisListener());

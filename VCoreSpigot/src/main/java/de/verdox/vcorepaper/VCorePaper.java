@@ -118,7 +118,7 @@ public class VCorePaper extends VCoreCoreInstance.Minecraft {
         if (Bukkit.getPluginManager().getPlugin("ProtocolLib") != null)
             protocolManager = ProtocolLibrary.getProtocolManager();
 
-        networkManager = new NetworkManager<>(ServerType.GAME_SERVER, this);
+        networkManager = new NetworkManager<>(this, ServerType.GAME_SERVER);
         new PlayerBukkitListener(networkManager);
         if (networkManager.getServerCache().isServerNameTaken(getServerName())) {
             consoleMessage("&4<> ============================================= <>", false);

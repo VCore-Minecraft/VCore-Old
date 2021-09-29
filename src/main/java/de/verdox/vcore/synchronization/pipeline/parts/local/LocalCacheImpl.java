@@ -11,10 +11,7 @@ import de.verdox.vcore.synchronization.pipeline.datatypes.VCoreData;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
@@ -27,13 +24,16 @@ public class LocalCacheImpl implements LocalCache {
     private final Map<Class<? extends VCoreData>, Map<UUID, VCoreData>> dataObjects = new ConcurrentHashMap<>();
     private final VCorePlugin<?, ?> plugin;
 
-    public LocalCacheImpl(VCorePlugin<?, ?> plugin) {
+    public LocalCacheImpl(@NotNull VCorePlugin<?, ?> plugin) {
+        Objects.requireNonNull(plugin, "plugin can't be null!");
         this.plugin = plugin;
         plugin.consoleMessage("&eLocalCache started", true);
     }
 
     @Override
     public synchronized <S extends VCoreData> S getData(@NotNull Class<? extends S> dataClass, @NotNull UUID objectUUID) {
+        Objects.requireNonNull(dataClass, "dataClass can't be null!");
+        Objects.requireNonNull(objectUUID, "objectUUID can't be null!");
         if (!dataExist(dataClass, objectUUID))
             return null;
         S data = dataClass.cast(dataObjects.get(dataClass).get(objectUUID));
@@ -43,11 +43,14 @@ public class LocalCacheImpl implements LocalCache {
 
     @Override
     public synchronized <S extends VCoreData> Set<S> getAllData(@NotNull Class<? extends S> dataClass) {
+        Objects.requireNonNull(dataClass, "dataClass can't be null!");
         return getSavedUUIDs(dataClass).stream().map(uuid -> getData(dataClass, uuid)).collect(Collectors.toSet());
     }
 
     @Override
     public synchronized <S extends VCoreData> void save(@NotNull Class<? extends S> dataClass, @NotNull S data) {
+        Objects.requireNonNull(dataClass, "dataClass can't be null!");
+        Objects.requireNonNull(data, "data can't be null!");
         if (dataExist(dataClass, data.getObjectUUID()))
             return;
         if (!dataObjects.containsKey(dataClass))
@@ -59,6 +62,8 @@ public class LocalCacheImpl implements LocalCache {
 
     @Override
     public synchronized <S extends VCoreData> boolean dataExist(@NotNull Class<? extends S> dataClass, @NotNull UUID objectUUID) {
+        Objects.requireNonNull(dataClass, "dataClass can't be null!");
+        Objects.requireNonNull(objectUUID, "objectUUID can't be null!");
         if (!dataObjects.containsKey(dataClass))
             return false;
         return dataObjects.get(dataClass).containsKey(objectUUID);
@@ -66,6 +71,8 @@ public class LocalCacheImpl implements LocalCache {
 
     @Override
     public synchronized <S extends VCoreData> boolean remove(@NotNull Class<? extends S> dataClass, @NotNull UUID objectUUID) {
+        Objects.requireNonNull(dataClass, "dataClass can't be null!");
+        Objects.requireNonNull(objectUUID, "objectUUID can't be null!");
         if (!dataExist(dataClass, objectUUID))
             return false;
         dataObjects.get(dataClass).remove(objectUUID);
@@ -77,6 +84,7 @@ public class LocalCacheImpl implements LocalCache {
 
     @Override
     public synchronized <S extends VCoreData> Set<UUID> getSavedUUIDs(@NotNull Class<? extends S> dataClass) {
+        Objects.requireNonNull(dataClass, "dataClass can't be null!");
         if (!dataObjects.containsKey(dataClass))
             return new HashSet<>();
         return dataObjects.get(dataClass).keySet();
@@ -84,6 +92,8 @@ public class LocalCacheImpl implements LocalCache {
 
     @Override
     public synchronized <S extends VCoreData> S instantiateData(@NotNull Class<? extends S> dataClass, @NotNull UUID objectUUID) {
+        Objects.requireNonNull(dataClass, "dataClass can't be null!");
+        Objects.requireNonNull(objectUUID, "objectUUID can't be null!");
         // Network Data is not subsystem dependent
         if (!NetworkData.class.isAssignableFrom(dataClass)) {
             VCoreSubsystem<?> subsystem = plugin.findDependSubsystem(dataClass);

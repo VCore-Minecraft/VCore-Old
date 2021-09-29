@@ -6,6 +6,7 @@ package de.verdox.vcore.synchronization.networkmanager.serverping.files;
 
 import de.verdox.vcore.plugin.VCorePlugin;
 import de.verdox.vcore.plugin.files.config.VCoreYAMLConfig;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Locale;
 
@@ -15,7 +16,7 @@ import java.util.Locale;
  * @date 09.07.2021 01:27
  */
 public class ServerPingConfig extends VCoreYAMLConfig {
-    public ServerPingConfig(VCorePlugin<?, ?> plugin, String fileName, String pluginDirectory) {
+    public ServerPingConfig(@NotNull VCorePlugin<?, ?> plugin, @NotNull String fileName, @NotNull String pluginDirectory) {
         super(plugin, fileName, pluginDirectory);
     }
 

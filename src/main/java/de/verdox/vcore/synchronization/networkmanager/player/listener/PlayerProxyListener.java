@@ -14,7 +14,9 @@ import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.event.LoginEvent;
 import net.md_5.bungee.api.event.PlayerDisconnectEvent;
 import net.md_5.bungee.api.event.PostLoginEvent;
+import org.jetbrains.annotations.NotNull;
 
+import java.util.Objects;
 import java.util.UUID;
 
 /**
@@ -25,8 +27,9 @@ import java.util.UUID;
 public class PlayerProxyListener extends VCoreListener.VCoreBungeeListener implements VCorePlayerCacheListener {
     private final NetworkManager<?> networkManager;
 
-    public PlayerProxyListener(NetworkManager<?> networkManager) {
+    public PlayerProxyListener(@NotNull NetworkManager<?> networkManager) {
         super((VCorePlugin.BungeeCord) networkManager.getPlugin());
+        Objects.requireNonNull(networkManager, "networkManager can't be null!");
         this.networkManager = networkManager;
     }
 

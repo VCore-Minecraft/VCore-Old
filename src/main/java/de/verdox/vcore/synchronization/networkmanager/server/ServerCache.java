@@ -12,9 +12,11 @@ import de.verdox.vcore.synchronization.networkmanager.serverping.ServerPingManag
 import de.verdox.vcore.synchronization.networkmanager.serverping.events.ServerPingOfflineEvent;
 import de.verdox.vcore.synchronization.networkmanager.serverping.events.ServerPingOnlineEvent;
 import de.verdox.vcore.synchronization.pipeline.parts.Pipeline;
+import org.jetbrains.annotations.NotNull;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.UUID;
 
 /**
@@ -27,7 +29,8 @@ public class ServerCache {
     private final ServerPingManager<?> serverPingManager;
     private final NetworkManager<?> networkManager;
 
-    public ServerCache(NetworkManager<?> networkManager) {
+    public ServerCache(@NotNull NetworkManager<?> networkManager) {
+        Objects.requireNonNull(networkManager, "networkManager can't be null!");
         this.serverPingManager = networkManager.getServerPingManager();
         this.networkManager = networkManager;
         networkManager.getPlugin().getServices().eventBus.register(this);
