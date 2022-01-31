@@ -7,7 +7,6 @@ package de.verdox.vcorepaper;
 import com.comphenix.protocol.ProtocolLibrary;
 import com.comphenix.protocol.ProtocolManager;
 import de.verdox.vcore.nms.NMSManager;
-import de.verdox.vcore.nms.commands.NMSCommand;
 import de.verdox.vcore.plugin.VCoreCoreInstance;
 import de.verdox.vcore.plugin.subsystem.VCoreSubsystem;
 import de.verdox.vcore.synchronization.networkmanager.NetworkManager;
@@ -113,7 +112,6 @@ public class VCorePaper extends VCoreCoreInstance.Minecraft {
 
 
         new AdminCommands(this, "debug");
-        new NMSCommand(this, "nms");
         new PlayerAPICommands(this, "playerapi");
         new WorkingNPCCommand(this, "workingNPC");
 

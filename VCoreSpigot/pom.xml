@@ -14,6 +14,7 @@
     <modules>
         <module>VCoreNMS</module>
         <module>VCoreNBT</module>
+        <module>VCorePaperEvent</module>
     </modules>
     <packaging>pom</packaging>
 
@@ -88,6 +89,18 @@
         <dependency>
             <groupId>de.verdox</groupId>
             <artifactId>VCoreNMS</artifactId>
+            <version>LATEST</version>
+        </dependency>
+        <!---  VCoreNBT Dependency -->
+        <dependency>
+            <groupId>de.verdox</groupId>
+            <artifactId>VCoreNBT</artifactId>
+            <version>LATEST</version>
+        </dependency>
+        <!---  VCoreEvents Dependency -->
+        <dependency>
+            <groupId>de.verdox</groupId>
+            <artifactId>VCorePaperEvent</artifactId>
             <version>LATEST</version>
         </dependency>
         <!---  NBT API Dependency (MIT LICENCE) -->
@@ -207,7 +220,15 @@
                                 </relocation>
                                 <relocation>
                                     <pattern>de.verdox.vcore.nms</pattern>
-                                    <shadedPattern>de.verdox.vcorepaper.nms</shadedPattern>
+                                    <shadedPattern>de.verdox.vcorepaper.custom.nms</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>de.verdox.vcore.nbt</pattern>
+                                    <shadedPattern>de.verdox.vcorepaper.custom.nbt</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>de.verdox.vcore.events</pattern>
+                                    <shadedPattern>de.verdox.vcorepaper.custom.events</shadedPattern>
                                 </relocation>
                                 <relocation>
                                     <pattern>dev.dbassett.skullcreator</pattern>

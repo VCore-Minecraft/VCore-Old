@@ -4,11 +4,11 @@
 
 package de.verdox.vcore.nms.commands;
 
+import de.verdox.vcore.nms.NMSModule;
 import de.verdox.vcore.plugin.VCorePlugin;
 import de.verdox.vcore.plugin.command.VCommandCallback;
 import de.verdox.vcore.plugin.command.VCoreCommand;
 import de.verdox.vcore.util.VCoreUtil;
-import de.verdox.vcorepaper.VCorePaper;
 import org.bukkit.ChatColor;
 import org.bukkit.World;
 import org.bukkit.block.Biome;
@@ -25,8 +25,11 @@ import java.util.Arrays;
  * @date 21.06.2021 15:15
  */
 public class NMSCommand extends VCoreCommand.VCoreBukkitCommand {
-    public NMSCommand(VCorePlugin.Minecraft vCorePlugin, String commandName) {
+    private final NMSModule nmsModule;
+
+    public NMSCommand(NMSModule nmsModule, VCorePlugin.Minecraft vCorePlugin, String commandName) {
         super(vCorePlugin, commandName);
+        this.nmsModule = nmsModule;
 
         addCommandCallback("world")
                 .setExecutor(VCommandCallback.CommandExecutorType.PLAYER)
@@ -34,10 +37,10 @@ public class NMSCommand extends VCoreCommand.VCoreBukkitCommand {
                 .withPermission("nms.world.sendFakeDimension")
                 .askFor("DimensionName", VCommandCallback.CommandAskType.STRING, "&cDimension not found", "NORMAL", "NETHER", "THE_END")
                 .commandCallback((commandSender, commandParameters) -> {
-                    VCorePaper.getInstance().sync(() -> {
+                    vCorePlugin.sync(() -> {
                         String env = commandParameters.getObject(0, String.class);
                         try {
-                            VCorePaper.getInstance().getNmsManager().getNmsWorldHandler().sendFakeDimension((Player) commandSender, World.Environment.valueOf(env));
+                            nmsModule.getNmsManager().getNmsWorldHandler().sendFakeDimension((Player) commandSender, World.Environment.valueOf(env));
                             commandSender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&aDimension successfully changed!"));
                         } catch (IllegalArgumentException e) {
                             commandSender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&cDimension not found"));
@@ -51,14 +54,14 @@ public class NMSCommand extends VCoreCommand.VCoreBukkitCommand {
                 .withPermission("nms.world.sendFakeBiome")
                 .askFor("Biome", VCommandCallback.CommandAskType.STRING, "&cBiome not found", Arrays.stream(Biome.values()).map(Biome::name).toArray(String[]::new))
                 .commandCallback((commandSender, commandParameters) -> {
-                    VCorePaper.getInstance().sync(() -> {
+                    vCorePlugin.sync(() -> {
                         Player player = (Player) commandSender;
                         Biome biome = commandParameters.getEnum(0, Biome.class);
                         if (biome == null) {
                             commandSender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&cBiome not found"));
                             return;
                         }
-                        VCorePaper.getInstance().getNmsManager().getNmsWorldHandler().sendFakeBiome(player, player.getChunk(), biome);
+                        nmsModule.getNmsManager().getNmsWorldHandler().sendFakeBiome(player, player.getChunk(), biome);
                     });
                 });
 
@@ -68,8 +71,8 @@ public class NMSCommand extends VCoreCommand.VCoreBukkitCommand {
                 .withPermission("nms.world.resetView")
                 .commandCallback((commandSender, commandParameters) -> {
                     Player player = (Player) commandSender;
-                    VCorePaper.getInstance().sync(() -> {
-                        VCorePaper.getInstance().getNmsManager().getNmsWorldHandler().resetView(player);
+                    vCorePlugin.sync(() -> {
+                        nmsModule.getNmsManager().getNmsWorldHandler().resetView(player);
                     });
                 });
 
@@ -88,7 +91,7 @@ public class NMSCommand extends VCoreCommand.VCoreBukkitCommand {
                         return;
                     }
 
-                    VCorePaper.getInstance().sync(() -> {
+                    vCorePlugin.sync(() -> {
                         RayTraceResult rayTraceResult = VCoreUtil.BukkitUtil.getBukkitPlayerUtil().rayTraceEntities(player, 15);
                         if (rayTraceResult == null || rayTraceResult.getHitEntity() == null || !rayTraceResult.getHitEntity().getType().equals(EntityType.VILLAGER)) {
                             player.sendMessage(ChatColor.translateAlternateColorCodes('&', "&cLook at an villager&7!"));
@@ -113,7 +116,7 @@ public class NMSCommand extends VCoreCommand.VCoreBukkitCommand {
                         player.sendMessage(ChatColor.translateAlternateColorCodes('&', "&cType not found&7!"));
                         return;
                     }
-                    VCorePaper.getInstance().sync(() -> {
+                    vCorePlugin.sync(() -> {
                         RayTraceResult rayTraceResult = VCoreUtil.BukkitUtil.getBukkitPlayerUtil().rayTraceEntities(player, 15);
                         if (rayTraceResult == null || rayTraceResult.getHitEntity() == null || !rayTraceResult.getHitEntity().getType().equals(EntityType.VILLAGER)) {
                             player.sendMessage(ChatColor.translateAlternateColorCodes('&', "&cLook at an villager&7!"));

@@ -11,13 +11,10 @@ import de.verdox.vcore.nbt.block.flags.VBlockFlag;
 import de.verdox.vcore.nbt.holders.NBTHolder;
 import de.verdox.vcore.nbt.holders.block.NBTBlockHolder;
 import de.verdox.vcore.nbt.holders.location.NBTLocation;
-import de.verdox.vcorepaper.custom.util.Serializer;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
-import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.Set;
@@ -52,25 +49,6 @@ public abstract class VBlock<D, N extends NBTHolder<?>, M extends CustomDataMana
      * @return LocationBased VBLock
      */
     public abstract LocationBased asLocationBased();
-
-    public void alternativeLootItems(@NotNull ItemStack... itemStacks) {
-        toNBTHolder().getPersistentDataContainer().setString("vblockAdditionalLoot", Serializer.itemStackArrayToBase64(itemStacks));
-    }
-
-    public boolean hasAlternativeLootItems() {
-        return toNBTHolder().getPersistentDataContainer().hasKey("vblockAdditionalLoot");
-    }
-
-    public ItemStack[] getAdditionalLootItems() {
-        if (!hasAlternativeLootItems())
-            return new ItemStack[0];
-        try {
-            return Serializer.itemStackArrayFromBase64(toNBTHolder().getPersistentDataContainer().getString("vblockAdditionalLoot"));
-        } catch (IOException e) {
-            e.printStackTrace();
-            return new ItemStack[0];
-        }
-    }
 
     @Override
     protected <T, R extends CustomData<T>> void onStoreData(Class<? extends R> customDataType, T value) {

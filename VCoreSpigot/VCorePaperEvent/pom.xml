@@ -13,18 +13,13 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>VCoreNBT</artifactId>
+    <artifactId>VCorePaperEvent</artifactId>
 
     <dependencies>
         <dependency>
             <groupId>de.verdox</groupId>
             <artifactId>VCore</artifactId>
             <version>LATEST</version>
-        </dependency>
-        <dependency>
-            <groupId>de.verdox</groupId>
-            <artifactId>VCorePaperEvent</artifactId>
-            <version>RELEASE</version>
         </dependency>
     </dependencies>
 

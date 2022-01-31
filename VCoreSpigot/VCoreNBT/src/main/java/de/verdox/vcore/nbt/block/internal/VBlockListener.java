@@ -4,12 +4,12 @@
 
 package de.verdox.vcore.nbt.block.internal;
 
+import de.verdox.vcore.events.paper.blockevents.BlockChangeStateEvent;
 import de.verdox.vcore.nbt.VCoreNBTModule;
 import de.verdox.vcore.nbt.block.VBlock;
 import de.verdox.vcore.nbt.block.flags.VBlockFlag;
 import de.verdox.vcore.plugin.VCorePlugin;
 import de.verdox.vcore.plugin.listener.VCoreListener;
-import de.verdox.vcorepaper.custom.events.paper.blockevents.BlockChangeStateEvent;
 import org.bukkit.block.Block;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.EventHandler;

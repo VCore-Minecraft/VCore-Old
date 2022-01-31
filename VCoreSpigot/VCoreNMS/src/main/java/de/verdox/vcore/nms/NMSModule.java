@@ -20,7 +20,7 @@ public class NMSModule implements VCoreModule<VCorePlugin.Minecraft> {
 
     @Override
     public void enableModule(VCorePlugin.Minecraft plugin) {
-        nmsCommand = new NMSCommand(plugin, "nms");
+        nmsCommand = new NMSCommand(this, plugin, "nms");
         nmsManager = new NMSManager(plugin);
     }
 
