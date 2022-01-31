@@ -2,12 +2,13 @@
  * Copyright (c) 2022. Lukas Jonsson
  */
 
-package de.verdox.vcorepaper.custom.nbt.block;
+package de.verdox.vcore.nbt.block;
 
+import de.verdox.vcore.nbt.CustomDataManager;
+import de.verdox.vcore.nbt.VCoreNBTModule;
+import de.verdox.vcore.nbt.block.data.VBlockCustomData;
 import de.verdox.vcore.plugin.SystemLoadable;
-import de.verdox.vcorepaper.VCorePaper;
-import de.verdox.vcorepaper.custom.nbt.CustomDataManager;
-import de.verdox.vcorepaper.custom.nbt.block.data.VBlockCustomData;
+import de.verdox.vcore.plugin.VCorePlugin;
 import org.bukkit.block.Block;
 
 import java.lang.reflect.InvocationTargetException;
@@ -17,17 +18,17 @@ import java.lang.reflect.InvocationTargetException;
  * @Author: Lukas Jonsson (Verdox)
  * @date 23.08.2021 15:16
  */
-public class CustomBlockDataManager extends CustomDataManager<Block, VBlockCustomData<?>, VBlock.BlockBased> implements SystemLoadable {
-    public CustomBlockDataManager(VCorePaper vCorePaper) {
-        super(vCorePaper);
+public class CustomBlockDataManager extends CustomDataManager<Block, VBlockCustomData<?>, de.verdox.vcore.nbt.block.VBlock.BlockBased> implements SystemLoadable {
+    public CustomBlockDataManager(VCoreNBTModule vCoreNBTModule, VCorePlugin.Minecraft vCorePlugin) {
+        super(vCoreNBTModule, vCorePlugin);
     }
 
-    public VBlock.BlockBased getVBlock(Block block) {
-        return wrap(VBlock.BlockBased.class, block);
+    public de.verdox.vcore.nbt.block.VBlock.BlockBased getVBlock(Block block) {
+        return wrap(de.verdox.vcore.nbt.block.VBlock.BlockBased.class, block);
     }
 
     @Override
-    public <U extends VBlock.BlockBased> U wrap(Class<? extends U> type, Block inputObject) {
+    public <U extends de.verdox.vcore.nbt.block.VBlock.BlockBased> U wrap(Class<? extends U> type, Block inputObject) {
         try {
             return type.getDeclaredConstructor(Block.class, CustomBlockDataManager.class).newInstance(inputObject, this);
         } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
@@ -37,7 +38,7 @@ public class CustomBlockDataManager extends CustomDataManager<Block, VBlockCusto
     }
 
     @Override
-    public <U extends VBlock.BlockBased> U convertTo(Class<? extends U> type, VBlock.BlockBased customData) {
+    public <U extends de.verdox.vcore.nbt.block.VBlock.BlockBased> U convertTo(Class<? extends U> type, VBlock.BlockBased customData) {
         try {
             return type.getDeclaredConstructor(Block.class, CustomBlockDataManager.class).newInstance(customData.getDataHolder(), this);
         } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {

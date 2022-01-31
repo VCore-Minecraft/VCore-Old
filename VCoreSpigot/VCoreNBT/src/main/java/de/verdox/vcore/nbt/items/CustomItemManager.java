@@ -2,11 +2,12 @@
  * Copyright (c) 2022. Lukas Jonsson
  */
 
-package de.verdox.vcorepaper.custom.nbt.items;
+package de.verdox.vcore.nbt.items;
 
 import de.tr7zw.changeme.nbtapi.NBTItem;
-import de.verdox.vcorepaper.VCorePaper;
-import de.verdox.vcorepaper.custom.nbt.CustomDataManager;
+import de.verdox.vcore.nbt.CustomDataManager;
+import de.verdox.vcore.nbt.VCoreNBTModule;
+import de.verdox.vcore.plugin.VCorePlugin;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -22,23 +23,23 @@ import org.jetbrains.annotations.NotNull;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
-public class CustomItemManager extends CustomDataManager<ItemStack, ItemCustomData<?>, VCoreItem> implements Listener {
+public class CustomItemManager extends CustomDataManager<ItemStack, de.verdox.vcore.nbt.items.ItemCustomData<?>, de.verdox.vcore.nbt.items.VCoreItem> implements Listener {
 
     private static CustomItemManager instance = null;
 
-    private final ItemPreset itemPreset;
+    private final de.verdox.vcore.nbt.items.ItemPreset itemPreset;
 
-    public CustomItemManager(VCorePaper vCorePaper) {
-        super(vCorePaper);
+    public CustomItemManager(VCoreNBTModule vCoreNBTModule, VCorePlugin.Minecraft vCorePlugin) {
+        super(vCoreNBTModule, vCorePlugin);
         if (instance != null)
             throw new IllegalStateException("There can only be one CustomEntityManager");
         instance = this;
-        this.itemPreset = new ItemPreset(this);
-        Bukkit.getPluginManager().registerEvents(this, vCorePaper.getPlugin());
+        this.itemPreset = new de.verdox.vcore.nbt.items.ItemPreset(this);
+        Bukkit.getPluginManager().registerEvents(this, vCorePlugin);
     }
 
     @Override
-    public <U extends VCoreItem> U wrap(Class<? extends U> type, ItemStack inputObject) {
+    public <U extends de.verdox.vcore.nbt.items.VCoreItem> U wrap(Class<? extends U> type, ItemStack inputObject) {
         try {
             return type.getDeclaredConstructor(ItemStack.class, CustomItemManager.class).newInstance(inputObject, this);
         } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
@@ -48,7 +49,7 @@ public class CustomItemManager extends CustomDataManager<ItemStack, ItemCustomDa
     }
 
     @Override
-    public <U extends VCoreItem> U convertTo(Class<? extends U> type, VCoreItem customData) {
+    public <U extends de.verdox.vcore.nbt.items.VCoreItem> U convertTo(Class<? extends U> type, de.verdox.vcore.nbt.items.VCoreItem customData) {
         try {
             return type.getDeclaredConstructor(ItemStack.class, CustomItemManager.class).newInstance(customData.getDataHolder(), this);
         } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
@@ -59,7 +60,7 @@ public class CustomItemManager extends CustomDataManager<ItemStack, ItemCustomDa
 
 
     @Override
-    protected ItemCustomData<?> instantiateCustomData(Class<? extends ItemCustomData<?>> dataClass) {
+    protected de.verdox.vcore.nbt.items.ItemCustomData<?> instantiateCustomData(Class<? extends ItemCustomData<?>> dataClass) {
         try {
             return dataClass.getDeclaredConstructor().newInstance();
         } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
@@ -68,7 +69,7 @@ public class CustomItemManager extends CustomDataManager<ItemStack, ItemCustomDa
         }
     }
 
-    public ItemPreset getItemPreset() {
+    public de.verdox.vcore.nbt.items.ItemPreset getItemPreset() {
         return itemPreset;
     }
 
@@ -110,14 +111,14 @@ public class CustomItemManager extends CustomDataManager<ItemStack, ItemCustomDa
             e.setCancelled(true);
     }
 
-    public VCoreItem getGuiBorderItem() {
-        return VCorePaper.getInstance()
+    public de.verdox.vcore.nbt.items.VCoreItem getGuiBorderItem() {
+        return getItemPreset()
                 .getCustomItemManager()
                 .createItemBuilder(Material.BLACK_STAINED_GLASS_PANE, 1, "&8").buildItem();
     }
 
-    public VCoreItem getHelpItem(@NotNull String title) {
-        return VCorePaper.getInstance()
+    public de.verdox.vcore.nbt.items.VCoreItem getHelpItem(@NotNull String title) {
+        return getVCoreNBTModule()
                 .getCustomItemManager()
                 .createItemBuilder(Material.WRITTEN_BOOK, 1, title).buildItem();
     }
@@ -225,11 +226,11 @@ public class CustomItemManager extends CustomDataManager<ItemStack, ItemCustomDa
             return this;
         }
 
-        public VCoreItem buildItem() {
-            return buildItem(VCoreItem.class);
+        public de.verdox.vcore.nbt.items.VCoreItem buildItem() {
+            return buildItem(de.verdox.vcore.nbt.items.VCoreItem.class);
         }
 
-        public <R extends VCoreItem> VCoreItem buildItem(Class<? extends R> type) {
+        public <R extends de.verdox.vcore.nbt.items.VCoreItem> VCoreItem buildItem(Class<? extends R> type) {
             if (material == null)
                 throw new NullPointerException("Material can't be null!");
             ItemStack itemStack;

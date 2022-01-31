@@ -13,6 +13,7 @@
     <version>1.0</version>
     <modules>
         <module>VCoreNMS</module>
+        <module>VCoreNBT</module>
     </modules>
     <packaging>pom</packaging>
 

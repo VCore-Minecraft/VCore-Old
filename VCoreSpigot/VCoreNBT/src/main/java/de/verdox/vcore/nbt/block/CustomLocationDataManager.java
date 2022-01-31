@@ -2,12 +2,13 @@
  * Copyright (c) 2022. Lukas Jonsson
  */
 
-package de.verdox.vcorepaper.custom.nbt.block;
+package de.verdox.vcore.nbt.block;
 
+import de.verdox.vcore.nbt.CustomDataManager;
+import de.verdox.vcore.nbt.VCoreNBTModule;
+import de.verdox.vcore.nbt.block.data.VBlockCustomData;
 import de.verdox.vcore.plugin.SystemLoadable;
-import de.verdox.vcorepaper.VCorePaper;
-import de.verdox.vcorepaper.custom.nbt.CustomDataManager;
-import de.verdox.vcorepaper.custom.nbt.block.data.VBlockCustomData;
+import de.verdox.vcore.plugin.VCorePlugin;
 import org.bukkit.Location;
 
 import java.lang.reflect.InvocationTargetException;
@@ -17,19 +18,19 @@ import java.lang.reflect.InvocationTargetException;
  * @Author: Lukas Jonsson (Verdox)
  * @date 10.08.2021 22:12
  */
-public class CustomLocationDataManager extends CustomDataManager<Location, VBlockCustomData<?>, VBlock.LocationBased> implements SystemLoadable {
+public class CustomLocationDataManager extends CustomDataManager<Location, VBlockCustomData<?>, de.verdox.vcore.nbt.block.VBlock.LocationBased> implements SystemLoadable {
     //private final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor(new DefaultThreadFactory("VBlock - Ticking Thread"));
 
-    public CustomLocationDataManager(VCorePaper vCorePaper) {
-        super(vCorePaper);
+    public CustomLocationDataManager(VCoreNBTModule vCoreNBTModule, VCorePlugin.Minecraft vCorePlugin) {
+        super(vCoreNBTModule, vCorePlugin);
     }
 
-    public VBlock.LocationBased getVBlock(Location location) {
-        return wrap(VBlock.LocationBased.class, location);
+    public de.verdox.vcore.nbt.block.VBlock.LocationBased getVBlock(Location location) {
+        return wrap(de.verdox.vcore.nbt.block.VBlock.LocationBased.class, location);
     }
 
     @Override
-    public <U extends VBlock.LocationBased> U wrap(Class<? extends U> type, Location inputObject) {
+    public <U extends de.verdox.vcore.nbt.block.VBlock.LocationBased> U wrap(Class<? extends U> type, Location inputObject) {
         try {
             return type.getDeclaredConstructor(Location.class, CustomLocationDataManager.class).newInstance(inputObject, this);
         } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
@@ -39,7 +40,7 @@ public class CustomLocationDataManager extends CustomDataManager<Location, VBloc
     }
 
     @Override
-    public <U extends VBlock.LocationBased> U convertTo(Class<? extends U> type, VBlock.LocationBased customData) {
+    public <U extends de.verdox.vcore.nbt.block.VBlock.LocationBased> U convertTo(Class<? extends U> type, VBlock.LocationBased customData) {
         try {
             return type.getDeclaredConstructor(Location.class, CustomLocationDataManager.class).newInstance(customData.getDataHolder(), this);
         } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {

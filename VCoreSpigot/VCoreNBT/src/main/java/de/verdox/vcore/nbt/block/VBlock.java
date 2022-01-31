@@ -2,16 +2,15 @@
  * Copyright (c) 2022. Lukas Jonsson
  */
 
-package de.verdox.vcorepaper.custom.nbt.block;
+package de.verdox.vcore.nbt.block;
 
-import de.verdox.vcorepaper.VCorePaper;
-import de.verdox.vcorepaper.custom.nbt.CustomData;
-import de.verdox.vcorepaper.custom.nbt.CustomDataHolder;
-import de.verdox.vcorepaper.custom.nbt.CustomDataManager;
-import de.verdox.vcorepaper.custom.nbt.block.flags.VBlockFlag;
-import de.verdox.vcorepaper.custom.nbt.holders.NBTHolder;
-import de.verdox.vcorepaper.custom.nbt.holders.block.NBTBlockHolder;
-import de.verdox.vcorepaper.custom.nbt.holders.location.NBTLocation;
+import de.verdox.vcore.nbt.CustomData;
+import de.verdox.vcore.nbt.CustomDataHolder;
+import de.verdox.vcore.nbt.CustomDataManager;
+import de.verdox.vcore.nbt.block.flags.VBlockFlag;
+import de.verdox.vcore.nbt.holders.NBTHolder;
+import de.verdox.vcore.nbt.holders.block.NBTBlockHolder;
+import de.verdox.vcore.nbt.holders.location.NBTLocation;
 import de.verdox.vcorepaper.custom.util.Serializer;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
@@ -42,7 +41,7 @@ public abstract class VBlock<D, N extends NBTHolder<?>, M extends CustomDataMana
      *
      * @return BlockBased VBLock
      */
-    public abstract VBlock.BlockBased asBlockBased();
+    public abstract BlockBased asBlockBased();
 
     /**
      * Gets the Location Storage of this Block
@@ -52,7 +51,7 @@ public abstract class VBlock<D, N extends NBTHolder<?>, M extends CustomDataMana
      *
      * @return LocationBased VBLock
      */
-    public abstract VBlock.LocationBased asLocationBased();
+    public abstract LocationBased asLocationBased();
 
     public void alternativeLootItems(@NotNull ItemStack... itemStacks) {
         toNBTHolder().getPersistentDataContainer().setString("vblockAdditionalLoot", Serializer.itemStackArrayToBase64(itemStacks));
@@ -101,7 +100,7 @@ public abstract class VBlock<D, N extends NBTHolder<?>, M extends CustomDataMana
 
         @Override
         public BlockBased asBlockBased() {
-            return VCorePaper.getInstance().getCustomBlockManager().getBlockDataManager().getVBlock(getDataHolder().getBlock());
+            return customDataManager.getVCoreNBTModule().getCustomBlockProvider().getBlockDataManager().getVBlock(getDataHolder().getBlock());
         }
 
         @Override
@@ -140,7 +139,7 @@ public abstract class VBlock<D, N extends NBTHolder<?>, M extends CustomDataMana
 
         @Override
         public LocationBased asLocationBased() {
-            return VCorePaper.getInstance().getCustomLocationDataManager().getVBlock(block.getLocation());
+            return customDataManager.getVCoreNBTModule().getCustomBlockProvider().getLocationDataManager().getVBlock(block.getLocation());
         }
 
         @Override

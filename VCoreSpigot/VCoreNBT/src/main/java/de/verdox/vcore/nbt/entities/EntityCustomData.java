@@ -2,10 +2,9 @@
  * Copyright (c) 2022. Lukas Jonsson
  */
 
-package de.verdox.vcorepaper.custom.nbt.entities;
+package de.verdox.vcore.nbt.entities;
 
-
-import de.verdox.vcorepaper.custom.nbt.CustomData;
+import de.verdox.vcore.nbt.CustomData;
 import org.bukkit.event.player.PlayerInteractAtEntityEvent;
 import org.jetbrains.annotations.NotNull;
 

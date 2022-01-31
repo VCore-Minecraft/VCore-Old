@@ -2,9 +2,9 @@
  * Copyright (c) 2022. Lukas Jonsson
  */
 
-package de.verdox.vcorepaper.custom.nbt.block.data;
+package de.verdox.vcore.nbt.block.data;
 
-import de.verdox.vcorepaper.custom.nbt.CustomData;
+import de.verdox.vcore.nbt.CustomData;
 
 import java.util.List;
 

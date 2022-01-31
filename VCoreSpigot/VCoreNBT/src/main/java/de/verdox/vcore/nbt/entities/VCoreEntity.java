@@ -2,11 +2,11 @@
  * Copyright (c) 2022. Lukas Jonsson
  */
 
-package de.verdox.vcorepaper.custom.nbt.entities;
+package de.verdox.vcore.nbt.entities;
 
-import de.verdox.vcorepaper.custom.nbt.CustomData;
-import de.verdox.vcorepaper.custom.nbt.CustomDataHolder;
-import de.verdox.vcorepaper.custom.nbt.holders.entity.NBTEntityHolder;
+import de.verdox.vcore.nbt.CustomData;
+import de.verdox.vcore.nbt.CustomDataHolder;
+import de.verdox.vcore.nbt.holders.entity.NBTEntityHolder;
 import org.bukkit.entity.Entity;
 import org.jetbrains.annotations.NotNull;
 

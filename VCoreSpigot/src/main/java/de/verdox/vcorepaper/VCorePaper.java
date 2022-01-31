@@ -6,6 +6,8 @@ package de.verdox.vcorepaper;
 
 import com.comphenix.protocol.ProtocolLibrary;
 import com.comphenix.protocol.ProtocolManager;
+import de.verdox.vcore.nms.NMSManager;
+import de.verdox.vcore.nms.commands.NMSCommand;
 import de.verdox.vcore.plugin.VCoreCoreInstance;
 import de.verdox.vcore.plugin.subsystem.VCoreSubsystem;
 import de.verdox.vcore.synchronization.networkmanager.NetworkManager;
@@ -20,10 +22,10 @@ import de.verdox.vcore.synchronization.pipeline.parts.Pipeline;
 import de.verdox.vcorepaper.commands.AdminCommands;
 import de.verdox.vcorepaper.commands.PlayerAPICommands;
 import de.verdox.vcorepaper.commands.WorkingNPCCommand;
-import de.verdox.vcorepaper.custom.CustomDataListener;
 import de.verdox.vcorepaper.custom.economy.EconomyContainer;
 import de.verdox.vcorepaper.custom.events.paper.CustomPaperEventListener;
 import de.verdox.vcorepaper.custom.events.paper.blockevents.BlockStateChangeListener;
+import de.verdox.vcorepaper.custom.nbt.CustomDataListener;
 import de.verdox.vcorepaper.custom.nbt.block.CustomBlockDataManager;
 import de.verdox.vcorepaper.custom.nbt.block.CustomBlockProvider;
 import de.verdox.vcorepaper.custom.nbt.block.CustomLocationDataManager;
@@ -35,7 +37,6 @@ import de.verdox.vcorepaper.custom.nbt.entities.CustomEntityManager;
 import de.verdox.vcorepaper.custom.nbt.holders.location.LocationNBTFileStorage;
 import de.verdox.vcorepaper.custom.nbt.items.CustomItemManager;
 import de.verdox.vcorepaper.custom.workernpc.listener.WorkerNPCListener;
-import de.verdox.vcorepaper.nms.NMSManager;
 import net.roxeez.advancement.AdvancementManager;
 import org.bstats.bukkit.Metrics;
 import org.bukkit.Bukkit;
@@ -112,6 +113,7 @@ public class VCorePaper extends VCoreCoreInstance.Minecraft {
 
 
         new AdminCommands(this, "debug");
+        new NMSCommand(this, "nms");
         new PlayerAPICommands(this, "playerapi");
         new WorkingNPCCommand(this, "workingNPC");
 
