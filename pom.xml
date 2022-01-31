@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~ Copyright (c) 2021. Lukas Jonsson
+  ~ Copyright (c) 2022. Lukas Jonsson
   -->
 
 <project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -131,13 +131,6 @@
             <artifactId>paper_1.16.5</artifactId>
             <version>1.16.5</version>
             <scope>provided</scope>
-        </dependency>
-        <!-- BStats -->
-        <dependency>
-            <groupId>org.bstats</groupId>
-            <artifactId>bstats-bungeecord</artifactId>
-            <version>2.2.1</version>
-            <scope>compile</scope>
         </dependency>
     </dependencies>
 

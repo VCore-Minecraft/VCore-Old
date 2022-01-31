@@ -1,9 +1,10 @@
 /*
- * Copyright (c) 2021. Lukas Jonsson
+ * Copyright (c) 2022. Lukas Jonsson
  */
 
 package de.verdox.vcorepaper.custom.workernpc;
 
+import de.verdox.vcorepaper.VCorePaper;
 import de.verdox.vcorepaper.custom.nbt.entities.CustomEntityManager;
 import de.verdox.vcorepaper.custom.workernpc.professions.VanillaTrader;
 import org.jetbrains.annotations.NotNull;
@@ -44,6 +45,7 @@ public class ProfessionRegistry {
     }
 
     public Set<String> getProfessions() {
+        VCorePaper.getInstance().consoleMessage(registry.keySet().toString(), true);
         return registry.keySet();
     }
 }

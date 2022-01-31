@@ -1,10 +1,10 @@
 /*
- * Copyright (c) 2021. Lukas Jonsson
+ * Copyright (c) 2022. Lukas Jonsson
  */
 
 package de.verdox.vcorepaper.nms.nmshandler.v1_16_3.entity;
 
-import de.verdox.vcorepaper.nms.nmshandler.api.entity.NMSEntityHandler;
+import de.verdox.vcore.nms.nmshandler.api.entity.NMSEntityHandler;
 import net.minecraft.server.v1_16_R3.*;
 import org.bukkit.Location;
 import org.bukkit.Material;

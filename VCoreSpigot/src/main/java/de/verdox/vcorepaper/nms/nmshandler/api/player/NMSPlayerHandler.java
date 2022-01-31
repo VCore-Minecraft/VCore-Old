@@ -1,8 +1,8 @@
 /*
- * Copyright (c) 2021. Lukas Jonsson
+ * Copyright (c) 2022. Lukas Jonsson
  */
 
-package de.verdox.vcorepaper.nms.nmshandler.api.player;
+package de.verdox.vcore.nms.nmshandler.api.player;
 
 import de.verdox.vcorepaper.nms.NMSHandler;
 import de.verdox.vcorepaper.nms.NMSVersion;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021. Lukas Jonsson
+ * Copyright (c) 2022. Lukas Jonsson
  */
 
 package de.verdox.vcorepaper.custom.nbt.holders.location;
@@ -8,6 +8,7 @@ import de.tr7zw.changeme.nbtapi.NBTFile;
 import de.tr7zw.changeme.nbtapi.NbtApiException;
 import de.verdox.vcore.plugin.VCorePlugin;
 import de.verdox.vcore.plugin.wrapper.types.WorldRegion;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.io.IOException;
@@ -29,12 +30,14 @@ public class WorldStorage {
         this.plugin = plugin;
         this.worldDirectory = worldDirectory;
         this.worldName = worldName;
+        plugin.consoleMessage("&8[&b" + worldName + "&8] &bStorage instantiated&7: ", true);
     }
 
     public boolean isRegionCached(int regionX, int regionZ) {
         return fileCache.containsKey(new WorldRegion(worldName, regionX, regionZ));
     }
 
+    @Nullable
     NBTFile cacheRegion(int regionX, int regionZ) {
         if (isRegionCached(regionX, regionZ))
             return fileCache.get(new WorldRegion(worldName, regionX, regionZ));
@@ -53,6 +56,7 @@ public class WorldStorage {
         }
     }
 
+    @Nullable
     NBTFile getNBTFile(int regionX, int regionZ) {
         if (!isRegionCached(regionX, regionZ))
             return cacheRegion(regionX, regionZ);
@@ -69,6 +73,7 @@ public class WorldStorage {
         });
     }
 
+    @Nullable
     private synchronized NBTFile loadNBTFileUnsafe(int regionX, int regionZ) {
         WorldRegion worldRegion = new WorldRegion(worldName, regionX, regionZ);
         File file = new File(worldDirectory.getAbsolutePath() + "//VBlocks//" + worldRegion.toStringWithoutWorld() + ".nbt");

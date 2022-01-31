@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021. Lukas Jonsson
+ * Copyright (c) 2022. Lukas Jonsson
  */
 
 package de.verdox.vcorepaper;
@@ -18,7 +18,6 @@ import de.verdox.vcore.synchronization.networkmanager.server.api.VCoreServerAPI;
 import de.verdox.vcore.synchronization.networkmanager.server.api.VCoreServerAPIImpl;
 import de.verdox.vcore.synchronization.pipeline.parts.Pipeline;
 import de.verdox.vcorepaper.commands.AdminCommands;
-import de.verdox.vcorepaper.commands.NMSCommand;
 import de.verdox.vcorepaper.commands.PlayerAPICommands;
 import de.verdox.vcorepaper.commands.WorkingNPCCommand;
 import de.verdox.vcorepaper.custom.CustomDataListener;
@@ -91,7 +90,6 @@ public class VCorePaper extends VCoreCoreInstance.Minecraft {
 
         this.vCorePlayerAPI = new VCorePlayerAPIBukkitImpl(this);
         this.vCoreServerAPI = new VCoreServerAPIImpl(this);
-        this.nmsManager = new NMSManager(this);
 
         this.customEntityManager = new CustomEntityManager(this);
         this.customItemManager = new CustomItemManager(this);
@@ -114,7 +112,6 @@ public class VCorePaper extends VCoreCoreInstance.Minecraft {
 
 
         new AdminCommands(this, "debug");
-        new NMSCommand(this, "nms");
         new PlayerAPICommands(this, "playerapi");
         new WorkingNPCCommand(this, "workingNPC");
 

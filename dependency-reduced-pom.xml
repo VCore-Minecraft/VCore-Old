@@ -1,20 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~ Copyright (c) 2021. Lukas Jonsson
+  ~ Copyright (c) 2022. Lukas Jonsson
   -->
 
 <project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-  <modelVersion>4.0.0</modelVersion>
-  <groupId>de.verdox</groupId>
-  <artifactId>VCore</artifactId>
-  <version>1.0</version>
-  <build>
-    <plugins>
-      <plugin>
-        <artifactId>maven-shade-plugin</artifactId>
-        <version>3.3.0-SNAPSHOT</version>
-        <executions>
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>de.verdox</groupId>
+    <artifactId>VCore</artifactId>
+    <version>1.0</version>
+    <build>
+        <plugins>
+            <plugin>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>3.3.0-SNAPSHOT</version>
+                <executions>
           <execution>
             <phase>package</phase>
             <goals>
@@ -72,7 +72,7 @@
   </repositories>
   <pluginRepositories>
     <pluginRepository>
-      <snapshots/>
+        <snapshots/>
       <id>maven-snapshots</id>
       <url>https://repository.apache.org/content/repositories/snapshots/</url>
     </pluginRepository>

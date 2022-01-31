@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021. Lukas Jonsson
+ * Copyright (c) 2022. Lukas Jonsson
  */
 
 package de.verdox.vcorepaper.commands;
@@ -84,7 +84,6 @@ public class WorkingNPCCommand extends VCoreCommand.VCoreBukkitCommand {
         addCommandCallback("changeText")
                 .setExecutor(VCommandCallback.CommandExecutorType.PLAYER)
                 .withPermission("workingNPC.changeText")
-                .askFor("npcName", VCommandCallback.CommandAskType.STRING, "")
                 .commandCallback((commandSender, commandParameters) -> {
                     vCorePlugin.sync(() -> {
                         Player player = (Player) commandSender;
@@ -105,7 +104,7 @@ public class WorkingNPCCommand extends VCoreCommand.VCoreBukkitCommand {
         addCommandCallback("addProfession")
                 .setExecutor(VCommandCallback.CommandExecutorType.PLAYER)
                 .withPermission("workingNPC.addProfession")
-                .askFor("profession", VCommandCallback.CommandAskType.STRING, "&cProfession unknown", VCorePaper.getInstance().getCustomEntityManager().getProfessionRegistry().getProfessions().toArray(String[]::new))
+                .askFor("profession", VCommandCallback.CommandAskType.STRING, "&cProfession unknown", () -> VCorePaper.getInstance().getCustomEntityManager().getProfessionRegistry().getProfessions().stream().toList())
                 .commandCallback((commandSender, commandParameters) -> {
                     Player player = (Player) commandSender;
                     vCorePlugin.sync(() -> {

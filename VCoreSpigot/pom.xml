@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~ Copyright (c) 2021. Lukas Jonsson
+  ~ Copyright (c) 2022. Lukas Jonsson
   -->
 
 <project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -11,7 +11,10 @@
     <groupId>de.verdox</groupId>
     <artifactId>VCorePaper</artifactId>
     <version>1.0</version>
-    <packaging>jar</packaging>
+    <modules>
+        <module>VCoreNMS</module>
+    </modules>
+    <packaging>pom</packaging>
 
     <name>VCorePaper</name>
 
@@ -79,6 +82,12 @@
             <groupId>de.verdox</groupId>
             <artifactId>VCore</artifactId>
             <version>1.0</version>
+        </dependency>
+        <!---  VCoreNMS Dependency -->
+        <dependency>
+            <groupId>de.verdox</groupId>
+            <artifactId>VCoreNMS</artifactId>
+            <version>LATEST</version>
         </dependency>
         <!---  NBT API Dependency (MIT LICENCE) -->
         <dependency>
@@ -194,6 +203,10 @@
                                 <relocation>
                                     <pattern>de.tr7zw.changeme.nbtapi</pattern>
                                     <shadedPattern>de.verdox.vcorepaper.dependencies.nbtapi</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>de.verdox.vcore.nms</pattern>
+                                    <shadedPattern>de.verdox.vcorepaper.nms</shadedPattern>
                                 </relocation>
                                 <relocation>
                                     <pattern>dev.dbassett.skullcreator</pattern>

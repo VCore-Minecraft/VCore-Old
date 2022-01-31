@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021. Lukas Jonsson
+ * Copyright (c) 2022. Lukas Jonsson
  */
 
 package de.verdox.vcorewaterfall;
@@ -16,7 +16,7 @@ import de.verdox.vcore.synchronization.networkmanager.server.api.VCoreServerAPI;
 import de.verdox.vcore.synchronization.networkmanager.server.api.VCoreServerAPIImpl;
 import de.verdox.vcorewaterfall.pings.ServerPingListener;
 import net.md_5.bungee.api.ProxyServer;
-import org.bstats.bungeecord.Metrics;
+import reactor.util.Metrics;
 
 import java.util.List;
 
@@ -30,7 +30,14 @@ public class VCoreWaterfall extends VCoreCoreInstance.BungeeCord {
 
     @Override
     public void onPluginEnable() {
-        metrics = new Metrics(this, 12913);
+        //metrics = new Metrics(this, 12913);
+        consoleMessage("TESTNACHRICHT", false);
+        consoleMessage("TESTNACHRICHT", false);
+        consoleMessage("TESTNACHRICHT", false);
+        consoleMessage("TESTNACHRICHT", false);
+        consoleMessage("TESTNACHRICHT", false);
+        consoleMessage("TESTNACHRICHT", false);
+        consoleMessage("TESTNACHRICHT", false);
         networkManager = new NetworkManager<>(this, ServerType.PROXY);
         new PlayerProxyListener(networkManager);
 

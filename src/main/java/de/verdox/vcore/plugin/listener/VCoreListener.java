@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021. Lukas Jonsson
+ * Copyright (c) 2022. Lukas Jonsson
  */
 
 package de.verdox.vcore.plugin.listener;
@@ -14,13 +14,11 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Objects;
 
 public abstract class VCoreListener<T extends VCorePlugin<?, ?>> {
-
     protected final T plugin;
 
     public VCoreListener(@NotNull VCoreSubsystem<T> subsystem) {
         Objects.requireNonNull(subsystem, "subsystem can't be null!");
         plugin = subsystem.getVCorePlugin();
-
         registerListener();
     }
 

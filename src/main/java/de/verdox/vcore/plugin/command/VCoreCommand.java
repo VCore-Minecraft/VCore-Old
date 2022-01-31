@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021. Lukas Jonsson
+ * Copyright (c) 2022. Lukas Jonsson
  */
 
 package de.verdox.vcore.plugin.command;
@@ -10,6 +10,7 @@ import de.verdox.vcore.plugin.command.callback.CommandSuggestionCallback;
 import de.verdox.vcore.plugin.subsystem.VCoreSubsystem;
 import de.verdox.vcore.util.VCoreUtil;
 import net.md_5.bungee.api.ChatMessageType;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -19,10 +20,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -95,6 +93,16 @@ public abstract class VCoreCommand<T extends VCorePlugin<?, ?>, R> {
             List<String> suggest = new ArrayList<>();
             String[] cmdArgs = e.getBuffer().replace("/", "").split("");
             String[] args = Arrays.copyOfRange(cmdArgs, 1, cmdArgs.length);
+            if (args.length == 0)
+                return;
+            String commandLabel = args[0].toLowerCase(Locale.ROOT);
+            if (Bukkit.getCommandMap().getCommand(commandLabel) == null)
+                return;
+            String permission = Bukkit.getCommandMap().getCommand(commandLabel).getPermission();
+            if (permission != null && !permission.isEmpty() && !e.getSender().hasPermission(permission)) {
+                e.setCancelled(true);
+                return;
+            }
             for (VCommandCallback vCommandCallback : vCommandCallbacks) {
                 List<String> suggested = vCommandCallback.suggest(e.getSender(), cmdArgs[0], args);
                 if (suggested != null && !suggested.isEmpty())

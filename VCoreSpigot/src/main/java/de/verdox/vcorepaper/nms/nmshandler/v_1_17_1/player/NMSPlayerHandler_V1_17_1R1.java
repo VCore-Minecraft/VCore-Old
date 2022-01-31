@@ -1,10 +1,10 @@
 /*
- * Copyright (c) 2021. Lukas Jonsson
+ * Copyright (c) 2022. Lukas Jonsson
  */
 
 package de.verdox.vcorepaper.nms.nmshandler.v_1_17_1.player;
 
-import de.verdox.vcorepaper.nms.nmshandler.api.player.NMSPlayerHandler;
+import de.verdox.vcore.nms.nmshandler.api.player.NMSPlayerHandler;
 import net.minecraft.advancements.AdvancementProgress;
 import net.minecraft.server.AdvancementDataPlayer;
 import org.bukkit.advancement.Advancement;

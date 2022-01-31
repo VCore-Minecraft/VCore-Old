@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021. Lukas Jonsson
+ * Copyright (c) 2022. Lukas Jonsson
  */
 
 package de.verdox.vcore.plugin.command;
@@ -23,6 +23,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.function.BiConsumer;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 /**
@@ -63,7 +64,15 @@ public class VCommandCallback {
 
     public VCommandCallback askFor(@NotNull String name, @NotNull CommandAskType commandAskType, @NotNull String errorMessage, @NotNull String... suggested) {
         int index = callbackInfos.size();
-        callbackInfos.add(new CommandAskParameter(plugin, index, name, commandAskType, errorMessage, Arrays.asList(suggested)));
+        callbackInfos.add(new CommandAskParameter(plugin, index, name, commandAskType, errorMessage, () -> Arrays.asList(suggested)));
+        if (commandAskType.equals(CommandAskType.REST_OF_INPUT))
+            restAsString = true;
+        return this;
+    }
+
+    public VCommandCallback askFor(@NotNull String name, @NotNull CommandAskType commandAskType, @NotNull String errorMessage, @NotNull Supplier<List<String>> supplier) {
+        int index = callbackInfos.size();
+        callbackInfos.add(new CommandAskParameter(plugin, index, name, commandAskType, errorMessage, supplier));
         if (commandAskType.equals(CommandAskType.REST_OF_INPUT))
             restAsString = true;
         return this;
@@ -352,14 +361,14 @@ public class VCommandCallback {
         protected final String name;
         protected final CommandAskType commandAskType;
         private final String errorMessage;
-        private final List<String> suggested;
+        private final Supplier<List<String>> supplySuggested;
 
-        CommandAskParameter(VCorePlugin<?, ?> plugin, int index, @NotNull String name, @NotNull CommandAskType commandAskType, @NotNull String errorMessage, @NotNull List<String> suggested) {
+        CommandAskParameter(VCorePlugin<?, ?> plugin, int index, @NotNull String name, @NotNull CommandAskType commandAskType, @NotNull String errorMessage, Supplier<List<String>> supplySuggested) {
             super(plugin, index);
             this.name = name;
             this.commandAskType = commandAskType;
             this.errorMessage = errorMessage;
-            this.suggested = suggested;
+            this.supplySuggested = supplySuggested;
         }
 
         public CommandAskType getCommandAskType() {
@@ -372,6 +381,7 @@ public class VCommandCallback {
 
         @Override
         public List<String> suggest(String argument) {
+            List<String> suggested = supplySuggested.get();
             if (commandAskType.equals(CommandAskType.PLAYER_ONLINE) && suggested.isEmpty())
                 return Bukkit.getOnlinePlayers().stream().map(HumanEntity::getName).collect(Collectors.toList());
             if (commandAskType.equals(CommandAskType.BOOLEAN))
@@ -408,7 +418,6 @@ public class VCommandCallback {
             return "CommandAskParameter{" +
                     "commandAskType=" + commandAskType +
                     ", errorMessage='" + errorMessage + '\'' +
-                    ", suggested=" + suggested +
                     '}';
         }
     }

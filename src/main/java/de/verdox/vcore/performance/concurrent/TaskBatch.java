@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021. Lukas Jonsson
+ * Copyright (c) 2022. Lukas Jonsson
  */
 
 package de.verdox.vcore.performance.concurrent;
@@ -36,25 +36,24 @@ public abstract class TaskBatch<V extends VCorePlugin<?, ?>> {
     }
 
     public TaskBatch<V> doSync(@NotNull Runnable runnable) {
-        Objects.requireNonNull(runnable, "Runnable can't be null!");
+        Objects.requireNonNull(runnable, "Runnable can't be null! [doSync]");
         addTask(TaskType.SYNC, runnable, 0);
         return this;
     }
 
     public TaskBatch<V> doAsync(@NotNull Runnable runnable) {
-        Objects.requireNonNull(runnable, "Runnable can't be null!");
+        Objects.requireNonNull(runnable, "Runnable can't be null! [doAsync]");
         addTask(TaskType.ASYNC, runnable, 0);
         return this;
     }
 
     public TaskBatch<V> wait(long delay, @NotNull TimeUnit timeUnit) {
-        Objects.requireNonNull(timeUnit, "timeUnit can't be null!");
+        Objects.requireNonNull(timeUnit, "timeUnit can't be null! [wait]");
         addTask(TaskType.WAIT, null, timeUnit.toMillis(delay));
         return this;
     }
 
     public void executeBatch(@Nullable Runnable callback) {
-        Objects.requireNonNull(callback, "Runnable can't be null!");
         this.callback = callback;
         executor.submit(new CatchingRunnable(this::runBatch));
     }
@@ -117,15 +116,7 @@ public abstract class TaskBatch<V extends VCorePlugin<?, ?>> {
         WAIT
     }
 
-    static class TaskInfo {
-        private final TaskType taskType;
-        private final Runnable runnable;
-        private final long delay;
-
-        public TaskInfo(long delay, TaskType taskType, Runnable runnable) {
-            this.delay = delay;
-            this.taskType = taskType;
-            this.runnable = runnable;
-        }
+    record TaskInfo(long delay, TaskType taskType,
+                    Runnable runnable) {
     }
 }

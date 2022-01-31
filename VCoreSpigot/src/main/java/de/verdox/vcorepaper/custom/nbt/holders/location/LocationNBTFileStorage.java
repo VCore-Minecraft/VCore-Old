@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021. Lukas Jonsson
+ * Copyright (c) 2022. Lukas Jonsson
  */
 
 package de.verdox.vcorepaper.custom.nbt.holders.location;
@@ -15,9 +15,7 @@ import io.netty.util.concurrent.DefaultThreadFactory;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.event.EventHandler;
-import org.bukkit.event.world.ChunkLoadEvent;
-import org.bukkit.event.world.ChunkUnloadEvent;
-import org.bukkit.event.world.WorldSaveEvent;
+import org.bukkit.event.world.*;
 
 import java.io.File;
 import java.util.Map;
@@ -32,19 +30,26 @@ import java.util.concurrent.TimeUnit;
  * @date 10.08.2021 14:33
  */
 public class LocationNBTFileStorage extends VCoreListener.VCoreBukkitListener implements SystemLoadable {
-    private final ExecutorService executor = Executors.newSingleThreadExecutor(new DefaultThreadFactory("NBTBlock IO Loader"));
+    private final ExecutorService executor = Executors.newSingleThreadExecutor(new DefaultThreadFactory("NBTBlock IO"));
     private final Map<String, WorldStorage> fileCache = new ConcurrentHashMap<>();
 
     public LocationNBTFileStorage(VCorePlugin.Minecraft plugin) {
         super(plugin);
     }
 
-    public WorldStorage getWorldStorage(String worldName) {
-        if (!fileCache.containsKey(worldName)) {
-            File worldDirectory = Bukkit.getWorld(worldName).getWorldFolder();
-            fileCache.put(worldName, new WorldStorage(plugin, worldDirectory, worldName));
-        }
-        return fileCache.get(worldName);
+    public synchronized WorldStorage getWorldStorage(String worldName) {
+        File worldDirectory = Bukkit.getWorld(worldName).getWorldFolder();
+        return fileCache.putIfAbsent(worldName, new WorldStorage(plugin, worldDirectory, worldName));
+    }
+
+    @EventHandler
+    public void onWorldLoad(WorldLoadEvent e) {
+        executor.submit(() -> getWorldStorage(e.getWorld().getName()));
+    }
+
+    @EventHandler
+    public void onWorldUnload(WorldUnloadEvent e) {
+        executor.submit(() -> getWorldStorage(e.getWorld().getName()).saveAll());
     }
 
     @EventHandler

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021. Lukas Jonsson
+ * Copyright (c) 2022. Lukas Jonsson
  */
 
 package de.verdox.vcore.synchronization.pipeline.player;
@@ -66,15 +66,13 @@ public class PlayerDataManager implements SystemLoadable {
         Objects.requireNonNull(player, "player can't be null!");
         plugin.getServices().eventBus.post(new PlayerPreSessionUnloadEvent(plugin, player));
         plugin.createTaskBatch()
-                .doAsync(() -> {
-                    plugin.getServices().getSubsystemManager().getActivePlayerDataClasses()
-                            .parallelStream()
-                            .forEach(aClass -> {
-                                PlayerData data = pipelineManager.getLocalCache().getData(aClass, player);
-                                data.onDisconnect(player);
-                                data.save(true);
-                            });
-                }).executeBatch();
+                .doAsync(() -> plugin.getServices().getSubsystemManager().getActivePlayerDataClasses()
+                        .parallelStream()
+                        .forEach(aClass -> {
+                            PlayerData data = pipelineManager.getLocalCache().getData(aClass, player);
+                            data.onDisconnect(player);
+                            data.save(true);
+                        })).executeBatch();
     }
 
     @Override
