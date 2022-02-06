@@ -42,16 +42,4 @@ public abstract class VCoreSubsystem<S extends VCorePlugin<?, ?>> {
     public UUID getUuid() {
         return uuid;
     }
-
-    public abstract static class Bukkit extends VCoreSubsystem<VCorePlugin.Minecraft> {
-        public Bukkit(de.verdox.vcore.plugin.VCorePlugin.Minecraft VCorePlugin) {
-            super(VCorePlugin);
-        }
-    }
-
-    public abstract static class BungeeCord extends VCoreSubsystem<VCorePlugin.BungeeCord> {
-        public BungeeCord(de.verdox.vcore.plugin.VCorePlugin.BungeeCord VCorePlugin) {
-            super(VCorePlugin);
-        }
-    }
 }

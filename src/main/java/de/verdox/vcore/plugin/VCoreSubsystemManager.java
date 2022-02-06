@@ -30,12 +30,12 @@ public class VCoreSubsystemManager<T extends VCorePlugin<?, R>, R extends VCoreS
 
     private boolean loaded = false;
 
-    VCoreSubsystemManager(@NotNull T plugin) {
+    public VCoreSubsystemManager(@NotNull T plugin) {
         Objects.requireNonNull(plugin, "plugin can't be null!");
         this.plugin = plugin;
     }
 
-    void enable() {
+    public void enable() {
         plugin.consoleMessage("&eStarting Subsystem Manager&7...", false);
         List<R> providedSubsystems = plugin.provideSubsystems();
         if (providedSubsystems != null) {

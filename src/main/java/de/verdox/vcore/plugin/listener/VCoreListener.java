@@ -33,38 +33,4 @@ public abstract class VCoreListener<T extends VCorePlugin<?, ?>> {
     public T getPlugin() {
         return plugin;
     }
-
-    public static class VCoreBukkitListener extends VCoreListener<VCorePlugin.Minecraft> implements Listener {
-
-        public VCoreBukkitListener(@NotNull VCoreSubsystem<VCorePlugin.Minecraft> subsystem) {
-            super(subsystem);
-        }
-
-        public VCoreBukkitListener(@NotNull VCorePlugin.Minecraft plugin) {
-            super(plugin);
-        }
-
-        @Override
-        protected void registerListener() {
-            getPlugin().consoleMessage("&eRegistering Listener&7: &b" + getClass().getSimpleName(), false);
-            Bukkit.getPluginManager().registerEvents(this, getPlugin().getPlugin());
-        }
-    }
-
-    public static class VCoreBungeeListener extends VCoreListener<VCorePlugin.BungeeCord> implements net.md_5.bungee.api.plugin.Listener {
-
-        public VCoreBungeeListener(VCoreSubsystem<VCorePlugin.BungeeCord> subsystem) {
-            super(subsystem);
-        }
-
-        public VCoreBungeeListener(VCorePlugin.BungeeCord plugin) {
-            super(plugin);
-        }
-
-        @Override
-        protected void registerListener() {
-            getPlugin().consoleMessage("&eRegistering Listener&7: &b" + getClass().getSimpleName(), false);
-            ProxyServer.getInstance().getPluginManager().registerListener(plugin, this);
-        }
-    }
 }

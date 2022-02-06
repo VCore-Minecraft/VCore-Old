@@ -1,0 +1,13 @@
+name: VCoreNMSModule
+version: ${project.version}
+main: de.verdox.vcorepaper.VCoreNMSModule
+api-version: 1.16
+authors: [ Verdox ]
+softdepend:
+  - ProtocolLib
+depend:
+  - VCorePaper
+commands:
+  nms:
+    description: "Main Debug for NMS Testing"
+    permission: "VCore.nms"

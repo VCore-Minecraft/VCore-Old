@@ -5,8 +5,6 @@
 package de.verdox.vcore.plugin.files.config;
 
 import de.verdox.vcore.plugin.VCorePlugin;
-import de.verdox.vcore.plugin.files.config.bukkit.VCoreBukkitConfig;
-import de.verdox.vcore.plugin.files.config.bungeecord.VCoreBungeeConfig;
 import de.verdox.vcore.plugin.files.config.serialization.VCoreDeserializer;
 import de.verdox.vcore.plugin.files.config.serialization.VCoreSerializable;
 import org.bukkit.craftbukkit.libs.org.apache.commons.io.FilenameUtils;
@@ -75,26 +73,6 @@ public abstract class VCoreConfig<T> {
 
     public VCorePlugin<?, ?> getPlugin() {
         return plugin;
-    }
-
-    public abstract static class Bukkit extends VCoreBukkitConfig {
-        public Bukkit(VCorePlugin.Minecraft plugin, File file) {
-            super(plugin, file);
-        }
-
-        public Bukkit(VCorePlugin.Minecraft plugin, String fileName, String pluginDirectory) {
-            super(plugin, fileName, pluginDirectory);
-        }
-    }
-
-    public abstract static class BungeeCord extends VCoreBungeeConfig {
-        public BungeeCord(VCorePlugin.BungeeCord plugin, File file) {
-            super(plugin, file);
-        }
-
-        public BungeeCord(VCorePlugin.BungeeCord plugin, String fileName, String pluginDirectory) {
-            super(plugin, fileName, pluginDirectory);
-        }
     }
 
 }

@@ -84,46 +84,4 @@ public class PlayerDataManager implements SystemLoadable {
     public void shutdown() {
 
     }
-
-    public static class Bukkit extends PlayerDataManager implements Listener {
-
-        public Bukkit(@NotNull PipelineManager pipelineManager) {
-            super(pipelineManager);
-            VCorePlugin.Minecraft bukkitPlugin = (VCorePlugin.Minecraft) plugin;
-            bukkitPlugin.getPlugin().getServer().getPluginManager().registerEvents(this, bukkitPlugin);
-        }
-
-        @EventHandler(priority = EventPriority.HIGHEST)
-        public void onJoin(PlayerJoinEvent e) {
-            loginPipeline(e.getPlayer().getUniqueId());
-        }
-
-        @EventHandler(priority = EventPriority.HIGHEST)
-        public void onLeave(PlayerQuitEvent e) {
-            logoutPipeline(e.getPlayer().getUniqueId());
-        }
-
-        @EventHandler(priority = EventPriority.HIGHEST)
-        public void onKick(PlayerKickEvent e) {
-            logoutPipeline(e.getPlayer().getUniqueId());
-        }
-
-    }
-
-    public static class BungeeCord extends PlayerDataManager implements net.md_5.bungee.api.plugin.Listener {
-        public BungeeCord(@NotNull PipelineManager pipelineManager) {
-            super(pipelineManager);
-            ProxyServer.getInstance().getPluginManager().registerListener((Plugin) pipelineManager.getPlugin(), this);
-        }
-
-        @net.md_5.bungee.event.EventHandler(priority = 5)
-        public void onJoin(PostLoginEvent e) {
-            loginPipeline(e.getPlayer().getUniqueId());
-        }
-
-        @net.md_5.bungee.event.EventHandler(priority = 5)
-        public void onPlayerLeave(PlayerDisconnectEvent e) {
-            logoutPipeline(e.getPlayer().getUniqueId());
-        }
-    }
 }

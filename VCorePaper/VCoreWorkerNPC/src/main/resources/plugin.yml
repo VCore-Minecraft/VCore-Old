@@ -1,0 +1,15 @@
+name: VCorePaper
+version: ${project.version}
+main: de.verdox.vcorepaper.VCorePaper
+api-version: 1.16
+authors: [ Verdox ]
+softdepend:
+  - VCorePaper
+  - VCorePaperGUIModule
+  - VCorePaperNBTModule
+  - VCorePaperEventModule
+  - VCorePaperNMSModule
+commands:
+  workingNPC:
+    description: "Working NPC Admin Command"
+    permission: "vcore.workingNPC"
