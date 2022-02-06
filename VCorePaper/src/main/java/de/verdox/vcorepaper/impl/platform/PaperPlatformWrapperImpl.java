@@ -2,14 +2,16 @@
  * Copyright (c) 2021. Lukas Jonsson
  */
 
-package de.verdox.vcore.plugin.wrapper;
+package de.verdox.vcorepaper.impl.platform;
 
-import de.verdox.vcore.plugin.wrapper.bungeecord.BungeePlatform;
-import de.verdox.vcore.plugin.wrapper.spigot.SpigotPlatform;
+import de.verdox.vcore.plugin.wrapper.PlatformWrapper;
+import de.verdox.vcore.plugin.wrapper.proxy.ProxyPlatform;
+import de.verdox.vcore.plugin.wrapper.gameserver.GameServerPlatform;
 import de.verdox.vcore.plugin.wrapper.types.GameLocation;
 import de.verdox.vcore.plugin.wrapper.types.enums.PlayerGameMode;
 import de.verdox.vcore.plugin.wrapper.types.enums.PlayerMessageType;
 import de.verdox.vcore.util.VCoreUtil;
+import de.verdox.vcorepaper.utils.BukkitPlayerUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
@@ -26,7 +28,7 @@ import java.util.UUID;
  * @Author: Lukas Jonsson (Verdox)
  * @date 01.08.2021 20:01
  */
-public class BukkitPlatformWrapperImpl implements PlatformWrapper {
+public class PaperPlatformWrapperImpl implements PlatformWrapper {
 
     @Override
     public boolean isPlayerOnline(@Nonnull @NotNull UUID playerUUID) {
@@ -52,8 +54,8 @@ public class BukkitPlatformWrapperImpl implements PlatformWrapper {
     }
 
     @Override
-    public SpigotPlatform getSpigotPlatform() {
-        return new SpigotPlatform() {
+    public GameServerPlatform getGameServerPlatform() {
+        return new GameServerPlatform() {
 
             private Location getLocation(@NotNull GameLocation gameLocation) {
                 return new Location(Bukkit.getWorld(gameLocation.worldName), gameLocation.x, gameLocation.y, gameLocation.z);
@@ -104,13 +106,13 @@ public class BukkitPlatformWrapperImpl implements PlatformWrapper {
                 Player player = Bukkit.getPlayer(playerUUID);
                 if (player == null)
                     return;
-                VCoreUtil.BukkitUtil.getBukkitPlayerUtil().sendPlayerMessage(player, playerMessageType, ChatColor.translateAlternateColorCodes('&', message));
+                BukkitPlayerUtil.sendPlayerMessage(player, playerMessageType, ChatColor.translateAlternateColorCodes('&', message));
             }
 
             @Override
             public void broadcastMessage(@NotNull String message, @NotNull PlayerMessageType playerMessageType) {
                 for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
-                    VCoreUtil.BukkitUtil.getBukkitPlayerUtil().sendPlayerMessage(onlinePlayer, playerMessageType, ChatColor.translateAlternateColorCodes('&', message));
+                    BukkitPlayerUtil.sendPlayerMessage(onlinePlayer, playerMessageType, ChatColor.translateAlternateColorCodes('&', message));
                 }
             }
 
@@ -154,7 +156,17 @@ public class BukkitPlatformWrapperImpl implements PlatformWrapper {
     }
 
     @Override
-    public BungeePlatform getBungeePlatform() {
-        return null;
+    public ProxyPlatform getProxyPlatform() {
+        return new ProxyPlatform() {
+            @Override
+            public boolean sendToServer(@NotNull UUID playerUUID, @NotNull String serverName) {
+                return false;
+            }
+
+            @Override
+            public boolean kickPlayer(@NotNull UUID playerUUID, @NotNull String kickMessage) {
+                return false;
+            }
+        };
     }
 }

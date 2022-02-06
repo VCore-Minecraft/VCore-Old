@@ -7,7 +7,7 @@ package de.verdox.vcore.plugin.files.config;
 import de.verdox.vcore.plugin.VCorePlugin;
 import de.verdox.vcore.plugin.files.config.serialization.VCoreDeserializer;
 import de.verdox.vcore.plugin.files.config.serialization.VCoreSerializable;
-import org.bukkit.craftbukkit.libs.org.apache.commons.io.FilenameUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;

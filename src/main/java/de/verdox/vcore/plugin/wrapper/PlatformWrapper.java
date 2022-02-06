@@ -4,8 +4,8 @@
 
 package de.verdox.vcore.plugin.wrapper;
 
-import de.verdox.vcore.plugin.wrapper.bungeecord.BungeePlatform;
-import de.verdox.vcore.plugin.wrapper.spigot.SpigotPlatform;
+import de.verdox.vcore.plugin.wrapper.proxy.ProxyPlatform;
+import de.verdox.vcore.plugin.wrapper.gameserver.GameServerPlatform;
 import org.jetbrains.annotations.NotNull;
 
 import java.net.InetSocketAddress;
@@ -25,7 +25,7 @@ public interface PlatformWrapper {
 
     InetSocketAddress getPlayerAddress(@NotNull UUID playerUUID);
 
-    SpigotPlatform getSpigotPlatform();
+    GameServerPlatform getGameServerPlatform();
 
-    BungeePlatform getBungeePlatform();
+    ProxyPlatform getProxyPlatform();
 }

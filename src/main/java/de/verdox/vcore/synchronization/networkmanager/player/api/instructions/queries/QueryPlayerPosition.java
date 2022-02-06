@@ -4,7 +4,7 @@
 
 package de.verdox.vcore.synchronization.networkmanager.player.api.instructions.queries;
 
-import de.verdox.vcore.plugin.wrapper.spigot.SpigotPlatform;
+import de.verdox.vcore.plugin.wrapper.gameserver.GameServerPlatform;
 import de.verdox.vcore.plugin.wrapper.types.GameLocation;
 import de.verdox.vcore.plugin.wrapper.types.ServerLocation;
 import de.verdox.vcore.synchronization.messaging.instructions.query.Query;
@@ -46,14 +46,14 @@ public class QueryPlayerPosition extends Query<ServerLocation> {
     @Override
     public Object[] respondToInstruction(Object[] instructionData) {
         UUID playerUUID = (UUID) instructionData[0];
-        SpigotPlatform spigotPlatform = plugin.getPlatformWrapper().getSpigotPlatform();
+        GameServerPlatform gameServerPlatform = plugin.getPlatformWrapper().getGameServerPlatform();
         // Makes sure it runs on Spigot Platform
-        if (spigotPlatform == null)
+        if (gameServerPlatform == null)
             return null;
         VCorePlayer vCorePlayer = plugin.getServices().getPipeline().load(VCorePlayer.class, playerUUID, Pipeline.LoadingStrategy.LOAD_PIPELINE);
         if (vCorePlayer == null)
             return null;
-        GameLocation gameLocation = spigotPlatform.getLocation(vCorePlayer.getObjectUUID());
+        GameLocation gameLocation = gameServerPlatform.getLocation(vCorePlayer.getObjectUUID());
         // Player is not online on this Server
         if (gameLocation == null)
             return null;

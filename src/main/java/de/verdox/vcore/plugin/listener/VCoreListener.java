@@ -6,9 +6,6 @@ package de.verdox.vcore.plugin.listener;
 
 import de.verdox.vcore.plugin.VCorePlugin;
 import de.verdox.vcore.plugin.subsystem.VCoreSubsystem;
-import net.md_5.bungee.api.ProxyServer;
-import org.bukkit.Bukkit;
-import org.bukkit.event.Listener;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;

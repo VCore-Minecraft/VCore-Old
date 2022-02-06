@@ -2,12 +2,12 @@
  * Copyright (c) 2021. Lukas Jonsson
  */
 
-package de.verdox.vcore.util.bukkit;
+package de.verdox.vcorepaper.utils;
 
 import de.verdox.vcore.plugin.wrapper.types.WorldChunk;
 import de.verdox.vcore.plugin.wrapper.types.enums.PlayerMessageType;
-import de.verdox.vcore.util.bukkit.keys.ChunkKey;
 import de.verdox.vcore.util.global.DirectionEnum;
+import de.verdox.vcorepaper.utils.keys.ChunkKey;
 import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.*;
@@ -24,29 +24,26 @@ import java.util.Set;
 
 public class BukkitPlayerUtil {
 
-    public BukkitPlayerUtil() {
-    }
-
-    public void sendPlayerMessage(Player player, ChatMessageType chatMessageType, String message) {
+    public static void sendPlayerMessage(Player player, ChatMessageType chatMessageType, String message) {
         player.spigot().sendMessage(chatMessageType, new TextComponent(ChatColor.translateAlternateColorCodes('&', message)));
     }
 
-    public RayTraceResult rayTraceEntities(@NotNull Player player, double maxDistance) {
+    public static RayTraceResult rayTraceEntities(@NotNull Player player, double maxDistance) {
         return player.getWorld().rayTraceEntities(player.getEyeLocation(), player.getLocation().getDirection(), maxDistance, entity -> !entity.getType().equals(EntityType.PLAYER));
     }
 
-    public void sendPlayerMessage(Player player, PlayerMessageType playerMessageType, String message) {
+    public static void sendPlayerMessage(Player player, PlayerMessageType playerMessageType, String message) {
         player.spigot().sendMessage(ChatMessageType.valueOf(playerMessageType.name()), new TextComponent(ChatColor.translateAlternateColorCodes('&', message)));
     }
 
-    public String serializePotionEffect(PotionEffect potionEffect) {
+    public static String serializePotionEffect(PotionEffect potionEffect) {
         int amplifier = potionEffect.getAmplifier();
         int duration = potionEffect.getDuration();
         String type = potionEffect.getType().getName();
         return type + ";" + duration + ";" + amplifier;
     }
 
-    public PotionEffect deSerializePotionEffect(String serialized) {
+    public static PotionEffect deSerializePotionEffect(String serialized) {
         String[] split = serialized.split(";");
         if (split.length != 3)
             throw new IllegalArgumentException("Wrong format of: " + serialized);
@@ -58,7 +55,7 @@ public class BukkitPlayerUtil {
         return new PotionEffect(potionEffectType, duration, amplifier);
     }
 
-    public Set<ChunkKey> getChunksInServerViewDistance(Player player) {
+    public static Set<ChunkKey> getChunksInServerViewDistance(Player player) {
         Set<ChunkKey> set = new HashSet<>();
         Chunk chunk = player.getLocation().getChunk();
         int chunkX = chunk.getX();
@@ -75,11 +72,11 @@ public class BukkitPlayerUtil {
         return set;
     }
 
-    public Collection<Chunk> getChunksAroundPlayer(Player player) {
+    public static Collection<Chunk> getChunksAroundPlayer(Player player) {
         return getChunksAround(player.getLocation());
     }
 
-    public Collection<Chunk> getChunksAround(Location location) {
+    public static Collection<Chunk> getChunksAround(Location location) {
         int[] offset = {-1, 0, 1};
 
         World world = location.getWorld();
@@ -96,7 +93,7 @@ public class BukkitPlayerUtil {
         return chunksAroundPlayer;
     }
 
-    public double getFacingRotation(Player player) {
+    public static double getFacingRotation(Player player) {
         float yaw = player.getLocation().getYaw();
         if (yaw < 0) {
             yaw += 360;
@@ -117,7 +114,7 @@ public class BukkitPlayerUtil {
         return 0d;
     }
 
-    public DirectionEnum getDirection(Location location) {
+    public static DirectionEnum getDirection(Location location) {
         float yaw = location.getYaw();
         if (yaw < 0) {
             yaw += 360;
@@ -138,7 +135,7 @@ public class BukkitPlayerUtil {
         return DirectionEnum.NORTH;
     }
 
-    public double rotateOffsetX(Location location, double offsetX, double offsetZ) {
+    public static double rotateOffsetX(Location location, double offsetX, double offsetZ) {
         DirectionEnum direction = getDirection(location);
         switch (direction) {
             case EAST:

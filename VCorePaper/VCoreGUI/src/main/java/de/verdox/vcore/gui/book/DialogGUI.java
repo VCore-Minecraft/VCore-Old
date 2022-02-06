@@ -7,6 +7,7 @@ package de.verdox.vcore.gui.book;
 import de.verdox.vcore.plugin.VCorePlugin;
 import de.verdox.vcore.util.VCoreUtil;
 import de.verdox.vcorepaper.impl.plugin.VCorePaperPlugin;
+import de.verdox.vcorepaper.utils.BukkitBookUtil;
 import net.kyori.adventure.inventory.Book;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
@@ -68,7 +69,7 @@ public class DialogGUI {
                         .append(Component.newline());
             }
             if (!text.isEmpty()) {
-                List<String> lines = VCoreUtil.BukkitUtil.getBukkitBookUtil().getLines(text);
+                List<String> lines = BukkitBookUtil.getLines(text);
 
                 for (int i = 0; i < lines.size(); i++) {
                     String line = ChatColor.stripColor(ChatColor.translateAlternateColorCodes('&', lines.get(i)));

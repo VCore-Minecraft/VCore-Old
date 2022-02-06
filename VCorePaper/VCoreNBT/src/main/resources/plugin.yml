@@ -1,8 +1,6 @@
-name: VCoreNBTModule
+name: VCorePaperNBTModule
 version: ${project.version}
-main: de.verdox.vcorepaper.VCoreNBTModule
+main: de.verdox.vcore.nbt.VCoreNBTModule
 api-version: 1.16
 authors: [ Verdox ]
-depend:
-  - VCorePaper
-  - VCorePaperEventModule
+depend: [VCorePaper, VCorePaperEventModule]

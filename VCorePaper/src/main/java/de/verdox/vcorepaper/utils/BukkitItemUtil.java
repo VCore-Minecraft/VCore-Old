@@ -2,7 +2,7 @@
  * Copyright (c) 2021. Lukas Jonsson
  */
 
-package de.verdox.vcore.util.bukkit;
+package de.verdox.vcorepaper.utils;
 
 import de.verdox.vcore.util.VCoreUtil;
 import org.bukkit.Bukkit;
@@ -35,7 +35,7 @@ public class BukkitItemUtil {
      * @param material Material the Item would break
      * @return damage that was dealt
      */
-    public int applyDamageNaturally(@Nullable ItemStack stack, @NotNull Material material, @Nullable Player player) {
+    public static int applyDamageNaturally(@Nullable ItemStack stack, @NotNull Material material, @Nullable Player player) {
 
 
         if (stack == null)
@@ -87,7 +87,7 @@ public class BukkitItemUtil {
      * @param material Material to be checked
      * @return true if it is a tool
      */
-    public boolean isMaterialTool(@NotNull Material material) {
+    public static boolean isMaterialTool(@NotNull Material material) {
         if (material.name().contains("SWORD"))
             return true;
         else if (material.name().contains("PICKAXE"))
@@ -105,7 +105,7 @@ public class BukkitItemUtil {
         else return material.equals(Material.FLINT_AND_STEEL);
     }
 
-    public Material getSeedMaterial(@NotNull Material plantItem) {
+    public static Material getSeedMaterial(@NotNull Material plantItem) {
         switch (plantItem) {
             case WHEAT:
                 return Material.WHEAT_SEEDS;

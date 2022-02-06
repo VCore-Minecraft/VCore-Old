@@ -9,8 +9,8 @@ import de.verdox.vcore.performance.concurrent.TaskBatch;
 import de.verdox.vcore.plugin.PluginServiceParts;
 import de.verdox.vcore.plugin.VCoreCoreInstance;
 import de.verdox.vcore.plugin.VCorePlugin;
-import de.verdox.vcore.plugin.wrapper.BukkitPlatformWrapperImpl;
 import de.verdox.vcore.plugin.wrapper.PlatformWrapper;
+import de.verdox.vcorepaper.impl.platform.PaperPlatformWrapperImpl;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.World;
@@ -27,7 +27,7 @@ public abstract class VCorePaperPlugin extends JavaPlugin implements VCorePlugin
 
     @Override
     public final PlatformWrapper getPlatformWrapper() {
-        return new BukkitPlatformWrapperImpl();
+        return new PaperPlatformWrapperImpl();
     }
 
     @Override

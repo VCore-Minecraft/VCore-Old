@@ -1,14 +1,9 @@
-name: VCorePaper
+name: VCorePaperWorkerNPCModule
 version: ${project.version}
-main: de.verdox.vcorepaper.VCorePaper
+main: de.verdox.vcore.workernpc.VCoreWorkerNPCModule
 api-version: 1.16
 authors: [ Verdox ]
-softdepend:
-  - VCorePaper
-  - VCorePaperGUIModule
-  - VCorePaperNBTModule
-  - VCorePaperEventModule
-  - VCorePaperNMSModule
+depend: [VCorePaper, VCorePaperGUIModule, VCorePaperNBTModule, VCorePaperEventModule, VCorePaperNMSModule]
 commands:
   workingNPC:
     description: "Working NPC Admin Command"

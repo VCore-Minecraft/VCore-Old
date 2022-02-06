@@ -72,20 +72,6 @@
       <url>https://repository.apache.org/content/repositories/snapshots/</url>
     </pluginRepository>
   </pluginRepositories>
-  <dependencies>
-    <dependency>
-      <groupId>com.destroystokyo.paper</groupId>
-      <artifactId>paper-api</artifactId>
-      <version>1.16.5-R0.1-SNAPSHOT</version>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>io.github.waterfallmc</groupId>
-      <artifactId>waterfall-api</artifactId>
-      <version>1.16-R0.4-SNAPSHOT</version>
-      <scope>provided</scope>
-    </dependency>
-  </dependencies>
   <reporting>
     <plugins>
       <plugin>

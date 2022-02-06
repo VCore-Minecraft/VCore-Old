@@ -5,8 +5,8 @@ import de.verdox.vcore.performance.concurrent.TaskBatch;
 import de.verdox.vcore.plugin.PluginServiceParts;
 import de.verdox.vcore.plugin.VCoreCoreInstance;
 import de.verdox.vcore.plugin.VCorePlugin;
-import de.verdox.vcore.plugin.wrapper.BungeePlatformWrapperImpl;
 import de.verdox.vcore.plugin.wrapper.PlatformWrapper;
+import de.verdox.vcorewaterfall.impl.platform.WaterfallPlatformWrapperImpl;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.plugin.Plugin;
@@ -33,7 +33,7 @@ public abstract class VCoreWaterfallPlugin extends Plugin implements VCorePlugin
 
     @Override
     public PlatformWrapper getPlatformWrapper() {
-        return new BungeePlatformWrapperImpl();
+        return new WaterfallPlatformWrapperImpl();
     }
 
     @Override

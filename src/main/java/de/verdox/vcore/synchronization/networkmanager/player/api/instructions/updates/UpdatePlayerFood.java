@@ -30,7 +30,7 @@ public class UpdatePlayerFood extends CleverUpdate {
         if (!checkOnlineOnSpigot(target))
             return UpdateCompletion.NOTHING;
 
-        plugin.sync(() -> spigotPlatform.setPlayerFood(target, food));
+        plugin.sync(() -> gameServerPlatform.setPlayerFood(target, food));
         return UpdateCompletion.TRUE;
     }
 

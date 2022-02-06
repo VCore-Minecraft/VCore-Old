@@ -2,10 +2,9 @@
  * Copyright (c) 2021. Lukas Jonsson
  */
 
-package de.verdox.vcore.util.bukkit;
+package de.verdox.vcorepaper.utils;
 
-import de.verdox.vcore.plugin.wrapper.types.StackPile;
-import de.verdox.vcore.util.VCoreUtil;
+import de.verdox.vcorepaper.utils.wrapper.StackPile;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.event.inventory.InventoryType;
@@ -24,7 +23,7 @@ import java.util.stream.IntStream;
  * @date 21.08.2021 22:15
  */
 public class BukkitInventoryUtil {
-    public boolean hasStorageContentSpaceFor(@NotNull Inventory inventory, @NotNull StackPile... piles) {
+    public static boolean hasStorageContentSpaceFor(@NotNull Inventory inventory, @NotNull StackPile... piles) {
         Inventory copy = Bukkit.createInventory(null, (inventory.getSize() / 9) * 9, "");
         copyStorageContentsToInventory(inventory, copy);
         for (StackPile pile : piles) {
@@ -39,7 +38,7 @@ public class BukkitInventoryUtil {
         return true;
     }
 
-    public boolean hasStorageContentSpaceFor(@NotNull Inventory inventory, @NotNull ItemStack... stacks) {
+    public static boolean hasStorageContentSpaceFor(@NotNull Inventory inventory, @NotNull ItemStack... stacks) {
         Inventory copy = Bukkit.createInventory(null, (inventory.getSize() / 9) * 9, "");
         copyStorageContentsToInventory(inventory, copy);
         for (ItemStack itemStack : stacks) {
@@ -52,24 +51,24 @@ public class BukkitInventoryUtil {
         return true;
     }
 
-    public int countItemAmount(@NotNull Inventory inventory, @NotNull ItemStack itemStack) {
+    public static int countItemAmount(@NotNull Inventory inventory, @NotNull ItemStack itemStack) {
         return inventory.all(itemStack.getType()).values()
                 .stream()
                 .filter(stack -> stack.isSimilar(itemStack)).flatMapToInt(stack -> IntStream.of(stack.getAmount())).sum();
     }
 
-    public boolean containsAtLeast(@NotNull Inventory inventory, @NotNull Inventory inventoryWithItems) {
+    public static boolean containsAtLeast(@NotNull Inventory inventory, @NotNull Inventory inventoryWithItems) {
         for (ItemStack stack : inventoryWithItems) {
             if (stack == null || stack.getType().isAir())
                 continue;
-            int amountAtLeast = VCoreUtil.BukkitUtil.getBukkitInventoryUtil().countItemAmount(inventoryWithItems, stack);
+            int amountAtLeast = BukkitInventoryUtil.countItemAmount(inventoryWithItems, stack);
             if (!inventory.containsAtLeast(stack, amountAtLeast))
                 return false;
         }
         return true;
     }
 
-    public Map<ItemStack, Integer> countItems(@NotNull Inventory inventory) {
+    public static Map<ItemStack, Integer> countItems(@NotNull Inventory inventory) {
         Map<ItemStack, Integer> counted = new LinkedHashMap<>();
         for (ItemStack storageContent : inventory.getStorageContents()) {
             if (storageContent == null || storageContent.getType().isAir())
@@ -83,15 +82,15 @@ public class BukkitInventoryUtil {
         return counted;
     }
 
-    public Map<Integer, ItemStack> removeItem(@NotNull Inventory inventory, @NotNull ItemStack itemStack, @Positive int number) {
+    public static Map<Integer, ItemStack> removeItem(@NotNull Inventory inventory, @NotNull ItemStack itemStack, @Positive int number) {
         return inventory.removeItem(new StackPile(itemStack, number).splitIntoVanillaStacks());
     }
 
-    public Map<Integer, ItemStack> addItem(@NotNull Inventory inventory, @NotNull ItemStack itemStack, @Positive int number) {
+    public static Map<Integer, ItemStack> addItem(@NotNull Inventory inventory, @NotNull ItemStack itemStack, @Positive int number) {
         return inventory.addItem(new StackPile(itemStack, number).splitIntoVanillaStacks());
     }
 
-    public Inventory cloneInventory(@NotNull Inventory inventory, @NotNull String title) {
+    public static Inventory cloneInventory(@NotNull Inventory inventory, @NotNull String title) {
         Inventory copy;
         if (inventory.getType().equals(InventoryType.CHEST))
             copy = Bukkit.createInventory(null, inventory.getSize(), ChatColor.translateAlternateColorCodes('&', title));
@@ -101,7 +100,7 @@ public class BukkitInventoryUtil {
         return copy;
     }
 
-    public void copyStorageContentsToInventory(@NotNull Inventory inventory, @NotNull Inventory copyTo) {
+    public static void copyStorageContentsToInventory(@NotNull Inventory inventory, @NotNull Inventory copyTo) {
         if (inventory.getSize() <= copyTo.getSize())
             copyTo.setStorageContents(inventory.getStorageContents());
         else

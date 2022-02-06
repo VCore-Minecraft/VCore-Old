@@ -32,7 +32,7 @@ public class UpdatePlayerGameMode extends CleverUpdate {
             return UpdateCompletion.NOTHING;
 
         PlayerGameMode playerGameMode = PlayerGameMode.valueOf(gameMode);
-        plugin.sync(() -> spigotPlatform.setGameMode(target, playerGameMode));
+        plugin.sync(() -> gameServerPlatform.setGameMode(target, playerGameMode));
         return UpdateCompletion.TRUE;
     }
 

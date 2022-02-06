@@ -7,6 +7,7 @@ package de.verdox.vcore.gui.book;
 import de.verdox.vcore.plugin.VCorePlugin;
 import de.verdox.vcore.util.VCoreUtil;
 import de.verdox.vcorepaper.impl.plugin.VCorePaperPlugin;
+import de.verdox.vcorepaper.utils.BukkitBookUtil;
 import net.kyori.adventure.inventory.Book;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
@@ -89,7 +90,7 @@ public class DialogBuilder {
     }
 
     public DialogBuilder addText(@NotNull String text, @Nullable HoverEvent<?> hoverEvent) {
-        List<String> lines = VCoreUtil.BukkitUtil.getBukkitBookUtil().getLines(text);
+        List<String> lines = BukkitBookUtil.getLines(text);
         lines.forEach(line -> {
             TextComponent component = Component.text(ChatColor.stripColor(ChatColor.translateAlternateColorCodes('&', line))).color(TextColor.fromHexString("#774936"));
             if (hoverEvent != null)
@@ -114,7 +115,7 @@ public class DialogBuilder {
     }
 
     public DialogBuilder addButton(@NotNull String text, @NotNull String hoverText, @NotNull Consumer<Player> consumer) {
-        List<String> lines = VCoreUtil.BukkitUtil.getBukkitBookUtil().getLines(text);
+        List<String> lines = BukkitBookUtil.getLines(text);
         lines.forEach(line -> {
             TextComponent component = Component.text(line).hoverEvent(HoverEvent.showText(Component.text(hoverText).color(TextColor.fromHexString("#ffbfa0"))));
             dialogLines.add(new DialogButton(component, consumer));
@@ -129,7 +130,7 @@ public class DialogBuilder {
     }
 
     public DialogBuilder addPageJump(@NotNull String text, @NotNull String hoverText, int page) {
-        List<String> lines = VCoreUtil.BukkitUtil.getBukkitBookUtil().getLines(text);
+        List<String> lines = BukkitBookUtil.getLines(text);
         lines.forEach(line -> {
             TextComponent component = Component.text(line).hoverEvent(HoverEvent.showText(Component.text(hoverText).color(TextColor.fromHexString("#ffbfa0")))).clickEvent(ClickEvent.clickEvent(ClickEvent.Action.CHANGE_PAGE, page + ""));
             dialogLines.add(new DialogPageJump(component, page));

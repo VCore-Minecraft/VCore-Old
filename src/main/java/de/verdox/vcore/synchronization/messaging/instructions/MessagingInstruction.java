@@ -6,8 +6,8 @@ package de.verdox.vcore.synchronization.messaging.instructions;
 
 import de.verdox.vcore.plugin.VCorePlugin;
 import de.verdox.vcore.plugin.wrapper.PlatformWrapper;
-import de.verdox.vcore.plugin.wrapper.bungeecord.BungeePlatform;
-import de.verdox.vcore.plugin.wrapper.spigot.SpigotPlatform;
+import de.verdox.vcore.plugin.wrapper.proxy.ProxyPlatform;
+import de.verdox.vcore.plugin.wrapper.gameserver.GameServerPlatform;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
@@ -26,8 +26,8 @@ public abstract class MessagingInstruction<T> implements InstructionSender<T> {
     protected final UUID uuid;
     private final Long creationTimeStamp = System.currentTimeMillis();
     protected VCorePlugin<?, ?> plugin;
-    protected SpigotPlatform spigotPlatform;
-    protected BungeePlatform bungeePlatform;
+    protected GameServerPlatform gameServerPlatform;
+    protected ProxyPlatform proxyPlatform;
     protected PlatformWrapper platformWrapper;
     private Object[] data;
 
@@ -42,8 +42,8 @@ public abstract class MessagingInstruction<T> implements InstructionSender<T> {
     public void setPlugin(VCorePlugin<?, ?> plugin) {
         this.plugin = plugin;
         this.platformWrapper = plugin.getPlatformWrapper();
-        this.spigotPlatform = plugin.getPlatformWrapper().getSpigotPlatform();
-        this.bungeePlatform = plugin.getPlatformWrapper().getBungeePlatform();
+        this.gameServerPlatform = plugin.getPlatformWrapper().getGameServerPlatform();
+        this.proxyPlatform = plugin.getPlatformWrapper().getProxyPlatform();
     }
 
     public MessagingInstruction<T> withData(Object... data) {
@@ -61,13 +61,13 @@ public abstract class MessagingInstruction<T> implements InstructionSender<T> {
     }
 
     public boolean checkOnlineOnSpigot(@NotNull UUID playerUUID) {
-        if (spigotPlatform == null)
+        if (gameServerPlatform == null)
             return false;
         return platformWrapper.isPlayerOnline(playerUUID);
     }
 
     public boolean checkOnlineOnBungeeCord(@NotNull UUID playerUUID) {
-        if (bungeePlatform == null)
+        if (proxyPlatform == null)
             return false;
         return platformWrapper.isPlayerOnline(playerUUID);
     }
@@ -100,8 +100,8 @@ public abstract class MessagingInstruction<T> implements InstructionSender<T> {
                 ", uuid=" + uuid +
                 ", creationTimeStamp=" + creationTimeStamp +
                 ", plugin=" + plugin +
-                ", spigotPlatform=" + spigotPlatform +
-                ", bungeePlatform=" + bungeePlatform +
+                ", spigotPlatform=" + gameServerPlatform +
+                ", bungeePlatform=" + proxyPlatform +
                 ", platformWrapper=" + platformWrapper +
                 ", data=" + Arrays.toString(data) +
                 '}';

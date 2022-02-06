@@ -18,7 +18,7 @@ import org.jetbrains.annotations.NotNull;
  * @Author: Lukas Jonsson (Verdox)
  * @date 01.02.2022 20:04
  */
-public class WorkerNPCModule extends VCorePaperModule {
+public class VCoreWorkerNPCModule extends VCorePaperModule {
 
     private CustomEntityManager customEntityManager;
     private VCoreNMSModule vCoreNMSModule;

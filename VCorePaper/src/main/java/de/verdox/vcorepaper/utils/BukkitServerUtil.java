@@ -2,7 +2,7 @@
  * Copyright (c) 2021. Lukas Jonsson
  */
 
-package de.verdox.vcore.util.bukkit;
+package de.verdox.vcorepaper.utils;
 
 import org.bukkit.Bukkit;
 import org.bukkit.event.Cancellable;
@@ -14,7 +14,7 @@ import org.bukkit.event.Event;
  * @date 18.08.2021 01:47
  */
 public class BukkitServerUtil {
-    public boolean callCancellable(Cancellable cancellable) {
+    public static boolean callCancellable(Cancellable cancellable) {
         if (!(cancellable instanceof Event))
             throw new IllegalStateException(cancellable + " not instance of Event");
         Bukkit.getPluginManager().callEvent((Event) cancellable);

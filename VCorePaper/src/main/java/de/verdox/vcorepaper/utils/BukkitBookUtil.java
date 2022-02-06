@@ -2,7 +2,7 @@
  * Copyright (c) 2021. Lukas Jonsson
  */
 
-package de.verdox.vcore.util.bukkit;
+package de.verdox.vcorepaper.utils;
 
 import org.bukkit.ChatColor;
 import org.bukkit.map.MinecraftFont;
@@ -16,7 +16,7 @@ import java.util.List;
  * @date 13.09.2021 22:59
  */
 public class BukkitBookUtil {
-    public List<String> getLines(String rawText) {
+    public static List<String> getLines(String rawText) {
         //Note that the only flaw with using MinecraftFont is that it can't account for some UTF-8 symbols, it will throw an IllegalArgumentException
         final MinecraftFont font = new MinecraftFont();
         final int maxLineWidth = font.getWidth("LLLLLLLLLLLLLLLLLLL");
@@ -62,7 +62,7 @@ public class BukkitBookUtil {
         return lines;
     }
 
-    public String rawButtonFormat(String rawText) {
+    public static String rawButtonFormat(String rawText) {
         final MinecraftFont font = new MinecraftFont();
         final int maxLineWidth = font.getWidth("LLLLLLLLLLLLLLLLLLL");
         final int textWidth = font.getWidth(rawText);

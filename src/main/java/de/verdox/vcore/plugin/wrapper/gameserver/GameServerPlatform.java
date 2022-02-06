@@ -2,7 +2,7 @@
  * Copyright (c) 2021. Lukas Jonsson
  */
 
-package de.verdox.vcore.plugin.wrapper.spigot;
+package de.verdox.vcore.plugin.wrapper.gameserver;
 
 import de.verdox.vcore.plugin.wrapper.Platform;
 import de.verdox.vcore.plugin.wrapper.types.GameLocation;
@@ -17,7 +17,7 @@ import java.util.UUID;
  * @Author: Lukas Jonsson (Verdox)
  * @date 04.08.2021 23:42
  */
-public interface SpigotPlatform extends Platform {
+public interface GameServerPlatform extends Platform {
 
     void setPlayerHealth(@NotNull UUID playerUUID, double health);
 

@@ -2,7 +2,7 @@
  * Copyright (c) 2021. Lukas Jonsson
  */
 
-package de.verdox.vcore.plugin.wrapper.types;
+package de.verdox.vcorepaper.utils.wrapper;
 
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;

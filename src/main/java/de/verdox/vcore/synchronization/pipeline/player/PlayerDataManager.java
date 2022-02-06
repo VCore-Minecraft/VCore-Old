@@ -13,16 +13,6 @@ import de.verdox.vcore.synchronization.pipeline.parts.Pipeline;
 import de.verdox.vcore.synchronization.pipeline.player.events.PlayerPreSessionLoadEvent;
 import de.verdox.vcore.synchronization.pipeline.player.events.PlayerPreSessionUnloadEvent;
 import de.verdox.vcore.synchronization.pipeline.player.events.PlayerSessionLoadedEvent;
-import net.md_5.bungee.api.ProxyServer;
-import net.md_5.bungee.api.event.PlayerDisconnectEvent;
-import net.md_5.bungee.api.event.PostLoginEvent;
-import net.md_5.bungee.api.plugin.Plugin;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.EventPriority;
-import org.bukkit.event.Listener;
-import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.event.player.PlayerKickEvent;
-import org.bukkit.event.player.PlayerQuitEvent;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;

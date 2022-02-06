@@ -33,6 +33,7 @@ public class VCoreModuleLoaderImpl<T, R extends VCoreSubsystem<?>, C extends VCo
             throw new RuntimeException("Module already registered!");
         cache.put((Class<? extends V>) module.getClass(), module);
         module.enableModule(coreInstance);
+        coreInstance.consoleMessage("&eModule loaded&7: &a" + module.getClass().getSimpleName(), true);
     }
 
     @Override

@@ -2,7 +2,7 @@
  * Copyright (c) 2021. Lukas Jonsson
  */
 
-package de.verdox.vcore.util.bukkit.keys;
+package de.verdox.vcorepaper.utils.keys;
 
 import de.verdox.vcore.plugin.wrapper.types.WorldChunk;
 import io.papermc.lib.PaperLib;

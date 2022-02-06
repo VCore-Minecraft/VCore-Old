@@ -25,13 +25,13 @@ public class UpdateBroadcastMessage extends Update {
     @NotNull
     @Override
     public UpdateCompletion executeUpdate(Object[] instructionData) {
-        if (spigotPlatform == null)
+        if (gameServerPlatform == null)
             return UpdateCompletion.NOTHING;
 
         String messageType = (String) instructionData[0];
         String message = (String) instructionData[1];
         PlayerMessageType playerMessageType = PlayerMessageType.valueOf(messageType);
-        spigotPlatform.broadcastMessage(message, playerMessageType);
+        gameServerPlatform.broadcastMessage(message, playerMessageType);
 
         return UpdateCompletion.TRUE;
     }

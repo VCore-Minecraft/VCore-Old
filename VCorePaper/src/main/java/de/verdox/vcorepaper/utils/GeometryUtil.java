@@ -2,7 +2,7 @@
  * Copyright (c) 2021. Lukas Jonsson
  */
 
-package de.verdox.vcore.util.bukkit;
+package de.verdox.vcorepaper.utils;
 
 import org.bukkit.Axis;
 import org.bukkit.Location;
@@ -57,7 +57,7 @@ public class GeometryUtil {
         return Math.sin(Math.toRadians(degrees));
     }
 
-    public Location rotateAround(Location point, Location rotateAround, double rotation) {
+    public static Location rotateAround(Location point, Location rotateAround, double rotation) {
         if (rotation == 0)
             return point;
         rotation %= 360;
@@ -77,7 +77,7 @@ public class GeometryUtil {
         return new Location(point.getWorld(), newRotatedX, point.getY(), newRotatedZ);
     }
 
-    public Location rotatePointAround(Location point, Location rotateAround, double rotation) {
+    public static Location rotatePointAround(Location point, Location rotateAround, double rotation) {
 
         // Point will be rotated around rotateAround
 
@@ -119,7 +119,7 @@ public class GeometryUtil {
         return new Location(point.getWorld(), newRotatedX, point.getY(), newRotatedZ);
     }
 
-    public BlockData rotateBlockData(BlockData blockData, double rotation) {
+    public static BlockData rotateBlockData(BlockData blockData, double rotation) {
         if (blockData == null) {
             throw new IllegalArgumentException("blockData can't be null!");
         } else if (rotation < 0.0D) {
@@ -151,7 +151,7 @@ public class GeometryUtil {
         }
     }
 
-    public MultipleFacing rotateMultipleFacing(MultipleFacing multipleFacing, double rotation) {
+    public static MultipleFacing rotateMultipleFacing(MultipleFacing multipleFacing, double rotation) {
         boolean oldNorth = multipleFacing.hasFace(BlockFace.NORTH);
         boolean oldEast = multipleFacing.hasFace(BlockFace.EAST);
         boolean oldSouth = multipleFacing.hasFace(BlockFace.SOUTH);
@@ -184,7 +184,7 @@ public class GeometryUtil {
         }
     }
 
-    public Axis rotateAxis(Axis axis, double rotation) {
+    public static Axis rotateAxis(Axis axis, double rotation) {
         if (rotation == 270.0D || rotation == 90.0D) {
             if (axis == Axis.X) {
                 return Axis.Z;
@@ -198,7 +198,7 @@ public class GeometryUtil {
         return axis;
     }
 
-    public BlockFace rotateBlockface(BlockFace blockFace, double rotation) {
+    public static BlockFace rotateBlockface(BlockFace blockFace, double rotation) {
         BlockFaceDirectionDegree blockFaceDirectionDegree = toBlockFaceDirectionDegree(blockFace);
         double originRotation = blockFaceDirectionDegree.getDegree();
         double newRotation = originRotation + rotation;
@@ -209,11 +209,11 @@ public class GeometryUtil {
         return getBlockFaceByDegree(newRotation);
     }
 
-    public BlockFaceDirectionDegree toBlockFaceDirectionDegree(BlockFace blockFace) {
+    public static BlockFaceDirectionDegree toBlockFaceDirectionDegree(BlockFace blockFace) {
         return BlockFaceDirectionDegree.valueOf(blockFace.name());
     }
 
-    public BlockFace getBlockFaceByDegree(double degree) {
+    public static BlockFace getBlockFaceByDegree(double degree) {
         BlockFaceDirectionDegree[] var2 = BlockFaceDirectionDegree.values();
         int var3 = var2.length;
 

@@ -34,7 +34,7 @@ public class UpdatePlayerSendMessage extends CleverUpdate {
             return UpdateCompletion.NOTHING;
 
         PlayerMessageType playerMessageType = PlayerMessageType.valueOf(messageType);
-        spigotPlatform.sendMessage(targetUUID, message, playerMessageType);
+        gameServerPlatform.sendMessage(targetUUID, message, playerMessageType);
 
         return UpdateCompletion.TRUE;
     }

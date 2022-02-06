@@ -4,8 +4,8 @@
 
 package de.verdox.vcore.synchronization.networkmanager.player.api.instructions.updates;
 
-import de.verdox.vcore.plugin.wrapper.bungeecord.BungeePlatform;
-import de.verdox.vcore.plugin.wrapper.spigot.SpigotPlatform;
+import de.verdox.vcore.plugin.wrapper.proxy.ProxyPlatform;
+import de.verdox.vcore.plugin.wrapper.gameserver.GameServerPlatform;
 import de.verdox.vcore.plugin.wrapper.types.GameLocation;
 import de.verdox.vcore.synchronization.messaging.instructions.update.CleverUpdate;
 import de.verdox.vcore.synchronization.networkmanager.player.VCorePlayer;
@@ -42,22 +42,22 @@ public class UpdatePlayerPosition extends CleverUpdate {
         double y = (double) instructionData[4];
         double z = (double) instructionData[5];
 
-        BungeePlatform bungeePlatform = plugin.getPlatformWrapper().getBungeePlatform();
-        SpigotPlatform spigotPlatform = plugin.getPlatformWrapper().getSpigotPlatform();
+        ProxyPlatform proxyPlatform = plugin.getPlatformWrapper().getProxyPlatform();
+        GameServerPlatform gameServerPlatform = plugin.getPlatformWrapper().getGameServerPlatform();
 
         // If is BungeeCord
-        if (bungeePlatform != null) {
+        if (proxyPlatform != null) {
             if (vCorePlayer.currentGameServer.equals(serverName))
                 return UpdateCompletion.NOTHING;
-            bungeePlatform.sendToServer(vCorePlayer.getObjectUUID(), serverName);
-        } else if (spigotPlatform != null) {
+            proxyPlatform.sendToServer(vCorePlayer.getObjectUUID(), serverName);
+        } else if (gameServerPlatform != null) {
             String gameServerName = plugin.getCoreInstance().getServerName();
             if (!serverName.equals(gameServerName))
                 return UpdateCompletion.NOTHING;
             // Player is already online
             plugin.getCoreInstance().getPlayerAPI().getPlayerScheduler().schedulePlayerTask(uuid, getUuid(), () -> {
                 GameLocation gameLocation = new GameLocation(worldName, x, y, z);
-                spigotPlatform.teleportPlayer(vCorePlayer.getObjectUUID(), gameLocation);
+                gameServerPlatform.teleportPlayer(vCorePlayer.getObjectUUID(), gameLocation);
             }, 5, TimeUnit.SECONDS);
         }
         return UpdateCompletion.TRUE;
