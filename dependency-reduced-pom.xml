@@ -16,12 +16,6 @@
               <goal>shade</goal>
             </goals>
             <configuration>
-              <relocations>
-                <relocation>
-                  <pattern>org.bstats</pattern>
-                  <shadedPattern>de.verdox.vcorepaper.dependencies.bstats</shadedPattern>
-                </relocation>
-              </relocations>
               <filters>
                 <filter>
                   <artifact>*:*</artifact>
