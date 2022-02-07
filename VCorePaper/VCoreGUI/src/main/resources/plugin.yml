@@ -1,6 +1,0 @@
-name: VCorePaperGUIModule
-version: ${project.version}
-main: de.verdox.vcore.gui.VCoreGUIModule
-api-version: 1.16
-authors: [ Verdox ]
-depend: [VCorePaper, VCorePaperEventModule, VCorePaperNBTModule]

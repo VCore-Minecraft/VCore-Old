@@ -1,6 +1,0 @@
-name: VCorePaperEventModule
-version: ${project.version}
-main: de.verdox.vcore.events.VCorePaperEventModule
-api-version: 1.16
-authors: [ Verdox ]
-depend: [VCorePaper]
