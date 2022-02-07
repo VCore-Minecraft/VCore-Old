@@ -4,7 +4,7 @@
 
 package de.verdox.vcore.workernpc;
 
-import de.tr7zw.changeme.nbtapi.NBTCompound;
+import de.verdox.vcore.nbt.api.NBTCompound;
 import de.verdox.vcore.gui.book.DialogBuilder;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;

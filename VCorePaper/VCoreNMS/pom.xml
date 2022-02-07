@@ -56,7 +56,7 @@
         <dependency>
             <groupId>de.verdox</groupId>
             <artifactId>VCorePaper</artifactId>
-            <version>1.0</version>
+            <version>LATEST</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>

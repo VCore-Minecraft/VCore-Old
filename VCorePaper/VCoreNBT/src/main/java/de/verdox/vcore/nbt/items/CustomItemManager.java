@@ -26,21 +26,16 @@ import java.util.*;
 
 public class CustomItemManager extends CustomDataManager<ItemStack, de.verdox.vcore.nbt.items.ItemCustomData<?>, de.verdox.vcore.nbt.items.VCoreItem> implements Listener {
 
-    private static CustomItemManager instance = null;
-
     private final ItemPreset itemPreset;
 
     public CustomItemManager(VCoreNBTModule vCoreNBTModule, VCorePaperPlugin vCorePlugin) {
         super(vCoreNBTModule, vCorePlugin);
-        if (instance != null)
-            throw new IllegalStateException("There can only be one CustomEntityManager");
-        instance = this;
-        this.itemPreset = new de.verdox.vcore.nbt.items.ItemPreset(this);
+        this.itemPreset = new ItemPreset(this);
         Bukkit.getPluginManager().registerEvents(this, vCorePlugin);
     }
 
     @Override
-    public <U extends de.verdox.vcore.nbt.items.VCoreItem> U wrap(Class<? extends U> type, ItemStack inputObject) {
+    public <U extends VCoreItem> U wrap(Class<? extends U> type, ItemStack inputObject) {
         try {
             return type.getDeclaredConstructor(ItemStack.class, CustomItemManager.class).newInstance(inputObject, this);
         } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
@@ -50,7 +45,7 @@ public class CustomItemManager extends CustomDataManager<ItemStack, de.verdox.vc
     }
 
     @Override
-    public <U extends de.verdox.vcore.nbt.items.VCoreItem> U convertTo(Class<? extends U> type, de.verdox.vcore.nbt.items.VCoreItem customData) {
+    public <U extends VCoreItem> U convertTo(Class<? extends U> type, de.verdox.vcore.nbt.items.VCoreItem customData) {
         try {
             return type.getDeclaredConstructor(ItemStack.class, CustomItemManager.class).newInstance(customData.getDataHolder(), this);
         } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
@@ -61,7 +56,7 @@ public class CustomItemManager extends CustomDataManager<ItemStack, de.verdox.vc
 
 
     @Override
-    protected de.verdox.vcore.nbt.items.ItemCustomData<?> instantiateCustomData(Class<? extends ItemCustomData<?>> dataClass) {
+    protected ItemCustomData<?> instantiateCustomData(Class<? extends ItemCustomData<?>> dataClass) {
         try {
             return dataClass.getDeclaredConstructor().newInstance();
         } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {

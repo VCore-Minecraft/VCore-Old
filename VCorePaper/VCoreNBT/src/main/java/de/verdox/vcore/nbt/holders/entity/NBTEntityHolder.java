@@ -16,7 +16,6 @@ public class NBTEntityHolder extends NBTHolderImpl<Entity, NBTCompound> {
     public NBTEntityHolder(Entity entity) {
         super(entity);
         this.nbtEntity = new NBTEntity(dataHolder);
-
     }
 
     @Override

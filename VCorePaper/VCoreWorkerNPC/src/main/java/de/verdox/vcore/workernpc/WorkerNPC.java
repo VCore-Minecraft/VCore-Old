@@ -5,7 +5,7 @@
 package de.verdox.vcore.workernpc;
 
 
-import de.tr7zw.changeme.nbtapi.NBTCompound;
+import de.verdox.vcore.nbt.api.*;
 import de.verdox.vcore.gui.book.DialogBuilder;
 import de.verdox.vcore.nbt.entities.CustomEntityManager;
 import de.verdox.vcore.nbt.entities.VCoreEntity;

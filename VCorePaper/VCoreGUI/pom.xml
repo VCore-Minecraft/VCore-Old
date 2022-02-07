@@ -25,14 +25,15 @@
         <dependency>
             <groupId>de.verdox</groupId>
             <artifactId>VCorePaperEvent</artifactId>
-            <version>RELEASE</version>
+            <version>LATEST</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>de.verdox</groupId>
             <artifactId>VCoreNBT</artifactId>
-            <version>1.0</version>
+            <version>LATEST</version>
             <scope>provided</scope>
+            <classifier>shaded</classifier>
         </dependency>
         <dependency>
             <groupId>net.wesjd</groupId>

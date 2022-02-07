@@ -101,7 +101,7 @@
         <dependency>
             <groupId>de.verdox</groupId>
             <artifactId>VCore</artifactId>
-            <version>1.0</version>
+            <version>LATEST</version>
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>

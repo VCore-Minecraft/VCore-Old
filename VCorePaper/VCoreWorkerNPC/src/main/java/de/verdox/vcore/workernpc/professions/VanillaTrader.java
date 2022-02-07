@@ -4,7 +4,7 @@
 
 package de.verdox.vcore.workernpc.professions;
 
-import de.tr7zw.changeme.nbtapi.NBTCompound;
+import de.verdox.vcore.nbt.api.NBTCompound;
 import de.verdox.vcore.gui.book.DialogBuilder;
 import de.verdox.vcore.workernpc.NPCProfession;
 import de.verdox.vcore.workernpc.WorkerNPC;

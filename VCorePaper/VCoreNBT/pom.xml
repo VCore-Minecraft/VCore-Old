@@ -11,6 +11,7 @@
     <artifactId>VCoreNBT</artifactId>
     <version>1.0</version>
     <groupId>de.verdox</groupId>
+    <name>VCoreNBT</name>
     <packaging>jar</packaging>
 
     <repositories>
@@ -46,7 +47,7 @@
         <dependency>
             <groupId>de.verdox</groupId>
             <artifactId>VCorePaper</artifactId>
-            <version>1.0</version>
+            <version>LATEST</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>
@@ -83,10 +84,9 @@
                                     <shadedPattern>de.verdox.vcore.nbt.api</shadedPattern>
                                 </relocation>
                             </relocations>
-                            <shadedArtifactAttached>true</shadedArtifactAttached>
+                            <createDependencyReducedPom>true</createDependencyReducedPom>
                             <shadedClassifierName>shaded</shadedClassifierName>
                             <shadedArtifactAttached>true</shadedArtifactAttached>
-                            <shadeSourcesContent>true</shadeSourcesContent>
                         </configuration>
                     </execution>
                 </executions>
