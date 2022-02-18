@@ -30,7 +30,7 @@ public interface VCoreSerializable {
         return ReflectionUtils.getAllFields(vCoreDataClass, field -> field.getAnnotation(VCorePersistentData.class) != null);
     }
 
-    private Field findField(Class<? extends VCoreSerializable> type, String fieldName) {
+    private static Field findField(Class<? extends VCoreSerializable> type, String fieldName) {
         try {
             return type.getDeclaredField(fieldName);
         } catch (NoSuchFieldException e) {

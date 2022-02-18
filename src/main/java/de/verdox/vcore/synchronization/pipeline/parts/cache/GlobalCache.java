@@ -5,7 +5,7 @@
 package de.verdox.vcore.synchronization.pipeline.parts.cache;
 
 import de.verdox.vcore.synchronization.pipeline.datatypes.VCoreData;
-import de.verdox.vcore.synchronization.pipeline.interfaces.DataManipulator;
+import de.verdox.vcore.synchronization.pipeline.parts.manipulator.DataSynchronizer;
 import de.verdox.vcore.synchronization.pipeline.parts.DataProvider;
 import org.jetbrains.annotations.NotNull;
 
@@ -31,26 +31,7 @@ public interface GlobalCache extends DataProvider {
     @Deprecated
     Map<String, Object> getGlobalCacheMap(String name);
 
+    //TODO: Queries für GlobalCache & GlobalStorage nach bestimmten Attributen / sortiert etc. -> Für TOP Listen etc interessant
+
     boolean dataExist(@Nonnull @NotNull Class<? extends VCoreData> dataClass, @Nonnull @NotNull UUID objectUUID);
-
-    default DataManipulator constructDataManipulator(VCoreData vCoreData) {
-        return new DataManipulator() {
-            @Override
-            public void cleanUp() {
-
-            }
-
-            @Override
-            public void pushUpdate(VCoreData vCoreData, Runnable callback) {
-
-            }
-
-            @Override
-            public void pushRemoval(VCoreData vCoreData, Runnable callback) {
-
-
-            }
-        };
-    }
-
 }

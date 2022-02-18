@@ -35,18 +35,15 @@ public abstract class RedisConnection {
             ClusterServersConfig clusterServersConfig = config.useClusterServers();
             clusterServersConfig.addNodeAddress(addressArray);
 
-            if (redisPassword != null && !redisPassword.isEmpty())
+            if (!redisPassword.isEmpty())
                 clusterServersConfig.addNodeAddress(addressArray).setPassword(redisPassword);
             else
                 clusterServersConfig.addNodeAddress(addressArray);
         } else {
-            String address = addressArray[0];
-            if (address == null)
-                throw new IllegalArgumentException("Single Server Adress can't be null!");
             SingleServerConfig singleServerConfig = config.useSingleServer();
             singleServerConfig.setSubscriptionsPerConnection(30);
 
-            if (redisPassword != null && !redisPassword.isEmpty())
+            if (!redisPassword.isEmpty())
                 singleServerConfig.setAddress(addressArray[0]).setPassword(redisPassword);
             else
                 singleServerConfig.setAddress(addressArray[0]);

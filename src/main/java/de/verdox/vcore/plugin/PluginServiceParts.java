@@ -73,7 +73,7 @@ public abstract class PluginServiceParts<T extends VCorePlugin<?, S>, S extends 
 
     @Override
     public void shutdown() {
-        plugin.consoleMessage("&6Shutting down VCore Parts", false);
+        plugin.consoleMessage("&6Shutting down ServiceParts", false);
         pipeline.saveAllData();
         vCoreScheduler.waitUntilShutdown();
 

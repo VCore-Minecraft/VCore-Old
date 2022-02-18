@@ -7,7 +7,7 @@ package de.verdox.vcore.synchronization.pipeline.player;
 import de.verdox.vcore.plugin.SystemLoadable;
 import de.verdox.vcore.plugin.VCoreCoreInstance;
 import de.verdox.vcore.plugin.VCorePlugin;
-import de.verdox.vcore.synchronization.pipeline.PipelineManager;
+import de.verdox.vcore.synchronization.pipeline.PipelineImpl;
 import de.verdox.vcore.synchronization.pipeline.datatypes.PlayerData;
 import de.verdox.vcore.synchronization.pipeline.parts.Pipeline;
 import de.verdox.vcore.synchronization.pipeline.player.events.PlayerPreSessionLoadEvent;
@@ -26,13 +26,13 @@ import java.util.concurrent.TimeUnit;
  */
 public class PlayerDataManager implements SystemLoadable {
     protected final VCorePlugin<?, ?> plugin;
-    private final PipelineManager pipelineManager;
+    private final PipelineImpl pipelineImpl;
     private final boolean loaded;
 
-    public PlayerDataManager(@NotNull PipelineManager pipelineManager) {
-        Objects.requireNonNull(pipelineManager, "pipelineManager can't be null!");
-        this.pipelineManager = pipelineManager;
-        this.plugin = pipelineManager.getPlugin();
+    public PlayerDataManager(@NotNull PipelineImpl pipelineImpl) {
+        Objects.requireNonNull(pipelineImpl, "pipelineManager can't be null!");
+        this.pipelineImpl = pipelineImpl;
+        this.plugin = pipelineImpl.getPlugin();
         loaded = true;
     }
 
@@ -45,7 +45,7 @@ public class PlayerDataManager implements SystemLoadable {
             plugin.getServices().getSubsystemManager().getActivePlayerDataClasses()
                     .parallelStream()
                     .forEach(aClass -> {
-                        PlayerData playerData = pipelineManager.load(aClass, player, Pipeline.LoadingStrategy.LOAD_PIPELINE, true);
+                        PlayerData playerData = pipelineImpl.load(aClass, player, Pipeline.LoadingStrategy.LOAD_PIPELINE, true);
                         playerData.onConnect(player);
                     });
             plugin.getServices().eventBus.post(new PlayerSessionLoadedEvent(plugin, player, System.currentTimeMillis()));
@@ -59,7 +59,7 @@ public class PlayerDataManager implements SystemLoadable {
                 .doAsync(() -> plugin.getServices().getSubsystemManager().getActivePlayerDataClasses()
                         .parallelStream()
                         .forEach(aClass -> {
-                            PlayerData data = pipelineManager.getLocalCache().getData(aClass, player);
+                            PlayerData data = pipelineImpl.getLocalCache().getData(aClass, player);
                             data.onDisconnect(player);
                             data.save(true);
                         })).executeBatch();

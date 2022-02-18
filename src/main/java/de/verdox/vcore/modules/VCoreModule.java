@@ -4,7 +4,6 @@
 
 package de.verdox.vcore.modules;
 
-import de.verdox.vcore.plugin.SystemLoadable;
 import de.verdox.vcore.plugin.VCoreCoreInstance;
 import de.verdox.vcore.plugin.VCorePlugin;
 import de.verdox.vcore.plugin.subsystem.VCoreSubsystem;

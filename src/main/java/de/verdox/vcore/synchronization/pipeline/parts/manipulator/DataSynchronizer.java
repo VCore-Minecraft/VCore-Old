@@ -2,7 +2,7 @@
  * Copyright (c) 2021. Lukas Jonsson
  */
 
-package de.verdox.vcore.synchronization.pipeline.interfaces;
+package de.verdox.vcore.synchronization.pipeline.parts.manipulator;
 
 import de.verdox.vcore.synchronization.pipeline.datatypes.VCoreData;
 
@@ -11,7 +11,7 @@ import de.verdox.vcore.synchronization.pipeline.datatypes.VCoreData;
  * @Author: Lukas Jonsson (Verdox)
  * @date 25.06.2021 01:22
  */
-public interface DataManipulator {
+public interface DataSynchronizer {
 
     /**
      * Cleanup Function triggered when data is removed from cache

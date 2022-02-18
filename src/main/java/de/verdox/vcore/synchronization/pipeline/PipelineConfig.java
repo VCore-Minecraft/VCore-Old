@@ -11,6 +11,8 @@ import de.verdox.vcore.synchronization.pipeline.parts.cache.GlobalCache;
 import de.verdox.vcore.synchronization.pipeline.parts.cache.redis.RedisCache;
 import de.verdox.vcore.synchronization.pipeline.parts.local.LocalCache;
 import de.verdox.vcore.synchronization.pipeline.parts.local.LocalCacheImpl;
+import de.verdox.vcore.synchronization.pipeline.parts.manipulator.SynchronizingService;
+import de.verdox.vcore.synchronization.pipeline.parts.manipulator.redis.RedisSynchronizingService;
 import de.verdox.vcore.synchronization.pipeline.parts.storage.GlobalStorage;
 import de.verdox.vcore.synchronization.pipeline.parts.storage.mongodb.MongoDBStorage;
 import org.jetbrains.annotations.NotNull;
@@ -35,12 +37,14 @@ public class PipelineConfig extends VCoreYAMLConfig {
         Objects.requireNonNull(plugin, "plugin can't be null!");
         plugin.consoleMessage("&eConstructing Pipeline", false);
         LocalCache localCache = new LocalCacheImpl(plugin);
+        SynchronizingService synchronizingService = null;
         GlobalCache globalCache = null;
         GlobalStorage globalStorage = null;
 
         // Initializing Global Cache
         if (useCoreGlobalCache()) {
             globalCache = plugin.getCoreInstance().getServices().getPipeline().getGlobalCache();
+            synchronizingService = plugin.getCoreInstance().getServices().getPipeline().getSynchronizingService();
             plugin.consoleMessage("&eSelecting Core GlobalCache", false);
         } else {
             String globalCacheType = config.getString("GlobalCache.type");
@@ -51,6 +55,7 @@ public class PipelineConfig extends VCoreYAMLConfig {
                 String password = config.getString("GlobalCache.redis.password");
 
                 globalCache = new RedisCache(plugin, useCluster, addresses, password);
+                synchronizingService = new RedisSynchronizingService(localCache, (RedisCache) globalCache);
             } else {
                 plugin.consoleMessage("&cNo GlobalCache loaded&7!", false);
             }
@@ -76,7 +81,7 @@ public class PipelineConfig extends VCoreYAMLConfig {
                 plugin.consoleMessage("&cNo GlobalStorage loaded&7!", false);
             }
         }
-        return new PipelineManager(plugin, localCache, globalCache, globalStorage);
+        return new PipelineImpl(plugin, localCache, synchronizingService, globalCache, globalStorage);
     }
 
     public boolean useCoreGlobalCache() {

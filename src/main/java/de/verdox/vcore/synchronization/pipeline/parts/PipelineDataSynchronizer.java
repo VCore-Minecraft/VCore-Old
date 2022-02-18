@@ -16,7 +16,7 @@ import java.util.concurrent.CompletableFuture;
  * @Author: Lukas Jonsson (Verdox)
  * @date 24.06.2021 15:45
  */
-public interface DataSynchronizer extends SystemLoadable {
+public interface PipelineDataSynchronizer extends SystemLoadable {
 
     CompletableFuture<Boolean> synchronize(@NotNull DataSourceType source, @NotNull DataSourceType destination, @NotNull Class<? extends VCoreData> dataClass, @NotNull UUID objectUUID);
 

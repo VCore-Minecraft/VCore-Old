@@ -31,7 +31,7 @@ public class LocalCacheImpl implements LocalCache {
     }
 
     @Override
-    public synchronized <S extends VCoreData> S getData(@NotNull Class<? extends S> dataClass, @NotNull UUID objectUUID) {
+    public <S extends VCoreData> S getData(@NotNull Class<? extends S> dataClass, @NotNull UUID objectUUID) {
         Objects.requireNonNull(dataClass, "dataClass can't be null!");
         Objects.requireNonNull(objectUUID, "objectUUID can't be null!");
         if (!dataExist(dataClass, objectUUID))
@@ -42,13 +42,13 @@ public class LocalCacheImpl implements LocalCache {
     }
 
     @Override
-    public synchronized <S extends VCoreData> Set<S> getAllData(@NotNull Class<? extends S> dataClass) {
+    public <S extends VCoreData> Set<S> getAllData(@NotNull Class<? extends S> dataClass) {
         Objects.requireNonNull(dataClass, "dataClass can't be null!");
         return getSavedUUIDs(dataClass).stream().map(uuid -> getData(dataClass, uuid)).collect(Collectors.toSet());
     }
 
     @Override
-    public synchronized <S extends VCoreData> void save(@NotNull Class<? extends S> dataClass, @NotNull S data) {
+    public <S extends VCoreData> void save(@NotNull Class<? extends S> dataClass, @NotNull S data) {
         Objects.requireNonNull(dataClass, "dataClass can't be null!");
         Objects.requireNonNull(data, "data can't be null!");
         if (dataExist(dataClass, data.getObjectUUID()))
@@ -61,7 +61,7 @@ public class LocalCacheImpl implements LocalCache {
     }
 
     @Override
-    public synchronized <S extends VCoreData> boolean dataExist(@NotNull Class<? extends S> dataClass, @NotNull UUID objectUUID) {
+    public <S extends VCoreData> boolean dataExist(@NotNull Class<? extends S> dataClass, @NotNull UUID objectUUID) {
         Objects.requireNonNull(dataClass, "dataClass can't be null!");
         Objects.requireNonNull(objectUUID, "objectUUID can't be null!");
         if (!dataObjects.containsKey(dataClass))
@@ -70,7 +70,7 @@ public class LocalCacheImpl implements LocalCache {
     }
 
     @Override
-    public synchronized <S extends VCoreData> boolean remove(@NotNull Class<? extends S> dataClass, @NotNull UUID objectUUID) {
+    public <S extends VCoreData> boolean remove(@NotNull Class<? extends S> dataClass, @NotNull UUID objectUUID) {
         Objects.requireNonNull(dataClass, "dataClass can't be null!");
         Objects.requireNonNull(objectUUID, "objectUUID can't be null!");
         if (!dataExist(dataClass, objectUUID))
@@ -82,8 +82,9 @@ public class LocalCacheImpl implements LocalCache {
         return true;
     }
 
+
     @Override
-    public synchronized <S extends VCoreData> Set<UUID> getSavedUUIDs(@NotNull Class<? extends S> dataClass) {
+    public <S extends VCoreData> Set<UUID> getSavedUUIDs(@NotNull Class<? extends S> dataClass) {
         Objects.requireNonNull(dataClass, "dataClass can't be null!");
         if (!dataObjects.containsKey(dataClass))
             return new HashSet<>();
@@ -91,7 +92,7 @@ public class LocalCacheImpl implements LocalCache {
     }
 
     @Override
-    public synchronized <S extends VCoreData> S instantiateData(@NotNull Class<? extends S> dataClass, @NotNull UUID objectUUID) {
+    public <S extends VCoreData> S instantiateData(@NotNull Class<? extends S> dataClass, @NotNull UUID objectUUID) {
         Objects.requireNonNull(dataClass, "dataClass can't be null!");
         Objects.requireNonNull(objectUUID, "objectUUID can't be null!");
         // Network Data is not subsystem dependent

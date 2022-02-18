@@ -9,6 +9,7 @@ import de.verdox.vcore.synchronization.pipeline.annotations.RequiredSubsystemInf
 import de.verdox.vcore.synchronization.pipeline.datatypes.PlayerData;
 import de.verdox.vcore.synchronization.pipeline.datatypes.ServerData;
 import de.verdox.vcore.synchronization.pipeline.datatypes.VCoreData;
+import de.verdox.vcore.util.global.AnnotationResolver;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -43,6 +44,7 @@ public class VCoreSubsystemManager<T extends VCorePlugin<?, R>, R extends VCoreS
             subSystems.stream()
                     .filter(VCoreSubsystem::isActivated)
                     .forEach(r -> {
+                        AnnotationResolver.getDataStorageIdentifier(r.getClass());
                         plugin.consoleMessage("&eActivating Subsystem&7: &b" + r.getClass().getSimpleName(), false);
                         r.onSubsystemEnable();
                         activatedSubSystems.add(r);
@@ -50,6 +52,12 @@ public class VCoreSubsystemManager<T extends VCorePlugin<?, R>, R extends VCoreS
                         plugin.consoleMessage("&eActivated Subsystem&7: &b" + r.getClass().getSimpleName(), false);
                         plugin.consoleMessage("", false);
                     });
+        }
+        if (plugin instanceof VCoreSubsystem<?>) {
+            plugin.consoleMessage("&ePlugin is a subsystem aswell", false);
+            activatedSubSystems.add((R) plugin);
+            subSystems.add((R) plugin);
+            findRegisteredDataClasses((VCoreSubsystem<?>) plugin);
         }
         findActiveDataClasses();
         loaded = true;

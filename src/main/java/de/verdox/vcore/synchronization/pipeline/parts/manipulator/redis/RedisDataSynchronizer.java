@@ -2,11 +2,13 @@
  * Copyright (c) 2021. Lukas Jonsson
  */
 
-package de.verdox.vcore.synchronization.pipeline.parts.cache.redis;
+package de.verdox.vcore.synchronization.pipeline.parts.manipulator.redis;
 
 import de.verdox.vcore.synchronization.pipeline.datatypes.VCoreData;
-import de.verdox.vcore.synchronization.pipeline.interfaces.DataManipulator;
-import de.verdox.vcore.synchronization.pipeline.parts.DataSynchronizer;
+import de.verdox.vcore.synchronization.pipeline.parts.PipelineDataSynchronizer;
+import de.verdox.vcore.synchronization.pipeline.parts.cache.redis.RedisCache;
+import de.verdox.vcore.synchronization.pipeline.parts.local.LocalCache;
+import de.verdox.vcore.synchronization.pipeline.parts.manipulator.DataSynchronizer;
 import de.verdox.vcore.synchronization.pipeline.parts.Pipeline;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -23,23 +25,25 @@ import java.util.UUID;
  * @Author: Lukas Jonsson (Verdox)
  * @date 25.06.2021 01:24
  */
-public class RedisDataManipulator implements DataManipulator {
+public class RedisDataSynchronizer implements DataSynchronizer {
 
     private final RedisCache redisCache;
     private final RTopic dataTopic;
     private final MessageListener<DataBlock> messageListener;
     private final UUID senderUUID = UUID.randomUUID();
 
-    RedisDataManipulator(@NotNull RedisCache redisCache, @NotNull VCoreData vCoreData) {
+    RedisDataSynchronizer(@NotNull LocalCache localCache, @NotNull RedisCache redisCache, @NotNull Class<? extends VCoreData> dataClass) {
         Objects.requireNonNull(redisCache, "redisCache can't be null!");
-        Objects.requireNonNull(vCoreData, "vCoreData can't be null!");
+        Objects.requireNonNull(dataClass, "dataClass can't be null!");
         this.redisCache = redisCache;
-        this.dataTopic = this.redisCache.getTopic(vCoreData.getClass(), vCoreData.getObjectUUID());
+        this.dataTopic = this.redisCache.getTopic(dataClass);
         this.messageListener = (channel, dataBlock) -> {
             if (dataBlock.senderUUID.equals(senderUUID))
                 return;
-            if (dataBlock instanceof UpdateDataBlock) {
-                UpdateDataBlock updateDataBlock = (UpdateDataBlock) dataBlock;
+            VCoreData vCoreData = localCache.getData(dataClass,dataBlock.dataUUID);
+            if(vCoreData == null)
+                return;
+            if (dataBlock instanceof UpdateDataBlock updateDataBlock) {
                 vCoreData.getPlugin().consoleMessage("&eReceived Sync &b" + vCoreData.getObjectUUID() + " &8[&e" + vCoreData.getClass().getSimpleName() + "&8] &b" + System.currentTimeMillis(), true);
                 vCoreData.onSync(vCoreData.deserialize(updateDataBlock.dataToUpdate));
             } else if (dataBlock instanceof RemoveDataBlock) {
@@ -65,7 +69,7 @@ public class RedisDataManipulator implements DataManipulator {
     public void pushRemoval(@NotNull VCoreData vCoreData, @Nullable Runnable callback) {
         Objects.requireNonNull(vCoreData, "vCoreData can't be null!");
         vCoreData.markForRemoval();
-        dataTopic.publish(new RemoveDataBlock(senderUUID));
+        dataTopic.publish(new RemoveDataBlock(senderUUID,vCoreData.getObjectUUID()));
         vCoreData.getPlugin().consoleMessage("&ePushing Removal&7: &b" + System.currentTimeMillis(), true);
         if (callback != null)
             callback.run();
@@ -77,33 +81,34 @@ public class RedisDataManipulator implements DataManipulator {
             vCoreData.getPlugin().consoleMessage("&4Push rejected as it is marked for removal &b" + vCoreData.getObjectUUID() + " &8[&e" + vCoreData.getClass().getSimpleName() + "&8] &b" + System.currentTimeMillis(), true);
             return;
         }
-        dataTopic.publish(new UpdateDataBlock(senderUUID, vCoreData.serialize()));
+        dataTopic.publish(new UpdateDataBlock(senderUUID, vCoreData.getObjectUUID(), vCoreData.serialize()));
         vCoreData.getPlugin().consoleMessage("&ePushing Sync &b" + vCoreData.getObjectUUID() + " &8[&e" + vCoreData.getClass().getSimpleName() + "&8] &b" + System.currentTimeMillis(), true);
-        vCoreData.getPlugin().getServices().getPipeline().getSynchronizer().synchronize(DataSynchronizer.DataSourceType.LOCAL, DataSynchronizer.DataSourceType.GLOBAL_CACHE, vCoreData.getClass(), vCoreData.getObjectUUID());
+        vCoreData.getPlugin().getServices().getPipeline().getPipelineDataSynchronizer().synchronize(PipelineDataSynchronizer.DataSourceType.LOCAL, PipelineDataSynchronizer.DataSourceType.GLOBAL_CACHE, vCoreData.getClass(), vCoreData.getObjectUUID());
         if (callback != null)
             callback.run();
-        callback.run();
-    }
-
-    public static class RemoveDataBlock extends DataBlock {
-        RemoveDataBlock(@NotNull UUID senderUUID) {
-            super(senderUUID);
-        }
     }
 
     public abstract static class DataBlock implements Serializable {
         protected final UUID senderUUID;
+        protected final UUID dataUUID;
 
-        DataBlock(@NotNull UUID senderUUID) {
+        DataBlock(@NotNull UUID senderUUID, @NotNull UUID dataUUID) {
             this.senderUUID = senderUUID;
+            this.dataUUID = dataUUID;
+        }
+    }
+
+    public static class RemoveDataBlock extends DataBlock {
+        RemoveDataBlock(@NotNull UUID senderUUID, @NotNull UUID dataUUID) {
+            super(senderUUID, dataUUID);
         }
     }
 
     public static class UpdateDataBlock extends DataBlock {
         private final Map<String, Object> dataToUpdate;
 
-        UpdateDataBlock(@NotNull UUID senderUUID, @NotNull Map<String, Object> dataToUpdate) {
-            super(senderUUID);
+        UpdateDataBlock(@NotNull UUID senderUUID, @NotNull UUID dataUUID, Map<String, Object> dataToUpdate) {
+            super(senderUUID, dataUUID);
             this.dataToUpdate = dataToUpdate;
         }
     }

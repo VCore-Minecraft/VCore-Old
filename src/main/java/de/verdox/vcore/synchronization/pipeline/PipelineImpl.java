@@ -12,10 +12,11 @@ import de.verdox.vcore.synchronization.pipeline.annotations.PreloadStrategy;
 import de.verdox.vcore.synchronization.pipeline.annotations.VCoreDataProperties;
 import de.verdox.vcore.synchronization.pipeline.datatypes.NetworkData;
 import de.verdox.vcore.synchronization.pipeline.datatypes.VCoreData;
-import de.verdox.vcore.synchronization.pipeline.parts.DataSynchronizer;
+import de.verdox.vcore.synchronization.pipeline.parts.PipelineDataSynchronizer;
 import de.verdox.vcore.synchronization.pipeline.parts.Pipeline;
 import de.verdox.vcore.synchronization.pipeline.parts.cache.GlobalCache;
 import de.verdox.vcore.synchronization.pipeline.parts.local.LocalCache;
+import de.verdox.vcore.synchronization.pipeline.parts.manipulator.SynchronizingService;
 import de.verdox.vcore.synchronization.pipeline.parts.storage.GlobalStorage;
 import de.verdox.vcore.synchronization.pipeline.parts.storage.PipelineTaskScheduler;
 import de.verdox.vcore.util.global.AnnotationResolver;
@@ -36,18 +37,20 @@ import java.util.stream.Collectors;
  * @Author: Lukas Jonsson (Verdox)
  * @date 24.06.2021 15:22
  */
-public class PipelineManager implements Pipeline {
+public class PipelineImpl implements Pipeline {
 
     final GlobalStorage globalStorage;
     final GlobalCache globalCache;
     final LocalCache localCache;
     private final VCorePlugin<?, ?> plugin;
-    private final PipelineDataSynchronizer pipelineDataSynchronizer;
+    private final PipelineDataSynchronizerImpl pipelineDataSynchronizerImpl;
     private final PipelineTaskScheduler pipelineTaskScheduler;
     private final ExecutorService executorService;
     private final boolean loaded;
+    private SynchronizingService synchronizingService;
 
-    public PipelineManager(VCorePlugin<?, ?> plugin, @NotNull LocalCache localCache, @Nullable GlobalCache globalCache, @Nullable GlobalStorage globalStorage) {
+    public PipelineImpl(VCorePlugin<?, ?> plugin, @NotNull LocalCache localCache, @NotNull SynchronizingService synchronizingService, @Nullable GlobalCache globalCache, @Nullable GlobalStorage globalStorage) {
+        this.synchronizingService = synchronizingService;
         Objects.requireNonNull(plugin, "plugin can't be null!");
         Objects.requireNonNull(localCache, "localCache can't be null!");
         this.plugin = plugin;
@@ -60,7 +63,7 @@ public class PipelineManager implements Pipeline {
         plugin.consoleMessage("&eGlobalCache: &b" + globalCache, 1, false);
         plugin.consoleMessage("&eGlobalStorage: &b" + globalStorage, 1, false);
         this.pipelineTaskScheduler = new PipelineTaskSchedulerImpl(this);
-        this.pipelineDataSynchronizer = new PipelineDataSynchronizer(this);
+        this.pipelineDataSynchronizerImpl = new PipelineDataSynchronizerImpl(this);
         plugin.getServices().getVCoreScheduler().asyncInterval(() -> {
             plugin.getServices().getSubsystemManager().getRegisteredPlayerDataClasses().forEach(aClass -> {
                 VCoreDataProperties vCoreDataProperties = AnnotationResolver.getDataProperties(aClass);
@@ -230,6 +233,8 @@ public class PipelineManager implements Pipeline {
         return completableFuture;
     }
 
+    //TODO: Irgendas mit Delete stimmt nicht -> Saveall speichert trotzdem die Daten
+
     @Override
     public <T extends VCoreData> boolean delete(@NotNull Class<? extends T> type, @NotNull UUID uuid, boolean notifyOthers, @NotNull QueryStrategy... strategies) {
         Objects.requireNonNull(type, "Dataclass can't be null");
@@ -285,18 +290,23 @@ public class PipelineManager implements Pipeline {
         if (getGlobalStorage() != null)
             getGlobalStorage().getSavedUUIDs(type).forEach(uuid -> {
                 if (!localCache.dataExist(type, uuid))
-                    pipelineDataSynchronizer.doSynchronisation(DataSynchronizer.DataSourceType.GLOBAL_STORAGE, DataSynchronizer.DataSourceType.LOCAL, type, uuid, null);
+                    pipelineDataSynchronizerImpl.doSynchronisation(PipelineDataSynchronizer.DataSourceType.GLOBAL_STORAGE, PipelineDataSynchronizer.DataSourceType.LOCAL, type, uuid, null);
             });
         if (getGlobalCache() != null)
             getGlobalCache().getSavedUUIDs(type).forEach(uuid -> {
                 if (!localCache.dataExist(type, uuid))
-                    pipelineDataSynchronizer.doSynchronisation(DataSynchronizer.DataSourceType.GLOBAL_CACHE, DataSynchronizer.DataSourceType.LOCAL, type, uuid, null);
+                    pipelineDataSynchronizerImpl.doSynchronisation(PipelineDataSynchronizer.DataSourceType.GLOBAL_CACHE, PipelineDataSynchronizer.DataSourceType.LOCAL, type, uuid, null);
             });
     }
 
     @Override
     public LocalCache getLocalCache() {
         return localCache;
+    }
+
+    @Override
+    public SynchronizingService getSynchronizingService() {
+        return synchronizingService;
     }
 
     @Override
@@ -323,17 +333,17 @@ public class PipelineManager implements Pipeline {
         Objects.requireNonNull(type);
         Objects.requireNonNull(uuid);
         VCoreData vCoreData = getLocalCache().getData(type, uuid);
-        plugin.consoleMessage("&eSaving &b" + uuid + " &8[&e" + type + "&8]", false);
         if (vCoreData == null)
             return;
         if (vCoreData.isMarkedForRemoval())
             return;
+        plugin.consoleMessage("&eSaving &b" + uuid + " &8[&e" + type + "&8]", false);
         plugin.consoleMessage("&7Cleaning Up &b" + uuid + " &8[&e" + type + "&8]", 1, false);
         vCoreData.cleanUp();
         plugin.consoleMessage("&7Syncing &b" + uuid + " &8[&e" + type + "&8] &7 -> &bGlobal Cache", 1, false);
-        pipelineDataSynchronizer.doSynchronisation(DataSynchronizer.DataSourceType.LOCAL, DataSynchronizer.DataSourceType.GLOBAL_CACHE, type, uuid, null);
+        pipelineDataSynchronizerImpl.doSynchronisation(PipelineDataSynchronizer.DataSourceType.LOCAL, PipelineDataSynchronizer.DataSourceType.GLOBAL_CACHE, type, uuid, null);
         plugin.consoleMessage("&7Syncing &b" + uuid + " &8[&e" + type + "&8] &7 -> &bGlobal Storage", 1, false);
-        pipelineDataSynchronizer.doSynchronisation(DataSynchronizer.DataSourceType.LOCAL, DataSynchronizer.DataSourceType.GLOBAL_STORAGE, type, uuid, null);
+        pipelineDataSynchronizerImpl.doSynchronisation(PipelineDataSynchronizer.DataSourceType.LOCAL, PipelineDataSynchronizer.DataSourceType.GLOBAL_STORAGE, type, uuid, null);
         plugin.consoleMessage("&aSaved &b" + uuid + " &8[&e" + type + "&8]", false);
         getLocalCache().remove(type, uuid);
     }
@@ -345,8 +355,8 @@ public class PipelineManager implements Pipeline {
     }
 
     @Override
-    public DataSynchronizer getSynchronizer() {
-        return pipelineDataSynchronizer;
+    public PipelineDataSynchronizer getPipelineDataSynchronizer() {
+        return pipelineDataSynchronizerImpl;
     }
 
     private <T extends VCoreData> T loadFromPipeline(@NotNull Class<? extends T> dataClass, @NotNull UUID uuid, boolean createIfNotExist) {
@@ -359,18 +369,18 @@ public class PipelineManager implements Pipeline {
         // ExistCheck GlobalCache
         else if (globalCache != null && globalCache.dataExist(dataClass, uuid)) {
             plugin.consoleMessage("&eFound Data in Redis Cache &8[&b" + dataClass.getSimpleName() + "&8]", 1, true);
-            pipelineDataSynchronizer.doSynchronisation(DataSynchronizer.DataSourceType.GLOBAL_CACHE, DataSynchronizer.DataSourceType.LOCAL, dataClass, uuid, null);
+            pipelineDataSynchronizerImpl.doSynchronisation(PipelineDataSynchronizer.DataSourceType.GLOBAL_CACHE, PipelineDataSynchronizer.DataSourceType.LOCAL, dataClass, uuid, null);
             //getRedisHandler().redisToLocal(dataClass, uuid);
         }
         // ExistCheck GlobalStorage
         else if (globalStorage != null && globalStorage.dataExist(dataClass, uuid)) {
             plugin.consoleMessage("&eFound Data in Database &8[&b" + dataClass.getSimpleName() + "&8]", 1, true);
             //getDatabaseHandler().databaseToLocal(dataClass,uuid);
-            pipelineDataSynchronizer.doSynchronisation(DataSynchronizer.DataSourceType.GLOBAL_STORAGE, DataSynchronizer.DataSourceType.LOCAL, dataClass, uuid, null);
+            pipelineDataSynchronizerImpl.doSynchronisation(PipelineDataSynchronizer.DataSourceType.GLOBAL_STORAGE, PipelineDataSynchronizer.DataSourceType.LOCAL, dataClass, uuid, null);
 
             if (AnnotationResolver.getDataProperties(dataClass).dataContext().equals(DataContext.GLOBAL))
                 //globalStorage.dataBaseToRedis(dataClass, uuid);
-                pipelineDataSynchronizer.doSynchronisation(DataSynchronizer.DataSourceType.GLOBAL_STORAGE, DataSynchronizer.DataSourceType.GLOBAL_CACHE, dataClass, uuid, null);
+                pipelineDataSynchronizerImpl.doSynchronisation(PipelineDataSynchronizer.DataSourceType.GLOBAL_STORAGE, PipelineDataSynchronizer.DataSourceType.GLOBAL_CACHE, dataClass, uuid, null);
         } else {
             if (!createIfNotExist)
                 return null;
@@ -398,10 +408,10 @@ public class PipelineManager implements Pipeline {
         vCoreData.onCreate();
         localCache.save(dataClass, vCoreData);
 
-        pipelineDataSynchronizer.synchronize(DataSynchronizer.DataSourceType.LOCAL, DataSynchronizer.DataSourceType.GLOBAL_CACHE, dataClass, uuid);
+        pipelineDataSynchronizerImpl.synchronize(PipelineDataSynchronizer.DataSourceType.LOCAL, PipelineDataSynchronizer.DataSourceType.GLOBAL_CACHE, dataClass, uuid);
 
         if (!NetworkData.class.isAssignableFrom(dataClass))
-            pipelineDataSynchronizer.synchronize(DataSynchronizer.DataSourceType.LOCAL, DataSynchronizer.DataSourceType.GLOBAL_STORAGE, dataClass, uuid);
+            pipelineDataSynchronizerImpl.synchronize(PipelineDataSynchronizer.DataSourceType.LOCAL, PipelineDataSynchronizer.DataSourceType.GLOBAL_STORAGE, dataClass, uuid);
         return vCoreData;
     }
 
@@ -414,9 +424,9 @@ public class PipelineManager implements Pipeline {
             return;
         plugin.consoleMessage("&ePreloading &b" + type.getSimpleName(), true);
         if (globalCache != null)
-            globalCache.getSavedUUIDs(type).forEach(uuid -> pipelineDataSynchronizer.doSynchronisation(DataSynchronizer.DataSourceType.GLOBAL_CACHE, DataSynchronizer.DataSourceType.LOCAL, type, uuid, null));
+            globalCache.getSavedUUIDs(type).forEach(uuid -> pipelineDataSynchronizerImpl.doSynchronisation(PipelineDataSynchronizer.DataSourceType.GLOBAL_CACHE, PipelineDataSynchronizer.DataSourceType.LOCAL, type, uuid, null));
         if (globalStorage != null)
-            globalStorage.getSavedUUIDs(type).forEach(uuid -> pipelineDataSynchronizer.doSynchronisation(DataSynchronizer.DataSourceType.GLOBAL_STORAGE, DataSynchronizer.DataSourceType.LOCAL, type, uuid, null));
+            globalStorage.getSavedUUIDs(type).forEach(uuid -> pipelineDataSynchronizerImpl.doSynchronisation(PipelineDataSynchronizer.DataSourceType.GLOBAL_STORAGE, PipelineDataSynchronizer.DataSourceType.LOCAL, type, uuid, null));
     }
 
 
@@ -427,7 +437,7 @@ public class PipelineManager implements Pipeline {
 
     @Override
     public void shutdown() {
-        pipelineDataSynchronizer.shutdown();
+        pipelineDataSynchronizerImpl.shutdown();
         executorService.shutdown();
         pipelineTaskScheduler.shutdown();
         try {

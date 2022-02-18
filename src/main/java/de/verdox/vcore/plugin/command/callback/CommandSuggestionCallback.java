@@ -13,5 +13,11 @@ import java.util.List;
  */
 
 public interface CommandSuggestionCallback<R> {
+    /**
+     *
+     * @param commandSender Platform dependent CommandSender
+     * @param args Command Suggestions
+     * @return Returns List of Suggestions
+     */
     List<String> getSuggestions(R commandSender, String[] args);
 }

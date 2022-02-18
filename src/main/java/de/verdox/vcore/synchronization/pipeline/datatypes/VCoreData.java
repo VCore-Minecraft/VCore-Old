@@ -4,11 +4,12 @@
 
 package de.verdox.vcore.synchronization.pipeline.datatypes;
 
+import com.google.gson.*;
 import de.verdox.vcore.plugin.VCorePlugin;
 import de.verdox.vcore.synchronization.pipeline.annotations.VCoreDataProperties;
-import de.verdox.vcore.synchronization.pipeline.interfaces.DataManipulator;
+import de.verdox.vcore.synchronization.pipeline.parts.PipelineDataSynchronizer;
+import de.verdox.vcore.synchronization.pipeline.parts.manipulator.DataSynchronizer;
 import de.verdox.vcore.synchronization.pipeline.interfaces.VCoreSerializable;
-import de.verdox.vcore.synchronization.pipeline.parts.DataSynchronizer;
 import de.verdox.vcore.util.global.AnnotationResolver;
 import org.jetbrains.annotations.NotNull;
 
@@ -27,21 +28,36 @@ public abstract class VCoreData implements VCoreSerializable {
 
     private final VCorePlugin<?, ?> plugin;
     private final UUID objectUUID;
-    private final DataManipulator dataManipulator;
+    private final DataSynchronizer dataSynchronizer;
     private final long cleanTime;
     private final TimeUnit cleanTimeUnit;
     private long lastUse = System.currentTimeMillis();
     private boolean markedForRemoval = false;
+    private final Gson gson;
 
     public VCoreData(@NotNull VCorePlugin<?, ?> plugin, @NotNull UUID objectUUID) {
         Objects.requireNonNull(plugin, "plugin can't be null!");
         Objects.requireNonNull(objectUUID, "objectUUID can't be null!");
         this.plugin = plugin;
         this.objectUUID = objectUUID;
+
+        this.gson = new GsonBuilder().setPrettyPrinting().serializeNulls().setExclusionStrategies(new ExclusionStrategy() {
+            @Override
+            public boolean shouldSkipField(FieldAttributes fieldAttributes) {
+                return false;
+            }
+
+            @Override
+            public boolean shouldSkipClass(Class<?> aClass) {
+                return false;
+            }
+        }).registerTypeAdapter(getClass(), (InstanceCreator<VCoreData>) type -> this)
+                .create();
+
         if (this.plugin.getServices().getPipeline().getGlobalCache() != null)
-            this.dataManipulator = this.plugin.getServices().getPipeline().getGlobalCache().constructDataManipulator(this);
+            this.dataSynchronizer = this.plugin.getServices().getPipeline().getSynchronizingService().getDataSynchronizer(this);
         else
-            this.dataManipulator = new DataManipulator() {
+            this.dataSynchronizer = new DataSynchronizer() {
                 @Override
                 public void cleanUp() {
 
@@ -81,20 +97,20 @@ public abstract class VCoreData implements VCoreSerializable {
 
     public void save(boolean saveToGlobalStorage) {
         updateLastUse();
-        if (this.dataManipulator == null)
+        if (this.dataSynchronizer == null)
             return;
-        this.dataManipulator.pushUpdate(this, () -> {
+        this.dataSynchronizer.pushUpdate(this, () -> {
             if (!saveToGlobalStorage)
                 return;
-            plugin.getServices().getPipeline().getSynchronizer().synchronize(DataSynchronizer.DataSourceType.LOCAL, DataSynchronizer.DataSourceType.GLOBAL_STORAGE, getClass(), getObjectUUID());
+            plugin.getServices().getPipeline().getPipelineDataSynchronizer().synchronize(PipelineDataSynchronizer.DataSourceType.LOCAL, PipelineDataSynchronizer.DataSourceType.GLOBAL_STORAGE, getClass(), getObjectUUID());
         });
     }
 
 
     public void cleanUp() {
-        this.dataManipulator.cleanUp();
+        this.dataSynchronizer.cleanUp();
         onCleanUp();
-        plugin.async(dataManipulator::cleanUp);
+        plugin.async(dataSynchronizer::cleanUp);
     }
 
     public VCorePlugin<?, ?> getPlugin() {
@@ -155,12 +171,6 @@ public abstract class VCoreData implements VCoreSerializable {
         return markedForRemoval;
     }
 
-    public void debugToConsole() {
-        serialize().forEach((s, o) -> {
-            getPlugin().consoleMessage("&e" + s + "&7: &b" + o.toString(), 2, true);
-        });
-    }
-
     public final boolean isExpired() {
         return (System.currentTimeMillis() - lastUse) > cleanTimeUnit.toMillis(cleanTime);
     }
@@ -186,7 +196,7 @@ public abstract class VCoreData implements VCoreSerializable {
         return VCoreSerializable.super.deserialize(serializedData);
     }
 
-    public DataManipulator getDataManipulator() {
-        return dataManipulator;
+    public DataSynchronizer getDataManipulator() {
+        return dataSynchronizer;
     }
 }
