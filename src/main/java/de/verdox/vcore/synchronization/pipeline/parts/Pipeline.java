@@ -104,10 +104,13 @@ public interface Pipeline extends SystemLoadable {
 
     LocalCache getLocalCache();
 
+    @org.jetbrains.annotations.Nullable
     SynchronizingService getSynchronizingService();
 
+    @org.jetbrains.annotations.Nullable
     GlobalCache getGlobalCache();
 
+    @org.jetbrains.annotations.Nullable
     GlobalStorage getGlobalStorage();
 
     void saveAllData();

@@ -4,18 +4,19 @@
 
 package de.verdox.vcore.synchronization.pipeline.parts.storage.mongodb;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoCredential;
 import com.mongodb.ServerAddress;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import de.verdox.vcore.plugin.VCorePlugin;
-import de.verdox.vcore.plugin.subsystem.VCoreSubsystem;
-import de.verdox.vcore.synchronization.pipeline.datatypes.NetworkData;
 import de.verdox.vcore.synchronization.pipeline.datatypes.VCoreData;
 import de.verdox.vcore.synchronization.pipeline.parts.storage.GlobalStorage;
 import de.verdox.vcore.synchronization.pipeline.parts.storage.RemoteStorage;
-import de.verdox.vcore.util.global.AnnotationResolver;
 import org.bson.Document;
 import org.jetbrains.annotations.NotNull;
 
@@ -37,6 +38,7 @@ public class MongoDBStorage implements GlobalStorage, RemoteStorage {
     private final int port;
     private final String user;
     private final String password;
+    private final Gson gson = new GsonBuilder().serializeNulls().create();
     //private final CodecRegistry codecRegistry;
 
     public MongoDBStorage(VCorePlugin<?, ?> vCorePlugin, String host, String database, int port, String user, String password) {
@@ -63,7 +65,7 @@ public class MongoDBStorage implements GlobalStorage, RemoteStorage {
 
 
     @Override
-    public Map<String, Object> loadData(@NotNull Class<? extends VCoreData> dataClass, @NotNull UUID objectUUID) {
+    public JsonElement loadData(@NotNull Class<? extends VCoreData> dataClass, @NotNull UUID objectUUID) {
         Objects.requireNonNull(dataClass, "dataClass can't be null!");
         Objects.requireNonNull(objectUUID, "objectUUID can't be null!");
         Document filter = new Document("objectUUID", objectUUID.toString());
@@ -72,22 +74,10 @@ public class MongoDBStorage implements GlobalStorage, RemoteStorage {
 
         if (mongoDBData == null)
             mongoDBData = filter;
-        return convertDocumentToHashMap(mongoDBData);
-    }
 
-    private Map<String, Object> convertDocumentToHashMap(@NotNull Object object) {
-        Objects.requireNonNull(object, "object can't be null!");
-        if (!(object instanceof Document document))
-            return null;
-        LinkedHashMap<String, Object> map = new LinkedHashMap<>(document);
-        map.remove("_id");
-        document.forEach((s, o) -> {
-            Map<String, Object> possibleFoundDocument = convertDocumentToHashMap(o);
-            if (possibleFoundDocument == null)
-                return;
-            map.put(s, possibleFoundDocument);
-        });
-        return map;
+        mongoDBData.remove("_id");
+        System.out.println(JsonParser.parseString(gson.toJson(mongoDBData)));
+        return JsonParser.parseString(gson.toJson(mongoDBData));
     }
 
     @Override
@@ -99,7 +89,7 @@ public class MongoDBStorage implements GlobalStorage, RemoteStorage {
     }
 
     @Override
-    public void save(@NotNull Class<? extends VCoreData> dataClass, @NotNull UUID objectUUID, @NotNull Map<String, Object> dataToSave) {
+    public void save(@NotNull Class<? extends VCoreData> dataClass, @NotNull UUID objectUUID, @NotNull JsonElement dataToSave) {
         Objects.requireNonNull(dataClass, "dataClass can't be null!");
         Objects.requireNonNull(objectUUID, "objectUUID can't be null!");
         Objects.requireNonNull(dataToSave, "dataToSave can't be null!");
@@ -109,10 +99,10 @@ public class MongoDBStorage implements GlobalStorage, RemoteStorage {
 
         if (collection.find(filter).first() == null) {
             Document newData = new Document("objectUUID", objectUUID.toString());
-            newData.putAll(dataToSave);
+            newData.putAll(Document.parse(gson.toJson(dataToSave)));
             collection.insertOne(newData);
         } else {
-            Document newData = new Document(dataToSave);
+            Document newData = Document.parse(gson.toJson(dataToSave));
             Document updateFunc = new Document("$set", newData);
             collection.updateOne(filter, updateFunc);
         }
@@ -144,12 +134,8 @@ public class MongoDBStorage implements GlobalStorage, RemoteStorage {
     private MongoCollection<Document> getMongoStorage(@NotNull Class<? extends VCoreData> dataClass, @NotNull String suffix) {
         Objects.requireNonNull(dataClass, "dataClass can't be null!");
         Objects.requireNonNull(suffix, "suffix can't be null!");
-        if (NetworkData.class.isAssignableFrom(dataClass)) {
-            return getCollection("VCore_NetworkData_" + dataClass.getCanonicalName() + "_" + suffix);
-        } else {
-            Class<? extends VCoreSubsystem<?>> subsystemClass = AnnotationResolver.findDependSubsystemClass(dataClass);
-            return getCollection(AnnotationResolver.getDataStorageIdentifier(subsystemClass) + "_" + suffix);
-        }
+        String storagePath = getStoragePath(dataClass, suffix, "_");
+        return getCollection(storagePath);
     }
 
     private com.mongodb.client.MongoCollection<Document> getCollection(@NotNull String name) {
@@ -177,10 +163,5 @@ public class MongoDBStorage implements GlobalStorage, RemoteStorage {
     @Override
     public void disconnect() {
         this.mongoClient.close();
-    }
-
-    private String getSuffix(@NotNull Class<? extends VCoreData> dataClass) {
-        Objects.requireNonNull(dataClass, "dataClass can't be null!");
-        return AnnotationResolver.getDataStorageIdentifier(dataClass);
     }
 }

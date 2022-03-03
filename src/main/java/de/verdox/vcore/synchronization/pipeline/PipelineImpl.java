@@ -49,7 +49,7 @@ public class PipelineImpl implements Pipeline {
     private final boolean loaded;
     private SynchronizingService synchronizingService;
 
-    public PipelineImpl(VCorePlugin<?, ?> plugin, @NotNull LocalCache localCache, @NotNull SynchronizingService synchronizingService, @Nullable GlobalCache globalCache, @Nullable GlobalStorage globalStorage) {
+    public PipelineImpl(VCorePlugin<?, ?> plugin, @NotNull LocalCache localCache, @org.jetbrains.annotations.Nullable SynchronizingService synchronizingService, @Nullable GlobalCache globalCache, @Nullable GlobalStorage globalStorage) {
         this.synchronizingService = synchronizingService;
         Objects.requireNonNull(plugin, "plugin can't be null!");
         Objects.requireNonNull(localCache, "localCache can't be null!");

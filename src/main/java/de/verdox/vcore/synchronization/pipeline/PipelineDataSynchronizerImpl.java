@@ -4,13 +4,14 @@
 
 package de.verdox.vcore.synchronization.pipeline;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import de.verdox.vcore.performance.concurrent.CatchingRunnable;
 import de.verdox.vcore.synchronization.pipeline.datatypes.VCoreData;
 import de.verdox.vcore.synchronization.pipeline.parts.PipelineDataSynchronizer;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
-import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -63,8 +64,7 @@ public record PipelineDataSynchronizerImpl(
             VCoreData data = pipelineImpl.localCache.getData(dataClass, objectUUID);
             if (data == null)
                 return false;
-            Map<String, Object> dataToSave = data.serialize();
-            dataToSave.remove("_id");
+            JsonElement dataToSave = data.serialize();
             // Local to Global Cache
             if (destination.equals(DataSourceType.GLOBAL_CACHE))
                 pipelineImpl.globalCache.save(dataClass, objectUUID, dataToSave);
@@ -74,14 +74,13 @@ public record PipelineDataSynchronizerImpl(
         } else if (source.equals(DataSourceType.GLOBAL_CACHE)) {
             if (!pipelineImpl.globalCache.dataExist(dataClass, objectUUID))
                 return false;
-            Map<String, Object> globalCachedData = pipelineImpl.globalCache.loadData(dataClass, objectUUID);
+            JsonObject globalCachedData = pipelineImpl.globalCache.loadData(dataClass, objectUUID).getAsJsonObject();
             // Error while loading from redis
             if (globalCachedData == null) {
                 pipelineImpl.getPlugin().consoleMessage("&eTrying to load from storage...", false);
                 doSynchronisation(DataSourceType.GLOBAL_STORAGE, DataSourceType.LOCAL, dataClass, objectUUID, callback);
                 return false;
             }
-            globalCachedData.remove("_id");
 
             if (destination.equals(DataSourceType.LOCAL)) {
                 if (!pipelineImpl.localCache.dataExist(dataClass, objectUUID))
@@ -98,8 +97,7 @@ public record PipelineDataSynchronizerImpl(
         } else if (source.equals(DataSourceType.GLOBAL_STORAGE)) {
             if (!pipelineImpl.globalStorage.dataExist(dataClass, objectUUID))
                 return false;
-            Map<String, Object> globalSavedData = pipelineImpl.globalStorage.loadData(dataClass, objectUUID);
-            globalSavedData.remove("_id");
+            JsonObject globalSavedData = pipelineImpl.globalStorage.loadData(dataClass, objectUUID).getAsJsonObject();
 
             if (destination.equals(DataSourceType.LOCAL)) {
                 if (!pipelineImpl.localCache.dataExist(dataClass, objectUUID))

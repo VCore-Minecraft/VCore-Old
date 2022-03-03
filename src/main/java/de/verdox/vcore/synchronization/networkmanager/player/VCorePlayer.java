@@ -21,11 +21,8 @@ import java.util.UUID;
 @VCoreDataProperties(preloadStrategy = PreloadStrategy.LOAD_ON_NEED, dataContext = DataContext.GLOBAL, cleanOnNoUse = false)
 public class VCorePlayer extends NetworkData {
 
-    @VCorePersistentData
     public String displayName;
-    @VCorePersistentData
     public String currentGameServer;
-    @VCorePersistentData
     public String currentProxyServer;
 
     public VCorePlayer(VCorePlugin<?, ?> plugin, UUID objectUUID) {

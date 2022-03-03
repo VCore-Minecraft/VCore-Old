@@ -4,17 +4,17 @@
 
 package de.verdox.vcore.synchronization.pipeline.datatypes;
 
-import com.google.gson.*;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.InstanceCreator;
+import com.google.gson.JsonElement;
 import de.verdox.vcore.plugin.VCorePlugin;
 import de.verdox.vcore.synchronization.pipeline.annotations.VCoreDataProperties;
 import de.verdox.vcore.synchronization.pipeline.parts.PipelineDataSynchronizer;
 import de.verdox.vcore.synchronization.pipeline.parts.manipulator.DataSynchronizer;
-import de.verdox.vcore.synchronization.pipeline.interfaces.VCoreSerializable;
 import de.verdox.vcore.util.global.AnnotationResolver;
 import org.jetbrains.annotations.NotNull;
 
-import javax.annotation.Nonnull;
-import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -24,16 +24,16 @@ import java.util.concurrent.TimeUnit;
  * @Author: Lukas Jonsson (Verdox)
  * @date 25.06.2021 01:09
  */
-public abstract class VCoreData implements VCoreSerializable {
-
-    private final VCorePlugin<?, ?> plugin;
+public abstract class VCoreData implements PipelineData {
     private final UUID objectUUID;
-    private final DataSynchronizer dataSynchronizer;
-    private final long cleanTime;
-    private final TimeUnit cleanTimeUnit;
-    private long lastUse = System.currentTimeMillis();
-    private boolean markedForRemoval = false;
-    private final Gson gson;
+
+    private transient final VCorePlugin<?, ?> plugin;
+    private transient final DataSynchronizer dataSynchronizer;
+    private transient final long cleanTime;
+    private transient final TimeUnit cleanTimeUnit;
+    private transient long lastUse = System.currentTimeMillis();
+    private transient boolean markedForRemoval = false;
+    private transient final Gson gson;
 
     public VCoreData(@NotNull VCorePlugin<?, ?> plugin, @NotNull UUID objectUUID) {
         Objects.requireNonNull(plugin, "plugin can't be null!");
@@ -41,20 +41,21 @@ public abstract class VCoreData implements VCoreSerializable {
         this.plugin = plugin;
         this.objectUUID = objectUUID;
 
-        this.gson = new GsonBuilder().setPrettyPrinting().serializeNulls().setExclusionStrategies(new ExclusionStrategy() {
-            @Override
-            public boolean shouldSkipField(FieldAttributes fieldAttributes) {
-                return false;
-            }
+        this.gson = new GsonBuilder().setPrettyPrinting().serializeNulls()
+                //.setExclusionStrategies(new ExclusionStrategy() {
+                //    @Override
+                //    public boolean shouldSkipField(FieldAttributes fieldAttributes) {
+                //        return fieldAttributes.getAnnotation(VCorePersistentData.class) == null;
+                //    }
 
-            @Override
-            public boolean shouldSkipClass(Class<?> aClass) {
-                return false;
-            }
-        }).registerTypeAdapter(getClass(), (InstanceCreator<VCoreData>) type -> this)
+                //    @Override
+                //    public boolean shouldSkipClass(Class<?> aClass) {
+                //        return false;
+                //    }
+                .registerTypeAdapter(getClass(), (InstanceCreator<PipelineData>) type -> this)
                 .create();
 
-        if (this.plugin.getServices().getPipeline().getGlobalCache() != null)
+        if (this.plugin.getServices().getPipeline().getSynchronizingService() != null)
             this.dataSynchronizer = this.plugin.getServices().getPipeline().getSynchronizingService().getDataSynchronizer(this);
         else
             this.dataSynchronizer = new DataSynchronizer() {
@@ -65,12 +66,14 @@ public abstract class VCoreData implements VCoreSerializable {
 
                 @Override
                 public void pushUpdate(VCoreData vCoreData, Runnable callback) {
-
+                    if (callback != null)
+                        callback.run();
                 }
 
                 @Override
                 public void pushRemoval(VCoreData vCoreData, Runnable callback) {
-
+                    if (callback != null)
+                        callback.run();
                 }
             };
         VCoreDataProperties dataContext = AnnotationResolver.getDataProperties(getClass());
@@ -81,8 +84,7 @@ public abstract class VCoreData implements VCoreSerializable {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof VCoreData)) return false;
-        VCoreData vCoreData = (VCoreData) o;
+        if (!(o instanceof VCoreData vCoreData)) return false;
         return Objects.equals(getObjectUUID(), vCoreData.getObjectUUID());
     }
 
@@ -97,8 +99,10 @@ public abstract class VCoreData implements VCoreSerializable {
 
     public void save(boolean saveToGlobalStorage) {
         updateLastUse();
-        if (this.dataSynchronizer == null)
+        if (this.dataSynchronizer == null) {
+            plugin.getServices().getPipeline().getPipelineDataSynchronizer().synchronize(PipelineDataSynchronizer.DataSourceType.LOCAL, PipelineDataSynchronizer.DataSourceType.GLOBAL_STORAGE, getClass(), getObjectUUID());
             return;
+        }
         this.dataSynchronizer.pushUpdate(this, () -> {
             if (!saveToGlobalStorage)
                 return;
@@ -115,48 +119,6 @@ public abstract class VCoreData implements VCoreSerializable {
 
     public VCorePlugin<?, ?> getPlugin() {
         return plugin;
-    }
-
-    /**
-     * Executed after a DataManipulator synced the object
-     *
-     * @param dataBeforeSync The data the object had before syncing
-     */
-    public void onSync(Map<String, Object> dataBeforeSync) {
-    }
-
-    /**
-     * Executed after instantiation of the Object
-     * Executed before Object is put into LocalCache
-     */
-    public void onCreate() {
-    }
-
-    /**
-     * Executed before the object is deleted from local cache.
-     */
-    public void onDelete() {
-    }
-
-    /**
-     * Executed directly after Data was loaded from Pipeline. Not if it was found in LocalCache
-     */
-    public void onLoad() {
-
-    }
-
-    /**
-     * Executed before onLoad and before onCreate everytime the data is being loaded into local cache.
-     * You can use this function to load dependent data from pipeline that is directly associated with this data
-     */
-    public void loadDependentData() {
-
-    }
-
-    /**
-     * Executed before Data is cleared from LocalCache
-     */
-    public void onCleanUp() {
     }
 
     public void markForRemoval() {
@@ -183,17 +145,21 @@ public abstract class VCoreData implements VCoreSerializable {
         return lastUse;
     }
 
-    @Nonnull
     @Override
-    public Map<String, Object> serialize() {
+    public JsonElement serialize() {
         unMarkRemoval();
-        return VCoreSerializable.super.serialize();
+        return gson.toJsonTree(this);
+    }
+
+    public String serializeToString() {
+        return gson.toJson(serialize());
     }
 
     @Override
-    public Map<String, Object> deserialize(Map<String, Object> serializedData) {
+    public String deserialize(JsonElement jsonObject) {
         unMarkRemoval();
-        return VCoreSerializable.super.deserialize(serializedData);
+        gson.fromJson(jsonObject, getClass());
+        return gson.toJson(jsonObject);
     }
 
     public DataSynchronizer getDataManipulator() {

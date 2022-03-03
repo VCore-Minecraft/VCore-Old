@@ -4,19 +4,21 @@
 
 package de.verdox.vcore.synchronization.pipeline.parts.manipulator.redis;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonParser;
 import de.verdox.vcore.synchronization.pipeline.datatypes.VCoreData;
+import de.verdox.vcore.synchronization.pipeline.parts.Pipeline;
 import de.verdox.vcore.synchronization.pipeline.parts.PipelineDataSynchronizer;
-import de.verdox.vcore.synchronization.pipeline.parts.cache.redis.RedisCache;
 import de.verdox.vcore.synchronization.pipeline.parts.local.LocalCache;
 import de.verdox.vcore.synchronization.pipeline.parts.manipulator.DataSynchronizer;
-import de.verdox.vcore.synchronization.pipeline.parts.Pipeline;
+import de.verdox.vcore.synchronization.redisson.RedisConnection;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.redisson.api.RTopic;
 import org.redisson.api.listener.MessageListener;
 
 import java.io.Serializable;
-import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -27,25 +29,24 @@ import java.util.UUID;
  */
 public class RedisDataSynchronizer implements DataSynchronizer {
 
-    private final RedisCache redisCache;
     private final RTopic dataTopic;
     private final MessageListener<DataBlock> messageListener;
     private final UUID senderUUID = UUID.randomUUID();
+    private final Gson gson = new GsonBuilder().serializeNulls().create();
 
-    RedisDataSynchronizer(@NotNull LocalCache localCache, @NotNull RedisCache redisCache, @NotNull Class<? extends VCoreData> dataClass) {
-        Objects.requireNonNull(redisCache, "redisCache can't be null!");
+    RedisDataSynchronizer(@NotNull LocalCache localCache, @NotNull RedisConnection redisConnection, @NotNull Class<? extends VCoreData> dataClass) {
+        Objects.requireNonNull(redisConnection, "redisConnection can't be null!");
         Objects.requireNonNull(dataClass, "dataClass can't be null!");
-        this.redisCache = redisCache;
-        this.dataTopic = this.redisCache.getTopic(dataClass);
+        this.dataTopic = redisConnection.getTopic(dataClass);
         this.messageListener = (channel, dataBlock) -> {
             if (dataBlock.senderUUID.equals(senderUUID))
                 return;
-            VCoreData vCoreData = localCache.getData(dataClass,dataBlock.dataUUID);
-            if(vCoreData == null)
+            VCoreData vCoreData = localCache.getData(dataClass, dataBlock.dataUUID);
+            if (vCoreData == null)
                 return;
             if (dataBlock instanceof UpdateDataBlock updateDataBlock) {
                 vCoreData.getPlugin().consoleMessage("&eReceived Sync &b" + vCoreData.getObjectUUID() + " &8[&e" + vCoreData.getClass().getSimpleName() + "&8] &b" + System.currentTimeMillis(), true);
-                vCoreData.onSync(vCoreData.deserialize(updateDataBlock.dataToUpdate));
+                vCoreData.onSync(vCoreData.deserialize(JsonParser.parseString(updateDataBlock.dataToUpdate).getAsJsonObject()));
             } else if (dataBlock instanceof RemoveDataBlock) {
                 vCoreData.getPlugin().consoleMessage("&eReceived Removal Instruction &b" + vCoreData.getObjectUUID() + " &8[&e" + vCoreData.getClass().getSimpleName() + "&8] &b" + System.currentTimeMillis(), true);
                 vCoreData.markForRemoval();
@@ -69,7 +70,7 @@ public class RedisDataSynchronizer implements DataSynchronizer {
     public void pushRemoval(@NotNull VCoreData vCoreData, @Nullable Runnable callback) {
         Objects.requireNonNull(vCoreData, "vCoreData can't be null!");
         vCoreData.markForRemoval();
-        dataTopic.publish(new RemoveDataBlock(senderUUID,vCoreData.getObjectUUID()));
+        dataTopic.publish(new RemoveDataBlock(senderUUID, vCoreData.getObjectUUID()));
         vCoreData.getPlugin().consoleMessage("&ePushing Removal&7: &b" + System.currentTimeMillis(), true);
         if (callback != null)
             callback.run();
@@ -81,7 +82,7 @@ public class RedisDataSynchronizer implements DataSynchronizer {
             vCoreData.getPlugin().consoleMessage("&4Push rejected as it is marked for removal &b" + vCoreData.getObjectUUID() + " &8[&e" + vCoreData.getClass().getSimpleName() + "&8] &b" + System.currentTimeMillis(), true);
             return;
         }
-        dataTopic.publish(new UpdateDataBlock(senderUUID, vCoreData.getObjectUUID(), vCoreData.serialize()));
+        dataTopic.publish(new UpdateDataBlock(senderUUID, vCoreData.getObjectUUID(), vCoreData.serializeToString()));
         vCoreData.getPlugin().consoleMessage("&ePushing Sync &b" + vCoreData.getObjectUUID() + " &8[&e" + vCoreData.getClass().getSimpleName() + "&8] &b" + System.currentTimeMillis(), true);
         vCoreData.getPlugin().getServices().getPipeline().getPipelineDataSynchronizer().synchronize(PipelineDataSynchronizer.DataSourceType.LOCAL, PipelineDataSynchronizer.DataSourceType.GLOBAL_CACHE, vCoreData.getClass(), vCoreData.getObjectUUID());
         if (callback != null)
@@ -105,9 +106,9 @@ public class RedisDataSynchronizer implements DataSynchronizer {
     }
 
     public static class UpdateDataBlock extends DataBlock {
-        private final Map<String, Object> dataToUpdate;
+        private final String dataToUpdate;
 
-        UpdateDataBlock(@NotNull UUID senderUUID, @NotNull UUID dataUUID, Map<String, Object> dataToUpdate) {
+        UpdateDataBlock(@NotNull UUID senderUUID, @NotNull UUID dataUUID, String dataToUpdate) {
             super(senderUUID, dataUUID);
             this.dataToUpdate = dataToUpdate;
         }

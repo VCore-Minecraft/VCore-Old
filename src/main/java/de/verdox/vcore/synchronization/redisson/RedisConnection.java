@@ -5,9 +5,13 @@
 package de.verdox.vcore.synchronization.redisson;
 
 import de.verdox.vcore.plugin.VCorePlugin;
+import de.verdox.vcore.synchronization.pipeline.datatypes.VCoreData;
+import de.verdox.vcore.util.global.AnnotationResolver;
 import org.jetbrains.annotations.NotNull;
 import org.redisson.Redisson;
+import org.redisson.api.RTopic;
 import org.redisson.api.RedissonClient;
+import org.redisson.codec.SerializationCodec;
 import org.redisson.config.ClusterServersConfig;
 import org.redisson.config.Config;
 import org.redisson.config.SingleServerConfig;
@@ -19,7 +23,7 @@ import java.util.Objects;
  * @Author: Lukas Jonsson (Verdox)
  * @date 25.06.2021 22:05
  */
-public abstract class RedisConnection {
+public class RedisConnection {
     protected final VCorePlugin<?, ?> plugin;
     protected final RedissonClient redissonClient;
 
@@ -51,5 +55,11 @@ public abstract class RedisConnection {
         config.setNettyThreads(4);
         config.setThreads(4);
         this.redissonClient = Redisson.create(config);
+    }
+
+    public RTopic getTopic(@NotNull Class<? extends VCoreData> dataClass) {
+        Objects.requireNonNull(dataClass, "dataClass can't be null!");
+        String key = plugin.getPluginName() + "DataTopic:" + AnnotationResolver.getDataStorageIdentifier(dataClass);
+        return redissonClient.getTopic(key, new SerializationCodec());
     }
 }

@@ -5,7 +5,10 @@
 package de.verdox.vcore.synchronization.networkmanager.server;
 
 import de.verdox.vcore.plugin.VCorePlugin;
-import de.verdox.vcore.synchronization.pipeline.annotations.*;
+import de.verdox.vcore.synchronization.pipeline.annotations.DataContext;
+import de.verdox.vcore.synchronization.pipeline.annotations.DataStorageIdentifier;
+import de.verdox.vcore.synchronization.pipeline.annotations.PreloadStrategy;
+import de.verdox.vcore.synchronization.pipeline.annotations.VCoreDataProperties;
 import de.verdox.vcore.synchronization.pipeline.datatypes.NetworkData;
 import org.jetbrains.annotations.NotNull;
 
@@ -23,16 +26,11 @@ import java.util.concurrent.ConcurrentHashMap;
 @VCoreDataProperties(preloadStrategy = PreloadStrategy.LOAD_ON_NEED, dataContext = DataContext.GLOBAL, cleanOnNoUse = false)
 public class ServerInstance extends NetworkData {
 
-    @VCorePersistentData
     private String serverName;
-    @VCorePersistentData
     public String serverAddress;
-    @VCorePersistentData
     public int serverPort;
     //TODO: VersionTag als Info hinzufügen
-    @VCorePersistentData
     private String serverType;
-    @VCorePersistentData
     private final Map<String, String> infoTags = new ConcurrentHashMap<>();
 
     public ServerInstance(@NotNull VCorePlugin<?, ?> plugin, @NotNull UUID objectUUID) {
@@ -47,26 +45,6 @@ public class ServerInstance extends NetworkData {
 
     public void setServerType(@NotNull ServerType serverType) {
         this.serverType = serverType.name();
-    }
-
-    @Override
-    public void onSync(Map<String, Object> dataBeforeSync) {
-
-    }
-
-    @Override
-    public void onCreate() {
-
-    }
-
-    @Override
-    public void onLoad() {
-
-    }
-
-    @Override
-    public void onCleanUp() {
-
     }
 
     public String getServerName() {
