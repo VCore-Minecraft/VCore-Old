@@ -11,6 +11,26 @@ This project is currently under heavy development. When there is a first stable 
 I am also working on a wiki right now! 
 The api will get big changes so use it at your own risk!
 
+
+## Implementations
+- [VCorePaper](https://github.com/VCore-Minecraft/VCorePaper)
+- [VCoreWaterfall](https://github.com/VCore-Minecraft/VCoreWaterfall)
+
+## PaperModules
+- [AdvancementsModule]()
+- [GUIModule](https://github.com/VCore-Minecraft/VCoreGUI)
+- [NBTModule](https://github.com/VCore-Minecraft/VCoreNBT)
+- [NMSModule]()
+- [EventModule](https://github.com/VCore-Minecraft/VCorePaperEvent)
+- [WorkerNPCModule](https://github.com/VCore-Minecraft/VCoreWorkerNPC)
+- [VSkillTree]()
+
+## VCorePlugins
+- [VEconomy](https://github.com/VCore-Minecraft/VEconomy)
+- [VInventories](https://github.com/VCore-Minecraft/VInventories)
+- [VProcessing](https://github.com/VCore-Minecraft/VProcessing)
+- [VQuests](https://github.com/VCore-Minecraft/VQuests)
+
 ## Importing the API using Maven
 
 [Choose latest Tag on Jitpack](https://jitpack.io/#derverdox/VCore)
