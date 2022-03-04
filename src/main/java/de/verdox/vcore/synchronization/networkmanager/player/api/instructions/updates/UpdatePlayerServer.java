@@ -33,7 +33,7 @@ public class UpdatePlayerServer extends CleverUpdate {
 
         if (serverName.equals(plugin.getCoreInstance().getServerName()))
             return UpdateCompletion.FALSE;
-        bungeePlatform.sendToServer(targetUUID, serverName);
+        proxyPlatform.sendToServer(targetUUID, serverName);
         return UpdateCompletion.TRUE;
     }
 

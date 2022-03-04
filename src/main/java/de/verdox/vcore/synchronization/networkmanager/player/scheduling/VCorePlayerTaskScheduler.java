@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021. Lukas Jonsson
+ * Copyright (c) 2022. Lukas Jonsson
  */
 
 package de.verdox.vcore.synchronization.networkmanager.player.scheduling;
@@ -51,7 +51,7 @@ public final class VCorePlayerTaskScheduler implements SystemLoadable {
     public void schedulePlayerTask(@NotNull UUID playerUUID, @NotNull UUID taskUUID, @NotNull Runnable runnable, int maxWaitTime, @NotNull TimeUnit timeUnit) {
         Objects.requireNonNull(playerUUID, "playerUUID can't be null!");
         Objects.requireNonNull(taskUUID, "taskUUID can't be null!");
-        Objects.requireNonNull(runnable, "runnable can't be null!");
+        Objects.requireNonNull(runnable, "runnable can't be null! [PlayerTaskScheduler]");
         Objects.requireNonNull(timeUnit, "timeUnit can't be null!");
         plugin.consoleMessage("&eScheduling Task", false);
         executor.submit(new CatchingRunnable(() -> {

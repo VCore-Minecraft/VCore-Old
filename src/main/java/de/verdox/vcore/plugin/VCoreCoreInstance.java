@@ -4,12 +4,12 @@
 
 package de.verdox.vcore.plugin;
 
+import de.verdox.vcore.modules.VCoreModule;
+import de.verdox.vcore.modules.VCoreModuleLoader;
 import de.verdox.vcore.plugin.subsystem.VCoreSubsystem;
 import de.verdox.vcore.synchronization.networkmanager.NetworkManager;
 import de.verdox.vcore.synchronization.networkmanager.player.api.VCorePlayerAPI;
 import de.verdox.vcore.synchronization.networkmanager.server.api.VCoreServerAPI;
-import net.md_5.bungee.api.plugin.Plugin;
-import org.bukkit.plugin.java.JavaPlugin;
 
 /**
  * @version 1.0
@@ -25,11 +25,5 @@ public interface VCoreCoreInstance<T, R extends VCoreSubsystem<?>> extends VCore
 
     String getServerName();
 
-    abstract class Minecraft extends VCorePlugin.Minecraft implements VCoreCoreInstance<JavaPlugin, VCoreSubsystem.Bukkit> {
-
-    }
-
-    abstract class BungeeCord extends VCorePlugin.BungeeCord implements VCoreCoreInstance<Plugin, VCoreSubsystem.BungeeCord> {
-
-    }
+    VCoreModuleLoader<T, R, ? extends VCoreCoreInstance<T, R>, ? extends VCoreModule<T, R, ? extends VCoreCoreInstance<T, R>>> getModuleLoader();
 }

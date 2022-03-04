@@ -12,11 +12,8 @@ import de.verdox.vcore.synchronization.messaging.MessagingConfig;
 import de.verdox.vcore.synchronization.messaging.MessagingService;
 import de.verdox.vcore.synchronization.networkmanager.server.ServerInstance;
 import de.verdox.vcore.synchronization.pipeline.PipelineConfig;
-import de.verdox.vcore.synchronization.pipeline.PipelineManager;
 import de.verdox.vcore.synchronization.pipeline.parts.Pipeline;
 import de.verdox.vcore.synchronization.pipeline.player.PlayerDataManager;
-import net.md_5.bungee.api.ProxyServer;
-import net.md_5.bungee.api.connection.Connection;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
@@ -39,7 +36,7 @@ public abstract class PluginServiceParts<T extends VCorePlugin<?, S>, S extends 
 
     protected boolean loaded;
 
-    PluginServiceParts(@NotNull T plugin) {
+    public PluginServiceParts(@NotNull T plugin) {
         Objects.requireNonNull(plugin, "plugin can't be null!");
         this.plugin = plugin;
         debugConfig = new DebugConfig(plugin);
@@ -76,7 +73,7 @@ public abstract class PluginServiceParts<T extends VCorePlugin<?, S>, S extends 
 
     @Override
     public void shutdown() {
-        plugin.consoleMessage("&6Shutting down VCore Parts", false);
+        plugin.consoleMessage("&6Shutting down ServiceParts", false);
         pipeline.saveAllData();
         vCoreScheduler.waitUntilShutdown();
 
@@ -105,79 +102,4 @@ public abstract class PluginServiceParts<T extends VCorePlugin<?, S>, S extends 
     public abstract VCoreSubsystemManager<T, S> getSubsystemManager();
 
     public abstract PlayerDataManager getPlayerDataManager();
-
-    public static class Bukkit extends PluginServiceParts<VCorePlugin.Minecraft, VCoreSubsystem.Bukkit> {
-
-        private VCoreSubsystemManager<VCorePlugin.Minecraft, VCoreSubsystem.Bukkit> subsystemManager;
-        private PlayerDataManager playerDataManager;
-
-        Bukkit(VCorePlugin.Minecraft plugin) {
-            super(plugin);
-        }
-
-        @Override
-        public VCoreSubsystemManager<VCorePlugin.Minecraft, VCoreSubsystem.Bukkit> getSubsystemManager() {
-            return subsystemManager;
-        }
-
-        @Override
-        public void enableAfter() {
-            super.enableAfter();
-            subsystemManager = new VCoreSubsystemManager<>(plugin);
-            subsystemManager.enable();
-            playerDataManager = new PlayerDataManager.Bukkit((PipelineManager) pipeline);
-            this.pipeline.preloadAllData();
-            loaded = true;
-        }
-
-        @Override
-        public final void shutdown() {
-
-            super.shutdown();
-            subsystemManager.shutdown();
-        }
-
-        @Override
-        public PlayerDataManager getPlayerDataManager() {
-            return playerDataManager;
-        }
-    }
-
-    public static class BungeeCord extends PluginServiceParts<VCorePlugin.BungeeCord, VCoreSubsystem.BungeeCord> {
-
-        private VCoreSubsystemManager<VCorePlugin.BungeeCord, VCoreSubsystem.BungeeCord> subsystemManager;
-        private PlayerDataManager playerDataManager;
-
-        BungeeCord(VCorePlugin.BungeeCord plugin) {
-            super(plugin);
-        }
-
-        @Override
-        public void enableAfter() {
-            subsystemManager = new VCoreSubsystemManager<>(plugin);
-            subsystemManager.enable();
-            playerDataManager = new PlayerDataManager.BungeeCord((PipelineManager) pipeline);
-            this.pipeline.preloadAllData();
-            loaded = true;
-
-        }
-
-        @Override
-        public final void shutdown() {
-
-            ProxyServer.getInstance().getPlayers().forEach(Connection::disconnect);
-            super.shutdown();
-            subsystemManager.shutdown();
-        }
-
-        @Override
-        public VCoreSubsystemManager<VCorePlugin.BungeeCord, VCoreSubsystem.BungeeCord> getSubsystemManager() {
-            return subsystemManager;
-        }
-
-        @Override
-        public PlayerDataManager getPlayerDataManager() {
-            return playerDataManager;
-        }
-    }
 }

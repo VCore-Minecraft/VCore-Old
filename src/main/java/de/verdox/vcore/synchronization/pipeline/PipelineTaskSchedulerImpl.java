@@ -25,23 +25,24 @@ import java.util.concurrent.TimeoutException;
  */
 public class PipelineTaskSchedulerImpl implements PipelineTaskScheduler {
 
-    private final PipelineManager pipelineManager;
+    private final PipelineImpl pipelineImpl;
     private final Map<UUID, Map<Class<? extends VCoreData>, PipelineTask<?>>> pendingTasks = new ConcurrentHashMap<>();
 
-    public PipelineTaskSchedulerImpl(PipelineManager pipelineManager) {
-        this.pipelineManager = pipelineManager;
+    public PipelineTaskSchedulerImpl(@NotNull PipelineImpl pipelineImpl) {
+        Objects.requireNonNull(pipelineImpl, "pipelineManager can't be null!");
+        this.pipelineImpl = pipelineImpl;
     }
 
     @Override
     public synchronized <T extends VCoreData> PipelineTask<T> schedulePipelineTask(@NotNull PipelineAction pipelineAction, @NotNull Pipeline.LoadingStrategy loadingStrategy, @NotNull Class<? extends T> type, @NotNull(exception = IllegalArgumentException.class) UUID uuid) {
-        Objects.requireNonNull(type);
-        Objects.requireNonNull(uuid);
+        Objects.requireNonNull(type, "type can't be null!");
+        Objects.requireNonNull(uuid, "uuid can't be null!");
         PipelineTask<T> existingTask = getExistingPipelineTask(type, uuid);
         if (existingTask != null) {
             //pipelineManager.getPlugin().consoleMessage("&8[&e" + loadingStrategy + "&8] &eFound existing Pipeline Task: " + existingTask, true);
             return existingTask;
         }
-        PipelineTask<T> pipelineTask = new PipelineTask<>(pipelineManager.getPlugin(), this, pipelineAction, type, uuid, () -> removePipelineTask(type, uuid));
+        PipelineTask<T> pipelineTask = new PipelineTask<>(pipelineImpl.getPlugin(), this, pipelineAction, type, uuid, () -> removePipelineTask(type, uuid));
         //pipelineManager.getPlugin().consoleMessage("&8[&e" + loadingStrategy + "&8] &eScheduling Pipeline Task: " + pipelineTask, true);
 
         if (!pendingTasks.containsKey(uuid))
@@ -52,8 +53,8 @@ public class PipelineTaskSchedulerImpl implements PipelineTaskScheduler {
 
     @Override
     public synchronized <T extends VCoreData> PipelineTask<T> getExistingPipelineTask(@NotNull Class<? extends T> type, @NotNull UUID uuid) {
-        Objects.requireNonNull(type);
-        Objects.requireNonNull(uuid);
+        Objects.requireNonNull(type, "type can't be null!");
+        Objects.requireNonNull(uuid, "uuid can't be null!");
         if (!pendingTasks.containsKey(uuid))
             return null;
         Map<Class<? extends VCoreData>, PipelineTask<?>> map = pendingTasks.get(uuid);
@@ -65,8 +66,8 @@ public class PipelineTaskSchedulerImpl implements PipelineTaskScheduler {
 
     @Override
     public synchronized <T extends VCoreData> void removePipelineTask(@NotNull Class<? extends T> type, @NotNull UUID uuid) {
-        Objects.requireNonNull(type);
-        Objects.requireNonNull(uuid);
+        Objects.requireNonNull(type, "type can't be null!");
+        Objects.requireNonNull(uuid, "uuid can't be null!");
         if (!pendingTasks.containsKey(uuid))
             return;
         pendingTasks.get(uuid).remove(type);
@@ -81,17 +82,17 @@ public class PipelineTaskSchedulerImpl implements PipelineTaskScheduler {
 
     @Override
     public void shutdown() {
-        pipelineManager.getPlugin().consoleMessage("&eShutting down Pipeline Task Scheduler", false);
+        pipelineImpl.getPlugin().consoleMessage("&eShutting down Pipeline Task Scheduler", false);
         pendingTasks.forEach((uuid, pipelineTasks) -> {
             pipelineTasks.forEach((aClass, pipelineTask) -> {
                 try {
                     pipelineTask.getCompletableFuture().get(1, TimeUnit.SECONDS);
                 } catch (InterruptedException | ExecutionException | TimeoutException e) {
-                    pipelineManager.getPlugin().consoleMessage("&cPipeline Task took too long for type: &b" + Arrays.toString(pipelineTask.getCompletableFuture().getClass().getGenericInterfaces()), false);
+                    pipelineImpl.getPlugin().consoleMessage("&cPipeline Task took too long for type: &b" + Arrays.toString(pipelineTask.getCompletableFuture().getClass().getGenericInterfaces()), false);
                     e.printStackTrace();
                 }
             });
         });
-        pipelineManager.getPlugin().consoleMessage("&aPipeline Task Scheduler shut down successfully", false);
+        pipelineImpl.getPlugin().consoleMessage("&aPipeline Task Scheduler shut down successfully", false);
     }
 }

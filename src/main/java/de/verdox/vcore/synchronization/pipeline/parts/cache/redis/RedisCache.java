@@ -4,21 +4,24 @@
 
 package de.verdox.vcore.synchronization.pipeline.parts.cache.redis;
 
+import com.google.gson.*;
 import de.verdox.vcore.plugin.VCorePlugin;
+import de.verdox.vcore.synchronization.pipeline.annotations.VCoreDataProperties;
 import de.verdox.vcore.synchronization.pipeline.datatypes.NetworkData;
 import de.verdox.vcore.synchronization.pipeline.datatypes.VCoreData;
-import de.verdox.vcore.synchronization.pipeline.interfaces.DataManipulator;
-import de.verdox.vcore.synchronization.pipeline.interfaces.VCoreSerializable;
 import de.verdox.vcore.synchronization.pipeline.parts.cache.GlobalCache;
 import de.verdox.vcore.synchronization.redisson.RedisConnection;
 import de.verdox.vcore.util.global.AnnotationResolver;
 import org.jetbrains.annotations.NotNull;
-import org.redisson.api.RMap;
+import org.redisson.api.RBucket;
 import org.redisson.api.RTopic;
+import org.redisson.client.codec.StringCodec;
 import org.redisson.codec.SerializationCodec;
 
 import javax.annotation.Nonnull;
-import java.util.*;
+import java.util.Objects;
+import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -28,70 +31,64 @@ import java.util.stream.Collectors;
  * @date 24.06.2021 15:49
  */
 public class RedisCache extends RedisConnection implements GlobalCache {
+
+    private final Gson gson = new GsonBuilder().serializeNulls().create();
+
     public RedisCache(@NotNull VCorePlugin<?, ?> plugin, boolean clusterMode, @NotNull String[] addressArray, String redisPassword) {
         super(plugin, clusterMode, addressArray, redisPassword);
         plugin.consoleMessage("&eRedis Manager started", true);
     }
 
     @Override
-    public synchronized Map<String, Object> loadData(@Nonnull @NotNull Class<? extends VCoreData> dataClass, @Nonnull @NotNull UUID objectUUID) {
+    public JsonObject loadData(@Nonnull @NotNull Class<? extends VCoreData> dataClass, @Nonnull @NotNull UUID objectUUID) {
         Objects.requireNonNull(dataClass, "dataClass can't be null!");
         Objects.requireNonNull(objectUUID, "objectUUID can't be null!");
         try {
-            return new HashMap<>(getObjectCache(dataClass, objectUUID));
+            return JsonParser.parseString(getObjectCache(dataClass, objectUUID).get()).getAsJsonObject();
         } catch (Exception e) {
             plugin.consoleMessage("&cError while loading &b" + dataClass + " &cwith uuid &e" + objectUUID + " &7-> &4removing &7...", false);
+            e.printStackTrace();
             remove(dataClass, objectUUID);
             return null;
         }
     }
 
     @Override
-    public synchronized void save(@Nonnull @NotNull Class<? extends VCoreData> dataClass, @Nonnull @NotNull UUID objectUUID, @Nonnull @NotNull Map<String, Object> dataToSave) {
+    public void save(@Nonnull @NotNull Class<? extends VCoreData> dataClass, @Nonnull @NotNull UUID objectUUID, @Nonnull @NotNull JsonElement dataToSave) {
         Objects.requireNonNull(dataClass, "dataClass can't be null!");
         Objects.requireNonNull(objectUUID, "objectUUID can't be null!");
-        Map<String, Object> objectCache = getObjectCache(dataClass, objectUUID);
-        dataToSave.forEach((key, value) -> {
-            if (value == null)
-                objectCache.remove(key);
-            else
-                objectCache.put(key, value);
-        });
+
+        RBucket<String> objectCache = getObjectCache(dataClass, objectUUID);
+        objectCache.set(gson.toJson(dataToSave));
+        updateExpireTime(dataClass, objectCache);
     }
 
     @Override
-    public synchronized boolean remove(@Nonnull @NotNull Class<? extends VCoreData> dataClass, @Nonnull @NotNull UUID objectUUID) {
+    public boolean remove(@Nonnull Class<? extends VCoreData> dataClass, @Nonnull @NotNull UUID objectUUID) {
         Objects.requireNonNull(dataClass, "dataClass can't be null!");
         Objects.requireNonNull(objectUUID, "objectUUID can't be null!");
-        RMap<String, Object> redisMap = (RMap<String, Object>) getObjectCache(dataClass, objectUUID);
-        return redisMap.delete();
+
+        RBucket<String> objectCache = getObjectCache(dataClass, objectUUID);
+        return objectCache.delete();
     }
 
-    @Override
-    public synchronized Map<String, Object> getObjectCache(Class<? extends VCoreData> dataClass, UUID objectUUID) {
+    public synchronized RBucket<String> getObjectCache(@Nonnull Class<? extends VCoreData> dataClass, @Nonnull @NotNull UUID objectUUID) {
         Objects.requireNonNull(dataClass, "dataClass can't be null!");
         Objects.requireNonNull(objectUUID, "objectUUID can't be null!");
-        RMap<String, Object> objectCache;
+        String key;
+
         if (NetworkData.class.isAssignableFrom(dataClass))
-            objectCache = redissonClient.getMap("VCoreCache:" + objectUUID + ":" + AnnotationResolver.getDataStorageIdentifier(dataClass));
-        else {
-            objectCache = redissonClient.getMap(plugin.getPluginName() + "Cache:" + objectUUID + ":" + AnnotationResolver.getDataStorageIdentifier(dataClass));
-            objectCache.expire(12, TimeUnit.HOURS);
-        }
+            key = "VCoreCache:" + objectUUID + ":" + AnnotationResolver.getDataStorageIdentifier(dataClass);
+        else
+            key = plugin.getPluginName() + "Cache:" + objectUUID + ":" + AnnotationResolver.getDataStorageIdentifier(dataClass);
+        RBucket<String> objectCache = redissonClient.getBucket(key, new StringCodec());
+        updateExpireTime(dataClass, objectCache);
+
         return objectCache;
     }
 
     @Override
-    public synchronized Set<Map<String, Object>> getCacheList(Class<? extends VCoreData> dataClass) {
-        Objects.requireNonNull(dataClass, "dataClass can't be null!");
-        Set<String> keys = getKeys(dataClass);
-        Set<Map<String, Object>> set = new HashSet<>();
-        keys.forEach(s -> set.add(redissonClient.getMap(s)));
-        return set;
-    }
-
-    @Override
-    public synchronized Set<String> getKeys(Class<? extends VCoreData> dataClass) {
+    public Set<String> getKeys(Class<? extends VCoreData> dataClass) {
         Objects.requireNonNull(dataClass, "dataClass can't be null!");
         String pluginName = plugin.getPluginName();
         String mongoIdentifier = AnnotationResolver.getDataStorageIdentifier(dataClass);
@@ -102,48 +99,29 @@ public class RedisCache extends RedisConnection implements GlobalCache {
     }
 
     @Override
-    public synchronized Map<String, Object> getGlobalCacheMap(String name) {
-        Objects.requireNonNull(name, "name can't be null!");
-        RMap<String, Object> objectCache = redissonClient.getMap("InternalVCoreData:" + name);
-        objectCache.expire(1, TimeUnit.HOURS);
-        return objectCache;
-    }
-
-    @Override
-    public synchronized Set<UUID> getSavedUUIDs(@Nonnull @NotNull Class<? extends VCoreData> dataClass) {
+    public Set<UUID> getSavedUUIDs(@Nonnull @NotNull Class<? extends VCoreData> dataClass) {
         Objects.requireNonNull(dataClass, "dataClass can't be null!");
         return getKeys(dataClass).stream().map(s -> UUID.fromString(s.split(":")[1])).collect(Collectors.toSet());
     }
 
     @Override
-    public synchronized boolean dataExist(@Nonnull @NotNull Class<? extends VCoreData> dataClass, @Nonnull @NotNull UUID objectUUID) {
+    public boolean dataExist(@Nonnull @NotNull Class<? extends VCoreData> dataClass, @Nonnull @NotNull UUID objectUUID) {
         Objects.requireNonNull(dataClass, "dataClass can't be null!");
         Objects.requireNonNull(objectUUID, "objectUUID can't be null!");
-        Map<String, Object> cache = getObjectCache(dataClass, objectUUID);
-
-        Set<String> redisKeys = getObjectDataKeys(dataClass, objectUUID);
-
-        return redisKeys.parallelStream().anyMatch(cache::containsKey);
+        return getObjectCache(dataClass, objectUUID).isExists();
     }
 
-    @Override
-    public synchronized DataManipulator constructDataManipulator(@NotNull VCoreData vCoreData) {
-        Objects.requireNonNull(vCoreData, "vCoreData can't be null!");
-        return new RedisDataManipulator(this, vCoreData);
-    }
-
-    private synchronized Set<String> getObjectDataKeys(@NotNull Class<? extends VCoreData> dataClass, @NotNull UUID objectUUID) {
+    private void updateExpireTime(@NotNull Class<? extends VCoreData> dataClass, RBucket<?> bucket) {
         Objects.requireNonNull(dataClass, "dataClass can't be null!");
-        Objects.requireNonNull(objectUUID, "objectUUID can't be null!");
-        if (VCoreSerializable.getPersistentDataFieldNames(dataClass) == null)
-            throw new NullPointerException(VCoreData.class.getSimpleName() + " does not provide RedisDataKeys");
-        return VCoreSerializable.getPersistentDataFieldNames(dataClass);
-    }
+        VCoreDataProperties properties = AnnotationResolver.getDataProperties(dataClass);
 
-    public synchronized RTopic getTopic(@NotNull Class<? extends VCoreData> dataClass, @NotNull UUID objectUUID) {
-        Objects.requireNonNull(dataClass, "dataClass can't be null!");
-        Objects.requireNonNull(objectUUID, "objectUUID can't be null!");
-        String key = plugin.getPluginName() + "DataTopic:" + AnnotationResolver.getDataStorageIdentifier(dataClass) + ":" + objectUUID;
-        return redissonClient.getTopic(key, new SerializationCodec());
+        if (bucket == null)
+            return;
+
+        if (properties.cleanOnNoUse()) {
+            bucket.expire(properties.time(), properties.timeUnit());
+        } else {
+            bucket.expire(12, TimeUnit.HOURS);
+        }
     }
 }

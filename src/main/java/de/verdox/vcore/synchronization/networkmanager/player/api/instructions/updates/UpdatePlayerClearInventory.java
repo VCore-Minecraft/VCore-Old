@@ -38,7 +38,7 @@ public class UpdatePlayerClearInventory extends CleverUpdate {
 
         if (!checkOnlineOnSpigot(target))
             return UpdateCompletion.NOTHING;
-        plugin.sync(() -> spigotPlatform.clearInventory(target));
+        plugin.sync(() -> gameServerPlatform.clearInventory(target));
         return UpdateCompletion.TRUE;
     }
 }

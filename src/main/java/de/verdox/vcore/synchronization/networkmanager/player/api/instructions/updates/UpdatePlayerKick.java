@@ -32,11 +32,11 @@ public class UpdatePlayerKick extends CleverUpdate {
         if (!platformWrapper.isPlayerOnline(targetUUID))
             return UpdateCompletion.NOTHING;
 
-        if (bungeePlatform != null)
-            bungeePlatform.kickPlayer(targetUUID, kickMessage);
-        else if (spigotPlatform != null) {
+        if (proxyPlatform != null)
+            proxyPlatform.kickPlayer(targetUUID, kickMessage);
+        else if (gameServerPlatform != null) {
             String finalKickMessage = kickMessage;
-            plugin.sync(() -> spigotPlatform.kickPlayer(targetUUID, finalKickMessage));
+            plugin.sync(() -> gameServerPlatform.kickPlayer(targetUUID, finalKickMessage));
         }
         return UpdateCompletion.TRUE;
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021. Lukas Jonsson
+ * Copyright (c) 2022. Lukas Jonsson
  */
 
 package de.verdox.vcore.synchronization.pipeline.player;
@@ -7,22 +7,12 @@ package de.verdox.vcore.synchronization.pipeline.player;
 import de.verdox.vcore.plugin.SystemLoadable;
 import de.verdox.vcore.plugin.VCoreCoreInstance;
 import de.verdox.vcore.plugin.VCorePlugin;
-import de.verdox.vcore.synchronization.pipeline.PipelineManager;
+import de.verdox.vcore.synchronization.pipeline.PipelineImpl;
 import de.verdox.vcore.synchronization.pipeline.datatypes.PlayerData;
 import de.verdox.vcore.synchronization.pipeline.parts.Pipeline;
 import de.verdox.vcore.synchronization.pipeline.player.events.PlayerPreSessionLoadEvent;
 import de.verdox.vcore.synchronization.pipeline.player.events.PlayerPreSessionUnloadEvent;
 import de.verdox.vcore.synchronization.pipeline.player.events.PlayerSessionLoadedEvent;
-import net.md_5.bungee.api.ProxyServer;
-import net.md_5.bungee.api.event.PlayerDisconnectEvent;
-import net.md_5.bungee.api.event.PostLoginEvent;
-import net.md_5.bungee.api.plugin.Plugin;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.EventPriority;
-import org.bukkit.event.Listener;
-import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.event.player.PlayerKickEvent;
-import org.bukkit.event.player.PlayerQuitEvent;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
@@ -36,13 +26,13 @@ import java.util.concurrent.TimeUnit;
  */
 public class PlayerDataManager implements SystemLoadable {
     protected final VCorePlugin<?, ?> plugin;
-    private final PipelineManager pipelineManager;
+    private final PipelineImpl pipelineImpl;
     private final boolean loaded;
 
-    public PlayerDataManager(@NotNull PipelineManager pipelineManager) {
-        Objects.requireNonNull(pipelineManager, "pipelineManager can't be null!");
-        this.pipelineManager = pipelineManager;
-        this.plugin = pipelineManager.getPlugin();
+    public PlayerDataManager(@NotNull PipelineImpl pipelineImpl) {
+        Objects.requireNonNull(pipelineImpl, "pipelineManager can't be null!");
+        this.pipelineImpl = pipelineImpl;
+        this.plugin = pipelineImpl.getPlugin();
         loaded = true;
     }
 
@@ -55,7 +45,7 @@ public class PlayerDataManager implements SystemLoadable {
             plugin.getServices().getSubsystemManager().getActivePlayerDataClasses()
                     .parallelStream()
                     .forEach(aClass -> {
-                        PlayerData playerData = pipelineManager.load(aClass, player, Pipeline.LoadingStrategy.LOAD_PIPELINE, true);
+                        PlayerData playerData = pipelineImpl.load(aClass, player, Pipeline.LoadingStrategy.LOAD_PIPELINE, true);
                         playerData.onConnect(player);
                     });
             plugin.getServices().eventBus.post(new PlayerSessionLoadedEvent(plugin, player, System.currentTimeMillis()));
@@ -66,15 +56,13 @@ public class PlayerDataManager implements SystemLoadable {
         Objects.requireNonNull(player, "player can't be null!");
         plugin.getServices().eventBus.post(new PlayerPreSessionUnloadEvent(plugin, player));
         plugin.createTaskBatch()
-                .doAsync(() -> {
-                    plugin.getServices().getSubsystemManager().getActivePlayerDataClasses()
-                            .parallelStream()
-                            .forEach(aClass -> {
-                                PlayerData data = pipelineManager.getLocalCache().getData(aClass, player);
-                                data.onDisconnect(player);
-                                data.save(true);
-                            });
-                }).executeBatch();
+                .doAsync(() -> plugin.getServices().getSubsystemManager().getActivePlayerDataClasses()
+                        .parallelStream()
+                        .forEach(aClass -> {
+                            PlayerData data = pipelineImpl.getLocalCache().getData(aClass, player);
+                            data.onDisconnect(player);
+                            data.save(true);
+                        })).executeBatch();
     }
 
     @Override
@@ -85,47 +73,5 @@ public class PlayerDataManager implements SystemLoadable {
     @Override
     public void shutdown() {
 
-    }
-
-    public static class Bukkit extends PlayerDataManager implements Listener {
-
-        public Bukkit(@NotNull PipelineManager pipelineManager) {
-            super(pipelineManager);
-            VCorePlugin.Minecraft bukkitPlugin = (VCorePlugin.Minecraft) plugin;
-            bukkitPlugin.getPlugin().getServer().getPluginManager().registerEvents(this, bukkitPlugin);
-        }
-
-        @EventHandler(priority = EventPriority.HIGHEST)
-        public void onJoin(PlayerJoinEvent e) {
-            loginPipeline(e.getPlayer().getUniqueId());
-        }
-
-        @EventHandler(priority = EventPriority.HIGHEST)
-        public void onLeave(PlayerQuitEvent e) {
-            logoutPipeline(e.getPlayer().getUniqueId());
-        }
-
-        @EventHandler(priority = EventPriority.HIGHEST)
-        public void onKick(PlayerKickEvent e) {
-            logoutPipeline(e.getPlayer().getUniqueId());
-        }
-
-    }
-
-    public static class BungeeCord extends PlayerDataManager implements net.md_5.bungee.api.plugin.Listener {
-        public BungeeCord(@NotNull PipelineManager pipelineManager) {
-            super(pipelineManager);
-            ProxyServer.getInstance().getPluginManager().registerListener((Plugin) pipelineManager.getPlugin(), this);
-        }
-
-        @net.md_5.bungee.event.EventHandler(priority = 5)
-        public void onJoin(PostLoginEvent e) {
-            loginPipeline(e.getPlayer().getUniqueId());
-        }
-
-        @net.md_5.bungee.event.EventHandler(priority = 5)
-        public void onPlayerLeave(PlayerDisconnectEvent e) {
-            logoutPipeline(e.getPlayer().getUniqueId());
-        }
     }
 }

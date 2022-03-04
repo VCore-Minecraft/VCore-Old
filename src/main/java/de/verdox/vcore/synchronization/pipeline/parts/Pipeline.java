@@ -8,6 +8,7 @@ import de.verdox.vcore.plugin.SystemLoadable;
 import de.verdox.vcore.synchronization.pipeline.datatypes.VCoreData;
 import de.verdox.vcore.synchronization.pipeline.parts.cache.GlobalCache;
 import de.verdox.vcore.synchronization.pipeline.parts.local.LocalCache;
+import de.verdox.vcore.synchronization.pipeline.parts.manipulator.SynchronizingService;
 import de.verdox.vcore.synchronization.pipeline.parts.storage.GlobalStorage;
 import org.jetbrains.annotations.NotNull;
 
@@ -103,15 +104,20 @@ public interface Pipeline extends SystemLoadable {
 
     LocalCache getLocalCache();
 
+    @org.jetbrains.annotations.Nullable
+    SynchronizingService getSynchronizingService();
+
+    @org.jetbrains.annotations.Nullable
     GlobalCache getGlobalCache();
 
+    @org.jetbrains.annotations.Nullable
     GlobalStorage getGlobalStorage();
 
     void saveAllData();
 
     void preloadAllData();
 
-    DataSynchronizer getSynchronizer();
+    PipelineDataSynchronizer getPipelineDataSynchronizer();
 
     enum LoadingStrategy {
         // Data will be loaded from Local Cache

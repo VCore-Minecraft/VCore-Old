@@ -6,7 +6,7 @@ package de.verdox.vcore.plugin.files.storage;
 
 import de.verdox.vcore.plugin.VCorePlugin;
 import de.verdox.vcore.plugin.files.config.VCoreConfig;
-import org.bukkit.craftbukkit.libs.org.apache.commons.io.FilenameUtils;
+import org.apache.commons.io.FilenameUtils;
 
 import java.io.File;
 import java.io.IOException;

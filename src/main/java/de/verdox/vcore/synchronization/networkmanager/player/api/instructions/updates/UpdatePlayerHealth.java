@@ -30,7 +30,7 @@ public class UpdatePlayerHealth extends CleverUpdate {
         if (!checkOnlineOnSpigot(target))
             return UpdateCompletion.NOTHING;
 
-        plugin.sync(() -> spigotPlatform.setPlayerHealth(target, health));
+        plugin.sync(() -> gameServerPlatform.setPlayerHealth(target, health));
 
         return UpdateCompletion.TRUE;
     }
