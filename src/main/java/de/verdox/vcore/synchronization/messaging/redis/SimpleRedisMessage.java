@@ -15,14 +15,10 @@ import java.util.UUID;
  * @Author: Lukas Jonsson (Verdox)
  * @date 25.06.2021 22:16
  */
-public class SimpleRedisMessage implements Message {
+public record SimpleRedisMessage(UUID sender, String senderIdentifier,
+                                 String[] parameters, Object[] dataToSend) implements Message {
 
-    private final UUID sender;
-    private final String senderIdentifier;
-    private final String[] parameters;
-    private final Object[] dataToSend;
-
-    SimpleRedisMessage(@NotNull UUID sender, @NotNull String senderIdentifier, @NotNull String[] parameters, @NotNull Object[] dataToSend) {
+    public SimpleRedisMessage(@NotNull UUID sender, @NotNull String senderIdentifier, @NotNull String[] parameters, @NotNull Object[] dataToSend) {
         this.sender = sender;
         this.senderIdentifier = senderIdentifier;
         this.parameters = parameters;
@@ -42,11 +38,6 @@ public class SimpleRedisMessage implements Message {
     @Override
     public String[] getParameters() {
         return parameters;
-    }
-
-    @Override
-    public Object[] dataToSend() {
-        return dataToSend;
     }
 
     @Override
