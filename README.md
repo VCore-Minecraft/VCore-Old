@@ -17,13 +17,13 @@ The api will get big changes so use it at your own risk!
 - [VCoreWaterfall](https://github.com/VCore-Minecraft/VCoreWaterfall)
 
 ## PaperModules
-- [AdvancementsModule]()
+- [AdvancementsModule](https://github.com/VCore-Minecraft/VCoreAdvancements)
 - [GUIModule](https://github.com/VCore-Minecraft/VCoreGUI)
 - [NBTModule](https://github.com/VCore-Minecraft/VCoreNBT)
-- [NMSModule]()
+- [NMSModule](https://github.com/VCore-Minecraft/VCoreNMS)
 - [EventModule](https://github.com/VCore-Minecraft/VCorePaperEvent)
 - [WorkerNPCModule](https://github.com/VCore-Minecraft/VCoreWorkerNPC)
-- [VSkillTree]()
+- [VSkillTree](https://github.com/VCore-Minecraft/VSkillTree)
 
 ## VCorePlugins
 - [VEconomy](https://github.com/VCore-Minecraft/VEconomy)
